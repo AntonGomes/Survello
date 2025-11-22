@@ -1,0 +1,8 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/download/[job_id]/[file_name]/route": "app/api/download/[job_id]/[file_name]/route.js",
+  "/api/stream/[job_id]/route": "app/api/stream/[job_id]/route.js",
+  "/api/upload/route": "app/api/upload/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js"
+}

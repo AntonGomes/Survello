@@ -1,0 +1,216 @@
+{
+  "summary": {
+    "report_type": "Schedule of Dilapidations (final report with costs and clauses)",
+    "sheets": [
+      "Front Pages",
+      "External",
+      "Ground Floor",
+      "First Floor",
+      "General Items",
+      "Collection"
+    ],
+    "detected_job_specific_fields": {
+      "site_address_lines": [
+        "173/175 Glasgow Road, ",
+        "Clydebank,",
+        "Glasgow. ",
+        "G81 1LQ"
+      ],
+      "site_postcode": "G81 1LQ",
+      "report_date": "July 2025",
+      "landlord_name": "Standard Life Trustee Company Limited",
+      "tenant_name": "T G BAKER (SOUND) LIMITED",
+      "company_number": "SCO53364",
+      "tenant_registered_office": "173/175 Glasgow Road, Clydebank, G81 1LQ",
+      "person_name_1": "Thomas George Baker",
+      "person_name_2": "Mrs Myra Elizabeth Baker",
+      "dates_in_narrative": [
+        "20th July 1999",
+        "31st March 1999",
+        "31st March 1999"
+      ]
+    },
+    "cleaning": {
+      "performed": true,
+      "placeholders_used": {
+        "ADDRESS_LINE_1": "{{ADDRESS_LINE_1}}",
+        "ADDRESS_LINE_2": "{{ADDRESS_LINE_2}}",
+        "ADDRESS_LINE_3": "{{ADDRESS_LINE_3}}",
+        "POSTCODE": "{{POSTCODE}}",
+        "REPORT_DATE": "{{REPORT_DATE}}",
+        "SITE_ADDRESS_FULL": "{{SITE_ADDRESS_FULL}}",
+        "PERSON_NAME_1": "{{PERSON_NAME_1}}",
+        "PERSON_NAME_2": "{{PERSON_NAME_2}}",
+        "LANDLORD_NAME": "{{LANDLORD_NAME}}",
+        "TENANT_NAME": "{{TENANT_NAME}}",
+        "COMPANY_NUMBER": "{{COMPANY_NUMBER}}",
+        "TENANT_REGISTERED_OFFICE": "{{TENANT_REGISTERED_OFFICE}}",
+        "DATE": "{{DATE}}"
+      },
+      "cleaned_file": "/mnt/data/f83a31d66cac8a1d65f0f1c53d7f5ab0-example_final_dilaps-cleaned.xlsx"
+    }
+  },
+  "schema": {
+    "report_type": "Schedule of Dilapidations",
+    "workbook": {
+      "sheets": [
+        {
+          "name": "Front Pages",
+          "sections": [
+            {
+              "type": "title",
+              "cells": [
+                "A20"
+              ],
+              "fields": [
+                "report_title"
+              ]
+            },
+            {
+              "type": "address_block",
+              "cells": [
+                "A24",
+                "A26",
+                "A28",
+                "A30"
+              ],
+              "fields": [
+                "address_line_1",
+                "address_line_2",
+                "address_line_3",
+                "postcode"
+              ]
+            },
+            {
+              "type": "report_date",
+              "cells": [
+                "A42"
+              ],
+              "fields": [
+                "report_date"
+              ]
+            },
+            {
+              "type": "heading",
+              "cells": [
+                "B67"
+              ],
+              "label": "General clauses and preliminaries"
+            },
+            {
+              "type": "introduction_paragraph",
+              "cells": [
+                "A69"
+              ],
+              "fields": [
+                "narrative_landlord_tenant_lease"
+              ]
+            },
+            {
+              "type": "numbered_clauses",
+              "pattern": {
+                "numbers_in_col": "A",
+                "text_in_col": "B",
+                "from_row": 71,
+                "to_row": 85
+              }
+            }
+          ]
+        },
+        {
+          "name": "External",
+          "table": {
+            "header_row": 1,
+            "columns": [
+              "Item No",
+              "Lease clause",
+              "Want of repair",
+              "Remedy",
+              "U",
+              "Q",
+              "R",
+              "£"
+            ],
+            "rows_follow": "items grouped by building element headings"
+          }
+        },
+        {
+          "name": "Ground Floor",
+          "table": {
+            "header_row": 1,
+            "columns": [
+              "Item No",
+              "Lease clause",
+              "Want of repair",
+              "Remedy",
+              "U",
+              "Q",
+              "R",
+              "£"
+            ],
+            "rows_follow": "items grouped by room/space"
+          }
+        },
+        {
+          "name": "First Floor",
+          "table": {
+            "header_row": 1,
+            "columns": [
+              "Item No",
+              "Lease clause",
+              "Want of repair",
+              "Remedy",
+              "U",
+              "Q",
+              "R",
+              "£"
+            ],
+            "rows_follow": "items grouped by room/space"
+          }
+        },
+        {
+          "name": "General Items",
+          "table": {
+            "header_row": 1,
+            "columns": [
+              "Item No",
+              "Lease clause",
+              "Want of repair",
+              "Remedy",
+              "U",
+              "Q",
+              "R",
+              "£"
+            ],
+            "rows_follow": "general/other items not location-specific"
+          }
+        },
+        {
+          "name": "Collection",
+          "summary": {
+            "label_cell": "C3",
+            "labels_column": "C",
+            "value_column": "H",
+            "rows": "subtotals by sheet and allowances (preliminaries, contingencies, professional fees), plus totals"
+          }
+        }
+      ]
+    },
+    "job_specific_fields": [
+      "site_address_lines",
+      "site_postcode",
+      "report_date",
+      "landlord_name",
+      "tenant_name",
+      "company_number",
+      "tenant_registered_office",
+      "person_name_1",
+      "person_name_2",
+      "dates_in_narrative"
+    ]
+  },
+  "is_template": false
+}
+
+Download the cleaned file:
+[Download the cleaned workbook](sandbox:/mnt/data/f83a31d66cac8a1d65f0f1c53d7f5ab0-example_final_dilaps-cleaned.xlsx)
