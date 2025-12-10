@@ -1,0 +1,324 @@
+module.exports = [
+"[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/vendored/contexts/app-router-context.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+module.exports = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/module.compiled.js [app-rsc] (ecmascript)").vendored['contexts'].AppRouterContext; //# sourceMappingURL=app-router-context.js.map
+}),
+"[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/vendored/contexts/hooks-client-context.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+module.exports = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/module.compiled.js [app-rsc] (ecmascript)").vendored['contexts'].HooksClientContext; //# sourceMappingURL=hooks-client-context.js.map
+}),
+"[project]/docgen/ui/node_modules/next/dist/client/components/router-reducer/reducers/get-segment-value.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "getSegmentValue", {
+    enumerable: true,
+    get: function() {
+        return getSegmentValue;
+    }
+});
+function getSegmentValue(segment) {
+    return Array.isArray(segment) ? segment[1] : segment;
+}
+if ((typeof exports.default === 'function' || typeof exports.default === 'object' && exports.default !== null) && typeof exports.default.__esModule === 'undefined') {
+    Object.defineProperty(exports.default, '__esModule', {
+        value: true
+    });
+    Object.assign(exports.default, exports);
+    module.exports = exports.default;
+} //# sourceMappingURL=get-segment-value.js.map
+}),
+"[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/vendored/contexts/server-inserted-html.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+module.exports = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/module.compiled.js [app-rsc] (ecmascript)").vendored['contexts'].ServerInsertedHtml; //# sourceMappingURL=server-inserted-html.js.map
+}),
+"[project]/docgen/ui/node_modules/next/dist/client/components/unrecognized-action-error.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+0 && (module.exports = {
+    UnrecognizedActionError: null,
+    unstable_isUnrecognizedActionError: null
+});
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: all[name]
+    });
+}
+_export(exports, {
+    UnrecognizedActionError: function() {
+        return UnrecognizedActionError;
+    },
+    unstable_isUnrecognizedActionError: function() {
+        return unstable_isUnrecognizedActionError;
+    }
+});
+class UnrecognizedActionError extends Error {
+    constructor(...args){
+        super(...args);
+        this.name = 'UnrecognizedActionError';
+    }
+}
+function unstable_isUnrecognizedActionError(error) {
+    return !!(error && typeof error === 'object' && error instanceof UnrecognizedActionError);
+}
+if ((typeof exports.default === 'function' || typeof exports.default === 'object' && exports.default !== null) && typeof exports.default.__esModule === 'undefined') {
+    Object.defineProperty(exports.default, '__esModule', {
+        value: true
+    });
+    Object.assign(exports.default, exports);
+    module.exports = exports.default;
+} //# sourceMappingURL=unrecognized-action-error.js.map
+}),
+"[project]/docgen/ui/node_modules/next/dist/client/components/bailout-to-client-rendering.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "bailoutToClientRendering", {
+    enumerable: true,
+    get: function() {
+        return bailoutToClientRendering;
+    }
+});
+const _bailouttocsr = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/shared/lib/lazy-dynamic/bailout-to-csr.js [app-rsc] (ecmascript)");
+const _workasyncstorageexternal = __turbopack_context__.r("[externals]/next/dist/server/app-render/work-async-storage.external.js [external] (next/dist/server/app-render/work-async-storage.external.js, cjs)");
+const _workunitasyncstorageexternal = __turbopack_context__.r("[externals]/next/dist/server/app-render/work-unit-async-storage.external.js [external] (next/dist/server/app-render/work-unit-async-storage.external.js, cjs)");
+function bailoutToClientRendering(reason) {
+    const workStore = _workasyncstorageexternal.workAsyncStorage.getStore();
+    if (workStore == null ? void 0 : workStore.forceStatic) return;
+    const workUnitStore = _workunitasyncstorageexternal.workUnitAsyncStorage.getStore();
+    if (workUnitStore) {
+        switch(workUnitStore.type){
+            case 'prerender':
+            case 'prerender-runtime':
+            case 'prerender-client':
+            case 'prerender-ppr':
+            case 'prerender-legacy':
+                throw Object.defineProperty(new _bailouttocsr.BailoutToCSRError(reason), "__NEXT_ERROR_CODE", {
+                    value: "E394",
+                    enumerable: false,
+                    configurable: true
+                });
+            case 'request':
+            case 'cache':
+            case 'private-cache':
+            case 'unstable-cache':
+                break;
+            default:
+                workUnitStore;
+        }
+    }
+}
+if ((typeof exports.default === 'function' || typeof exports.default === 'object' && exports.default !== null) && typeof exports.default.__esModule === 'undefined') {
+    Object.defineProperty(exports.default, '__esModule', {
+        value: true
+    });
+    Object.assign(exports.default, exports);
+    module.exports = exports.default;
+} //# sourceMappingURL=bailout-to-client-rendering.js.map
+}),
+"[project]/docgen/ui/node_modules/next/dist/client/components/navigation.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+0 && (module.exports = {
+    ReadonlyURLSearchParams: null,
+    RedirectType: null,
+    ServerInsertedHTMLContext: null,
+    forbidden: null,
+    notFound: null,
+    permanentRedirect: null,
+    redirect: null,
+    unauthorized: null,
+    unstable_isUnrecognizedActionError: null,
+    unstable_rethrow: null,
+    useParams: null,
+    usePathname: null,
+    useRouter: null,
+    useSearchParams: null,
+    useSelectedLayoutSegment: null,
+    useSelectedLayoutSegments: null,
+    useServerInsertedHTML: null
+});
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: all[name]
+    });
+}
+_export(exports, {
+    ReadonlyURLSearchParams: function() {
+        return _navigationreactserver.ReadonlyURLSearchParams;
+    },
+    RedirectType: function() {
+        return _navigationreactserver.RedirectType;
+    },
+    ServerInsertedHTMLContext: function() {
+        return _serverinsertedhtmlsharedruntime.ServerInsertedHTMLContext;
+    },
+    forbidden: function() {
+        return _navigationreactserver.forbidden;
+    },
+    notFound: function() {
+        return _navigationreactserver.notFound;
+    },
+    permanentRedirect: function() {
+        return _navigationreactserver.permanentRedirect;
+    },
+    redirect: function() {
+        return _navigationreactserver.redirect;
+    },
+    unauthorized: function() {
+        return _navigationreactserver.unauthorized;
+    },
+    unstable_isUnrecognizedActionError: function() {
+        return _unrecognizedactionerror.unstable_isUnrecognizedActionError;
+    },
+    unstable_rethrow: function() {
+        return _navigationreactserver.unstable_rethrow;
+    },
+    useParams: function() {
+        return useParams;
+    },
+    usePathname: function() {
+        return usePathname;
+    },
+    useRouter: function() {
+        return useRouter;
+    },
+    useSearchParams: function() {
+        return useSearchParams;
+    },
+    useSelectedLayoutSegment: function() {
+        return useSelectedLayoutSegment;
+    },
+    useSelectedLayoutSegments: function() {
+        return useSelectedLayoutSegments;
+    },
+    useServerInsertedHTML: function() {
+        return _serverinsertedhtmlsharedruntime.useServerInsertedHTML;
+    }
+});
+const _react = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/vendored/rsc/react.js [app-rsc] (ecmascript)");
+const _approutercontextsharedruntime = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/vendored/contexts/app-router-context.js [app-rsc] (ecmascript)");
+const _hooksclientcontextsharedruntime = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/vendored/contexts/hooks-client-context.js [app-rsc] (ecmascript)");
+const _getsegmentvalue = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/client/components/router-reducer/reducers/get-segment-value.js [app-rsc] (ecmascript)");
+const _segment = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/shared/lib/segment.js [app-rsc] (ecmascript)");
+const _navigationreactserver = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/client/components/navigation.react-server.js [app-rsc] (ecmascript)");
+const _serverinsertedhtmlsharedruntime = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/server/route-modules/app-page/vendored/contexts/server-inserted-html.js [app-rsc] (ecmascript)");
+const _unrecognizedactionerror = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/client/components/unrecognized-action-error.js [app-rsc] (ecmascript)");
+const useDynamicRouteParams = ("TURBOPACK compile-time truthy", 1) ? __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/server/app-render/dynamic-rendering.js [app-rsc] (ecmascript)").useDynamicRouteParams : "TURBOPACK unreachable";
+function useSearchParams() {
+    const searchParams = (0, _react.useContext)(_hooksclientcontextsharedruntime.SearchParamsContext);
+    // In the case where this is `null`, the compat types added in
+    // `next-env.d.ts` will add a new overload that changes the return type to
+    // include `null`.
+    const readonlySearchParams = (0, _react.useMemo)(()=>{
+        if (!searchParams) {
+            // When the router is not ready in pages, we won't have the search params
+            // available.
+            return null;
+        }
+        return new _navigationreactserver.ReadonlyURLSearchParams(searchParams);
+    }, [
+        searchParams
+    ]);
+    if ("TURBOPACK compile-time truthy", 1) {
+        // AsyncLocalStorage should not be included in the client bundle.
+        const { bailoutToClientRendering } = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/client/components/bailout-to-client-rendering.js [app-rsc] (ecmascript)");
+        // TODO-APP: handle dynamic = 'force-static' here and on the client
+        bailoutToClientRendering('useSearchParams()');
+    }
+    return readonlySearchParams;
+}
+function usePathname() {
+    useDynamicRouteParams == null ? void 0 : useDynamicRouteParams('usePathname()');
+    // In the case where this is `null`, the compat types added in `next-env.d.ts`
+    // will add a new overload that changes the return type to include `null`.
+    return (0, _react.useContext)(_hooksclientcontextsharedruntime.PathnameContext);
+}
+function useRouter() {
+    const router = (0, _react.useContext)(_approutercontextsharedruntime.AppRouterContext);
+    if (router === null) {
+        throw Object.defineProperty(new Error('invariant expected app router to be mounted'), "__NEXT_ERROR_CODE", {
+            value: "E238",
+            enumerable: false,
+            configurable: true
+        });
+    }
+    return router;
+}
+function useParams() {
+    useDynamicRouteParams == null ? void 0 : useDynamicRouteParams('useParams()');
+    return (0, _react.useContext)(_hooksclientcontextsharedruntime.PathParamsContext);
+}
+/** Get the canonical parameters from the current level to the leaf node. */ // Client components API
+function getSelectedLayoutSegmentPath(tree, parallelRouteKey, first, segmentPath) {
+    if (first === void 0) first = true;
+    if (segmentPath === void 0) segmentPath = [];
+    let node;
+    if (first) {
+        // Use the provided parallel route key on the first parallel route
+        node = tree[1][parallelRouteKey];
+    } else {
+        // After first parallel route prefer children, if there's no children pick the first parallel route.
+        const parallelRoutes = tree[1];
+        var _parallelRoutes_children;
+        node = (_parallelRoutes_children = parallelRoutes.children) != null ? _parallelRoutes_children : Object.values(parallelRoutes)[0];
+    }
+    if (!node) return segmentPath;
+    const segment = node[0];
+    let segmentValue = (0, _getsegmentvalue.getSegmentValue)(segment);
+    if (!segmentValue || segmentValue.startsWith(_segment.PAGE_SEGMENT_KEY)) {
+        return segmentPath;
+    }
+    segmentPath.push(segmentValue);
+    return getSelectedLayoutSegmentPath(node, parallelRouteKey, false, segmentPath);
+}
+function useSelectedLayoutSegments(parallelRouteKey) {
+    if (parallelRouteKey === void 0) parallelRouteKey = 'children';
+    useDynamicRouteParams == null ? void 0 : useDynamicRouteParams('useSelectedLayoutSegments()');
+    const context = (0, _react.useContext)(_approutercontextsharedruntime.LayoutRouterContext);
+    // @ts-expect-error This only happens in `pages`. Type is overwritten in navigation.d.ts
+    if (!context) return null;
+    return getSelectedLayoutSegmentPath(context.parentTree, parallelRouteKey);
+}
+function useSelectedLayoutSegment(parallelRouteKey) {
+    if (parallelRouteKey === void 0) parallelRouteKey = 'children';
+    useDynamicRouteParams == null ? void 0 : useDynamicRouteParams('useSelectedLayoutSegment()');
+    const selectedLayoutSegments = useSelectedLayoutSegments(parallelRouteKey);
+    if (!selectedLayoutSegments || selectedLayoutSegments.length === 0) {
+        return null;
+    }
+    const selectedLayoutSegment = parallelRouteKey === 'children' ? selectedLayoutSegments[0] : selectedLayoutSegments[selectedLayoutSegments.length - 1];
+    // if the default slot is showing, we return null since it's not technically "selected" (it's a fallback)
+    // and returning an internal value like `__DEFAULT__` would be confusing.
+    return selectedLayoutSegment === _segment.DEFAULT_SEGMENT_KEY ? null : selectedLayoutSegment;
+}
+if ((typeof exports.default === 'function' || typeof exports.default === 'object' && exports.default !== null) && typeof exports.default.__esModule === 'undefined') {
+    Object.defineProperty(exports.default, '__esModule', {
+        value: true
+    });
+    Object.assign(exports.default, exports);
+    module.exports = exports.default;
+} //# sourceMappingURL=navigation.js.map
+}),
+"[project]/docgen/ui/node_modules/next/navigation.js [app-rsc] (ecmascript)", ((__turbopack_context__, module, exports) => {
+
+module.exports = __turbopack_context__.r("[project]/docgen/ui/node_modules/next/dist/client/components/navigation.js [app-rsc] (ecmascript)");
+}),
+];
+
+//# sourceMappingURL=70d1f_next_2a45dc7e._.js.map

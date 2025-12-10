@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 37, "column": 0}, "map": {"version":3,"sources":["file:///Users/anton/Development/docgen/ui/src/app/api/generate/download_url/%5BjobId%5D/route.ts"],"sourcesContent":["import { NextRequest } from \"next/server\";\n\nexport async function GET(\n  _req: NextRequest,\n  { params }: { params: Promise<{ jobId: string }> },\n) {\n  const { jobId } = await params;\n  const res = await fetch(\n    `${process.env.PY_BACKEND_URL}/generate/download_url/${jobId}`,\n  );\n  const text = await res.text();\n  return new Response(text, {\n    status: res.status,\n    headers: { \"Content-Type\": res.headers.get(\"content-type\") ?? \"application/json\" },\n  });\n}\n"],"names":[],"mappings":";;;;AAEO,eAAe,IACpB,IAAiB,EACjB,EAAE,MAAM,EAA0C;IAElD,MAAM,EAAE,KAAK,EAAE,GAAG,MAAM;IACxB,MAAM,MAAM,MAAM,MAChB,GAAG,QAAQ,GAAG,CAAC,cAAc,CAAC,uBAAuB,EAAE,OAAO;IAEhE,MAAM,OAAO,MAAM,IAAI,IAAI;IAC3B,OAAO,IAAI,SAAS,MAAM;QACxB,QAAQ,IAAI,MAAM;QAClB,SAAS;YAAE,gBAAgB,IAAI,OAAO,CAAC,GAAG,CAAC,mBAAmB;QAAmB;IACnF;AACF","debugId":null}}]
+}

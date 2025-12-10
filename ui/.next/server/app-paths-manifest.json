@@ -1,0 +1,10 @@
+{
+  "/api/generate/create_job/route": "app/api/generate/create_job/route.js",
+  "/api/generate/download_url/[jobId]/route": "app/api/generate/download_url/[jobId]/route.js",
+  "/api/generate/presign_uploads/route": "app/api/generate/presign_uploads/route.js",
+  "/api/generate/run_job/[jobId]/route": "app/api/generate/run_job/[jobId]/route.js",
+  "/api/users/route": "app/api/users/route.js",
+  "/app/page": "app/app/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js"
+}

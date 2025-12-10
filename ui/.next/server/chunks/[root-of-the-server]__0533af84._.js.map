@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 37, "column": 0}, "map": {"version":3,"sources":["file:///Users/anton/Development/docgen/ui/src/app/api/generate/run_job/%5BjobId%5D/route.ts"],"sourcesContent":["import { NextRequest } from \"next/server\";\n\nexport const runtime = \"nodejs\";\n\nexport async function GET(\n  _req: NextRequest,\n  { params }: { params: Promise<{ jobId: string }> },\n) {\n  const { jobId } = await params;\n  const res = await fetch(`${process.env.PY_BACKEND_URL}/generate/run_job/${jobId}`, {\n    method: \"GET\",\n  });\n\n  if (!res.body) {\n    return new Response(\"Upstream stream missing\", { status: 502 });\n  }\n\n  return new Response(res.body, {\n    status: res.status,\n    headers: {\n      \"Content-Type\": \"text/event-stream\",\n      \"Cache-Control\": \"no-cache\",\n      Connection: \"keep-alive\",\n    },\n  });\n}\n"],"names":[],"mappings":";;;;;;AAEO,MAAM,UAAU;AAEhB,eAAe,IACpB,IAAiB,EACjB,EAAE,MAAM,EAA0C;IAElD,MAAM,EAAE,KAAK,EAAE,GAAG,MAAM;IACxB,MAAM,MAAM,MAAM,MAAM,GAAG,QAAQ,GAAG,CAAC,cAAc,CAAC,kBAAkB,EAAE,OAAO,EAAE;QACjF,QAAQ;IACV;IAEA,IAAI,CAAC,IAAI,IAAI,EAAE;QACb,OAAO,IAAI,SAAS,2BAA2B;YAAE,QAAQ;QAAI;IAC/D;IAEA,OAAO,IAAI,SAAS,IAAI,IAAI,EAAE;QAC5B,QAAQ,IAAI,MAAM;QAClB,SAAS;YACP,gBAAgB;YAChB,iBAAiB;YACjB,YAAY;QACd;IACF;AACF","debugId":null}}]
+}
