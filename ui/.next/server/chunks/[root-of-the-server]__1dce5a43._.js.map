@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 37, "column": 0}, "map": {"version":3,"sources":["file:///Users/anton/Development/docgen/ui/src/app/api/generate/create_job/route.ts"],"sourcesContent":["import { NextRequest } from \"next/server\";\n\nexport async function POST(req: NextRequest) {\n  const body = await req.text();\n  const res = await fetch(`${process.env.PY_BACKEND_URL}/generate/create_job`, {\n    method: \"POST\",\n    headers: { \"Content-Type\": \"application/json\" },\n    body,\n  });\n  const text = await res.text();\n  return new Response(text, {\n    status: res.status,\n    headers: { \"Content-Type\": res.headers.get(\"content-type\") ?? \"application/json\" },\n  });\n}\n"],"names":[],"mappings":";;;;AAEO,eAAe,KAAK,GAAgB;IACzC,MAAM,OAAO,MAAM,IAAI,IAAI;IAC3B,MAAM,MAAM,MAAM,MAAM,GAAG,QAAQ,GAAG,CAAC,cAAc,CAAC,oBAAoB,CAAC,EAAE;QAC3E,QAAQ;QACR,SAAS;YAAE,gBAAgB;QAAmB;QAC9C;IACF;IACA,MAAM,OAAO,MAAM,IAAI,IAAI;IAC3B,OAAO,IAAI,SAAS,MAAM;QACxB,QAAQ,IAAI,MAAM;QAClB,SAAS;YAAE,gBAAgB,IAAI,OAAO,CAAC,GAAG,CAAC,mBAAmB;QAAmB;IACnF;AACF","debugId":null}}]
-}

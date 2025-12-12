@@ -7,7 +7,6 @@ import { Status } from "@/hooks/generate-doc";
 
 type Props = {
   canStart: boolean;
-  isStreaming: boolean;
   status: Status;
   uploadProgress: number;
   onStart: () => void;
@@ -16,20 +15,22 @@ type Props = {
 
 export function JobStatusPanel({
   canStart,
-  isStreaming,
   status,
   uploadProgress,
   onStart,
   updates,
 }: Props) {
-  const [showDetails, setShowDetails] = useState(true);
+  const [showDetails, setShowDetails] = useState(false);
 
   const isIdle = status === "idle" || status === "error";
-  const showProgress = !isIdle && uploadProgress < 100;
   const isPresigning = status === "presigning";
   const isUploading = status === "uploading";
-  const isCreating = status === "creating";
-  const isGenerating = status === "streaming" || uploadProgress >= 100;
+  
+  // Show the "See what the AI is thinking" section when streaming or done
+  const showAiDetails = status === "streaming" || uploadProgress >= 100;
+  
+  // Progress bar is "done" when we hit 100%. We use this to trigger the fade out.
+  const isProgressDone = uploadProgress >= 100;
 
   return (
     <div className="flex justify-center mb-8">
@@ -47,7 +48,7 @@ export function JobStatusPanel({
               disabled={!canStart}
               size="lg"
               variant="accent"
-              className="px-8 py-6 text-lg rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 border border-accent/30 shadow-[0_14px_38px_-18px_rgba(83,162,85,0.45)]"
+              className="px-8 py-6 text-lg rounded-xl hover:shadow-lg transition-all disabled:opacity-50 border border-accent/30 shadow-[0_14px_38px_-18px_rgba(83,162,85,0.45)]"
             >
               <Sparkles className="w-5 h-5 mr-2" />
               Generate Document
@@ -63,42 +64,44 @@ export function JobStatusPanel({
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-foreground">
-                  {showProgress
-                    ? isUploading
+                  {isUploading
                       ? "Uploading your files"
                       : isPresigning
                         ? "Preparing uploads"
-                        : "Starting your job"
-                    : "Generating document…"}
+                        : "Generating document..."}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {showProgress
-                    ? isUploading
-                      ? "Securely transferring your template and context to storage."
-                      : "Getting things ready… we’ll begin generating in a moment."
-                    : "We are reading your files, extracting the details and filling your template."}
+                  {isUploading
+                      ? "Securely uploading your files to the AI."
+                      : isPresigning 
+                        ? "Getting things ready..."
+                        : "We are reading your files, extracting the details and filling your template."}
                 </p>
 
-                {showProgress && (
-                  <div className="space-y-2 mt-3">
+                {/* Progress Bar with smooth exit transition */}
+                <div 
+                  className={`
+                    space-y-2 mt-3 transition-all duration-1000 ease-in-out overflow-hidden
+                    ${isProgressDone ? "max-h-0 opacity-0" : "max-h-20 opacity-100"}
+                  `}
+                >
                     <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                      <span>Upload progress</span>
+                      <span>{status === 'streaming' ? 'Generation Progress' : 'Upload progress'}</span>
                       <span className="text-foreground font-semibold">{Math.round(uploadProgress)}%</span>
                     </div>
                     <Progress value={Math.round(uploadProgress)} className="h-2.5 bg-primary/10" />
-                  </div>
-                )}
+                </div>
 
-                {isGenerating && (
+                {showAiDetails && (
                   <>
                     <button
                       type="button"
                       onClick={() => setShowDetails((prev) => !prev)}
-                      className="mt-4 w-full flex items-center justify-between text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      className="mt-2 w-full flex text-xs text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      <p className="text-xs text-muted-foreground mt-1">See what the AI is thinking</p>
+                      <p className="text-muted-foreground mr-2 mt-1">See what the AI is thinking</p>
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-300 ${showDetails ? "rotate-180" : ""}`}
+                        className={`w-4 h-4 mt-1 transition-transform duration-300 ${showDetails ? "rotate-180" : ""}`}
                       />
                     </button>
 

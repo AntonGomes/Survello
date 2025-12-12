@@ -15,31 +15,14 @@ type StartArgs = {
   userId?: string;
 };
 
-const EVENT_TYPES = [
-  "response.code_interpreter_call_code.done",
-  "response.output_text.done",
-] as const;
-
-export function generateDoc() {
+export function useGenerateDoc() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [updates, setUpdates] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const eventSourceRef = useRef<EventSource | null>(null);
-
-
-  const appendUpdate = useCallback((raw: string) => {
-    if (!raw) return;
-    try {
-      const json = JSON.parse(raw);
-      const parsed = typeof json === "string" ? json : JSON.stringify(json);
-      setUpdates((prev) => prev.concat(parsed.split(/\r?\n/)));
-    } catch {
-      setUpdates((prev) => prev.concat(raw.split(/\r?\n/)));
-    }
-  }, []);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const reset = useCallback(() => {
     setJobId(null);
@@ -48,8 +31,10 @@ export function generateDoc() {
     setStatus("idle");
     setDownloadUrl(null);
     setUploadProgress(0);
-    eventSourceRef.current?.close();
-    eventSourceRef.current = null;
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
   }, []);
 
   const start = useCallback(
@@ -81,9 +66,11 @@ export function generateDoc() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: userId, files: filesMeta }),
         });
+        console.log("presignedRes", presignRes);
         const { uploads } = (await presignRes.json()) as {
           uploads: Array<{ key: string; upload_url: string; kind: string; content_type: string }>;
         };
+        console.log("uploads", uploads);
 
         const templateUpload = uploads.find((u) => u.kind === "template")!;
         const contextUploads = uploads.filter((u) => u.kind === "context");
@@ -96,8 +83,9 @@ export function generateDoc() {
 
         const bumpProgress = (delta: number) => {
           uploadedBytes += delta;
+          // Scale 0-100% of S3 upload to 0-33% of total job
           const next =
-            totalBytes === 0 ? 50 : Math.min(50, Math.round((uploadedBytes / totalBytes) * 50));
+            totalBytes === 0 ? 33 : Math.min(33, Math.round((uploadedBytes / totalBytes) * 33));
           setUploadProgress(next);
         };
 
@@ -131,7 +119,7 @@ export function generateDoc() {
             put(file, contextUploads[idx].upload_url, contextUploads[idx].content_type),
           ),
         ]);
-        setUploadProgress(50);
+        setUploadProgress(33);
 
         // 2. creating: tell backend to create the job using uploaded file keys
         setStatus("creating");
@@ -147,48 +135,90 @@ export function generateDoc() {
         const { id: newJobId } = (await jobRes.json()) as { id: string };
         setJobId(newJobId);
 
-        // 3. streaming: open SSE to follow progress and collect updates
+        // 3. Polling: check status periodically
         setStatus("streaming");
-        const es = new EventSource(`/api/generate/run_job/${newJobId}`);
-        eventSourceRef.current = es;
-
-        EVENT_TYPES.forEach((eventType) => {
-          es.addEventListener(eventType, (event: MessageEvent) => {
-            appendUpdate(event.data ?? "");
-          });
-        });
-
-        es.addEventListener("openaiUpload", (event: MessageEvent) => {
-          const percent = Number(event.data);
-          if (Number.isFinite(percent)) {
-            setUploadProgress((prev) => Math.max(prev, 50 + percent / 2));
+        
+        const poll = async () => {
+          try {
+            const res = await fetch(`/api/generate/status/${newJobId}`);
+            if (!res.ok) {
+               // If 404 or other error, maybe retry or fail?
+               console.error("Status check failed", res.status);
+               return false;
+            }
+            
+            const data = await res.json();
+            // data: { id, status, progress, logs, output_document_url }
+            
+            if (data.logs) {
+                setUpdates(data.logs);
+            }
+            
+            if (typeof data.progress === 'number') {
+                // Backend returns 33-100 range.
+                // We take the max to ensure we don't jump back if S3 upload finished at 33
+                // and backend starts at 33.
+                setUploadProgress(prev => Math.max(prev, data.progress));
+            }
+            
+            if (data.status === "completed") {
+               const dlRes = await fetch(`/api/generate/download_url/${newJobId}`);
+               const { download_url } = await dlRes.json();
+               setDownloadUrl(download_url);
+               setStatus("completed");
+               return true; // stop polling
+            } else if (data.status === "failed") {
+               setError("Job failed during processing.");
+               setStatus("error");
+               return true; // stop polling
+            }
+            
+            return false; // continue polling
+          } catch (e) {
+            console.error("Polling error", e);
+            return false;
           }
-        });
+        };
 
-        es.addEventListener("completed", async () => {
-          // 4. completed: fetch the presigned download URL
-          const res = await fetch(`/api/generate/download_url/${newJobId}`);
-          const { download_url } = (await res.json()) as { download_url: string };
-          setDownloadUrl(download_url);
-          setStatus("completed");
-          es.close();
-        });
+        // Start polling loop
+        pollIntervalRef.current = setInterval(async () => {
+            const stop = await poll();
+            if (stop && pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+            }
+        }, 2000); // Poll every 2 seconds
 
-        es.addEventListener("modelError", (event: MessageEvent) => {
-          setError(String(event.data || "Generation failed"));
-          setStatus("error");
-          es.close();
-        });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Generation failed");
         setStatus("error");
-        eventSourceRef.current?.close();
+        if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+        }
       }
     },
-    [appendUpdate],
+    [],
   );
 
-  useEffect(() => () => eventSourceRef.current?.close(), []);
+  useEffect(() => {
+      return () => {
+          if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      };
+  }, []);
+
+  const statusMessage = useMemo(() => {
+      if (status === "presigning" || status === "uploading") return "Uploading files...";
+      if (status === "creating") return "Creating job...";
+      if (status === "streaming") {
+          if (uploadProgress < 66) return "Preparing documents...";
+          if (uploadProgress < 100) return "Sending to AI...";
+          return "AI is thinking...";
+      }
+      if (status === "completed") return "Document generated!";
+      if (status === "error") return "Error occurred";
+      return "";
+  }, [status, uploadProgress]);
 
   const state = useMemo(
     () => ({
@@ -196,12 +226,13 @@ export function generateDoc() {
       updates,
       error,
       status,
+      statusMessage,
       downloadUrl,
       uploadProgress,
       isStreaming: status === "streaming",
       isCompleted: status === "completed",
     }),
-    [downloadUrl, error, jobId, status, updates, uploadProgress],
+    [downloadUrl, error, jobId, status, statusMessage, updates, uploadProgress],
   );
 
   return { ...state, start, reset, setError };

@@ -2,13 +2,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FileText, Image } from "lucide-react";
+import { FileText, Image as ImageIcon } from "lucide-react";
 
 import { DownloadButton } from "@/components/download-button";
 import { ErrorAlert } from "@/components/error-alert";
 import { JobStatusPanel } from "@/components/job-status-panel";
 import { UploadCard } from "@/components/upload-card";
-import { generateDoc } from "@/hooks/generate-doc";
+import { useGenerateDoc } from "@/hooks/generate-doc";
 
 type MainProps = {
   userId?: string;
@@ -20,7 +20,6 @@ export function Main({ userId: initialUserId }: MainProps) {
   const [userId, setUserId] = useState<string | undefined>(initialUserId);
 
   const {
-    jobId,
     updates,
     error,
     status,
@@ -30,7 +29,7 @@ export function Main({ userId: initialUserId }: MainProps) {
     uploadProgress,
     start,
     setError,
-  } = generateDoc();
+  } = useGenerateDoc();
 
   // Create user via Next API route on the client so auth cookies flow automatically
   useEffect(() => {
@@ -60,7 +59,7 @@ export function Main({ userId: initialUserId }: MainProps) {
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <UploadCard
           title="Context Files"
-          icon={<Image className="w-5 h-5 text-accent" />}
+          icon={<ImageIcon className="w-5 h-5 text-accent" />}
           hint="Optional"
           files={contextFiles}
           onDrop={setContextFiles}
@@ -83,7 +82,6 @@ export function Main({ userId: initialUserId }: MainProps) {
 
       <JobStatusPanel
         canStart={canStart}
-        isStreaming={isStreaming}
         status={status}
         uploadProgress={uploadProgress}
         onStart={() => start({ templateFile, contextFiles, userId })}

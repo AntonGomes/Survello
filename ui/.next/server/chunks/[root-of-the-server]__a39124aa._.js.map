@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 37, "column": 0}, "map": {"version":3,"sources":["file:///Users/anton/Development/docgen/ui/src/app/api/stream/%5Bjob_id%5D/route.ts"],"sourcesContent":["import { NextRequest } from \"next/server\";\n\nexport const runtime = \"nodejs\"; // Required for streaming\n\nexport async function GET(\n  req: NextRequest,\n  { params }: { params: { job_id: string } }\n) {\n  const { job_id } = await params;\n\n  const fastapi = await fetch(`http://localhost:8000/process/${job_id}`, {\n    method: \"GET\",\n  });\n\n  if (!fastapi.ok || !fastapi.body) {\n    return new Response(\"Failed to connect to FastAPI SSE endpoint\", {\n      status: 500,\n    });\n  }\n\n  return fastapi;\n}"],"names":[],"mappings":";;;;;;AAEO,MAAM,UAAU,UAAU,yBAAyB;AAEnD,eAAe,IACpB,GAAgB,EAChB,EAAE,MAAM,EAAkC;IAE1C,MAAM,EAAE,MAAM,EAAE,GAAG,MAAM;IAEzB,MAAM,UAAU,MAAM,MAAM,CAAC,8BAA8B,EAAE,QAAQ,EAAE;QACrE,QAAQ;IACV;IAEA,IAAI,CAAC,QAAQ,EAAE,IAAI,CAAC,QAAQ,IAAI,EAAE;QAChC,OAAO,IAAI,SAAS,6CAA6C;YAC/D,QAAQ;QACV;IACF;IAEA,OAAO;AACT","debugId":null}}]
-}

@@ -1,21 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ItemContent, ItemTitle, Item, ItemMedia } from "./ui/item";
-import { Spinner } from "@/components/ui/spinner";
-import { Loader2 } from "lucide-react"; // Import Loader2 for the activity indicator
 
 interface TypingTitleProps {
   updates: string[];
   tokenDelayMs?: number;
   dwellMs?: number;
 }
-
-// Custom Activity Indicator using Loader2 for a "breathing" effect
-const ActivityIndicator = () => (
-  // Use an icon with a gentle animation instead of a standard spinner
-  <Loader2
-    className="size-8 text-primary animate-spin animate-[pulse_2s_cubic-bezier(0.4,_0,_0.6,_1)_infinite]"
-  />
-);
 
 export const RollingUpdates: React.FC<TypingTitleProps> = ({
   updates,
@@ -26,6 +15,7 @@ export const RollingUpdates: React.FC<TypingTitleProps> = ({
   const [tokens, setTokens] = useState<string[]>([]);
   const [tokenIndex, setTokenIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
+  const [dotCount, setDotCount] = useState(0);
 
   // Chunk text into fake tokens of 3–4 characters
   const chunkIntoTokens = useCallback((text: string): string[] => {
@@ -79,12 +69,27 @@ export const RollingUpdates: React.FC<TypingTitleProps> = ({
     if (tokenIndex >= tokens.length) return;
   }, [tokenIndex, tokens, tokenDelayMs, dwellMs, updates.length]);
 
+  // Animate trailing dots: . (200ms) -> .. (200ms) -> ... (1s) -> repeat
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    const tick = (current: number) => {
+      const next = (current + 1) % 4; // 0..3 dots
+      const delay = current === 2 ? 1000 : 200; // linger on "..." for 1s
+      timeout = setTimeout(() => tick(next), delay);
+      setDotCount(next);
+    };
+    tick(dotCount);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseText]);
+
   const textToShow =
     updates.length === 0 ? "Initialising model and context..." : displayed || " ";
 
   return (
     <p className="text-xs text-muted-foreground font-mono">
             {textToShow}
+            {".".repeat(dotCount)}
     </p>
   );
 };
