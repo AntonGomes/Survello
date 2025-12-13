@@ -21,13 +21,13 @@ Ensure `DATABASE_URL` is exported (or in `.env`) when you run Alembic.
 3) Generate a migration  
 After changing models, autogenerate a script:
 ```bash
-alembic revision --autogenerate -m "describe change"
+uv run alembic revision --autogenerate -m "describe change"
 ```
 Review the new file in `migrations/versions/` and edit if needed.
 
 4) Apply migrations  
 ```bash
-alembic upgrade head   # apply latest
+uv run alembic upgrade head   # apply latest
 ```
 To roll back one step: `alembic downgrade -1`.
 

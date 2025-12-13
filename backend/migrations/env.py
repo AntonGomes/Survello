@@ -1,9 +1,11 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
+
+from app.core.db import Base, Database
+from app.core.settings import get_settings
+import app.models.orm  # noqa: F401 - register models for metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -14,22 +16,13 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from app.db import Base
-import app.models.orm  # register models
 target_metadata = Base.metadata
 
+# Load settings from your application
+settings = get_settings()
 
-import os
-from dotenv import load_dotenv
-load_dotenv()  # picks up backend/.env
-config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
-
-
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# Override the sqlalchemy.url in alembic.ini with the one from environment variables
+config.set_main_option("sqlalchemy.url", settings.db_url)
 
 
 def run_migrations_offline() -> None:
@@ -63,16 +56,13 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # We use your Database class to ensure the engine is created
+    # with the exact same parameters as your application.
+    db_instance = Database(db_url=settings.db_url)
+    connectable = db_instance.get_engine()
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

@@ -1,11 +1,16 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { auth0 } from "@/lib/auth0";
+import { backendFetch } from "@/lib/backendFetch";
 
 export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const res = await fetch(`${process.env.PY_BACKEND_URL}/generate/create_job`, {
+  const session = await auth0.getSession();
+  if (!session?.user) return new Response("Unauthorized", { status: 401 });
+
+  const body = await req.json();
+  const res = await backendFetch("/generate/create_job", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body,
+    sub: session.user.sub,
+    body: JSON.stringify(body),
   });
   const text = await res.text();
   return new Response(text, {

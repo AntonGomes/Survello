@@ -1,12 +1,20 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { auth0 } from "@/lib/auth0";
+import { backendFetch } from "@/lib/backendFetch";
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ jobId: string }> },
 ) {
+  const session = await auth0.getSession();
+  if (!session?.user) return new Response("Unauthorized", { status: 401 });
+
   const { jobId } = await params;
-  const res = await fetch(
-    `${process.env.PY_BACKEND_URL}/generate/download_url/${jobId}`,
+  const res = await backendFetch(
+    `/generate/download_url/${jobId}`,
+    {
+      sub: session.user.sub,
+    }
   );
   const text = await res.text();
   return new Response(text, {

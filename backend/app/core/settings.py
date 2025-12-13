@@ -2,51 +2,50 @@ from __future__ import annotations
 
 import os
 from functools import lru_cache
-from pathlib import Path
+from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+from pydantic_settings import BaseSettings
 
 
-def _default_storage_root() -> Path:
-    env_storage_root = os.environ.get("STORAGE_ROOT")
-    return Path(env_storage_root)
-
-
-class Settings(BaseModel):
+class Settings(BaseSettings):
     """Application configuration loaded from environment variables."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, env_file=".env", extra="ignore"
+    )
 
+    jwt_secret: str = Field(..., alias="JWT_SECRET")
+
+    # OpenAI / App
     openai_api_key: str = Field(..., alias="OPENAI_API_KEY")
     container_prefix: str = Field(default="docgen")
 
-    template_temp_dir: Path = Field(default=Path("/tmp/templates"))
-    context_temp_dir: Path = Field(default=Path("/tmp/context"))
-    output_temp_dir: Path = Field(default=Path("/tmp/output"))
+    # AWS and S3
+    aws_default_region: str | None = Field(default=None, alias="AWS_DEFAULT_REGION")
+    s3_bucket_name: str | None = Field(default=None, alias="S3_BUCKET_NAME")
+    s3_endpoint_url: str | None = Field(default=None, alias="S3_ENDPOINT_URL")
+    aws_access_key: str | None = Field(default=None, alias="AWS_ACCESS_KEY")
+    aws_secret_key: str | None = Field(default=None, alias="AWS_SECRET_KEY")
 
-    storage_backend: str = Field(default="local", description="local|s3")
-    storage_base_url: str = Field(default="http://localhost:8000")
-    storage_root: Path = Field(default_factory=_default_storage_root)
+    # Database
+    db_user: str = Field(default="postgres", alias="DB_USER")
+    db_password: str = Field(default="mysecretpassword", alias="DB_PASSWORD")
+    db_host: str = Field(default="localhost", alias="DB_HOST")
+    db_port: str = Field(default="5432", alias="DB_PORT")
+    db_name: str = Field(default="postgres", alias="DB_NAME")
+    db_echo: bool = Field(
+        default=False, alias="DB_ECHO", description="SQLAlchemy echo for debugging"
+    )
 
-    s3_bucket_name: str | None = Field(default=None)
-    s3_endpoint_url: str | None = Field(default=None)
-    s3_access_key: str | None = Field(default=None)
-    s3_secret_key: str | None = Field(default=None)
-
+    @property
+    def db_url(self) -> str:
+        # Construct the full SQLAlchemy URL
+        return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
 
 @lru_cache()
 def get_settings() -> Settings:
-    load_dotenv()
-    settings = Settings(
-        OPENAI_API_KEY=os.environ["OPENAI_API_KEY"],  # using alias
-        storage_backend=os.environ.get("STORAGE_BACKEND", "local"),
-        storage_base_url=os.environ.get("STORAGE_BASE_URL", "http://localhost:8000"),
-        s3_bucket_name=os.environ.get("S3_BUCKET_NAME"),
-        s3_endpoint_url=os.environ.get("S3_ENDPOINT_URL"),
-        s3_access_key=os.environ.get("S3_ACCESS_KEY"),
-        s3_secret_key=os.environ.get("S3_SECRET_KEY"),
-    )
-    settings.storage_root.mkdir(parents=True, exist_ok=True)
-    return settings
+    # BaseSettings automatically reads from .env and os.environ
+    return Settings()

@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 15, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/ (unsupported edge import 'crypto')"],"sourcesContent":["__turbopack_context__.n(__import_unsupported(`crypto`));\n"],"names":[],"mappings":"AAAA,sBAAsB,CAAC,CAAC,qBAAqB,CAAC,MAAM,CAAC"}},
+    {"offset": {"line": 20, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/docgen/ui/src/lib/auth0.ts"],"sourcesContent":["import { Auth0Client } from '@auth0/nextjs-auth0/server';\n\nexport const auth0 = new Auth0Client();"],"names":[],"mappings":";;;;AAAA;AAAA;;AAEO,MAAM,QAAQ,IAAI,6MAAW"}},
+    {"offset": {"line": 32, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/docgen/ui/src/middleware.ts"],"sourcesContent":["import type { NextRequest } from \"next/server\";\nimport { auth0 } from \"./lib/auth0\";\n\nexport async function middleware(request: NextRequest) {\n  return await auth0.middleware(request);\n}\n\nexport const config = {\n  matcher: [\n    /*\n     * Match all request paths except for the ones starting with:\n     * - _next/static (static files)\n     * - _next/image (image optimization files)\n     * - favicon.ico, sitemap.xml, robots.txt (metadata files)\n     */\n    \"/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)\",\n  ],\n};"],"names":[],"mappings":";;;;;;AACA;;AAEO,eAAe,WAAW,OAAoB;IACnD,OAAO,MAAM,oJAAK,CAAC,UAAU,CAAC;AAChC;AAEO,MAAM,SAAS;IACpB,SAAS;QACP;;;;;KAKC,GACD;KACD;AACH"}}]
+}

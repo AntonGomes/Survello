@@ -15,4 +15,3 @@ Before starting, always present a concise conceptual checklist (3–7 bullets) s
 **Output requirements**
 - The final document should be at the provided template path within the python tool container because you edited directly and did not create a new file.  
 """
-

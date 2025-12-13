@@ -12,7 +12,6 @@ export type Status =
 type StartArgs = {
   templateFile: File | null;
   contextFiles: File[];
-  userId?: string;
 };
 
 export function useGenerateDoc() {
@@ -38,7 +37,7 @@ export function useGenerateDoc() {
   }, []);
 
   const start = useCallback(
-    async ({ templateFile, contextFiles, userId }: StartArgs) => {
+    async ({ templateFile, contextFiles }: StartArgs) => {
       if (!templateFile) return;
       try {
         setError(null);
@@ -64,7 +63,7 @@ export function useGenerateDoc() {
         const presignRes = await fetch("/api/generate/presign_uploads", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userId, files: filesMeta }),
+          body: JSON.stringify({ files: filesMeta }),
         });
         console.log("presignedRes", presignRes);
         const { uploads } = (await presignRes.json()) as {
@@ -127,7 +126,6 @@ export function useGenerateDoc() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            user_id: userId,
             template_file_url: templateUpload.key,
             context_file_urls: contextUploads.map((c) => c.key),
           }),

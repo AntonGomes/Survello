@@ -1,5 +1,5 @@
 from pathlib import Path
-import os 
+import os
 from dotenv import load_dotenv
 
 from fastapi import FastAPI, Response, HTTPException, Request
@@ -19,10 +19,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def path_for(key: str) -> Path:
     p = STORAGE_ROOT / key
     p.parent.mkdir(parents=True, exist_ok=True)
     return p
+
 
 @app.put("/api/storage/upload")
 async def put_object(key: str, request: Request):
@@ -34,12 +36,14 @@ async def put_object(key: str, request: Request):
         headers={"Access-Control-Allow-Origin": "*"},
     )
 
+
 @app.get("/api/storage/download")
 async def get_object(key: str):
     target = path_for(key)
     if not target.exists():
         raise HTTPException(status_code=404)
     return FileResponse(target, headers={"Access-Control-Allow-Origin": "*"})
+
 
 @app.options("/api/storage/{path:path}")
 async def options_object(path: str):

@@ -10,14 +10,9 @@ import { JobStatusPanel } from "@/components/job-status-panel";
 import { UploadCard } from "@/components/upload-card";
 import { useGenerateDoc } from "@/hooks/generate-doc";
 
-type MainProps = {
-  userId?: string;
-};
-
-export function Main({ userId: initialUserId }: MainProps) {
+export function Main() {
   const [contextFiles, setContextFiles] = useState<File[]>([]);
   const [templateFile, setTemplateFile] = useState<File | null>(null);
-  const [userId, setUserId] = useState<string | undefined>(initialUserId);
 
   const {
     updates,
@@ -34,22 +29,18 @@ export function Main({ userId: initialUserId }: MainProps) {
   // Create user via Next API route on the client so auth cookies flow automatically
   useEffect(() => {
     const ensureUser = async () => {
-      if (userId) return;
       const res = await fetch("/api/users", { method: "POST" });
-      if (!res.ok) throw new Error(`Failed to create user (${res.status})`);
-      const data = (await res.json()) as { id: string };
-      setUserId(data.id);
+      if (!res.ok) console.error(`Failed to sync user (${res.status})`);
     };
     
     ensureUser();
-  }, [userId, setUserId, setError]);
+  }, []);
 
   const canStart = useMemo(
     () =>
       Boolean(templateFile) &&
-      Boolean(userId) &&
       !["presigning", "uploading", "creating", "streaming"].includes(status),
-    [status, templateFile, userId],
+    [status, templateFile],
   );
 
   const downloadPath = useMemo(() => downloadUrl || "", [downloadUrl]);
@@ -84,7 +75,7 @@ export function Main({ userId: initialUserId }: MainProps) {
         canStart={canStart}
         status={status}
         uploadProgress={uploadProgress}
-        onStart={() => start({ templateFile, contextFiles, userId })}
+        onStart={() => start({ templateFile, contextFiles })}
         updates={updates}
       />
       )}

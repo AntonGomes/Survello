@@ -34,4 +34,3 @@ The provided context includes:
 - Save over the provided template path within the code interpreter container.  
 
 """
-

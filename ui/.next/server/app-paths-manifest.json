@@ -1,14 +1,10 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/about/page": "app/about/page.js",
   "/api/generate/create_job/route": "app/api/generate/create_job/route.js",
   "/api/generate/download_url/[jobId]/route": "app/api/generate/download_url/[jobId]/route.js",
   "/api/generate/presign_uploads/route": "app/api/generate/presign_uploads/route.js",
   "/api/generate/status/[jobId]/route": "app/api/generate/status/[jobId]/route.js",
   "/api/users/route": "app/api/users/route.js",
   "/app/page": "app/app/page.js",
-  "/contact/page": "app/contact/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/page": "app/page.js",
-  "/pricing/page": "app/pricing/page.js"
+  "/page": "app/page.js"
 }

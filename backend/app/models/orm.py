@@ -16,17 +16,18 @@ from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from app.db import Base
+from app.core.db import Base
 
 
 class JobStatus(enum.Enum):
     pending = "pending"
     running = "running"
-    succeeded = "succeeded"
+    completed = "completed"
     failed = "failed"
 
 
 # --- Core tables --------------------------------------------------
+
 
 class Organisation(Base):
     __tablename__ = "organisations"
@@ -84,9 +85,7 @@ class User(Base):
     )
 
     # Relationships
-    organisation: Mapped[Organisation] = relationship(
-        back_populates="users"
-    )
+    organisation: Mapped[Organisation] = relationship(back_populates="users")
 
     documents: Mapped[list["Document"]] = relationship(
         back_populates="owner_user",
@@ -152,9 +151,7 @@ class Document(Base):
     )
 
     # Relationships
-    owner_user: Mapped[User | None] = relationship(
-        back_populates="documents"
-    )
+    owner_user: Mapped[User | None] = relationship(back_populates="documents")
     organisation: Mapped[Organisation | None] = relationship()
 
     # jobs where this is the template
@@ -164,9 +161,8 @@ class Document(Base):
     )
 
 
-
-
 # --- Template sharing across organisations ------------------------
+
 
 class OrganisationTemplate(Base):
     """
@@ -201,13 +197,12 @@ class OrganisationTemplate(Base):
         nullable=False,
     )
 
-    organisation: Mapped[Organisation] = relationship(
-        back_populates="templates"
-    )
+    organisation: Mapped[Organisation] = relationship(back_populates="templates")
     template: Mapped[Document] = relationship()
 
 
 # --- Jobs + context files per job ---------------------------------
+
 
 class Job(Base):
     __tablename__ = "jobs"
@@ -266,7 +261,6 @@ class Job(Base):
         back_populates="template_jobs",
     )
 
-
     # Store S3 URLs for context files directly on the job for simplicity
     context_s3_urls: Mapped[list[str]] = mapped_column(
         JSON,
@@ -297,6 +291,23 @@ class Job(Base):
         Text,
         nullable=True,
         doc="Storage key/URL for the generated document",
+    )
+
+    # Async Polling Support
+    progress: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        server_default="0",
+        nullable=False,
+        doc="Percentage progress (0-100)",
+    )
+
+    logs: Mapped[list[str]] = mapped_column(
+        JSON,
+        default=list,
+        server_default="[]",
+        nullable=False,
+        doc="List of log messages for the user",
     )
 
     output_document: Mapped[Document | None] = relationship(
