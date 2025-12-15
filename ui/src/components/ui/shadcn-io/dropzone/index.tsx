@@ -120,7 +120,7 @@ export const DropzoneContent = ({
   children,
   className,
 }: DropzoneContentProps) => {
-  const { src } = useDropzoneContext();
+  const { src, maxFiles } = useDropzoneContext();
 
   if (!src) {
     return null;
@@ -143,7 +143,7 @@ export const DropzoneContent = ({
           : new Intl.ListFormat('en').format(src.map((file) => file.name))}
       </p>
       <p className="w-full text-wrap text-muted-foreground text-xs">
-        Drag and drop or click to replace
+        Drag and drop or click to {maxFiles && maxFiles > 1 ? 'add more' : 'replace'}
       </p>
     </div>
   );

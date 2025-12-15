@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 15, "column": 0}, "map": {"version":3,"sources":["file:///Users/anton/Development/docgen/ui/src/app/jobs/page.tsx"],"sourcesContent":["export default function JobsPage() {\n  return (\n    <div className=\"flex flex-col items-center justify-center h-full text-muted-foreground\">\n      <h1 className=\"text-2xl font-bold mb-2\">Jobs</h1>\n      <p>This feature is coming soon.</p>\n    </div>\n  );\n}\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAU;;0BACb,8OAAC;gBAAG,WAAU;0BAA0B;;;;;;0BACxC,8OAAC;0BAAE;;;;;;;;;;;;AAGT","debugId":null}}]
+}

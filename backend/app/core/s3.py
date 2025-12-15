@@ -1,6 +1,7 @@
 # app/core/s3.py
 
 import boto3
+from botocore.config import Config
 
 
 class S3Client:
@@ -14,6 +15,13 @@ class S3Client:
         access_key: str | None = None,
         secret_key: str | None = None,
     ):
+        # Configure timeouts to prevent hanging indefinitely
+        config = Config(
+            connect_timeout=5,
+            read_timeout=60,
+            retries={"max_attempts": 2}
+        )
+
         # If keys are provided (Local Dev), use them.
         # If not (App Runner with IAM Role), pass None so boto3 uses the role.
         if access_key and secret_key:
@@ -23,12 +31,12 @@ class S3Client:
                 region_name=region,
             )
             self.client = session.client(
-                "s3", region_name=region, endpoint_url=endpoint_url
+                "s3", region_name=region, endpoint_url=endpoint_url, config=config
             )
         else:
             # IAM Role authentication (App Runner / EC2)
             self.client = boto3.client(
-                "s3", region_name=region, endpoint_url=endpoint_url
+                "s3", region_name=region, endpoint_url=endpoint_url, config=config
             )
 
         self.bucket_name = bucket_name

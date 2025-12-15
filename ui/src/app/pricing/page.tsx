@@ -6,128 +6,160 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Sparkles } from "lucide-react";
-
-const PLANS = [
-  {
-    name: "Starter",
-    price: "$29",
-    cadence: "per month",
-    description: "For individual builders and small projects.",
-    features: [
-      "Up to 5 templates",
-      "Basic context uploads",
-      "Email support",
-      "Download-ready outputs",
-    ],
-    cta: "Start free trial",
-  },
-  {
-    name: "Growth",
-    price: "$89",
-    cadence: "per month",
-    description: "For small teams with repeatable workflows.",
-    features: [
-      "Unlimited templates",
-      "Role-based access",
-      "Streaming status updates",
-      "Priority support",
-    ],
-    highlight: true,
-    cta: "Choose Growth",
-  },
-  {
-    name: "Enterprise",
-    price: "Let’s talk",
-    cadence: "",
-    description: "For large teams needing security reviews and SLAs.",
-    features: [
-      "Custom onboarding",
-      "Security & compliance review",
-      "Dedicated success manager",
-      "On-prem or VPC options",
-    ],
-    cta: "Contact sales",
-  },
-];
+import { Check } from "lucide-react";
+import Link from "next/link";
 
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-secondary flex flex-col">
       <Header />
 
-      <main className="max-w-6xl mx-auto px-6 py-12 flex-1 w-full space-y-10">
-        <div className="space-y-3 text-center">
-          <Badge variant="outline" className="w-fit mx-auto">
-            Pricing
-          </Badge>
-          <h1 className="text-4xl font-bold text-foreground">
-            Choose the plan that fits your team.
-          </h1>
-          <p className="text-lg text-slate-700 max-w-2xl mx-auto">
-            Start with a free trial and upgrade when you’re ready. No credit
-            card required.
-          </p>
-        </div>
+      <main className="flex-1 w-full">
+        <div className="container mx-auto py-24 px-4">
+          <div className="text-center mb-16 space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-foreground">
+              Simple, Transparent Pricing
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              We are currently in <b>Alpha</b>. Join our program today to start generating documents for free.
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {PLANS.map((plan) => (
-            <Card
-              key={plan.name}
-              className={plan.highlight ? "border-primary shadow-lg" : ""}
-            >
-              <CardHeader className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-2xl text-foreground">
-                    {plan.name}
-                  </CardTitle>
-                  {plan.highlight && (
-                    <Badge variant="secondary" className="gap-1">
-                      <Sparkles className="h-4 w-4" />
-                      Popular
-                    </Badge>
-                  )}
-                </div>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="text-3xl font-bold text-slate-900">
-                  {plan.price}{" "}
-                  <span className="text-base font-medium text-slate-600">
-                    {plan.cadence}
-                  </span>
-                </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            {/* Alpha Plan - Active */}
+            <Card className="relative border-2 border-chart-1 shadow-2xl scale-105 z-10 flex flex-col bg-card">
+              <div className="absolute -top-4 left-0 right-0 flex justify-center">
+                <Badge className="bg-chart-1 hover:bg-chart-1/90 text-white px-4 py-1 text-sm uppercase tracking-wide">
+                  Alpha Access
+                </Badge>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-2xl">Early Adopter</CardTitle>
+                <CardDescription>Full access to current features for feedback.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <ul className="space-y-3 text-sm text-slate-700">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-accent" />
-                      {feature}
-                    </li>
-                  ))}
+              <CardContent className="flex-1">
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">$0</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5 text-chart-1 shrink-0" />
+                    <span>50 Documents per month</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5 text-chart-1 shrink-0" />
+                    <span>3 Team Members</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5 text-chart-1 shrink-0" />
+                    <span>Standard Support</span>
+                  </li>
+                  <li className="flex items-center gap-2 font-medium text-foreground">
+                    <Check className="h-5 w-5 text-chart-1 shrink-0" />
+                    <span>No Credit Card Required</span>
+                  </li>
                 </ul>
-                <Button
-                  className="w-full"
-                  variant={
-                    plan.highlight ? "accent" : plan.name === "Starter" ? "tertiary" : "outline"
-                  }
-                  asChild
-                >
-                  <a
-                    href={
-                      plan.name === "Enterprise"
-                        ? "/contact"
-                        : "/auth/login?screen_hint=signup"
-                    }
-                  >
-                    {plan.cta}
-                  </a>
-                </Button>
               </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-chart-1 hover:bg-chart-1/90 text-white font-semibold" size="lg" asChild>
+                  <Link href="mailto:hello@docgen.com?subject=Request%20Alpha%20Access">
+                    Request Access
+                  </Link>
+                </Button>
+              </CardFooter>
             </Card>
-          ))}
+
+            {/* Pro Plan - Future */}
+            <Card className="relative border-border/50 bg-muted/10 opacity-60 grayscale flex flex-col">
+               <div className="absolute -top-3 right-4">
+                <Badge variant="outline" className="bg-background">Coming Soon</Badge>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-2xl">Professional</CardTitle>
+                <CardDescription>For growing teams needing more power.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">$49</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                <ul className="space-y-3 text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5" />
+                    <span>500 Documents per month</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5" />
+                    <span>10 Team Members</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5" />
+                    <span>Priority Support</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5" />
+                    <span>Custom Templates</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button disabled variant="outline" className="w-full">
+                  Planned for V1.0
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {/* Enterprise Plan - Future */}
+            <Card className="relative border-border/50 bg-muted/10 opacity-60 grayscale flex flex-col">
+               <div className="absolute -top-3 right-4">
+                <Badge variant="outline" className="bg-background">Coming Soon</Badge>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-2xl">Enterprise</CardTitle>
+                <CardDescription>For large organizations with specific needs.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <div className="mb-6">
+                  <span className="text-4xl font-bold">Custom</span>
+                </div>
+                <ul className="space-y-3 text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5" />
+                    <span>Unlimited Documents</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5" />
+                    <span>Unlimited Users</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5" />
+                    <span>Dedicated Account Manager</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-5 w-5" />
+                    <span>SSO & Advanced Security</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button disabled variant="outline" className="w-full">
+                  Planned for V1.0
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+          
+          <div className="mt-16 text-center border-t pt-8 max-w-2xl mx-auto">
+            <h3 className="text-lg font-semibold mb-2">Why is this free?</h3>
+            <p className="text-muted-foreground">
+              We are currently refining our AI models and user experience. In exchange for free access, we may ask for occasional feedback to help us build the best document generation tool for you.
+            </p>
+          </div>
         </div>
       </main>
 

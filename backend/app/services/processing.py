@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from threading import Thread
 from queue import SimpleQueue
+import time
 
 from app.core.logging import logger
 from app.models.orm import JobStatus
@@ -34,18 +35,19 @@ class ProcessingOrchestrator:
         self.openai_service = openai_service
 
     def run(self) -> None:
-        logger.info("Starting orchestrator for job_id=%s", self.job_id)
+        start_time = time.time()
+        logger.info(f"Starting orchestrator for job_id={self.job_id}")
 
         try:
             # 1. Fetch Job Metadata
             job = self.job_repo.get_job(self.job_id)
             if not job:
-                logger.error("Job not found")
+                logger.error(f"Job not found job_id={self.job_id}")
                 return
 
             template_doc = self.job_repo.get_document(job.template_id)
             if not template_doc:
-                logger.error("template doc not found")
+                logger.error(f"Template doc not found job_id={self.job_id}")
                 self.job_repo.append_log(
                     self.job_id, "ERROR: Template document not found"
                 )
@@ -61,21 +63,30 @@ class ProcessingOrchestrator:
             # 2. Download & Prepare Files
             try:
                 # Download raw bytes
-                logger.info("Downloading files from s3")
+                dl_start = time.time()
+                logger.info(f"Downloading files from s3 for job_id={self.job_id}")
                 self.job_repo.append_log(self.job_id, "Downloading files...")
+                
+                logger.info(f"Downloading template: {template_doc.file_url} job_id={self.job_id}")
                 template_tuple = self.storage.get_file_bytes(template_doc.file_url)
-                context_files = [
-                    self.storage.get_file_bytes(url) for url in job.context_s3_urls
-                ]
+                
+                context_files = []
+                for idx, url in enumerate(job.context_s3_urls):
+                    logger.info(f"Downloading context file {idx+1}/{len(job.context_s3_urls)}: {url} job_id={self.job_id}")
+                    context_files.append(self.storage.get_file_bytes(url))
+                
+                dl_duration = time.time() - dl_start
+                logger.info(f"Downloaded {len(context_files) + 1} files. Duration: {dl_duration:.2f}s job_id={self.job_id}")
 
                 # Convert to PDF/Images
-                logger.info("Preparing files")
+                prep_start = time.time()
+                logger.info(f"Preparing files for job_id={self.job_id}")
                 self.job_repo.append_log(
                     self.job_id, "Converting files to PDF/Images..."
                 )
 
                 def _log_handler(msg: str):
-                    logger.info(msg)
+                    # logger.info(msg) # Reduced noise
                     self.job_repo.append_log(self.job_id, msg)
 
                 def _prepare_progress_handler(done: int, total: int):
@@ -91,8 +102,10 @@ class ProcessingOrchestrator:
                     on_log=_log_handler,
                     on_progress=_prepare_progress_handler,
                 )
+                prep_duration = time.time() - prep_start
+                logger.info(f"Files prepared. Duration: {prep_duration:.2f}s job_id={self.job_id}")
             except (ConversionError, Exception) as exc:
-                logger.exception("Preparation failed for job_id=%s", self.job_id)
+                logger.error(f"Preparation failed for job_id={self.job_id}", exc_info=True)
                 self.job_repo.append_log(
                     self.job_id, f"ERROR: Preparation failed: {exc}"
                 )
@@ -100,7 +113,7 @@ class ProcessingOrchestrator:
                 return
 
             # 3. Upload to OpenAI (Async Progress)
-            logger.info("Uploading files to OpenAI")
+            logger.info(f"Uploading files to OpenAI for job_id={self.job_id}")
             self.job_repo.append_log(self.job_id, "Uploading files to OpenAI...")
             upload_queue: SimpleQueue[float | str | None] = SimpleQueue()
             upload_result_holder = {}
@@ -114,10 +127,10 @@ class ProcessingOrchestrator:
                             100 * done / total if total else 100
                         ),
                     )
-                    logger.debug("Succesful upload")
+                    logger.info(f"Upload successful for job_id={self.job_id}")
                     upload_queue.put(None)  # Signal done
                 except Exception as e:
-                    logger.debug("unsuccesful upload", e)
+                    logger.error(f"Unsuccessful upload for job_id={self.job_id}", exc_info=True)
                     upload_queue.put(f"ERROR:{e}")
                     upload_queue.put(None)
 
@@ -155,15 +168,17 @@ class ProcessingOrchestrator:
             client_container_bundle = upload_result_holder["bundle"]
 
             # 4. Stream Model Response
-            logger.info("Stream model repsonse")
+            logger.info(f"Stream model response for job_id={self.job_id}")
             self.job_repo.append_log(self.job_id, "Generating document with OpenAI...")
             try:
+                gen_start = time.time()
                 stream = self.openai_service.stream_model_response(
                     container_bundle=client_container_bundle,
                     system_prompt=SYSTEM_PROMPT,
                     user_input=DILAPS_INPUT,
                 )
 
+                token_est = 0
                 for chunk in stream:
                     # Check for various chunk types (Text vs Code)
                     output_text = ""
@@ -177,11 +192,15 @@ class ProcessingOrchestrator:
                         output_text = extract_comments(chunk.code)
 
                     if output_text:
-                        logger.debug(f"Model resonse: {output_text}")
+                        # logger.debug(f"Model resonse: {output_text}") # REMOVED
+                        token_est += len(output_text) // 4
                         self.job_repo.append_log(self.job_id, output_text)
+                
+                gen_duration = time.time() - gen_start
+                logger.info(f"Generation completed. Duration: {gen_duration:.2f}s. Est Tokens: {token_est} job_id={self.job_id}")
 
             except Exception as exc:
-                logger.exception("Model stream error job_id=%s", self.job_id)
+                logger.error(f"Model stream error job_id={self.job_id}", exc_info=True)
                 self.job_repo.append_log(
                     self.job_id, f"ERROR: Model stream error: {exc}"
                 )
@@ -190,7 +209,7 @@ class ProcessingOrchestrator:
 
             # 5. Fetch Final File & Persist
             try:
-                logger.info("Fetching final file for job_id=%s", self.job_id)
+                logger.info(f"Fetching final file for job_id={self.job_id}")
                 self.job_repo.append_log(self.job_id, "Finalizing document...")
 
                 file_data = self.openai_service.fetch_generated_file(
@@ -208,15 +227,18 @@ class ProcessingOrchestrator:
                 self.job_repo.append_log(self.job_id, "Job completed successfully")
                 self.job_repo.update_status(self.job_id, JobStatus.completed)
                 self.job_repo.update_progress(self.job_id, 100)
+                
+                total_duration = time.time() - start_time
+                logger.info(f"Job completed successfully. Total Duration: {total_duration:.2f}s job_id={self.job_id}")
 
             except Exception as exc:
-                logger.exception("Finalization failed for job_id=%s", self.job_id)
+                logger.error(f"Finalization failed for job_id={self.job_id}", exc_info=True)
                 self.job_repo.append_log(
                     self.job_id, f"ERROR: Finalization failed: {exc}"
                 )
                 self.job_repo.update_status(self.job_id, JobStatus.failed)
 
         except Exception as e:
-            logger.exception("Unexpected error in orchestrator job_id=%s", self.job_id)
+            logger.error(f"Unexpected error in orchestrator job_id={self.job_id}", exc_info=True)
             self.job_repo.append_log(self.job_id, f"ERROR: Unexpected error: {e}")
             self.job_repo.update_status(self.job_id, JobStatus.failed)

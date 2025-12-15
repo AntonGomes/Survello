@@ -47,13 +47,28 @@ export function Main() {
 
   return (
     <>
+      <div className="mb-8 space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Generate Document</h1>
+        <p className="text-muted-foreground max-w-3xl">
+          Create professional documents in seconds. Upload your context files (images, PDFs) and a template, 
+          and our AI will intelligently analyze the content to generate a filled document matching your requirements.
+        </p>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <UploadCard
           title="Context Files"
           icon={<ImageIcon className="w-5 h-5 text-accent" />}
           hint="Optional"
           files={contextFiles}
-          onDrop={setContextFiles}
+          onDrop={(files) => {
+            setContextFiles((prev) => {
+              const newFiles = files.filter(
+                (file) => !prev.some((p) => p.name === file.name)
+              );
+              return [...prev, ...newFiles];
+            });
+          }}
           maxFiles={100}
         />
         <UploadCard

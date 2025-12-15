@@ -9,102 +9,178 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sparkles, Target, Users } from "lucide-react";
+import {
+  Bot,
+  FileText,
+  Layers,
+  UploadCloud,
+  Wand2,
+  CheckCircle2,
+  ArrowRight,
+  Zap,
+  MessageSquareText,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-secondary flex flex-col">
       <Header />
 
-      <main className="max-w-5xl mx-auto px-6 py-12 flex-1 w-full space-y-10">
-        <div className="space-y-4">
-          <Badge variant="outline" className="w-fit">
-            About DocGen
-          </Badge>
-          <h1 className="text-4xl font-bold text-foreground">
-            We help teams move faster with documents that stay on-brand.
-          </h1>
-          <p className="text-lg text-slate-700 max-w-3xl">
-            DocGen blends your templates, brand language, and context to create
-            documents your customers trust. No more reinventing the wheel for
-            every proposal, report, or briefing.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              title: "Built for teams",
-              description:
-                "Sales, marketing, and operations collaborate with roles and approvals baked in.",
-              icon: <Users className="h-5 w-5 text-primary" />,
-            },
-            {
-              title: "Quality without effort",
-              description:
-                "Template-aware generation keeps formatting, tone, and data consistent.",
-              icon: <Sparkles className="h-5 w-5 text-primary" />,
-            },
-            {
-              title: "Outcome-focused",
-              description:
-                "We measure success by the time you save and the deals you close, not just page views.",
-              icon: <Target className="h-5 w-5 text-green-600" />,
-            },
-          ].map((item) => (
-            <Card key={item.title}>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  {item.icon}
-                  <CardTitle className="text-lg">{item.title}</CardTitle>
-                </div>
-                <CardDescription>{item.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-
-        <Card className="border-border shadow-md">
-          <CardHeader className="border-b">
-            <CardTitle className="text-2xl text-foreground">
-              Our promise
-            </CardTitle>
-            <CardDescription>
-              Security-first, customer-obsessed, and relentlessly focused on
-              reliable outputs.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid md:grid-cols-2 gap-6 pt-4">
-            <div className="space-y-2">
-              <h3 className="font-semibold text-slate-900">Security</h3>
-              <p className="text-slate-700">
-                Your data stays yours. We use encrypted storage, least-privilege
-                access, and auditability across the stack.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold text-slate-900">Partnership</h3>
-              <p className="text-slate-700">
-                We co-design playbooks with customers so DocGen fits your
-                workflows, not the other way around.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="rounded-2xl border bg-white p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="text-xl font-semibold text-slate-900">
-              Want to learn more?
-            </h3>
-            <p className="text-slate-700">
-              Talk with us about rollout, security reviews, and success plans.
+      <main className="flex-1 w-full">
+        {/* Hero Section */}
+        <section className="w-full py-20 px-6 bg-white border-b border-border">
+          <div className="max-w-5xl mx-auto space-y-6 text-center">
+            <Badge variant="outline" className="mx-auto w-fit border-chart-1 text-chart-1 bg-chart-1/5">
+              About SiteNotes
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground tracking-tight">
+              Surveying, <span className="text-chart-1">Simplified.</span>
+            </h1>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              SiteNotes empowers surveyors to turn site visits into signed schedules in minutes, not hours. 
+              We combine industry expertise with cutting-edge AI to automate the heavy lifting of report writing.
             </p>
           </div>
-          <Button variant="accent" asChild>
-            <a href="/auth/login?screen_hint=signup">Start free trial</a>
-          </Button>
-        </div>
+        </section>
+
+        {/* Features Grid */}
+        <section className="py-20 px-6 max-w-6xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-3xl font-bold text-foreground">Built for the Modern Surveyor</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Everything you need to streamline your workflow and deliver higher quality reports faster.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="border-t-4 border-t-chart-1 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-chart-1/10 flex items-center justify-center mb-4">
+                  <FileText className="h-6 w-6 text-chart-1" />
+                </div>
+                <CardTitle className="text-xl">Automated Reporting</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600">
+                  Instantly convert raw site notes, photos, and dictations into professional, formatted schedules of condition and dilapidations.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-t-4 border-t-chart-2 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-chart-2/10 flex items-center justify-center mb-4">
+                  <Bot className="h-6 w-6 text-chart-2" />
+                </div>
+                <CardTitle className="text-xl">AI Assistant</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600">
+                  Our context-aware AI understands building pathology. Chat with your documents to refine clauses, expand descriptions, or check for consistency.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-t-4 border-t-chart-3 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-chart-3/10 flex items-center justify-center mb-4">
+                  <Layers className="h-6 w-6 text-chart-3" />
+                </div>
+                <CardTitle className="text-xl">Job Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600">
+                  Keep track of all your instructions in one place. Monitor status from site visit to final sign-off with our intuitive dashboard.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="py-20 px-6 bg-white border-y border-border">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <Badge variant="secondary" className="mb-4">Workflow</Badge>
+              <h2 className="text-3xl font-bold text-foreground">How It Works</h2>
+            </div>
+
+            <div className="relative">
+              {/* Connecting Line (Desktop) */}
+              <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 z-0" />
+
+              <div className="grid md:grid-cols-4 gap-8 relative z-10">
+                {[
+                  {
+                    step: "01",
+                    title: "Upload",
+                    desc: "Upload your site notes and photos securely.",
+                    icon: <UploadCloud className="h-6 w-6 text-white" />,
+                    color: "bg-chart-1",
+                  },
+                  {
+                    step: "02",
+                    title: "Generate",
+                    desc: "AI processes data into a structured draft.",
+                    icon: <Wand2 className="h-6 w-6 text-white" />,
+                    color: "bg-chart-2",
+                  },
+                  {
+                    step: "03",
+                    title: "Refine",
+                    desc: "Chat with the doc to tweak details.",
+                    icon: <MessageSquareText className="h-6 w-6 text-white" />,
+                    color: "bg-chart-3",
+                  },
+                  {
+                    step: "04",
+                    title: "Deliver",
+                    desc: "Download the signed, professional PDF.",
+                    icon: <CheckCircle2 className="h-6 w-6 text-white" />,
+                    color: "bg-chart-4",
+                  },
+                ].map((item) => (
+                  <div key={item.step} className="flex flex-col items-center text-center group">
+                    <div className={`w-16 h-16 rounded-2xl ${item.color} flex items-center justify-center shadow-lg mb-6 transform group-hover:scale-110 transition-transform duration-300`}>
+                      {item.icon}
+                    </div>
+                    <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+                      <span className="text-slate-300 font-mono text-sm">{item.step}</span>
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600 text-sm leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-24 px-6">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-chart-1 to-blue-600 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to modernize your surveying practice?</h2>
+            <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
+              Join forward-thinking surveyors who are saving hours on every job with SiteNotes.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" variant="secondary" className="text-chart-1 font-semibold" asChild>
+                <Link href="/auth/login?screen_hint=signup">
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" asChild>
+                <Link href="/contact">
+                  Contact Sales
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

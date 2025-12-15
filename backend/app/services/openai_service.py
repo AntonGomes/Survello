@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import io
+import time
 from typing import Callable, Generator, Literal, Optional, Any
 
 from openai import OpenAI
 
+from app.core.logging import logger
 from app.models.models import ClientContainerBundle, UploadPayloadItem
 from app.utils.document_handler import PreparedBundle, to_file_obj
 
@@ -56,6 +58,8 @@ class OpenAIService:
         on_progress: Optional[Callable[[int, int], None]] = None,
     ) -> ClientContainerBundle:
         """Uploads all files in a bundle and creates a container."""
+        start_time = time.time()
+        logger.info(f"Starting bundle upload for job_id={job_id}")
 
         # Calculate total size for progress tracking
         total_bytes = len(bundle.template.data)
@@ -100,6 +104,9 @@ class OpenAIService:
         payload: list[UploadPayloadItem] = [
             UploadPayloadItem(type="input_image", file_id=fid) for fid in image_ids
         ] + [UploadPayloadItem(type="input_file", file_id=fid) for fid in document_ids]
+
+        duration = time.time() - start_time
+        logger.info(f"Bundle upload finished for job_id={job_id}. Duration: {duration:.2f}s")
 
         return ClientContainerBundle(
             container_id=container.id,

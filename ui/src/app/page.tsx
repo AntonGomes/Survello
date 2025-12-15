@@ -2,12 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   ArrowRight,
+  BarChart3,
+  Briefcase,
   CheckCircle2,
-  Clock3,
   FileText,
-  ShieldCheck,
+  Mail,
+  MessageSquare,
+  PieChart,
   Sparkles,
-  Users,
 } from "lucide-react";
 
 import { Header } from "@/components/header";
@@ -38,17 +40,14 @@ export default async function Home() {
       <main className="max-w-6xl mx-auto px-6 py-12 flex-1 w-full space-y-16">
         <section className="grid md:grid-cols-[1.1fr_0.9fr] items-center gap-10">
           <div className="space-y-6">
-            <Badge variant="secondary" className="gap-2 w-fit">
-              <Sparkles className="h-4 w-4 text-primary" />
-              Smarter document generation for teams
-            </Badge>
             <div className="space-y-4">
               <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
-                Ship polished documents without starting from scratch.
+                Property & Surveying, <br className="hidden sm:block" />
+                <span className="text-chart-1">reimagined for efficiency.</span>
               </h1>
               <p className="text-lg text-slate-700 max-w-2xl">
-                DocGen takes your templates, context files, and brand voice to
-                deliver ready-to-send proposals, reports, and briefs in minutes.
+                From site notes to signed schedules in minutes. <b>SiteNotes</b> combines
+                powerful document generation with intelligent job tracking.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -81,117 +80,153 @@ export default async function Home() {
                 <CheckCircle2 className="h-4 w-4 text-accent" />
                 SOC2-ready infrastructure
               </span>
-              <span className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-accent" />
-                Live collaboration coming soon
-              </span>
             </div>
           </div>
 
-          <Card className="shadow-xl border-border">
-            <CardHeader className="border-b">
+          {/* features section */}
+          <Card className="shadow-xl border-border bg-white/80 backdrop-blur-sm">
+            <CardHeader className="border-b pb-4">
               <CardTitle className="flex items-center gap-2 text-foreground">
-                <FileText className="h-5 w-5 text-primary" />
-                Generate a document
+                <Sparkles className="h-5 w-5 text-chart-1" />
+                Intelligent Surveying Platform
               </CardTitle>
               <CardDescription>
-                Upload your template and add optional context to see DocGen in
-                action.
+                The all-in-one platform for surveyors and property managers.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-lg bg-chart-3 text-[#0f172a] border border-border p-4 text-sm">
-                <p className="font-semibold">Try it now</p>
-                <p className="text-[#1f2937]">
-                  Sign up to unlock the builder and download results directly in
-                  your workspace.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="rounded-xl border bg-white p-4 space-y-2">
-                  <div className="flex items-center gap-2 font-semibold text-slate-900">
-                    <ShieldCheck className="h-4 w-4 text-accent" />
-                    Secure by design
+            <CardContent className="space-y-4 pt-5">
+              <div className="grid gap-3">
+                {/* Active Feature */}
+                <div className="flex gap-3 items-start p-3 rounded-lg border border-chart-1/20 bg-chart-1/5">
+                  <FileText className="h-5 w-5 text-chart-1 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold leading-none text-foreground">
+                        Technical Document Generation
+                      </p>
+                      <Badge
+                        variant="default"
+                        className="bg-chart-1 hover:bg-chart-1/90 text-[10px] h-5 px-1.5"
+                      >
+                        Live
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Instantly generate Schedules of Dilapidations, Condition,
+                      and Works from your site notes.
+                    </p>
                   </div>
-                  <p className="text-slate-600">
-                    Your uploads stay private with encrypted storage and scoped
-                    access.
-                  </p>
                 </div>
-                <div className="rounded-xl border bg-white p-4 space-y-2">
-                  <div className="flex items-center gap-2 font-semibold text-slate-900">
-                    <Clock3 className="h-4 w-4 text-primary" />
-                    Fast turnaround
+
+                {/* Coming Soon Features */}
+                {[
+                  {
+                    icon: MessageSquare,
+                    color: "text-chart-2",
+                    title: "Context-Aware AI Chat",
+                    desc: "Chat with an LLM that knows every detail of your specific job or portfolio.",
+                  },
+                  {
+                    icon: Briefcase,
+                    color: "text-chart-3",
+                    title: "Unified Job Tracking",
+                    desc: "Centralize files, images, and email threads for complete project context.",
+                  },
+                  {
+                    icon: PieChart,
+                    color: "text-chart-4",
+                    title: "Operations & Analytics",
+                    desc: "Integrated time tracking, billing, and business intelligence dashboards.",
+                  },
+                ].map((feature) => (
+                  <div
+                    key={feature.title}
+                    className="flex gap-3 items-start p-3 rounded-lg border bg-white/50 opacity-75 grayscale-[0.3]"
+                  >
+                    <feature.icon
+                      className={`h-5 w-5 ${feature.color} shrink-0 mt-0.5`}
+                    />
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium leading-none">
+                          {feature.title}
+                        </p>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] h-5 px-1.5 text-muted-foreground border-slate-300"
+                        >
+                          Coming Soon
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {feature.desc}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-slate-600">
-                    Docs are generated in seconds with streaming status updates.
-                  </p>
-                </div>
-              </div>
-              <div className="rounded-xl border bg-chart-3 text-[#0f172a] p-5 space-y-3 shadow-sm">
-                <div className="flex items-center gap-2 text-sm uppercase tracking-[0.08em] text-[#334155]">
-                  <Users className="h-4 w-4" />
-                  For modern GTM teams
-                </div>
-                <p className="text-lg font-semibold leading-snug">
-                  Operations, sales, and marketing teams collaborate on one
-                  source of truth for outbound.
-                </p>
-                <p className="text-sm text-white/80">
-                  Roles, approvals, and content locking keep everything on
-                  brand.
-                </p>
+                ))}
               </div>
             </CardContent>
           </Card>
         </section>
 
-        <section className="space-y-6" id="features">
-          <div className="space-y-2">
-            <Badge variant="outline">Why teams choose DocGen</Badge>
-            <h2 className="text-3xl font-bold text-foreground">
-              Built for reliable, on-brand documents.
+        <section className="space-y-8" id="features">
+          <div className="space-y-4">
+            <Badge variant="outline" className="border-chart-1 text-chart-1">
+              Why SiteNotes?
+            </Badge>
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">
+              Built for the realities of the surveying sector.
             </h2>
-            <p className="text-slate-700 max-w-3xl">
-              Automate proposal packages, research summaries, onboarding decks,
-              and any other repeatable workflow with approvals baked in.
+            <p className="text-slate-600 max-w-3xl text-lg leading-relaxed">
+              Stop wrestling with Word documents and scattered emails. SiteNotes
+              brings your technical reporting, communication, and job management
+              into one intelligent workspace.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
-                title: "Template-aware",
+                title: "Automated Schedules",
                 description:
-                  "Bring your own templates and let DocGen fill in the details with contextual data.",
-                icon: <FileText className="h-5 w-5 text-primary" />,
+                  "Upload site photos and rough notes. SiteNotes formats them into industry-standard Schedules of Dilapidations or Condition instantly.",
+                icon: <FileText className="h-5 w-5 text-chart-1" />,
               },
               {
-                title: "Governed access",
+                title: "AI Site Intelligence",
                 description:
-                  "Granular permissions keep sensitive work limited to the right teams.",
-                icon: <ShieldCheck className="h-5 w-5 text-accent" />,
+                  "Don't just search, ask. 'Show me all roof defects from last week.' Our LLM understands your specific property context.",
+                icon: <MessageSquare className="h-5 w-5 text-chart-2" />,
               },
               {
-                title: "Human-in-the-loop",
+                title: "Unified Context",
                 description:
-                  "Track every generation with streaming updates, versioning, and review checkpoints.",
-                icon: <Clock3 className="h-5 w-5 text-primary" />,
+                  "Connect your email client to automatically file communications against specific jobs. Nothing gets lost.",
+                icon: <Mail className="h-5 w-5 text-chart-3" />,
+              },
+              {
+                title: "Commercial Ops",
+                description:
+                  "Track billable hours per job, generate invoices, and visualize portfolio performance with built-in analytics.",
+                icon: <BarChart3 className="h-5 w-5 text-chart-4" />,
               },
             ].map((feature) => (
-              <Card key={feature.title}>
+              <Card
+                key={feature.title}
+                className="border-border/60 shadow-sm hover:shadow-md transition-shadow"
+              >
                 <CardHeader>
-                  <div className="flex items-center gap-3">
+                  <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
                     {feature.icon}
-                    <CardTitle className="text-lg">{feature.title}</CardTitle>
                   </div>
-                  <CardDescription>{feature.description}</CardDescription>
+                  <CardTitle className="text-lg">{feature.title}</CardTitle>
+                  <CardDescription className="leading-relaxed mt-2">
+                    {feature.description}
+                  </CardDescription>
                 </CardHeader>
               </Card>
             ))}
           </div>
         </section>
-
-        <HowItWorks />
 
         <section className="rounded-3xl border border-slate-200 bg-white shadow-sm p-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2">
