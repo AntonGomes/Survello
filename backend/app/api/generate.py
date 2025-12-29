@@ -146,4 +146,15 @@ def get_download_url(
         key=job.output_document_url,
     )
 
-    return DownloadGenDocUrlResponse(download_url=download_url)
+    if not job.preview_pdf_document_url:
+        raise HTTPException(status_code=404, detail="Preview document not found")
+
+    preview_url = storage.generate_presigned_url(
+        operation="get_object",
+        key=job.preview_pdf_document_url,
+        content_type="application/pdf",
+        inline=True,
+        filename=f"preview-{job.id}.pdf"
+    )
+
+    return DownloadGenDocUrlResponse(download_url=download_url, preview_url=preview_url)

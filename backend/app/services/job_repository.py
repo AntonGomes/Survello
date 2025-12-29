@@ -96,7 +96,25 @@ class JobRepository:
 
         job.output_document_id = output_doc.id
         job.output_document_url = storage_key
-        job.status = JobStatus.completed
 
         self.db.commit()
         return output_doc
+
+    def create_pdf_preview(
+        self, job: Job, iteration: int, storage_key: str
+    ) -> Document:
+        preview_doc = Document(
+            id=uuid.uuid4(),
+            org_id=job.org_id,
+            owner_user_id=job.user_id,
+            name=f"preview_{str(iteration)}_{job.id}",
+            file_url=storage_key,
+            mime_type="application/pdf",
+        )
+        self.db.add(preview_doc)
+
+        job.preview_pdf_document_id = preview_doc.id
+        job.preview_pdf_document_url = storage_key
+
+        self.db.commit()
+        return preview_doc

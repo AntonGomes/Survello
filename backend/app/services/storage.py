@@ -27,17 +27,31 @@ class StorageService:
         key: str,
         content_type: str | None = None,
         expiration: int = 3600,
+        inline: bool = False,
+        filename: str | None = None,
     ) -> str:
-        """Generates a presigned URL for uploading or downloading."""
-        params = {
+        params: dict[str, object] = {
             "Bucket": self.s3.bucket_name,
             "Key": key,
         }
-        if content_type:
-            params["ContentType"] = content_type
+
+        if operation == "put_object":
+            # This sets metadata on the uploaded object (good to do)
+            if content_type:
+                params["ContentType"] = content_type
+            if inline:
+                params["ContentDisposition"] = f'inline; filename="{filename or key.split("/")[-1]}"'
+
+        elif operation == "get_object":
+            # These override response headers when viewing/downloading
+            if content_type:
+                params["ResponseContentType"] = content_type
+            if inline:
+                params["ResponseContentDisposition"] = f'inline; filename="{filename or key.split("/")[-1]}"'
 
         return self.s3.client.generate_presigned_url(
             ClientMethod=operation,
             Params=params,
             ExpiresIn=expiration,
         )
+        

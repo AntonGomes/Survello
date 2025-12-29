@@ -47,6 +47,7 @@ class CreateJobResponse(BaseModel):
 
 class DownloadGenDocUrlResponse(BaseModel):
     download_url: str
+    preview_url: str
 
 
 class JobStatusResponse(BaseModel):

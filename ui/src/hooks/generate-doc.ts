@@ -19,6 +19,7 @@ export function useGenerateDoc() {
   const [updates, setUpdates] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -29,6 +30,7 @@ export function useGenerateDoc() {
     setError(null);
     setStatus("idle");
     setDownloadUrl(null);
+    setPreviewUrl(null);
     setUploadProgress(0);
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
@@ -161,8 +163,9 @@ export function useGenerateDoc() {
             
             if (data.status === "completed") {
                const dlRes = await fetch(`/api/generate/download_url/${newJobId}`);
-               const { download_url } = await dlRes.json();
+               const { download_url, preview_url } = await dlRes.json();
                setDownloadUrl(download_url);
+               setPreviewUrl(preview_url);
                setStatus("completed");
                return true; // stop polling
             } else if (data.status === "failed") {
@@ -226,6 +229,7 @@ export function useGenerateDoc() {
       status,
       statusMessage,
       downloadUrl,
+      previewUrl,
       uploadProgress,
       isStreaming: status === "streaming",
       isCompleted: status === "completed",

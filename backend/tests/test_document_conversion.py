@@ -1,3 +1,6 @@
+import shutil
+import platform
+
 import pytest
 from pathlib import Path
 from app.utils.document_handler import _convert_docx_bytes, _convert_xlsx_bytes
@@ -7,20 +10,37 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 OUTPUT_DIR = Path(__file__).parent / "output"
 
 
+def _libreoffice_available() -> bool:
+    """Check if LibreOffice is available on this system."""
+    if shutil.which("soffice"):
+        return True
+    # On macOS, check the standard installation path
+    if platform.system() == "Darwin":
+        return Path("/Applications/LibreOffice.app/Contents/MacOS/soffice").exists()
+    return False
+
+
+# Skip marker for tests requiring LibreOffice
+requires_libreoffice = pytest.mark.skipif(
+    not _libreoffice_available(),
+    reason="LibreOffice (soffice) not installed",
+)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def ensure_output_dir():
     """Ensure the output directory exists."""
     OUTPUT_DIR.mkdir(exist_ok=True)
 
 
+@requires_libreoffice
 def test_convert_docx_to_pdf(request):
     """Test converting a DOCX file to PDF using LibreOffice."""
-    docx_path = FIXTURES_DIR / "example_context.docx"
+    docx_path = FIXTURES_DIR / "docx_inputs" / "example_template.docx"
 
-    # Create a dummy docx if it doesn't exist for testing purposes
     if not docx_path.exists():
         pytest.skip(
-            f"Fixture {docx_path} not found. Please add a sample.docx to backend/tests/fixtures."
+            f"Fixture {docx_path} not found. Please add example_template.docx to backend/tests/fixtures/docx_inputs/."
         )
 
     docx_data = docx_path.read_bytes()
@@ -37,14 +57,14 @@ def test_convert_docx_to_pdf(request):
         print(f"\nSaved converted PDF to: {output_path}")
 
 
+@requires_libreoffice
 def test_convert_xlsx_to_pdf(request):
     """Test converting an XLSX file to PDF using LibreOffice."""
-    xlsx_path = FIXTURES_DIR / "example_template.xlsx"
+    xlsx_path = FIXTURES_DIR / "xlsx_inputs" / "example_template.xlsx"
 
-    # Create a dummy xlsx if it doesn't exist for testing purposes
     if not xlsx_path.exists():
         pytest.skip(
-            f"Fixture {xlsx_path} not found. Please add a example_template.xlsx to backend/tests/fixtures."
+            f"Fixture {xlsx_path} not found. Please add example_template.xlsx to backend/tests/fixtures/xlsx_inputs/."
         )
 
     xlsx_data = xlsx_path.read_bytes()

@@ -8,3 +8,9 @@ def pytest_addoption(parser):
         default=False,
         help="Save generated files to tests/output for inspection",
     )
+    parser.addoption(
+        "--file-type",
+        action="store",
+        default="docx",
+        help="Specify the file type for document generation tests (docx or xlsx)",
+    )

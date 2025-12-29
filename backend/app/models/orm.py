@@ -281,6 +281,18 @@ class Job(Base):
         doc="Version of the template prompt used when this job ran",
     )
 
+    preview_pdf_document_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("documents.id"),
+        nullable=True,
+    )
+    
+    preview_pdf_document_url: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+        doc="Storage key/URL for the preview PDF document",
+    )
+
     output_document_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("documents.id"),
@@ -308,6 +320,10 @@ class Job(Base):
         server_default="[]",
         nullable=False,
         doc="List of log messages for the user",
+    )
+
+    preview_pdf: Mapped[Document | None] = relationship(
+        foreign_keys=[preview_pdf_document_id]
     )
 
     output_document: Mapped[Document | None] = relationship(

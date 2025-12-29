@@ -3,12 +3,13 @@ from __future__ import annotations
 from threading import Thread
 from queue import SimpleQueue
 import time
+from pathlib import Path
 
 from app.core.logging import logger
 from app.models.orm import JobStatus
 from app.prompts.dilaps_input import DILAPS_INPUT
-from app.prompts.system import SYSTEM_PROMPT
-from app.utils.document_handler import prepare, ConversionError
+from app.prompts.doc_gen_prompt import DOC_GEN_SYSTEM_PROMPT_XLSX, DOC_GEN_SYSTEM_PROMPT_DOCX
+from app.utils.document_handler import prepare, convert_to_pdf, ConversionError
 from app.utils.files import extract_comments
 
 # Imported from our new service structure
@@ -16,6 +17,7 @@ from app.services.job_repository import JobRepository
 from app.services.storage import StorageService
 from app.services.openai_service import OpenAIService
 
+GPT_MODEL = "gpt-5.2-2025-12-11"
 
 class ProcessingOrchestrator:
     """
@@ -150,7 +152,6 @@ class ProcessingOrchestrator:
                     return
                 if isinstance(msg, (int, float)):
                     # Map 0-100% of upload to 66-100% of total job
-                    # progress = 66 + (msg / 100 * 34)
                     p = 66 + int((msg / 100) * 34)
                     # Cap at 99 until we are truly done with everything before generation
                     p = min(p, 99)
@@ -167,15 +168,18 @@ class ProcessingOrchestrator:
 
             client_container_bundle = upload_result_holder["bundle"]
 
-            # 4. Stream Model Response
+            # 4. Stream Model Responses
             logger.info(f"Stream model response for job_id={self.job_id}")
-            self.job_repo.append_log(self.job_id, "Generating document with OpenAI...")
+
+            template_file_type = Path(job_file_bundle.template.name).suffix.lower() 
+            DOC_GEN_SYSTEM_PROMPT = DOC_GEN_SYSTEM_PROMPT_XLSX if template_file_type == ".xlsx" else DOC_GEN_SYSTEM_PROMPT_DOCX
             try:
                 gen_start = time.time()
                 stream = self.openai_service.stream_model_response(
                     container_bundle=client_container_bundle,
-                    system_prompt=SYSTEM_PROMPT,
-                    user_input=DILAPS_INPUT,
+                    system_prompt=DOC_GEN_SYSTEM_PROMPT.format(template_string=job_file_bundle.template_string),
+                    user_input=f"The template file is called {client_container_bundle.template_container_file_id}. ",
+                    model_name=GPT_MODEL,
                 )
 
                 token_est = 0
@@ -207,8 +211,8 @@ class ProcessingOrchestrator:
                 self.job_repo.update_status(self.job_id, JobStatus.failed)
                 return
 
-            # 5. Fetch Final File & Persist
             try:
+                # 5.1 Fetch Final File & Persist
                 logger.info(f"Fetching final file for job_id={self.job_id}")
                 self.job_repo.append_log(self.job_id, "Finalizing document...")
 
@@ -217,13 +221,26 @@ class ProcessingOrchestrator:
                     client_container_bundle.template_container_file_id,
                 )
 
-                storage_key = f"outputs/{self.job_id}/{job_file_bundle.template.name}"
+                storage_key = f"outputs/{self.job_id}/generated_document_0.{template_file_type}"
                 self.storage.upload_file(storage_key, file_data)
 
                 self.job_repo.create_output_document(
                     job=job, name=job_file_bundle.template.name, storage_key=storage_key
                 )
 
+                # 5.2 Create pdf preview and save
+                logger.info(f"Creating preview for job_id={self.job_id}")
+                self.job_repo.append_log(self.job_id, "Creating document preview...")
+
+                pdf_data = convert_to_pdf(job_file_bundle.template.name, file_data)
+                pdf_preview_storage_key = f"outputs/{self.job_id}/preview.pdf"
+                self.storage.upload_file(pdf_preview_storage_key, pdf_data)
+
+                self.job_repo.create_pdf_preview(
+                    job=job, iteration=0, storage_key=pdf_preview_storage_key
+                )
+
+                # set jon as completed
                 self.job_repo.append_log(self.job_id, "Job completed successfully")
                 self.job_repo.update_status(self.job_id, JobStatus.completed)
                 self.job_repo.update_progress(self.job_id, 100)
