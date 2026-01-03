@@ -1,4 +1,5 @@
 from app.prompts.dilaps_input import DILAPS_INPUT
+
 DOC_ANALYSIS_SYSTEM_PROMPT = f"""
 You are an expert document analyst and prompt engineer.
 

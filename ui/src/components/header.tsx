@@ -42,15 +42,15 @@ export function Header({ authenticated = false }: HeaderProps) {
           {!authenticated ? (
             <>
               <Button variant="ghost" asChild>
-                <a href="/auth/login">Log in</a>
+                <Link href="/login">Log in</Link>
               </Button>
               <Button asChild>
-                <a href="/auth/login?screen_hint=signup">Sign up</a>
+                <Link href="/register">Sign up</Link>
               </Button>
             </>
           ) : (
-            <Button variant="outline" asChild>
-              <a href="/auth/logout">Log out</a>
+            <Button asChild>
+              <Link href="/app">Dashboard</Link>
             </Button>
           )}
         </div>

@@ -3,12 +3,12 @@ from __future__ import annotations
 from fastapi import FastAPI
 from sqlalchemy import text, Engine
 from sqlalchemy.exc import OperationalError
-from fastapi.middleware.cors import CORSMiddleware 
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.users import router as users_router
-from app.api.generate import (
-    router as generate_router,
-)  # Assuming generate.py was renamed routes.py
+from app.api.generate import router as generate_router
+from app.api.store import router as store_router
+
 from app.core.logging import logger
 from app.core.deps import get_database
 
@@ -23,7 +23,7 @@ def check_db_connection(engine: Engine) -> None:
         logger.error("Database connection failed: %s", e)
         # Re-raise the exception to prevent the application from starting
         raise
-    except Exception as e:
+    except Exception:
         logger.exception("An unexpected error occurred during database check.")
         raise
 
@@ -39,16 +39,17 @@ def create_app() -> FastAPI:
     # 1. Include Routers
     app.include_router(users_router, tags=["Users"])
     app.include_router(generate_router, tags=["Generation"])
+    app.include_router(store_router, tags=["Storage"])
 
     origins = [
-        "http://localhost:3000",           # For local development
-        "https://docgen.vercel.app",       # Your Vercel production domain
-        "https://docgen-git-main.vercel.app" # Your Vercel preview URLs (optional)
+        "http://localhost:3000",  # For local development
+        "https://docgen.vercel.app",  # Your Vercel production domain
+        "https://docgen-git-main.vercel.app",  # Your Vercel preview URLs (optional)
     ]
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins, # STRICT: Only allow these domains
+        allow_origins=origins,  # STRICT: Only allow these domains
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

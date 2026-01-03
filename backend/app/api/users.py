@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import uuid
 
 from fastapi import APIRouter, Response
 
 from app.api.deps import UserRepoDep, CurrentExternalIdDep
-from app.models.request_models import UserUpsertRequest, UserUpsertResponse
+from app.models.request_models import UserUpsertRequest
 
 
 router = APIRouter()
@@ -24,4 +23,3 @@ def sync_user(
     if not user_repo.get_user_id_by_external_id(external_id):
         user_repo.create_user(external_id=external_id, request=request)
     return Response(status_code=200)
-

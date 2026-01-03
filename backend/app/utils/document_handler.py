@@ -3,13 +3,13 @@ from __future__ import annotations
 import io
 import subprocess
 import tempfile
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 import json
+from contextgem import DocxConverter
 from openpyxl import load_workbook
 
-# import pypandoc  <-- Removed dependency
+from app.models.models import FileRead
+from app.models.orm import ArtefactType
 
 
 class ConversionError(Exception):
@@ -21,54 +21,31 @@ DOC_EXTS = {".pdf", ".docx", ".xlsx"}
 OPEN_XML_EXTS = {".docx", ".xlsx"}
 
 
-
-@dataclass
-class PreparedFile:
-    name: str
-    data: bytes
-    mime_type: str
-
-
-@dataclass
-class PreparedBundle:
-    template: PreparedFile
-    template_string: str
-    images: list[PreparedFile]
-    documents: list[PreparedFile]  # PDFs only
-
-
-def _is_image(name: str) -> bool:
-    return Path(name).suffix.lower() in IMAGE_EXTS
-
-
-def _is_document(name: str) -> bool:
-    return Path(name).suffix.lower() in DOC_EXTS
-
-
-def _is_open_xml(name: str) -> bool:
-    return Path(name).suffix.lower() in OPEN_XML_EXTS
-
-
-def _is_pdf(name: str) -> bool:
-    return Path(name).suffix.lower() == ".pdf"
+def file_type_to_mime_type(file_type: ArtefactType) -> str:
+    if file_type == ArtefactType.DOCX:
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    elif file_type == ArtefactType.XLSX:
+        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    else:
+        raise ValueError(f"Unsupported ArtefactType: {file_type}")
 
 
 def _get_soffice_path() -> str:
     """Get the path to the soffice executable, handling macOS installation location."""
     import shutil
     import platform
-    
+
     # Check if soffice is in PATH
     soffice = shutil.which("soffice")
     if soffice:
         return soffice
-    
+
     # On macOS, check the standard LibreOffice installation path
     if platform.system() == "Darwin":
         macos_path = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
         if Path(macos_path).exists():
             return macos_path
-    
+
     # Fall back to "soffice" and let subprocess raise FileNotFoundError
     return "soffice"
 
@@ -76,11 +53,12 @@ def _get_soffice_path() -> str:
 def _run_libreoffice_conversion(input_path: Path, output_dir: Path) -> bytes:
     """Common LibreOffice conversion logic for converting documents to PDF."""
     soffice_path = _get_soffice_path()
-    
+
     # Use a unique user profile to avoid conflicts with running LibreOffice instances
     import uuid
+
     user_installation = output_dir / f".libreoffice_profile_{uuid.uuid4().hex[:8]}"
-    
+
     try:
         result = subprocess.run(
             [
@@ -142,29 +120,6 @@ def _convert_xlsx_bytes(data: bytes) -> bytes:
         return _run_libreoffice_conversion(in_path, td_path)
 
 
-def _ensure_pdf(name: str, data: bytes) -> PreparedFile:
-    suffix = Path(name).suffix.lower()
-    if suffix == ".pdf":
-        return PreparedFile(name=name, data=data, mime_type="application/pdf")
-    if suffix == ".docx":
-        pdf_bytes = _convert_docx_bytes(data)
-        return PreparedFile(
-            name=Path(name).with_suffix(".pdf").name,
-            data=pdf_bytes,
-            mime_type="application/pdf",
-        )
-    if suffix == ".xlsx":
-        pdf_bytes = _convert_xlsx_bytes(data)
-        return PreparedFile(
-            name=Path(name).with_suffix(".pdf").name,
-            data=pdf_bytes,
-            mime_type="application/pdf",
-        )
-    raise ConversionError(f"Unsupported file extension for PDF conversion: {name}")
-
-
-from contextgem import DocxConverter
-
 def _docx_to_md(data) -> str:
     """Convert a DOCX file to markdown or raw text using ContextGem's DocxConverter."""
     with tempfile.TemporaryDirectory() as td:
@@ -190,81 +145,58 @@ def _xlsx_to_json_str(data) -> str:
         for name in wb.sheetnames:
             # Fetch up to 101 rows (1 for header + 100 for data) in one go
             data = list(wb[name].iter_rows(max_row=101, values_only=True))
-            
+
             result[name] = {
                 "columns": list(data[0]) if data else [],
-                "rows": [list(row) for row in data[1:]] # The next 100 rows
+                "rows": [list(row) for row in data[1:]],  # The next 100 rows
             }
-        
+
         # default=str ensures dates and other Excel objects don't break the JSON
         return json.dumps(result, indent=2, default=str)
 
-def convert_to_pdf(name: str, data: bytes) -> bytes:
+
+def convert_to_pdf(file: FileRead) -> FileRead:
     """Convert a document (DOCX or XLSX) to PDF bytes."""
-    suffix = Path(name).suffix.lower()
-    if suffix == ".docx":
-        return _convert_docx_bytes(data)
-    if suffix == ".xlsx":
-        return _convert_xlsx_bytes(data)
-    raise ConversionError(f"Unsupported file extension for PDF conversion: {name}")
+    if (
+        file.mime_type
+        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ):
+        file.data = _convert_docx_bytes(file.data)
+    elif (
+        file.mime_type
+        == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ):
+        file.data = _convert_xlsx_bytes(file.data)
+    else:
+        raise ConversionError(
+            f"Unsupported file extension for PDF conversion: {file.mime_type}"
+        )
+    file.mime_type = "application/pdf"
+    file.file_name = Path(file.file_name).with_suffix(".pdf").name
+    file.storage_key = Path(file.storage_key).with_suffix(".pdf").as_posix()
+    return file
 
 
-def prepare(
-    template: tuple[str, bytes],
-    context_files: list[tuple[str, bytes]],
-    on_log: Callable[[str], None] | None = None,
-    on_progress: Callable[[int, int], None] | None = None,
-) -> PreparedBundle:
-    """Prepare template/context files in-memory; converts docs to PDF bytes."""
-    template_name, template_bytes = template
-
-    images: list[PreparedFile] = []
-    documents: list[PreparedFile] = []
-
-    total_files = len(context_files)
-
-    # Initial progress
-    if on_progress:
-        on_progress(0, total_files)
-
-    for i, (name, data) in enumerate(context_files):
-        if on_log:
-            on_log(f"Processing file {i + 1}/{total_files}: {name}")
-
-        if _is_image(name):
-            images.append(
-                PreparedFile(name=name, data=data, mime_type="application/octet-stream")
-            )
-        elif _is_document(name):
-            if on_log:
-                on_log(f"Converting {name} to PDF...")
-            documents.append(_ensure_pdf(name, data))
-
-        # Update progress after each file
-        if on_progress:
-            on_progress(i + 1, total_files)
-    
-    if Path(template_name).suffix.lower() == ".docx":
-        if on_log:
-            on_log(f"Converting template {template_name} to markdown...")
-        template_string = _docx_to_md(template_bytes)
-    elif Path(template_name).suffix.lower() == ".xlsx":
-        template_string = _xlsx_to_json_str(template_bytes)
-
-    return PreparedBundle(
-        template=PreparedFile(
-            name=template_name,
-            data=template_bytes,
-            mime_type="application/octet-stream",
-        ),
-        template_string=template_string,
-        images=images,
-        documents=documents,
-    )
+def get_template_summary(file: FileRead) -> str:
+    """Convert a DOCX template to markdown summary string."""
+    if (
+        file.mime_type
+        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ):
+        return _docx_to_md(file.data)
+    elif (
+        file.mime_type
+        == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ):
+        return _xlsx_to_json_str(file.data)
+    else:
+        raise ConversionError(
+            f"Unsupported file extension for template conversion: {file.mime_type}"
+        )
 
 
-def to_file_obj(prepared_file: PreparedFile) -> io.BytesIO:
+def to_file_obj(file: FileRead) -> io.BytesIO:
     """Return a BytesIO with name set for OpenAI uploads."""
-    bio = io.BytesIO(prepared_file.data)
-    bio.name = prepared_file.name
+    bio = io.BytesIO(file.data)
+    bio.name = file.file_name
     return bio

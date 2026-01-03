@@ -16,11 +16,7 @@ class S3Client:
         secret_key: str | None = None,
     ):
         # Configure timeouts to prevent hanging indefinitely
-        config = Config(
-            connect_timeout=5,
-            read_timeout=60,
-            retries={"max_attempts": 2}
-        )
+        config = Config(connect_timeout=5, read_timeout=60, retries={"max_attempts": 2})
 
         # If keys are provided (Local Dev), use them.
         # If not (App Runner with IAM Role), pass None so boto3 uses the role.

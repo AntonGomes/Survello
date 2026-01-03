@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
@@ -74,7 +73,9 @@ def _occupied_column_header_names(wb: openpyxl.Workbook) -> set[str]:
     return names
 
 
-def _non_empty_cell_map(wb: openpyxl.Workbook, only_sheets: set[str]) -> Dict[Tuple[str, int, int], Any]:
+def _non_empty_cell_map(
+    wb: openpyxl.Workbook, only_sheets: set[str]
+) -> Dict[Tuple[str, int, int], Any]:
     """
     Map non-empty cells to their normalised value, restricted to selected sheet names.
     Key: (sheet_name, row, col)
@@ -120,7 +121,11 @@ def compare_spreadsheets(path_a: Path, path_b: Path) -> dict:
 
     worksheets_identical_count = len(sheets_inter)
     worksheets_union_count = len(sheets_union)
-    worksheets_similarity = (worksheets_identical_count / worksheets_union_count) if worksheets_union_count else 1.0
+    worksheets_similarity = (
+        (worksheets_identical_count / worksheets_union_count)
+        if worksheets_union_count
+        else 1.0
+    )
 
     # 1) Identical column names in occupied columns
     cols_a = _occupied_column_header_names(wb_a)
@@ -130,7 +135,11 @@ def compare_spreadsheets(path_a: Path, path_b: Path) -> dict:
 
     identical_column_names_count = len(cols_inter)
     occupied_column_names_union_count = len(cols_union)
-    column_names_similarity = (identical_column_names_count / occupied_column_names_union_count) if occupied_column_names_union_count else 1.0
+    column_names_similarity = (
+        (identical_column_names_count / occupied_column_names_union_count)
+        if occupied_column_names_union_count
+        else 1.0
+    )
 
     # 2) Identical non-empty cells (restricted to common sheet names)
     cells_a = _non_empty_cell_map(wb_a, only_sheets=sheets_inter)
@@ -143,10 +152,16 @@ def compare_spreadsheets(path_a: Path, path_b: Path) -> dict:
             identical_non_empty_cells_count += 1
 
     non_empty_cells_union_count = len(keys_union)
-    non_empty_cells_similarity = (identical_non_empty_cells_count / non_empty_cells_union_count) if non_empty_cells_union_count else 1.0
+    non_empty_cells_similarity = (
+        (identical_non_empty_cells_count / non_empty_cells_union_count)
+        if non_empty_cells_union_count
+        else 1.0
+    )
 
     # Average similarity across the 3 metrics
-    average_similarity = (column_names_similarity + non_empty_cells_similarity + worksheets_similarity) / 3.0
+    average_similarity = (
+        column_names_similarity + non_empty_cells_similarity + worksheets_similarity
+    ) / 3.0
 
     return {
         "paths": {"a": str(path_a), "b": str(path_b)},
@@ -169,6 +184,7 @@ def compare_spreadsheets(path_a: Path, path_b: Path) -> dict:
         "average_similarity": average_similarity,
     }
 
+
 def excel_to_json(path: Path) -> str:
     # read_only=True is essential for speed; data_only=False preserves formulas
     wb = load_workbook(path, data_only=False, read_only=True)
@@ -177,11 +193,11 @@ def excel_to_json(path: Path) -> str:
     for name in wb.sheetnames:
         # Fetch up to 101 rows (1 for header + 100 for data) in one go
         data = list(wb[name].iter_rows(max_row=101, values_only=True))
-        
+
         result[name] = {
             "columns": list(data[0]) if data else [],
-            "rows": [list(row) for row in data[1:]] # The next 100 rows
+            "rows": [list(row) for row in data[1:]],  # The next 100 rows
         }
-    
+
     # default=str ensures dates and other Excel objects don't break the JSON
     return json.dumps(result, indent=2, default=str)

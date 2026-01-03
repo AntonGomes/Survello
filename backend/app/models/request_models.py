@@ -1,8 +1,33 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
+
+from app.models.models import FileRead
+
+
+# -----------------------------------------------------------------------------
+# Files
+# -----------------------------------------------------------------------------
+
+
+class GetPresignPutsRequest(BaseModel):
+    files: List[FileRead]
+
+
+class PresignedPut(BaseModel):
+    file: FileRead
+    put_url: str
+
+
+class GetPresignPutsResponse(BaseModel):
+    puts: List[PresignedPut]
+
+
+# -----------------------------------------------------------------------------
+# User
+# -----------------------------------------------------------------------------
 
 
 class UserUpsertRequest(BaseModel):
@@ -14,45 +39,28 @@ class UserUpsertResponse(BaseModel):
     id: str
 
 
-class PresignFileRequest(BaseModel):
-    name: str
-    content_type: str
-    kind: str  # e.g. "template" or "context"
+# -----------------------------------------------------------------------------
+# Run
+# -----------------------------------------------------------------------------
 
 
-class PresignUploadsRequest(BaseModel):
-    files: List[PresignFileRequest]
+class StartRunRequest(BaseModel):
+    template: FileRead
+    context_files: List[FileRead] = []
+    job_id: Optional[int] = None
 
 
-class PresignedUpload(BaseModel):
-    name: str
-    content_type: str
-    kind: str
-    key: str
-    upload_url: str
+class StartRunResponse(BaseModel):
+    run_id: int
 
 
-class PresignUploadsResponse(BaseModel):
-    uploads: List[PresignedUpload]
+class RunStatusResponse(BaseModel):
+    run_id: int
+    status: str
+    upload_progress: int
+    model_responses: List[str]
 
 
-class CreateJobRequest(BaseModel):
-    template_file_url: str
-    context_file_urls: List[str]
-
-
-class CreateJobResponse(BaseModel):
-    id: str
-
-
-class DownloadGenDocUrlResponse(BaseModel):
+class LatestArtefactResponse(BaseModel):
     download_url: str
     preview_url: str
-
-
-class JobStatusResponse(BaseModel):
-    id: str
-    status: str
-    progress: int
-    logs: List[str]
-    output_document_url: str | None = None

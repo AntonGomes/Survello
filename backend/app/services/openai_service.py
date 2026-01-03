@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import io
-import time
-from typing import Callable, Generator, Literal, Optional, Any
+from typing import Generator, Literal, Any
 
 from openai import OpenAI
 
-from app.core.logging import logger
-from app.models.models import ClientContainerBundle, UploadPayloadItem
-from app.utils.document_handler import PreparedBundle, to_file_obj
+from app.models.models import (
+    LLMClientContainerBundle,
+    UploadPayloadItem,
+    FileRead,
+)
+from app.utils.document_handler import to_file_obj
 
 
 class UploadError(Exception):
@@ -51,72 +53,35 @@ class OpenAIService:
 
     # ---- Public API -------------------------------------------------------
 
-    def upload_bundle(
+    def upload_template(
         self,
-        job_id: str,
-        bundle: PreparedBundle,
-        on_progress: Optional[Callable[[int, int], None]] = None,
-    ) -> ClientContainerBundle:
+        run_id: str,
+        template_with_bytes: FileRead,
+    ) -> LLMClientContainerBundle:
         """Uploads all files in a bundle and creates a container."""
-        start_time = time.time()
-        logger.info(f"Starting bundle upload for job_id={job_id}")
-
-        # Calculate total size for progress tracking
-        total_bytes = len(bundle.template.data)
-        total_bytes += sum(len(p.data) for p in bundle.images)
-        total_bytes += sum(len(p.data) for p in bundle.documents)
-        uploaded = 0
-
-        def bump(delta: int) -> None:
-            nonlocal uploaded
-            uploaded += delta
-            if on_progress and total_bytes:
-                on_progress(uploaded, total_bytes)
 
         # 1. Upload Template
         template_id = self._upload_fileobj(
-            to_file_obj(bundle.template), purpose="user_data"
+            to_file_obj(template_with_bytes), purpose="user_data"
         )
-        bump(len(bundle.template.data))
 
         # 2. Create Container
-        container = self.client.containers.create(name=job_id)
+        container = self.client.containers.create(name=run_id)
 
         # 3. Attach Template
         template_container_file_id = self._attach_file_to_container(
             container.id, template_id
         )
 
-        # 4. Upload & Collect IDs for Images/Docs
-        image_ids = []
-        for img in bundle.images:
-            image_ids.append(self._upload_fileobj(to_file_obj(img), purpose="vision"))
-            bump(len(img.data))
-
-        document_ids = []
-        for doc in bundle.documents:
-            document_ids.append(
-                self._upload_fileobj(to_file_obj(doc), purpose="user_data")
-            )
-            bump(len(doc.data))
-
-        # 5. Construct Payload
-        payload: list[UploadPayloadItem] = [
-            UploadPayloadItem(type="input_image", file_id=fid) for fid in image_ids
-        ] + [UploadPayloadItem(type="input_file", file_id=fid) for fid in document_ids]
-
-        duration = time.time() - start_time
-        logger.info(f"Bundle upload finished for job_id={job_id}. Duration: {duration:.2f}s")
-
-        return ClientContainerBundle(
+        return LLMClientContainerBundle(
             container_id=container.id,
             template_container_file_id=template_container_file_id,
-            payload=payload,
         )
 
     def stream_model_response(
         self,
-        container_bundle: ClientContainerBundle,
+        container_bundle: LLMClientContainerBundle,
+        payload: list[UploadPayloadItem],
         system_prompt: str,
         user_input: str,
         model_name: str = "gpt-5-2025-08-07",
@@ -130,7 +95,7 @@ class OpenAIService:
                     "role": "user",
                     "content": [
                         {"type": "input_text", "text": user_input},
-                        *[item.model_dump() for item in container_bundle.payload],
+                        *[item.model_dump() for item in payload],
                     ],
                 }
             ],

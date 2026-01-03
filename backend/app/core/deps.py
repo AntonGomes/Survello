@@ -1,4 +1,4 @@
-# app/core/deps.py
+# backend/app/core/deps.py
 from __future__ import annotations
 
 from functools import lru_cache

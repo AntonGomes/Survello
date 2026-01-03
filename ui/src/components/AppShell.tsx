@@ -10,7 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  LogOut,
+  LayoutDashboard,
   Menu,
   MessageSquare,
   Plus,
@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
 
 type AppShellProps = {
   userEmail?: string;
@@ -36,10 +37,10 @@ type AppShellProps = {
 };
 
 const NAV_ITEMS = [
-  { label: "Jobs", icon: Briefcase, href: "/app/jobs", disabled: false, comingSoon: true },
-  { label: "Templates", icon: FileText, href: "/app/templates", disabled: false, comingSoon: true },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/app/dashboard", disabled: false, comingSoon: false },
+  { label: "Jobs", icon: Briefcase, href: "/app/jobs", disabled: false, comingSoon: false },
+  { label: "Clients", icon: FileText, href: "/app/clients", disabled: false, comingSoon: false },
   { label: "Chat", icon: MessageSquare, href: "/app/chat", disabled: false, comingSoon: true },
-  { label: "Analytics", icon: BarChart2, href: "/app/analytics", disabled: false, comingSoon: true },
 ];
 
 const BOTTOM_ITEMS = [
@@ -47,7 +48,10 @@ const BOTTOM_ITEMS = [
   { label: "Account", icon: User, href: "/app/account" },
 ];
 
-export function AppShell({ userEmail, children }: AppShellProps) {
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const { user, logout } = useAuth();
+  const userEmail = user?.email;
+
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -131,23 +135,21 @@ export function AppShell({ userEmail, children }: AppShellProps) {
             </Button>
           </div>
 
-          <div className="px-4">
+          <nav className="space-y-1 px-2 flex-1">
             <Button
               className={cn(
-                "w-full gap-3 bg-chart-2 hover:bg-chart-2/90 text-white font-semibold shadow-md transition-all",
+                "w-full gap-3 bg-chart-2 hover:bg-chart-2/90 text-white font-semibold shadow-md transition-all mb-1",
                 collapsed ? "lg:justify-center lg:px-0" : "justify-start"
               )}
               asChild
               onClick={() => setMobileMenuOpen(false)}
             >
               <Link href="/app/generate">
-                <Plus className="h-6 w-6" strokeWidth={3} />
+                <Plus className="h-5 w-5" strokeWidth={3} />
                 <span className={cn(collapsed ? "lg:hidden" : "block")}>Generate Document</span>
               </Link>
             </Button>
-          </div>
 
-          <nav className="space-y-1 px-2 flex-1">
             {NAV_ITEMS.map(({ label, icon: Icon, href, disabled, comingSoon }) => (
               <Button
                 key={label}
@@ -155,7 +157,8 @@ export function AppShell({ userEmail, children }: AppShellProps) {
                 className={cn(
                   "w-full gap-3 text-white/90 hover:bg-white/10 hover:text-white transition-colors relative group",
                   collapsed ? "lg:justify-center lg:px-0" : "justify-start",
-                  disabled && "opacity-70 hover:opacity-90"
+                  disabled && "opacity-70 hover:opacity-90",
+                  pathname?.startsWith(href) && "bg-white/10 text-white"
                 )}
                 asChild
                 onClick={() => setMobileMenuOpen(false)}
@@ -180,7 +183,8 @@ export function AppShell({ userEmail, children }: AppShellProps) {
                 variant="ghost"
                 className={cn(
                   "w-full gap-3 text-white/90 hover:bg-white/10 hover:text-white transition-colors",
-                  collapsed ? "lg:justify-center lg:px-0" : "justify-start"
+                  collapsed ? "lg:justify-center lg:px-0" : "justify-start",
+                  pathname?.startsWith(href) && "bg-white/10 text-white"
                 )}
                 asChild
                 onClick={() => setMobileMenuOpen(false)}
@@ -197,12 +201,9 @@ export function AppShell({ userEmail, children }: AppShellProps) {
                 "w-full gap-3 text-white/90 hover:bg-white/10 hover:text-white transition-colors",
                 collapsed ? "lg:justify-center lg:px-0" : "justify-start"
               )}
-              asChild
+              onClick={() => logout()}
             >
-              <a href="/auth/logout">
-                <LogOut className="h-5 w-5" />
-                <span className={cn(collapsed ? "lg:hidden" : "block")}>Log out</span>
-              </a>
+              <span className={cn(collapsed ? "lg:hidden" : "block")}>Log out</span>
             </Button>
           </div>
         </aside>
@@ -224,17 +225,7 @@ export function AppShell({ userEmail, children }: AppShellProps) {
                 </>
               )}
             </div>
-            {userEmail && (
-              <Card className="border-border shadow-sm shrink-0 min-w-[260px] max-w-sm relative overflow-hidden hidden md:block">
-                <span className="absolute inset-x-0 top-0 h-1 bg-accent/60" />
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm font-medium truncate">
-                    {userEmail}
-                  </CardTitle>
-                  <CardDescription>Signed in</CardDescription>
-                </CardHeader>
-              </Card>
-            )}
+            
           </div>
 
           <Card className="border-border shadow-sm min-h-[500px]">

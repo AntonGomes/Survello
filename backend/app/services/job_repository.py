@@ -1,120 +1,92 @@
+# backend/app/services/run_repository.py
+
 from __future__ import annotations
 
-import uuid
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import Session
 
-from app.models.orm import Job, Document, JobStatus
+from app.models.orm import Run, RunFile, RunStatus, FileRole
 
 
-class JobRepository:
-    """Encapsulates all database access related to Jobs and Documents."""
+class RunRepository:
+    """Encapsulates all database access related to Runs."""
 
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def get_job(self, job_id: str) -> Optional[Job]:
-        try:
-            # Handle string validation here or let UUID throw
-            uid = uuid.UUID(job_id)
-        except ValueError:
-            return None
-        return self.db.query(Job).filter(Job.id == uid).first()
+    def get_run(self, run_id: int) -> Optional[Run]:
+        return self.db.query(Run).filter(Run.id == run_id).first()
 
-    def get_document(self, doc_id: uuid.UUID) -> Optional[Document]:
-        return self.db.query(Document).filter(Document.id == doc_id).first()
-
-    def update_status(self, job_id: str, status: JobStatus) -> None:
-        job = self.get_job(job_id)
-        if job:
-            job.status = status
-            self.db.commit()
-
-    def update_progress(self, job_id: str, progress: int) -> None:
-        """Update the progress percentage of a job."""
-        job = self.get_job(job_id)
-        if job:
-            job.progress = progress
-            self.db.commit()
-
-    def append_log(self, job_id: str, message: str) -> None:
-        """Append a log message to the job's log list."""
-        job = self.get_job(job_id)
-        if job:
-            # SQLAlchemy JSON mutation requires reassignment or flag_modified
-            current_logs = list(job.logs)
-            current_logs.append(message)
-            job.logs = current_logs
-            self.db.commit()
-
-    def create_job(
+    def create_run(
         self,
-        user_id: str,
-        template_name: str,
-        template_url: str,
-        context_urls: list[str],
-    ) -> Job:
-        """Creates the Template Document and the Job record in a single transaction."""
-        user_uuid = uuid.UUID(user_id)
+        org_id: Optional[int] = None,
+        created_by_user_id: int,
+        template_file_id: int = None,
+        input_file_ids: List[int] = None,
+        job_id: Optional[int] = None,
+    ) -> Run:
+        """
+        Creates a Run and links input files via RunFile association.
 
-        # 1. Create the Template Document record
-        template_doc = Document(
-            id=uuid.uuid4(),
-            owner_user_id=user_uuid,
-            name=template_name,
-            file_url=template_url,
-            mime_type="application/octet-stream",  # Inferred or generic
+        Args:
+            org_id: The organization this run belongs to
+            created_by_user_id: The user creating the run
+            job_id: Optional job this run is associated with
+            template_file_id: Optional File.id for the template
+            input_file_ids: Optional list of File.ids for context/input files
+        """
+        # 1. Create the Run record
+        run = Run(
+            org_id=org_id,
+            created_by_user_id=created_by_user_id,
+            job_id=job_id,
+            status=RunStatus.ACTIVE,
         )
-        self.db.add(template_doc)
-        self.db.flush()  # Flush to get the ID
+        self.db.add(run)
+        self.db.flush()  # Get the run.id
 
-        # 2. Create the Job record
-        job = Job(
-            id=uuid.uuid4(),
-            user_id=user_uuid,
-            template_id=template_doc.id,
-            status=JobStatus.pending,
-            context_s3_urls=context_urls,
+        # 2. Link the template file
+        template_link = RunFile(
+            run_id=run.id,
+            file_id=template_file_id,
+            role=FileRole.TEMPLATE,
         )
-        self.db.add(job)
-        self.db.commit()
-        return job
+        self.db.add(template_link)
 
-    def create_output_document(
-        self, job: Job, name: str, storage_key: str, mime_type: str = "application/pdf"
-    ) -> Document:
-        output_doc = Document(
-            id=uuid.uuid4(),
-            org_id=job.org_id,
-            owner_user_id=job.user_id,
-            name=name,
-            file_url=storage_key,
-            mime_type=mime_type,
-        )
-        self.db.add(output_doc)
-
-        job.output_document_id = output_doc.id
-        job.output_document_url = storage_key
+        # 3. Link input/context files (if provided)
+        for file_id in input_file_ids:
+            input_link = RunFile(
+                run_id=run.id,
+                file_id=file_id,
+                role=FileRole.INPUT,
+            )
+            self.db.add(input_link)
 
         self.db.commit()
-        return output_doc
+        self.db.refresh(run)
+        return run
 
-    def create_pdf_preview(
-        self, job: Job, iteration: int, storage_key: str
-    ) -> Document:
-        preview_doc = Document(
-            id=uuid.uuid4(),
-            org_id=job.org_id,
-            owner_user_id=job.user_id,
-            name=f"preview_{str(iteration)}_{job.id}",
-            file_url=storage_key,
-            mime_type="application/pdf",
+    def update_status(self, run_id: int, status: RunStatus) -> Optional[Run]:
+        run = self.get_run(run_id)
+        if run:
+            run.status = status
+            self.db.commit()
+            self.db.refresh(run)
+        return run
+
+    def add_artefact_to_run(
+        self,
+        run_id: int,
+        file_id: int,
+        role: FileRole = FileRole.ARTIFACT,
+    ) -> RunFile:
+        """Link an output/artefact file to a run."""
+        run_file = RunFile(
+            run_id=run_id,
+            file_id=file_id,
+            role=role,
         )
-        self.db.add(preview_doc)
-
-        job.preview_pdf_document_id = preview_doc.id
-        job.preview_pdf_document_url = storage_key
-
+        self.db.add(run_file)
         self.db.commit()
-        return preview_doc
+        return run_file

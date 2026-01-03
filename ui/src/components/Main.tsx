@@ -26,16 +26,6 @@ export function Main() {
     setError,
   } = useGenerateDoc();
 
-  // Create user via Next API route on the client so auth cookies flow automatically
-  useEffect(() => {
-    const ensureUser = async () => {
-      const res = await fetch("/api/users", { method: "POST" });
-      if (!res.ok) console.error(`Failed to sync user (${res.status})`);
-    };
-    
-    ensureUser();
-  }, []);
-
   const canStart = useMemo(
     () =>
       Boolean(templateFile) &&

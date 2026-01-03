@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -24,18 +27,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { auth0 } from "@/lib/auth0";
+import { useAuth } from "@/context/auth-context";
 
-export default async function Home() {
-  const session = await auth0.getSession();
+export default function Home() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
-  if (session?.user) {
-    redirect("/app");
-  }
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push("/app");
+    }
+  }, [user, isLoading, router]);
 
   return (
     <div className="min-h-screen bg-secondary flex flex-col">
-      <Header />
+      <Header authenticated={!!user} />
 
       <main className="max-w-6xl mx-auto px-6 py-12 flex-1 w-full space-y-16">
         <section className="grid md:grid-cols-[1.1fr_0.9fr] items-center gap-10">
@@ -56,13 +62,15 @@ export default async function Home() {
                 variant="accent"
                 asChild
               >
-                <a href="/auth/login?screen_hint=signup">
+                <Link href="/register">
                   Start free trial
                   <ArrowRight className="h-4 w-4" />
-                </a>
+                </Link>
               </Button>
               <Button size="lg" variant="tertiary" asChild>
-                <a href="/auth/login">Log in</a>
+                <Link href="/login">
+                  Log in
+                </Link>
               </Button>
               <Button size="lg" variant="ghost" asChild>
                 <Link href="/pricing">

@@ -1,95 +1,95 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 
-interface TypingTitleProps {
+interface RollingUpdatesProps {
   updates: string[];
-  tokenDelayMs?: number;
-  dwellMs?: number;
+  typeSpeedMs?: number; // Speed of typing
+  dwellMs?: number;     // Time to wait after typing finishes before showing next
 }
 
-export const RollingUpdates: React.FC<TypingTitleProps> = ({
+export const RollingUpdates: React.FC<RollingUpdatesProps> = ({
   updates,
-  tokenDelayMs = 80,
-  dwellMs = 2000,
+  typeSpeedMs = 30,
+  dwellMs = 1500,
 }) => {
-  const [baseText, setBaseText] = useState("");
-  const [tokens, setTokens] = useState<string[]>([]);
-  const [tokenIndex, setTokenIndex] = useState(0);
-  const [displayed, setDisplayed] = useState("");
-  const [dotCount, setDotCount] = useState(0);
+  const [displayIndex, setDisplayIndex] = useState(0);
+  const [displayedText, setDisplayedText] = useState("");
+  const [phase, setPhase] = useState<"typing" | "dwelling">("typing");
+  
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Chunk text into fake tokens of 3–4 characters
-  const chunkIntoTokens = useCallback((text: string): string[] => {
-    const tokens: string[] = [];
-    let i = 0;
-    while (i < text.length) {
-      const chunkSize = Math.floor(Math.random() * 2) + 3; // 3–4 chars
-      tokens.push(text.slice(i, i + chunkSize));
-      i += chunkSize;
-    }
-    return tokens;
+  // Clear any pending timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
-  // When currentIndex changes (or the text at that index changes),
-  // (re)initialise the typing state.
+  // Handle new updates coming in - jump to latest if we've fallen behind
   useEffect(() => {
-    const latest = updates[updates.length - 1] ?? "";
-    if (!latest) {
-      setBaseText("");
-      setTokens([]);
-      setDisplayed("");
-      setTokenIndex(0);
+    if (updates.length > 0 && displayIndex < updates.length - 1 && phase === "dwelling") {
+      // New updates arrived while dwelling, move to next
+      setDisplayIndex(prev => prev + 1);
+      setDisplayedText("");
+      setPhase("typing");
+    }
+  }, [updates.length, displayIndex, phase]);
+
+  // Main typing/dwelling effect
+  useEffect(() => {
+    if (!updates || updates.length === 0) return;
+
+    // Clamp display index to valid range
+    if (displayIndex >= updates.length) {
+      setDisplayIndex(updates.length - 1);
+      setDisplayedText(updates[updates.length - 1]);
+      setPhase("dwelling");
       return;
     }
 
-    // Only restart typing when the latest message changes
-    if (latest === baseText) return;
+    const currentFullText = updates[displayIndex];
 
-    setBaseText(latest);
-    setTokens(chunkIntoTokens(latest));
-    setDisplayed("");
-    setTokenIndex(0);
-  }, [updates, baseText, chunkIntoTokens]);
-
-  // Typing effect + advancing to the next update
-  useEffect(() => {
-    if (updates.length === 0) return;
-    if (!tokens.length) return;
-
-    // Still typing this update
-    if (tokenIndex < tokens.length) {
-      const timeout = setTimeout(() => {
-        setDisplayed((prev) => prev + tokens[tokenIndex]);
-        setTokenIndex((prev) => prev + 1);
-      }, tokenDelayMs);
-
-      return () => clearTimeout(timeout);
+    if (phase === "typing") {
+      // Still typing current message
+      if (displayedText.length < currentFullText.length) {
+        timeoutRef.current = setTimeout(() => {
+          // Type 1-3 chars at a time for a more natural feel
+          const chunk = Math.floor(Math.random() * 2) + 1;
+          setDisplayedText(currentFullText.slice(0, displayedText.length + chunk));
+        }, typeSpeedMs);
+        return () => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+      } else {
+        // Finished typing, start dwelling
+        setPhase("dwelling");
+      }
+    } else if (phase === "dwelling") {
+      // Check if there are more messages to show
+      if (displayIndex < updates.length - 1) {
+        timeoutRef.current = setTimeout(() => {
+          setDisplayIndex(prev => prev + 1);
+          setDisplayedText("");
+          setPhase("typing");
+        }, dwellMs);
+        return () => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+      }
+      // Otherwise, stay on the last message
     }
+  }, [updates, displayIndex, displayedText, typeSpeedMs, dwellMs, phase]);
 
-    // Finished typing this update; wait for a new one
-    if (tokenIndex >= tokens.length) return;
-  }, [tokenIndex, tokens, tokenDelayMs, dwellMs, updates.length]);
-
-  // Animate trailing dots: . (200ms) -> .. (200ms) -> ... (1s) -> repeat
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
-    const tick = (current: number) => {
-      const next = (current + 1) % 4; // 0..3 dots
-      const delay = current === 2 ? 1000 : 200; // linger on "..." for 1s
-      timeout = setTimeout(() => tick(next), delay);
-      setDotCount(next);
-    };
-    tick(dotCount);
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [baseText]);
-
-  const textToShow =
-    updates.length === 0 ? "Initialising model and context..." : displayed || " ";
+  // Handle initial load or empty state
+  if (!updates.length) return <span className="animate-pulse text-muted-foreground font-mono">Initializing AI...</span>;
 
   return (
-    <p className="text-xs text-muted-foreground font-mono">
-            {textToShow}
-            {".".repeat(dotCount)}
-    </p>
+    <div className="min-h-[1.5em] flex items-center">
+      <p className="text-foreground font-mono text-xs tracking-tight">
+        {displayedText}
+        <span className="animate-pulse inline-block w-1.5 h-4 ml-1 bg-primary align-middle" />
+      </p>
+    </div>
   );
 };

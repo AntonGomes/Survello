@@ -1,21 +1,16 @@
-import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { auth0 } from "@/lib/auth0";
+import { AuthGuard } from "@/components/auth-guard";
 
-export default async function AppLayout({
+export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth0.getSession();
-
-  if (!session?.user) {
-    redirect("/");
-  }
-
   return (
-    <AppShell userEmail={session.user?.email}>
-      {children}
-    </AppShell>
+    <AuthGuard>
+      <AppShell>
+        {children}
+      </AppShell>
+    </AuthGuard>
   );
 }

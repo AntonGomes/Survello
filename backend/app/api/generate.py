@@ -1,160 +1,139 @@
 from __future__ import annotations
 
-import uuid
-from pathlib import Path
-
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 
-from app.api.deps import JobRepoDep, StorageDep, CurrentUserDep
+from app.api.deps import RunRepoDep, StorageDep, CurrentUserDep
+from app.services.run_repository import RunRepository
+from app.services.file_repository import FileRepository
+from app.services.artefact_repository import ArtefactRepository
 from app.core.deps import get_database, get_s3, get_openai_client, get_settings
-from app.services.job_repository import JobRepository
 from app.services.storage import StorageService
 from app.services.openai_service import OpenAIService
 from app.models.request_models import (
-    CreateJobRequest,
-    CreateJobResponse,
-    DownloadGenDocUrlResponse,
-    PresignUploadsRequest,
-    PresignUploadsResponse,
-    PresignedUpload,
-    JobStatusResponse,
+    StartRunRequest,
+    StartRunResponse,
+    LatestArtefactResponse,
+    RunStatusResponse,
 )
-from app.services.processing import ProcessingOrchestrator
+from app.services.docgen_orchestrator import DocGenOrchestrator
 from app.core.logging import logger
+from app.models.orm import User, Run
 
 
-router = APIRouter()
+# -------------------------------------------------------
+# Helpers for Background Tasks
+# -------------------------------------------------------
 
 
-def run_orchestrator_background(job_id: str):
-    """
-    Background task wrapper to run the orchestrator with its own DB session.
-    """
+def create_orchestrator_services():
+    """Create fresh services for background processing."""
     db = get_database().get_session()
-    try:
-        repo = JobRepository(db)
-        storage = StorageService(get_s3())
-        openai_service = OpenAIService(
-            get_openai_client(), get_settings().openai_api_key
-        )
+    return (
+        db,
+        RunRepository(db),
+        FileRepository(db),
+        ArtefactRepository(db),
+        StorageService(get_s3()),
+        OpenAIService(get_openai_client(), get_settings().openai_api_key),
+    )
 
-        orchestrator = ProcessingOrchestrator(job_id, repo, storage, openai_service)
-        orchestrator.run()
-    except Exception as e:
-        logger.exception(f"Background task failed for job {job_id}")
+
+def run_orchestrator_background(run: Run):
+    db, run_repo, file_repo, artefact_repo, storage, openai_service = create_orchestrator_services()
+    try:
+        orchestrator = DocGenOrchestrator(run, run_repo, file_repo, artefact_repo, storage, openai_service)
+        orchestrator.run_process()
+    except Exception:
+        logger.exception(f"Background task failed for run {run.id}")
     finally:
         db.close()
 
 
-@router.post("/generate/presign_uploads", response_model=PresignUploadsResponse)
-def presign_uploads(
-    request: PresignUploadsRequest,
-    storage: StorageDep,
-    user_id: CurrentUserDep,
-):
-    """Generate presigned upload URLs for the provided file list."""
-    uploads: list[PresignedUpload] = []
+# -------------------------------------------------------
+# API Endpoints
+# -------------------------------------------------------
 
-    for file in request.files:
-        # Construct a unique storage key
-        storage_key = f"uploads/{user_id}/{uuid.uuid4()}-{file.name}"
-
-        upload_url = storage.generate_presigned_url(
-            operation="put_object", key=storage_key, content_type=file.content_type
-        )
-
-        uploads.append(
-            PresignedUpload(
-                name=file.name,
-                content_type=file.content_type,
-                kind=file.kind,
-                key=storage_key,
-                upload_url=upload_url,
-            )
-        )
-
-    return PresignUploadsResponse(uploads=uploads)
+router = APIRouter()
 
 
-@router.post("/generate/create_job", response_model=CreateJobResponse)
-def create_job(
-    request: CreateJobRequest,
-    repo: JobRepoDep,
+@router.post("/generate/start_run", response_model=StartRunResponse)
+def start_run(
+    request: StartRunRequest,
+    run_repo: RunRepoDep,
     background_tasks: BackgroundTasks,
     user_id: CurrentUserDep,
 ):
-    """Creates a Job and starts processing in background."""
-    template_name = Path(request.template_file_url).name
+    """Creates a Run and starts processing in background."""
+    user_id_int = int(user_id)
+    # org_id = (
+    #     run_repo.db.query(User.org_id).filter(User.id == user_id_int).scalar()
+    # )
 
-    job = repo.create_job(
-        user_id=user_id,
-        template_name=template_name,
-        template_url=request.template_file_url,
-        context_urls=request.context_file_urls,
+    run = run_repo.create_run(
+    # org_id=1,
+        created_by_user_id=user_id_int,
+        template=request.template,
+        context_files=request.context_files,
+        job_id=request.job_id,
     )
 
-    background_tasks.add_task(run_orchestrator_background, str(job.id))
+    background_tasks.add_task(run_orchestrator_background, run)
 
-    return CreateJobResponse(id=str(job.id))
+    return StartRunResponse(run_id=run.id)
 
 
-@router.get("/generate/status/{job_id}", response_model=JobStatusResponse)
-def get_job_status(
-    job_id: str,
-    repo: JobRepoDep,
+@router.get("/generate/status/{run_id}", response_model=RunStatusResponse)
+def get_run_status(
+    run_id: int,
+    repo: RunRepoDep,
     user_id: CurrentUserDep,
 ):
-    """Returns the current status, progress, and logs of a job."""
-    job = repo.get_job(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    if str(job.user_id) != user_id:
-        logger.error(f"Job user mismatch: job.user_id={job.user_id} ({type(job.user_id)}), user_id={user_id} ({type(user_id)})")
-        raise HTTPException(status_code=403, detail="Not authorized")
+    """Returns the current status, progress, and model responses of a run."""
+    run = repo.get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
 
-    return JobStatusResponse(
-        id=str(job.id),
-        status=job.status.value,
-        progress=job.progress or 0,
-        logs=job.logs or [],
-        output_document_url=job.output_document_url,
+    return RunStatusResponse(
+        run_id=run.id,
+        status=run.status.value,
+        upload_progress=run.upload_progress or 0,  
+        model_responses=run.model_responses
     )
 
 
-@router.get("/generate/download_url/{job_id}", response_model=DownloadGenDocUrlResponse)
+@router.get("/generate/latest_artefact/{run_id}", response_model=LatestArtefactResponse)
 def get_download_url(
-    job_id: str,
-    repo: JobRepoDep,
+    run_id: int,
+    repo: RunRepoDep,
     storage: StorageDep,
     user_id: CurrentUserDep,
 ):
     """Return a presigned download URL for the generated document."""
-    job = repo.get_job(job_id)
+    run = repo.get_run(run_id)
 
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    if str(job.user_id) != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized")
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
 
-    if not job.output_document_url:
-        raise HTTPException(status_code=404, detail="Output document not found")
+    artefact = repo.artefact_repo.get_latest_artefact_by_run(run_id)
+    if not artefact:
+        raise HTTPException(status_code=404, detail="Artefact not found")
 
     download_url = storage.generate_presigned_url(
         operation="get_object",
-        key=job.output_document_url,
+        key=artefact.file.storage_key,
     )
 
-    if not job.preview_pdf_document_url:
+    preview_file = artefact.preview_file
+
+    if not preview_file:
         raise HTTPException(status_code=404, detail="Preview document not found")
 
     preview_url = storage.generate_presigned_url(
         operation="get_object",
-        key=job.preview_pdf_document_url,
+        key=preview_file.storage_key,
         content_type="application/pdf",
         inline=True,
-        filename=f"preview-{job.id}.pdf"
+        filename=preview_file.file_name,
     )
 
-    return DownloadGenDocUrlResponse(download_url=download_url, preview_url=preview_url)
+    return LatestArtefactResponse(download_url=download_url, preview_url=preview_url)

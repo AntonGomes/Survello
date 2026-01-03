@@ -1,12 +1,13 @@
+import Link from "next/link"; 
 "use client";
 
 export default function LogoutButton() {
   return (
-    <a
-      href="/auth/logout"
+    <Link
+      href="/"
       className="button logout"
     >
       Log Out
-    </a>
+    </Link>
   );
 }

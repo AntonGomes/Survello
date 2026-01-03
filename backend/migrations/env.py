@@ -1,27 +1,19 @@
 from logging.config import fileConfig
 
-from sqlalchemy import pool
 from alembic import context
 
-from app.core.db import Base, Database
+from app.core.db import Database
 from app.core.settings import get_settings
-import app.models.orm  # noqa: F401 - register models for metadata
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+import app.models.orm as orm  # ensures models are imported
+
 config = context.config
-
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata
+target_metadata = orm.Base.metadata  
 
-# Load settings from your application
 settings = get_settings()
-
-# Override the sqlalchemy.url in alembic.ini with the one from environment variables
 config.set_main_option("sqlalchemy.url", settings.db_url)
 
 
@@ -39,10 +31,10 @@ def run_migrations_offline() -> None:
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        connection=connection,
         target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        compare_type=True,
+        compare_server_default=True,
     )
 
     with context.begin_transaction():

@@ -1,13 +1,55 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { apiFetch } from "@/lib/api"; // Import the helper
 
 export type Status =
   | "idle"
   | "presigning"
   | "uploading"
-  | "creating"
-  | "streaming"
+  | "generating"
+  | "finalising"
   | "completed"
   | "error";
+
+export enum FileRole {
+  TEMPLATE = "template",
+  INPUT = "input",
+  ARTEFACT = "artefact",
+  PREVIEW_PDF = "preview_pdf",
+}
+
+export interface FileRead {
+  id?: number;
+  storage_key?: string; 
+  file_name: string;
+  mime_type: string;
+  role: FileRole;
+}
+
+export interface GetPresignPutsRequest {
+  files: FileRead[];
+}
+
+export interface PresignedPut {
+  file: FileRead;
+  put_url: string;
+}
+export interface GetPresignPutsResponse {
+  puts: PresignedPut[];
+}
+
+interface RegisterFilesRequest {
+  files: FileRead[];
+}
+
+interface RegisterFilesResponse {
+  files: FileRead[];
+}
+
+interface StartRunRequest {
+  template_id: number;
+  context_file_ids: number[];
+  job_id?: number;
+}
 
 type StartArgs = {
   templateFile: File | null;
@@ -15,7 +57,7 @@ type StartArgs = {
 };
 
 export function useGenerateDoc() {
-  const [jobId, setJobId] = useState<string | null>(null);
+  const [runId, setRunId] = useState<number | null>(null);
   const [updates, setUpdates] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
@@ -25,7 +67,7 @@ export function useGenerateDoc() {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const reset = useCallback(() => {
-    setJobId(null);
+    setRunId(null);
     setUpdates([]);
     setError(null);
     setStatus("idle");
@@ -46,149 +88,134 @@ export function useGenerateDoc() {
         setUpdates([]);
         setUploadProgress(0);
 
-        // 1. presigning: ask backend for presigned URLs + storage keys
+        // 1. Presigning + Upload to storgae
         setStatus("presigning");
 
-        const filesMeta = [
-          {
-            name: templateFile.name,
-            content_type: templateFile.type || "application/octet-stream",
-            kind: "template",
-          },
+        const filesMetaDataBundle: FileRead[] = [
+            {
+              file_name: templateFile.name,
+              mime_type: templateFile.type || "application/octet-stream",
+              role: FileRole.TEMPLATE,
+            },
           ...contextFiles.map((file) => ({
-            name: file.name,
-            content_type: file.type || "application/octet-stream",
-            kind: "context",
+            file_name: file.name,
+            mime_type: file.type || "application/octet-stream",
+            role: FileRole.INPUT,
           })),
         ];
+        const getPresignPutsRequestPayload: GetPresignPutsRequest = { files: filesMetaDataBundle };
 
-        const presignRes = await fetch("/api/generate/presign_uploads", {
+        const response = await apiFetch("/store/presign_uploads", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ files: filesMeta }),
+          body: JSON.stringify(getPresignPutsRequestPayload),
         });
-        console.log("presignedRes", presignRes);
-        const { uploads } = (await presignRes.json()) as {
-          uploads: Array<{ key: string; upload_url: string; kind: string; content_type: string }>;
-        };
-        console.log("uploads", uploads);
 
-        const templateUpload = uploads.find((u) => u.kind === "template")!;
-        const contextUploads = uploads.filter((u) => u.kind === "context");
+        const { puts } = response as GetPresignPutsResponse;
 
-        // 2. uploading: browser PUTs files to the presigned URLs
-        setStatus("uploading");
-        const totalBytes =
-          templateFile.size + contextFiles.reduce((sum, file) => sum + file.size, 0);
-        let uploadedBytes = 0;
+        const numFiles = puts.length;
+        let uploadedFiles= 0;
+        let presignProgress = 30;
 
-        const bumpProgress = (delta: number) => {
-          uploadedBytes += delta;
-          // Scale 0-100% of S3 upload to 0-33% of total job
+        const bumpProgress = () => {
+          uploadedFiles += 1;
           const next =
-            totalBytes === 0 ? 33 : Math.min(33, Math.round((uploadedBytes / totalBytes) * 33));
+            numFiles === 0 ? presignProgress : Math.min(presignProgress, Math.round((uploadedFiles/ numFiles) * presignProgress));
           setUploadProgress(next);
         };
 
-        const put = (file: File, url: string, contentType: string) =>
+        const put = (file: File, put: PresignedPut) =>
           new Promise<void>((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            let previousLoaded = 0;
-
-            xhr.upload.onprogress = (event: ProgressEvent<EventTarget>) => {
-              const loaded = event.lengthComputable ? event.loaded : file.size;
-              const delta = Math.max(0, loaded - previousLoaded);
-              previousLoaded = loaded;
-              bumpProgress(delta);
-            };
-
-            xhr.onerror = () => reject(new Error(`Failed to upload ${file.name}`));
+            xhr.upload.onprogress = () => {bumpProgress()};
+            xhr.onerror = () => reject(new Error(`Failed to upload ${put.file.file_name}`));
             xhr.onload = () => {
-              // Ensure we count any remaining bytes and resolve.
-              bumpProgress(Math.max(0, file.size - previousLoaded));
-              resolve();
+              if (xhr.status >= 200 && xhr.status < 300) {
+                bumpProgress();
+                resolve();
+              } else {
+                reject(new Error(`Upload failed with status ${xhr.status}`));
+              }
             };
-
-            xhr.open("PUT", url);
-            xhr.setRequestHeader("Content-Type", contentType);
+            xhr.open("PUT", put.put_url);
+            xhr.setRequestHeader("Content-Type", file.type);
             xhr.send(file);
           });
 
         await Promise.all([
-          put(templateFile, templateUpload.upload_url, templateUpload.content_type),
+          put(templateFile, puts[0]),
           ...contextFiles.map((file, idx) =>
-            put(file, contextUploads[idx].upload_url, contextUploads[idx].content_type),
+            put(file, puts[idx + 1]),
           ),
         ]);
-        setUploadProgress(33);
+        setUploadProgress(presignProgress);
 
-        // 2. creating: tell backend to create the job using uploaded file keys
-        setStatus("creating");
-        const jobRes = await fetch("/api/generate/create_job", {
+        // 2. Register files
+        const registerPayload: RegisterFilesRequest = {
+            files: puts.map(p => p.file)
+        };
+        
+        const registerRes = await apiFetch("/store/register", {
+            method: "POST",
+            body: JSON.stringify(registerPayload)
+        }) as RegisterFilesResponse;
+        
+        const registeredFiles = registerRes.files;
+        // Assuming order is preserved
+        const templateId = registeredFiles[0].id!;
+        const contextFileIds = registeredFiles.slice(1).map(f => f.id!);
+
+        // 3. starting run
+        const startRunPayload: StartRunRequest = {
+          template_id: templateId,
+          context_file_ids: contextFileIds,
+        };
+
+        const startRunRes = await apiFetch("/generate/start_run", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            template_file_url: templateUpload.key,
-            context_file_urls: contextUploads.map((c) => c.key),
-          }),
+          body: JSON.stringify(startRunPayload),
         });
-        const { id: newJobId } = (await jobRes.json()) as { id: string };
-        setJobId(newJobId);
-
-        // 3. Polling: check status periodically
-        setStatus("streaming");
+        
+        const { run_id: newRunId } = startRunRes as { run_id: number };
+        setRunId(newRunId);
         
         const poll = async () => {
           try {
-            const res = await fetch(`/api/generate/status/${newJobId}`);
-            if (!res.ok) {
-               // If 404 or other error, maybe retry or fail?
-               console.error("Status check failed", res.status);
-               return false;
+            const data = await apiFetch(`/generate/status/${newRunId}`);
+            console.log("Polled run status data:", data); // DEBUG
+            setStatus(data.status);
+            if (data.status == "uploading") {
+                setUploadProgress(data.upload_progress || 30);
             }
-            
-            const data = await res.json();
-            // data: { id, status, progress, logs, output_document_url }
-            
-            if (data.logs) {
-                setUpdates(data.logs);
+            if (data.status == "generating") {
+                setUpdates(data.model_responses);
             }
-            
-            if (typeof data.progress === 'number') {
-                // Backend returns 33-100 range.
-                // We take the max to ensure we don't jump back if S3 upload finished at 33
-                // and backend starts at 33.
-                setUploadProgress(prev => Math.max(prev, data.progress));
-            }
+            // Should maybe doing something here with finialising status?
             
             if (data.status === "completed") {
-               const dlRes = await fetch(`/api/generate/download_url/${newJobId}`);
-               const { download_url, preview_url } = await dlRes.json();
+               const dlRes = await apiFetch(`/generate/latest_artefact/${newRunId}`);
+               const { download_url, preview_url } = dlRes;
                setDownloadUrl(download_url);
                setPreviewUrl(preview_url);
-               setStatus("completed");
-               return true; // stop polling
-            } else if (data.status === "failed") {
-               setError("Job failed during processing.");
-               setStatus("error");
-               return true; // stop polling
+               return true; 
+            } else if (data.status === "error") {
+               setError("Run failed during processing.");
+               return true; 
             }
             
-            return false; // continue polling
+            return false; 
           } catch (e) {
             console.error("Polling error", e);
             return false;
           }
         };
 
-        // Start polling loop
         pollIntervalRef.current = setInterval(async () => {
             const stop = await poll();
             if (stop && pollIntervalRef.current) {
                 clearInterval(pollIntervalRef.current);
                 pollIntervalRef.current = null;
             }
-        }, 2000); // Poll every 2 seconds
+        }, 2000);
 
       } catch (err) {
         setError(err instanceof Error ? err.message : "Generation failed");
@@ -208,33 +235,19 @@ export function useGenerateDoc() {
       };
   }, []);
 
-  const statusMessage = useMemo(() => {
-      if (status === "presigning" || status === "uploading") return "Uploading files...";
-      if (status === "creating") return "Creating job...";
-      if (status === "streaming") {
-          if (uploadProgress < 66) return "Preparing documents...";
-          if (uploadProgress < 100) return "Sending to AI...";
-          return "AI is thinking...";
-      }
-      if (status === "completed") return "Document generated!";
-      if (status === "error") return "Error occurred";
-      return "";
-  }, [status, uploadProgress]);
-
   const state = useMemo(
     () => ({
-      jobId,
+      runId,
       updates,
       error,
       status,
-      statusMessage,
       downloadUrl,
       previewUrl,
       uploadProgress,
-      isStreaming: status === "streaming",
+      isStreaming: status === "generating",
       isCompleted: status === "completed",
     }),
-    [downloadUrl, error, jobId, status, statusMessage, updates, uploadProgress],
+    [downloadUrl, error, runId, status, updates, uploadProgress],
   );
 
   return { ...state, start, reset, setError };
