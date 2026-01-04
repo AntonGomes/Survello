@@ -20,7 +20,7 @@ DocGen is a document generation platform consisting of a Python FastAPI backend 
 - **Package Manager**: Uses `uv`. Always run commands with `uv run ...`.
 - **Structure**:
   - `app/api/`: Routes (e.g., `generate.py`, `users.py`).
-  - `app/services/`: Business logic (e.g., `processing.py`, `job_repository.py`).
+  - `app/services/`: Business logic (e.g., `processing.py`, `work_repository.py`).
   - `app/models/`: Pydantic models (`request_models.py`) and SQLAlchemy ORM (`orm.py`).
   - `app/core/`: Configuration and dependencies (`deps.py`).
 - **Database**: PostgreSQL with SQLAlchemy and Alembic.

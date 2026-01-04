@@ -5,11 +5,8 @@ from typing import Generator, Literal, Any
 
 from openai import OpenAI
 
-from app.models.models import (
-    LLMClientContainerBundle,
-    UploadPayloadItem,
-    FileRead,
-)
+from app.schemas.common_schemas import LLMClientContainerBundle, UploadPayloadItem
+from app.schemas.file_schemas import FileRead
 from app.utils.document_handler import to_file_obj
 
 

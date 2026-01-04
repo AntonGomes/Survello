@@ -55,7 +55,6 @@ cover/
 *.pot
 
 # Data
-db/
 
 node_modules/
 
@@ -214,5 +213,8 @@ __marimo__/
 examples/
 outputs/
 output/
+fixtures/
+node_modules/
+.next/
 
 deploy_backend.sh

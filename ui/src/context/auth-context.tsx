@@ -1,71 +1,74 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: "user" | "admin";
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { 
+  getCurrentUserOptions, 
+  loginMutation, 
+  registerMutation, 
+  logoutMutation 
+} from "@/client/@tanstack/react-query.gen";
+import type { UserRead, LoginRequest, SignupRequest } from "@/client/types.gen";
 
 interface AuthContextType {
-  user: User | null;
+  user: UserRead | undefined;
   isLoading: boolean;
-  login: (data: any) => Promise<void>;
-  register: (data: any) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (data: LoginRequest) => void;
+  register: (data: SignupRequest) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const checkSession = async () => {
-    try {
-      const userData = await apiFetch("/auth/me");
-      setUser(userData);
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
+  // 1. Query for the current user
+  const { data: user, isLoading } = useQuery({
+    ...getCurrentUserOptions(),
+    retry: false, // Don't retry on 401
+  });
+
+  // 2. Login Mutation
+  const { mutate: loginMutate } = useMutation({
+    ...loginMutation(),
+    onSuccess: () => {
+      // Invalidate 'me' query to refetch user
+      queryClient.invalidateQueries({ queryKey: getCurrentUserOptions().queryKey });
+      router.push("/app");
+    },
+  });
+
+  const login = (data: LoginRequest) => {
+    loginMutate({ body: data });
   };
 
-  useEffect(() => {
-    checkSession();
-  }, []);
-
-  const login = async (data: any) => {
-    await apiFetch("/auth/login", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-    await checkSession();
-    router.push("/app");
-  };
-
-  const register = async (data: any) => {
-    await apiFetch("/auth/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-    await checkSession();
-    router.push("/");
-  };
-
-  const logout = async () => {
-    try {
-      await apiFetch("/auth/logout", { method: "POST" });
-    } finally {
-      setUser(null);
+  // 3. Register Mutation
+  const { mutate: registerMutate } = useMutation({
+    ...registerMutation(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getCurrentUserOptions().queryKey });
       router.push("/");
-    }
+    },
+  });
+
+  const register = (data: SignupRequest) => {
+    registerMutate({ body: data });
+  };
+
+  // 4. Logout Mutation
+  const { mutate: logoutMutate } = useMutation({
+    ...logoutMutation(),
+    onSuccess: () => {
+      queryClient.setQueryData(getCurrentUserOptions().queryKey, undefined);
+      router.push("/");
+    },
+  });
+
+  const logout = () => {
+    logoutMutate({});
   };
 
   return (

@@ -8,8 +8,8 @@ import json
 from contextgem import DocxConverter
 from openpyxl import load_workbook
 
-from app.models.models import FileRead
-from app.models.orm import ArtefactType
+from app.schemas.file_schemas import FileRead, FileStore
+from typing import Literal
 
 
 class ConversionError(Exception):
@@ -18,16 +18,47 @@ class ConversionError(Exception):
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 DOC_EXTS = {".pdf", ".docx", ".xlsx"}
+
 OPEN_XML_EXTS = {".docx", ".xlsx"}
 
 
-def file_type_to_mime_type(file_type: ArtefactType) -> str:
-    if file_type == ArtefactType.DOCX:
+def file_type_to_mime_type(
+    file_type: Literal["pdf", "docx", "xlsx", "png", "jpg", "jpeg", "webp", "gif"],
+) -> str:
+    if file_type == "docx":
         return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    elif file_type == ArtefactType.XLSX:
+    elif file_type == "xlsx":
         return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    elif file_type == "pdf":
+        return "application/pdf"
+    elif (
+        file_type == "png"
+        or file_type == "jpg"
+        or file_type == "jpeg"
+        or file_type == "webp"
+        or file_type == "gif"
+    ):
+        return f"image/{file_type}"
     else:
         raise ValueError(f"Unsupported ArtefactType: {file_type}")
+
+
+def mime_type_to_file_type(mime_type: str) -> str:
+    if (
+        mime_type
+        == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ):
+        return "docx"
+    elif (
+        mime_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ):
+        return "xlsx"
+    elif mime_type == "application/pdf":
+        return "pdf"
+    elif mime_type.startswith("image/"):
+        return mime_type.split("/")[1]
+    else:
+        raise ValueError(f"Unsupported mime_type: {mime_type}")
 
 
 def _get_soffice_path() -> str:
@@ -155,26 +186,29 @@ def _xlsx_to_json_str(data) -> str:
         return json.dumps(result, indent=2, default=str)
 
 
-def convert_to_pdf(file: FileRead) -> FileRead:
+def convert_to_pdf(file: FileStore) -> FileStore:
     """Convert a document (DOCX or XLSX) to PDF bytes."""
     if (
         file.mime_type
         == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ):
-        file.data = _convert_docx_bytes(file.data)
+        data = _convert_docx_bytes(file.data)
     elif (
         file.mime_type
         == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     ):
-        file.data = _convert_xlsx_bytes(file.data)
+        data = _convert_xlsx_bytes(file.data)
     else:
         raise ConversionError(
             f"Unsupported file extension for PDF conversion: {file.mime_type}"
         )
-    file.mime_type = "application/pdf"
-    file.file_name = Path(file.file_name).with_suffix(".pdf").name
-    file.storage_key = Path(file.storage_key).with_suffix(".pdf").as_posix()
-    return file
+    return FileStore(
+        storage_key=Path(file.storage_key).with_suffix(".pdf").as_posix(),
+        file_name=Path(file.file_name).with_suffix(".pdf").name,
+        mime_type="application/pdf",
+        data=data,
+        role=file.role,
+    )
 
 
 def get_template_summary(file: FileRead) -> str:

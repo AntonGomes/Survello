@@ -5,12 +5,15 @@ from sqlalchemy import text, Engine
 from sqlalchemy.exc import OperationalError
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.users import router as users_router
-from app.api.generate import router as generate_router
-from app.api.store import router as store_router
+from app.api.routes.generate import router as generate_router
+from app.api.routes.files import router as files_router
+from app.api.routes.auth import router as auth_router
+from app.api.routes.work import router as jobs_router
+from app.api.routes.users import router as users_router
 
 from app.core.logging import logger
 from app.core.deps import get_database
+import app.db.models  # Ensure all models are registered
 
 
 def check_db_connection(engine: Engine) -> None:
@@ -37,9 +40,11 @@ def create_app() -> FastAPI:
     )
 
     # 1. Include Routers
-    app.include_router(users_router, tags=["Users"])
-    app.include_router(generate_router, tags=["Generation"])
-    app.include_router(store_router, tags=["Storage"])
+    app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+    app.include_router(generate_router, prefix="/generate", tags=["Generation"])
+    app.include_router(files_router, prefix="/store", tags=["Storage"])
+    app.include_router(jobs_router, prefix="/jobs", tags=["Jobs"])
+    app.include_router(users_router, prefix="/users", tags=["Users"])
 
     origins = [
         "http://localhost:3000",  # For local development

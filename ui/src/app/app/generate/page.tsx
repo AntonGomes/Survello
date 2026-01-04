@@ -6,7 +6,7 @@ import { DocumentViewerWithChat } from "@/components/document-viewer-with-chat";
 import { ErrorAlert } from "@/components/error-alert";
 import { JobStatusPanel } from "@/components/job-status-panel";
 import { UploadSection } from "@/components/upload-section";
-import { useGenerateDoc } from "@/hooks/generate-doc";
+import { useDocumentGeneration } from "@/hooks/use-document-generation";
 
 export default function GeneratePage() {
   const [contextFiles, setContextFiles] = useState<File[]>([]);
@@ -22,8 +22,8 @@ export default function GeneratePage() {
     downloadUrl,
     uploadProgress,
     start,
-    setError,
-  } = useGenerateDoc();
+    // setError, // setError is not exposed in the new hook, errors are handled via the error property
+  } = useDocumentGeneration();
 
   const canStart = useMemo(
     () =>

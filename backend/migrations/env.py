@@ -5,13 +5,13 @@ from alembic import context
 from app.core.db import Database
 from app.core.settings import get_settings
 
-import app.models.orm as orm  # ensures models are imported
+from app.db.base import Base 
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = orm.Base.metadata  
+target_metadata = Base.metadata  
 
 settings = get_settings()
 config.set_main_option("sqlalchemy.url", settings.db_url)
@@ -29,10 +29,11 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        connection=connection,
+        url=config.get_main_option("sqlalchemy.url"),
         target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
         compare_type=True,
         compare_server_default=True,
     )

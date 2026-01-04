@@ -8,7 +8,7 @@ import { DownloadButton } from "@/components/download-button";
 import { ErrorAlert } from "@/components/error-alert";
 import { JobStatusPanel } from "@/components/job-status-panel";
 import { UploadCard } from "@/components/upload-card";
-import { useGenerateDoc } from "@/hooks/generate-doc";
+import { useDocumentGeneration } from "@/hooks/use-document-generation";
 
 export function Main() {
   const [contextFiles, setContextFiles] = useState<File[]>([]);
@@ -23,8 +23,8 @@ export function Main() {
     downloadUrl,
     uploadProgress,
     start,
-    setError,
-  } = useGenerateDoc();
+    // setError,
+  } = useDocumentGeneration();
 
   const canStart = useMemo(
     () =>

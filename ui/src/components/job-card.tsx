@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Calendar, ChevronRight, FileText, User } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { components } from "@/types/api.generated";
-
-type Job = components["schemas"]["JobRead"];
+import { type JobRead } from "@/client/types.gen";
 
 interface JobCardProps {
-  job: Job;
+  job: JobRead;
 }
 
 export function JobCard({ job }: JobCardProps) {

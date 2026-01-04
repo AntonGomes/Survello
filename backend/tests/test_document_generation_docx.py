@@ -85,7 +85,7 @@ def run_pipeline_test(
     assert file_data is not None
     assert len(file_data) > 0
 
-    if request.config.getoption("--save-output"):
+    if save_output:
         final_doc_path = output_dir / f"{job_id}_final.{file_type}"
         with open(final_doc_path, "wb") as f:
             f.write(file_data)
@@ -95,7 +95,7 @@ def run_pipeline_test(
 @pytest.mark.integration
 def test_xlsx_generation(openai_service, request):
     # Setup paths
-    input_dir = fixtures_dir / "docx_inputs"
+    input_dir = FIXTURES_DIR / "docx_inputs"
     # Find first xlsx
     template_path = input_dir / "example_template.docx"
 
@@ -106,9 +106,14 @@ def test_xlsx_generation(openai_service, request):
         if p != template_path and not p.name.startswith(".")
     ]
 
-    img_dir = fixtures_dir / "context_images"
+    img_dir = FIXTURES_DIR / "context_images"
     context_paths.extend(list(img_dir.iterdir())[:20])
 
     run_pipeline_test(
-        template_path, context_paths, openai_service, save_output, output_dir, "xlsx"
+        template_path,
+        context_paths,
+        openai_service,
+        request.config.getoption("--save-output"),
+        OUTPUT_DIR,
+        "xlsx",
     )
