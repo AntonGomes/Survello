@@ -1,0 +1,84 @@
+name: Deploy Backend
+
+on:
+  pull_request:
+  push:
+    branches: ['**']
+    tags-ignore: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  APP_RUNNER_SERVICE_PROD: ${{ vars.APP_RUNNER_SERVICE_PROD }}
+  APP_RUNNER_SERVICE_STAGING: ${{ vars.APP_RUNNER_SERVICE_STAGING }}
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - run: npm ci
+        working-directory: ui
+      - run: npm run lint
+        working-directory: ui
+      - run: npm run typecheck
+        working-directory: ui
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv sync --frozen
+        working-directory: backend
+      - run: make ci
+        working-directory: backend
+
+  deploy:
+    name: Deploy
+    needs: ci
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'develop')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+
+      - name: Build & push
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'develop' && 'staging' || 'latest' }}
+        run: |
+          docker build -f backend/Dockerfile --platform linux/amd64 -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" backend
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Trigger App Runner deploy
+        env:
+          SERVICE_NAME: ${{ github.ref_name == 'main' && env.APP_RUNNER_SERVICE_PROD || env.APP_RUNNER_SERVICE_STAGING }}
+        run: |
+          ARN=$(aws apprunner list-services --region "$AWS_REGION" --query "ServiceSummaryList[?ServiceName=='$SERVICE_NAME'].ServiceArn" --output text)
+          aws apprunner start-deployment --region "$AWS_REGION" --service-arn "$ARN"

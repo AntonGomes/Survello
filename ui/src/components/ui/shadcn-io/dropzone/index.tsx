@@ -57,11 +57,12 @@ export const Dropzone = ({
   children,
   ...props
 }: DropzoneProps) => {
+  // @ts-expect-error - exactOptionalPropertyTypes mismatch with react-dropzone types
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept,
-    maxFiles,
-    maxSize,
-    minSize,
+    ...(accept ? { accept } : {}),
+    ...(maxFiles !== undefined ? { maxFiles } : {}),
+    ...(maxSize !== undefined ? { maxSize } : {}),
+    ...(minSize !== undefined ? { minSize } : {}),
     onError,
     disabled,
     onDrop: (acceptedFiles, fileRejections, event) => {
@@ -79,7 +80,13 @@ export const Dropzone = ({
   return (
     <DropzoneContext.Provider
       key={JSON.stringify(src)}
-      value={{ src, accept, maxSize, minSize, maxFiles }}
+      value={{ 
+        ...(src ? { src } : {}),
+        ...(accept ? { accept } : {}),
+        ...(maxSize ? { maxSize } : {}),
+        ...(minSize ? { minSize } : {}),
+        maxFiles 
+      }}
     >
       <Button
         className={cn(
@@ -137,10 +144,10 @@ export const DropzoneContent = ({
       </div>
       <p className="my-2 w-full truncate font-medium text-sm">
         {src.length > maxLabelItems
-          ? `${new Intl.ListFormat('en').format(
+          ? `${new Intl.listFormat('en').format(
               src.slice(0, maxLabelItems).map((file) => file.name)
             )} and ${src.length - maxLabelItems} more`
-          : new Intl.ListFormat('en').format(src.map((file) => file.name))}
+          : new Intl.listFormat('en').format(src.map((file) => file.name))}
       </p>
       <p className="w-full text-wrap text-muted-foreground text-xs">
         Drag and drop or click to {maxFiles && maxFiles > 1 ? 'add more' : 'replace'}
@@ -172,7 +179,7 @@ export const DropzoneEmptyState = ({
 
   if (accept) {
     caption += 'Accepts ';
-    caption += new Intl.ListFormat('en').format(Object.keys(accept));
+    caption += new Intl.listFormat('en').format(Object.keys(accept));
   }
 
   if (minSize && maxSize) {

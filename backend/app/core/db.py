@@ -1,32 +1,24 @@
-from __future__ import annotations
+from sqlmodel import create_engine, SQLModel, Session
+from app.core.settings import get_settings
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+settings = get_settings()
+
+# Create the engine once
+engine = create_engine(settings.db_url, echo=False, pool_pre_ping=True)
 
 
-class Base(DeclarativeBase):
-    """Base class for ORM models."""
+def init_db():
+    """
+    Create all tables defined in SQLModel metadata.
+    This should be called on application startup.
+    """
+    # Import models here to ensure they are registered with SQLModel.metadata
+    SQLModel.metadata.create_all(engine)
 
 
-class Database:
-    """Encapsulates engine + session factory."""
-
-    def __init__(self, db_url: str, db_echo: bool = False) -> None:
-        self.engine = create_engine(
-            db_url,
-            echo=db_echo,
-            future=True,
-        )
-        self._SessionLocal = sessionmaker(
-            bind=self.engine,
-            autoflush=False,
-            autocommit=False,
-            future=True,
-        )
-
-    def get_session(self) -> Session:
-        """Create a new Session instance."""
-        return self._SessionLocal()
-
-    def get_engine(self):
-        return self.engine
+def get_session():
+    """
+    Dependency to get a standard SQLModel session.
+    """
+    with Session(engine) as session:
+        yield session

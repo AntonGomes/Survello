@@ -39,7 +39,7 @@ Create a precise technical report in .docx format by editing the supplied templa
 ## Checklist (before tool usage)
 - State the report type (e.g., schedule of dilapidations, home report, move out report).
 - Summarize unique formatting and styling; specify methods for preserving them.
-- List fonts, headings, and font sizes in the template.
+- list fonts, headings, and font sizes in the template.
 - Identify included images and differentiate job-specific from template-standard images (e.g., logo, cover page).
 - Describe image organization, order, or grouping patterns.
 

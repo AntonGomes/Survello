@@ -82,12 +82,12 @@ function CommandInput({
   )
 }
 
-function CommandList({
+function Commandlist({
   className,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.List>) {
+}: React.ComponentProps<typeof CommandPrimitive.list>) {
   return (
-    <CommandPrimitive.List
+    <CommandPrimitive.list
       data-slot="command-list"
       className={cn(
         "max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto",
@@ -175,7 +175,7 @@ export {
   Command,
   CommandDialog,
   CommandInput,
-  CommandList,
+  Commandlist,
   CommandEmpty,
   CommandGroup,
   CommandItem,

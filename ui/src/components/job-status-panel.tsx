@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RollingUpdates } from "@/components/rolling-updates";
 import { Progress } from "@/components/ui/progress";
-import { Status } from "@/hooks/generate-doc";
+import { Status } from "@/hooks/use-document-generation";
 
 type Props = {
   canStart: boolean;

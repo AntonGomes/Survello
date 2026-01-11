@@ -1,18 +1,19 @@
 from logging.config import fileConfig
 
 from alembic import context
+from sqlmodel import SQLModel
 
 from app.core.db import Database
 from app.core.settings import get_settings
 
-from app.db.base import Base 
+# Import all models so that SQLModel.metadata is populated
+from app import models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata  
-
+target_metadata = SQLModel.metadata
 settings = get_settings()
 config.set_main_option("sqlalchemy.url", settings.db_url)
 

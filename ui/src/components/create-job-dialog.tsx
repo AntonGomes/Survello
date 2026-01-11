@@ -1,5 +1,12 @@
 "use client";
 
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,20 +17,90 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/context/auth-context";
+import { 
+  createJobMutation, 
+  getJobsOptions,
+  getClientsJobsClientsGetOptions as getClientsOptions,
+  getUsersUsersGetOptions as getUsersOptions 
+} from "@/client/@tanstack/react-query.gen";
+import { JobStatus, type JobCreate } from "@/client/types.gen";
+
+const formSchema = z.object({
+  name: z.string().min(2, "Job name must be at least 2 characters"),
+  client_id: z.string().min(1, "Please select a client"),
+  lead_user_id: z.string().optional(),
+  address: z.string().optional(),
+  status: z.nativeEnum(JobStatus),
+});
 
 export function CreateJobDialog() {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement job creation logic via API
-    console.log("Creating job...");
-    setOpen(false);
-  };
+  const { data: clients, isLoading: isLoadingClients } = useQuery({
+    ...getClientsOptions(),
+  });
+
+  const { data: users, isLoading: isLoadingUsers } = useQuery({
+    ...getUsersOptions(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      client_id: "",
+      lead_user_id: "",
+      address: "",
+      status: JobStatus.PLANNED,
+    },
+  });
+
+  const { mutate: createJob, isPending } = useMutation({
+    ...createJobMutation(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getJobsOptions().queryKey });
+      setOpen(false);
+      form.reset();
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) return;
+
+    const jobData: JobCreate = {
+      name: values.name,
+      client_id: parseInt(values.client_id),
+      org_id: user.org_id ?? null,
+      created_by_user_id: user.id,
+      lead_user_id: values.lead_user_id ? parseInt(values.lead_user_id) : null,
+      address: values.address || null,
+      status: values.status,
+    };
+
+    createJob({
+      body: jobData,
+    });
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -33,25 +110,136 @@ export function CreateJobDialog() {
           Create Job
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create New Job</DialogTitle>
-            <DialogDescription>
-              Start a new document generation workflow.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Job Name</Label>
-              <Input id="name" placeholder="e.g. Q1 Report Generation" required />
+      <DialogContent className="sm:max-w-[500px]">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>Create New Job</DialogTitle>
+              <DialogDescription>
+                Fill in the details to start a new document generation job.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Job Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Q1 Report Generation" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="client_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Client</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={isLoadingClients ? "Loading..." : "Select client"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {clients?.map((client) => (
+                          <SelectItem key={client.id} value={client.id.toString()}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Initial Status</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(JobStatus).map((status) => (
+                          <SelectItem key={status} value={status} className="capitalize">
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lead_user_id"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Lead User (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={isLoadingUsers ? "Loading..." : "Select lead user"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {users?.map((u) => (
+                          <SelectItem key={u.id} value={u.id.toString()}>
+                            {u.name} ({u.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Site Address (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Enter the site address for this job..." 
+                        className="resize-none"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            {/* Future: Add Client Select and File Upload here */}
-          </div>
-          <DialogFooter>
-            <Button type="submit">Create Job</Button>
-          </DialogFooter>
-        </form>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Job
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

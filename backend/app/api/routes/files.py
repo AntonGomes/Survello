@@ -1,84 +1,129 @@
-from __future__ import annotations
+from fastapi import APIRouter, HTTPException, status
+from sqlmodel import select
 
-import uuid
-
-from fastapi import APIRouter, HTTPException
-
-from app.api.deps import StorageDep, CurrentUserDep, FileRepoDep
-from app.schemas.file_schemas import (
-    GetPresignPutsRequest,
-    GetPresignPutsResponse,
-    PresignedPut,
-    FileInput,
-    RegisterFilesRequest,
-    RegisterFilesResponse,
+from app.api.deps import StorageDep, CurrentUserDep, DBDep
+from app.models.file_model import (
+    File,
     FileCreate,
+    FilePresignRequest,
+    FilePresignResponse,
     FileRead,
 )
 
 router = APIRouter()
 
 
-@router.post(
-    "/presign_uploads",
-    response_model=GetPresignPutsResponse,
-    operation_id="presignUploads",
-)
-def presign_uploads(
-    request: GetPresignPutsRequest,
+@router.post("/presign", response_model=list[FilePresignResponse])
+def generate_upload_urls(
+    files: list[FilePresignRequest],
     storage: StorageDep,
     user: CurrentUserDep,
-):
-    """Generate presigned URLs for uploading files."""
-    puts = []
-    for file in request.files:
-        org_id = user.org_id if user.org_id else "no_org"
-        file_uuid = uuid.uuid4()
-        storage_key = f"{org_id}/{user.id}/{file_uuid}-{file.file_name}"
+) -> list[FilePresignResponse]:
+    """
+    Generate presigned PUT URLs. Does NOT create DB records yet.
+    """
+    response: list[FilePresignResponse] = []
 
+    for f in files:
+        storage_key = f"{user.org_id}/{user.id}/{f.client_id}-{f.file_name}"
 
-        file_input = FileInput(
-            file_name=file.file_name,
-            mime_type=file.mime_type,
-            role=file.role,
+        url = storage.generate_presigned_url(
+            "put_object",
             storage_key=storage_key,
-        )
-        put_url = storage.generate_presigned_url("put_object", file=file_input)
-
-        puts.append(
-            PresignedPut(
-                file=file_input,
-                put_url=put_url,
-            )
+            mime_type=f.mime_type,
+            file_name=f.file_name,
         )
 
-    return GetPresignPutsResponse(puts=puts)
+        extra_data = {"storage_key": storage_key, "put_url": url}
+        response.append(FilePresignResponse.model_validate(f, update=extra_data))
+
+    return response
 
 
-@router.post(
-    "/register", response_model=RegisterFilesResponse, operation_id="registerFiles"
-)
-def register_files(
-    request: RegisterFilesRequest,
+@router.post("/", response_model=FileRead, status_code=status.HTTP_201_CREATED)
+def create_file(
+    file_in: FileCreate,
+    db: DBDep,
     storage: StorageDep,
-    file_repo: FileRepoDep,
     user: CurrentUserDep,
-):
-    """Register uploaded files in the database after verification."""
-    registered_files = []
-    for file_input in request.files:
-        # Verify file exists in storage
-        if not storage.check_file_exists(file_input.storage_key):
-            raise HTTPException(
-                status_code=400,
-                detail=f"File not found in storage: {file_input.storage_key}",
-            )
+) -> FileRead:
+    """
+    Standard Create Endpoint.
+    Client calls this AFTER successfully uploading to the presigned URL.
+    """
+    extra_data = {"uploaded_by_user_id": user.id, "org_id": user.org_id}
+    if not storage.check_file_exists(file_in.storage_key):
+        raise HTTPException(400, "File verification failed. Upload not found.")
+    db_file = File.model_validate(file_in, update=extra_data)
+    db.add(db_file)
 
-        # Create DB record
-        file_create = FileCreate(
-            **file_input.model_dump(), owner_user_id=user.id, org_id=user.org_id
-        )
-        file_record = file_repo.create(file_create)
-        registered_files.append(FileRead.model_validate(file_record))
+    db.commit()
+    db.refresh(db_file)
 
-    return RegisterFilesResponse(files=registered_files)
+    return db_file  # pyright: ignore[reportReturnType]
+
+
+@router.post("/", response_model=list[FileRead], status_code=status.HTTP_201_CREATED)
+def create_files(
+    files_in: list[FileCreate],
+    db: DBDep,
+    storage: StorageDep,
+    user: CurrentUserDep,
+) -> list[FileRead]:
+    """
+    Create Endpoint for multiple files.
+    """
+    files: list[File] = []
+    extra_data = {"uploaded_by_user_id": user.id, "org_id": user.org_id}
+    for file_in_item in files_in:
+        if not storage.check_file_exists(file_in_item.storage_key):
+            raise HTTPException(400, "File verification failed. Upload not found.")
+        db_file = File.model_validate(file_in_item, update=extra_data)
+        db.add(db_file)
+        files.append(db_file)
+
+    db.commit()
+    for f in files:
+        db.refresh(f)
+    
+    return files  # pyright: ignore[reportReturnType]
+
+
+@router.get("/{file_id}", response_model=FileRead)
+def read_file(
+    file_id: int,
+    db: DBDep,
+    current_user: CurrentUserDep,
+) -> FileRead:
+    """
+    Get file metadata by ID.
+    """
+    file = db.get(File, file_id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    if file.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return file  # pyright: ignore[reportReturnType]
+
+
+@router.get("/", response_model=list[FileRead])
+def read_files(
+    db: DBDep,
+    current_user: CurrentUserDep,
+    offset: int = 0,
+    limit: int = 100,
+) -> list[FileRead]:
+    """
+    Retrieve files.
+    """
+    files = db.exec(
+        select(File)
+        .where(File.org_id == current_user.org_id)
+        .offset(offset)
+        .limit(limit)
+    ).all()
+    if not files:
+        raise HTTPException(status_code=404, detail="No files found")
+    if any(file.org_id != current_user.org_id for file in files):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return files  # pyright: ignore[reportReturnType]

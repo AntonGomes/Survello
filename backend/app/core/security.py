@@ -14,6 +14,6 @@ def verify_password(password: str, hashed: str) -> bool:
     return password_hash.verify(password, hashed)
 
 
-def create_session_token() -> str:
+def create_token() -> str:
     """Generate a secure random session token."""
     return secrets.token_urlsafe(32)

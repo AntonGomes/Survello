@@ -80,7 +80,10 @@ export function useDocumentGeneration() {
       if (registerError || !registerData) throw new Error("Failed to register files");
 
       const registeredFiles = registerData.files;
-      const templateId = registeredFiles[0].id!;
+      if (!registeredFiles || registeredFiles.length === 0) throw new Error("No files registered");
+      const firstFile = registeredFiles[0];
+      if (!firstFile) throw new Error("No files registered");
+      const templateId = firstFile.id!;
       const contextFileIds = registeredFiles.slice(1).map(f => f.id!);
 
       // D. Start Run

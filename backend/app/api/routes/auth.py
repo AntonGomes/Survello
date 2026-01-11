@@ -1,81 +1,62 @@
-from __future__ import annotations
-
-
-from fastapi import APIRouter, Response, HTTPException, status
-
-from app.api.deps import SessionRepoDep, UserRepoDep, CurrentUserDep
-from app.core.security import verify_password, create_session_token
-from app.schemas.auth_schemas import (
-    SignupRequest,
-    LoginRequest,
-    MessageResponse,
-)
-from app.schemas.user_schemas import UserCreate, UserRead
-
+from typing import Annotated
+from datetime import datetime, timezone, timedelta
+from fastapi import APIRouter, Response, HTTPException, Cookie
+from app.api.deps import SessionDep
+from app.core.security import verify_password, create_token
+from app.models.user_model import UserLogin, User, Session as DbSession
+from sqlmodel import select
 
 router = APIRouter()
 
 
-@router.post(
-    "/register",
-    response_model=MessageResponse,
-    status_code=status.HTTP_201_CREATED,
-    operation_id="register",
-)
-def register(
-    request: SignupRequest,
-    user_repo: UserRepoDep,
-    session_repo: SessionRepoDep,
-    response: Response,
-):
-    if user_repo.get_by_email(email=request.email):
-        return HTTPException(status_code=400, detail="Email already registered")
+@router.post("/login")
+def login(login_data: UserLogin, response: Response, db: SessionDep):
+    # 1. Verify User
+    statement = select(User).where(User.email == login_data.email)
+    user = db.exec(statement).first()
 
-    user_in = UserCreate(
-        name=request.name, email=request.email, password=request.password
-    )
-    user = user_repo.create_user(user_in)
+    if not user or not verify_password(login_data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+    
+    assert user.id is not None
 
-    session_token = create_session_token()
-    session_repo.create_session(user.id, session_token)
+    # 2. Create Session Token
+    token = create_token()  # UUID or Hex string
+    expires = datetime.now(timezone.utc) + timedelta(hours=2)
 
-    # Set cookie on the injected response object
+    # 3. Save Session to DB
+    new_session = DbSession(session_token=token, user_id=user.id, expires_at=expires)
+    db.add(new_session)
+    user_id = user.id
+    db.commit()
+
+    # 4. Set Cookie
     response.set_cookie(
-        key="session_token", value=session_token, httponly=True, samesite="lax"
-    )
-    return MessageResponse(message="Registration successful")
-
-
-@router.post("/login", response_model=MessageResponse, operation_id="login")
-def login(
-    request: LoginRequest,
-    session_repo: SessionRepoDep,
-    user_repo: UserRepoDep,
-    response: Response,
-):
-    user = user_repo.get_by_email(email=request.email)
-    if not user or not verify_password(request.password, user.password_hash):
-        return HTTPException(status_code=401, detail="Invalid credentials")
-    session_token = create_session_token()
-    session_repo.create_session(user.id, session_token)
-
-    # Set cookie on the injected response object
-    response.set_cookie(
-        key="session_token", value=session_token, httponly=True, samesite="lax"
+        key="session_token",
+        value=token,
+        httponly=True,
+        secure=True,  # Set False only for localhost dev
+        samesite="lax",
+        expires=expires,
     )
 
-    return MessageResponse(message="Login successful")
+    return {"message": "Login Successful", "user": user_id}
 
 
-@router.post("/logout", operation_id="logout")
+@router.post("/logout")
 def logout(
-    response: Response, session_repo: SessionRepoDep, current_user: CurrentUserDep
+    response: Response,
+    db: SessionDep,
+    session_token: Annotated[str | None, Cookie()] = None,
 ):
-    session_repo.delete_sessions_for_user(current_user.id)
-    response.delete_cookie(key="session_token")
-    return MessageResponse(message="Logout successful")
+    if session_token:
+        # Delete ONLY the session associated with this cookie
+        statement = select(DbSession).where(DbSession.session_token == session_token)
+        session_record = db.exec(statement).first()
+        if session_record:
+            db.delete(session_record)
+            db.commit()
 
-
-@router.get("/me", response_model=UserRead, operation_id="getCurrentUser")
-def me(current_user: CurrentUserDep):
-    return current_user
+    # Clear the cookie from the browser
+    response.delete_cookie("session_token")
+    return {"message": "Logged out successfully"}

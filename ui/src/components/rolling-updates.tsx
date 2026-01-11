@@ -43,12 +43,13 @@ export const RollingUpdates: React.FC<RollingUpdatesProps> = ({
     // Clamp display index to valid range
     if (displayIndex >= updates.length) {
       setDisplayIndex(updates.length - 1);
-      setDisplayedText(updates[updates.length - 1]);
+      setDisplayedText(updates[updates.length - 1] ?? "");
       setPhase("dwelling");
       return;
     }
 
     const currentFullText = updates[displayIndex];
+    if (!currentFullText) return;
 
     if (phase === "typing") {
       // Still typing current message

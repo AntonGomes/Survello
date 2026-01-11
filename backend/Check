@@ -1,0 +1,10 @@
+.PHONY: ci lint type 
+
+lint:
+	uv run ruff check app
+	uv run ruff format --check app
+
+type:
+	uv run pyright
+
+ci: lint type
