@@ -6,6 +6,7 @@ FROM python:3.11-slim
 # fonts-liberation: standard fonts for document rendering
 # curl: utility
 RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
     libreoffice-writer \
     libreoffice-java-common \
     default-jre \

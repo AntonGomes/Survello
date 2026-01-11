@@ -6,7 +6,7 @@ ACCOUNT_ID="991176603801"
 ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/service-role/DocgenECRAccessRole"
 INSTANCE_ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/AppRunner-S3-Access-Role"
 VPC_CONNECTOR_ARN="arn:aws:apprunner:eu-west-2:${ACCOUNT_ID}:vpcconnector/docgen-connector/1/21fb1a6d22c243bbb17dae32e8e60cf9"
-IMAGE_ID="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/survello-backend:latest"
+IMAGE_REPO="${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/survello-backend"
 
 # ---------------------------------------------------------
 # STAGING
@@ -22,7 +22,7 @@ cat > service_staging.json <<EOF
         "AuthenticationConfiguration": { "AccessRoleArn": "$ROLE_ARN" },
         "AutoDeploymentsEnabled": true,
         "ImageRepository": {
-            "ImageIdentifier": "$IMAGE_ID",
+            "ImageIdentifier": "$IMAGE_REPO:staging",
             "ImageRepositoryType": "ECR",
             "ImageConfiguration": {
                 "RuntimeEnvironmentVariables": {
@@ -71,7 +71,7 @@ cat > service_prod.json <<EOF
         "AuthenticationConfiguration": { "AccessRoleArn": "$ROLE_ARN" },
         "AutoDeploymentsEnabled": true,
         "ImageRepository": {
-            "ImageIdentifier": "$IMAGE_ID",
+            "ImageIdentifier": "$IMAGE_REPO:prod",
             "ImageRepositoryType": "ECR",
             "ImageConfiguration": {
                 "RuntimeEnvironmentVariables": {

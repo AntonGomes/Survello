@@ -1,0 +1,26 @@
+# Docker ignores (Docker does NOT use .gitignore)
+
+# Python caches
+__pycache__/
+*.py[codz]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local environments
+.venv/
+.env
+.env.*
+
+# VCS / OS junk
+.git/
+.DS_Store
+
+# Tests and fixtures (not needed at runtime)
+tests/
+
+# Local tooling output
+scripts/output/
+
+# Notebooks / scratch
+*.ipynb
