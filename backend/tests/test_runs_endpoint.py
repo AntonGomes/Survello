@@ -1,5 +1,4 @@
 from unittest.mock import MagicMock, patch
-from pathlib import Path
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 from app.models.run_model import Run
@@ -18,27 +17,17 @@ def test_create_run_endpoint(
         "context_file_ids": [setup_data["context_id"]],
     }
 
-    # Inject real file data into the mock for orchestrator if it runs
-    # Reading real fixture file
-    fixtures_path = Path(__file__).parent / "fixtures"
-    docx_path = fixtures_path / "docx_inputs" / "example_template.docx"
-
-    if docx_path.exists():
-        with open(docx_path, "rb") as f:
-            real_bytes = f.read()
-        mock_storage.get_file_data.return_value = real_bytes
-
     # Act
     # Pass the session token in cookies
     client.cookies = {"session_token": setup_data["token"]}
 
-    # Configure magic mock to return valid string for DB
-    import magic
-
-    magic.from_buffer.return_value = "application/pdf"
-
-    # Patch to_pdf to avoid system dependency (libreoffice) and magic issues
-    with patch("app.orchestrators.generation.to_pdf", return_value=b"fake pdf content"):
+    # Patch conversions to avoid system dependencies and binary fixture issues.
+    # In CI, DOCX fixtures may be Git LFS pointers (not real ZIP/DOCX), so we mock
+    # `to_summary` rather than relying on parsing real DOCX bytes.
+    with (
+        patch("app.orchestrators.generation.to_pdf", return_value=b"fake pdf content"),
+        patch("app.orchestrators.generation.to_summary", return_value="fake summary"),
+    ):
         response = client.post("/runs/", json=payload)
 
     # Assert

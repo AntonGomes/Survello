@@ -8,6 +8,8 @@ from sqlmodel.pool import StaticPool
 
 # Mock python-magic which requires a system library not present in this env
 sys.modules["magic"] = MagicMock()
+# Ensure callers get a real MIME string (not a MagicMock) so ORM inserts work.
+sys.modules["magic"].from_buffer.return_value = "application/octet-stream"
 
 from app.main import app  # noqa: E402
 from app.api.deps import get_db, get_storage_service, get_llm_service  # noqa: E402

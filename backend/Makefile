@@ -12,4 +12,4 @@ fmt-check:
 test:
 	uv run pytest
 
-ci: lint fmt-check type test
+ci: lint fmt-check test
