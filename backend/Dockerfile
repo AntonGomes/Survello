@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libreoffice-java-common \
     default-jre \
     fonts-liberation \
+    libmagic1 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
