@@ -6,7 +6,7 @@ import io
 import tokenize
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generator
+from typing import Any, Iterator
 
 from openai import OpenAI
 
@@ -33,23 +33,21 @@ class LLMContainer:
 class BaseLLMService(ABC):
     @abstractmethod
     def upload_template(self, data: bytes, name: str, run_id: str) -> LLMContainer:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def generate(
         self, container: LLMContainer, files: list[LLMFile], system: str, user: str
-    ) -> Generator[str, None, None]:
-        if False:
-            yield ""
-
+    ) -> Iterator[str]:
+        raise NotImplementedError
 
     @abstractmethod
     def download(self, container: LLMContainer) -> bytes:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def cleanup(self, container: LLMContainer) -> None:
-        pass
+        raise NotImplementedError
 
 
 class MockLLMService(BaseLLMService):
@@ -61,7 +59,7 @@ class MockLLMService(BaseLLMService):
 
     def generate(
         self, container: LLMContainer, files: list[LLMFile], system: str, user: str
-    ) -> Generator[str, None, None]:
+    ) -> Iterator[str]:
         logger.info("MOCK: Generating responses...")
         actions = ["Analyzing document...", "Extracting tables...", "Finalizing PDF..."]
         for action in actions:
@@ -107,7 +105,7 @@ class OpenAIService(BaseLLMService):
 
     def generate(
         self, container: LLMContainer, files: list[LLMFile], system: str, user: str
-    ) -> Generator[str, None, None]:
+    ) -> Iterator[str]:
         logger.info(f"Starting generation: {len(files)} context files")
 
         content = [{"type": "input_text", "text": user}]
@@ -123,17 +121,20 @@ class OpenAIService(BaseLLMService):
         )
 
         for chunk in stream:  # pyright: ignore[reportUnknownVariableType]
-            event = getattr(chunk, "type", "")  # pyright: ignore[reportUnknownArgumentType]
+            chunk_any: Any = chunk
+            event = getattr(chunk_any, "type", "")
 
             if event == "response.output_text.done":
-                yield chunk.text  # pyright: ignore[reportUnknownMemberType]
+                yield str(getattr(chunk_any, "text", ""))
 
             elif event == "response.code_interpreter_call_code.done":
-                for comment in self._extract_comments(chunk.code):  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+                for comment in self._extract_comments(
+                    str(getattr(chunk_any, "code", ""))
+                ):
                     yield comment
 
             elif event == "error":
-                raise RuntimeError(getattr(chunk, "error", "LLM error"))  # pyright: ignore[reportUnknownArgumentType]
+                raise RuntimeError(str(getattr(chunk_any, "error", "LLM error")))
 
         logger.info("Generation complete")
 

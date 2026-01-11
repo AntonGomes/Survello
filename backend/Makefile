@@ -9,9 +9,6 @@ fmt:
 fmt-check:
 	uv run ruff format --check app
 
-type:
-	uv run pyright
-
 test:
 	uv run pytest
 

@@ -85,7 +85,7 @@ def create_files(
     db.commit()
     for f in files:
         db.refresh(f)
-    
+
     return files  # pyright: ignore[reportReturnType]
 
 

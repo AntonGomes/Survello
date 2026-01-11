@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import cast, Iterable
 
 import magic
 from sqlmodel import Session
@@ -75,11 +74,11 @@ def execute(
                 "get_object", f.storage_key, f.mime_type, f.file_name, inline=True
             )
             llm_files.append(LLMFile(url=url, name=f.file_name))
-            
+
             # Initialize if None
             if run.upload_progress is None:
                 run.upload_progress = 0
-                
+
             run.upload_progress += int(
                 60 / len(context_files) + 1
             )  # incremental progress up to 90%
@@ -103,10 +102,9 @@ def execute(
         user = f"Template file: {container.container_file_id}. Process with provided context."
 
         gen = llm.generate(container, llm_files, system, user)
-        if gen:  # pyright: ignore[reportOptionalIterable]
-            for msg in gen:
-                run.model_responses = [*run.model_responses, msg]
-                db.commit()
+        for msg in gen:
+            run.model_responses = [*run.model_responses, msg]
+            db.commit()
 
         # Finalize
         logger.info(f"[run={run.id}] Finalising artefact")
@@ -140,7 +138,7 @@ def _create_artefact(
 ) -> Artefact:
     """Create artefact + preview files and artefact record."""
     assert run.id is not None
-    
+
     mime = magic.from_buffer(data, mime=True)
     ext = {
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": (

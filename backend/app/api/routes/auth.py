@@ -17,7 +17,7 @@ def login(login_data: UserLogin, response: Response, db: SessionDep):
 
     if not user or not verify_password(login_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
-    
+
     assert user.id is not None
 
     # 2. Create Session Token
