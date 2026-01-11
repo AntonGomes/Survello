@@ -19,6 +19,7 @@ env:
   ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
   APP_RUNNER_SERVICE_PROD: ${{ vars.APP_RUNNER_SERVICE_PROD }}
   APP_RUNNER_SERVICE_STAGING: ${{ vars.APP_RUNNER_SERVICE_STAGING }}
+  OPENAI_API_KEY: "dummyapikeyfortests"
 
 jobs:
   ci:
