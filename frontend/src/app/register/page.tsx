@@ -23,8 +23,12 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register({ name, email, password, org_name: orgName });
-    } catch (err: any) {
-      setError(err.message || "Failed to register");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to register");
+      }
     } finally {
       setLoading(false);
     }

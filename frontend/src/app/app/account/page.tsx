@@ -2,7 +2,7 @@ import { FeatureHeader } from "@/components/feature-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CreditCard, User } from "lucide-react";
+import { User } from "lucide-react";
 
 export default function AccountPage() {
   return (

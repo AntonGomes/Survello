@@ -12,7 +12,6 @@ import {
   type FilePresignRequest,
   type FileCreate,
   type RunCreate,
-  type FilePresignResponse
 } from "@/client/types.gen";
 import { uploadFilesToS3 } from "@/lib/upload";
 
@@ -79,7 +78,6 @@ export function useDocumentGeneration() {
 
       // B. Upload
       setLocalStatus("uploading");
-      const allFiles = [templateFile, ...contextFiles];
       
       const uploads = presignData.map(p => {
           let file: File | undefined;
@@ -197,14 +195,14 @@ export function useDocumentGeneration() {
   // 4. Fetch URLs
   const { data: downloadUrl } = useQuery({
       ...generateFileDownloadUrlOptions({
-          path: { file_id: outputArtefact?.file_id! }
+          path: { file_id: outputArtefact?.file_id ?? 0 }
       }),
       enabled: !!outputArtefact?.file_id
   });
 
   const { data: previewUrl } = useQuery({
       ...generateFileDownloadUrlOptions({
-          path: { file_id: outputArtefact?.preview_file_id! },
+          path: { file_id: outputArtefact?.preview_file_id ?? 0 },
           query: { inline: true }
       }),
       enabled: !!outputArtefact?.preview_file_id

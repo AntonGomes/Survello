@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 
 import { Header } from "@/components/header";
-import { HowItWorks } from "@/components/how-it-works";
 import { Footer } from "@/components/footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

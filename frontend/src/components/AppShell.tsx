@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart2,
   Briefcase,
   ChevronLeft,
   ChevronRight,
@@ -23,18 +22,10 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/auth-context";
-
-type AppShellProps = {
-  userEmail?: string;
-  children: React.ReactNode;
-};
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/app/dashboard", disabled: false, comingSoon: false },
@@ -49,8 +40,7 @@ const BOTTOM_ITEMS = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
-  const userEmail = user?.email;
+  const { logout } = useAuth();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

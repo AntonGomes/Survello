@@ -8,7 +8,7 @@ import { readClientsOptions } from "@/client/@tanstack/react-query.gen";
 import { CreateClientDialog } from "@/components/create-client-dialog";
 
 export default function ClientsPage() {
-  const { data: clients, isLoading, isError } = useQuery({
+  const { data: clients } = useQuery({
     ...readClientsOptions()
   });
 

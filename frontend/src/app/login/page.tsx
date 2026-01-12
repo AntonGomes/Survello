@@ -21,8 +21,12 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login({ email, password });
-    } catch (err: any) {
-      setError(err.message || "Failed to login");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to login");
+      }
     } finally {
       setLoading(false);
     }
@@ -72,7 +76,7 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
             <div className="text-sm text-center text-gray-500">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/register" className="text-blue-600 hover:underline">
                 Sign up
               </Link>

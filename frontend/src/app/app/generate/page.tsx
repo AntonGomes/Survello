@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { DocumentViewerWithChat } from "@/components/document-viewer-with-chat";
 import { ErrorAlert } from "@/components/error-alert";
@@ -16,7 +16,6 @@ export default function GeneratePage() {
     updates,
     error,
     status,
-    isStreaming,
     isCompleted,
     previewUrl,
     downloadUrl,

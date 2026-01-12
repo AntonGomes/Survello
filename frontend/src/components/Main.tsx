@@ -1,7 +1,7 @@
 // src/app/HomeClient.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FileText, Image as ImageIcon } from "lucide-react";
 
 import { DownloadButton } from "@/components/download-button";
@@ -18,7 +18,6 @@ export function Main() {
     updates,
     error,
     status,
-    isStreaming,
     isCompleted,
     downloadUrl,
     uploadProgress,
