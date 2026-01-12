@@ -56,7 +56,7 @@ jobs:
   deploy:
     name: Deploy
     needs: ci
-    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'develop')
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref_name == 'main' || github.ref_name == 'develop')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
