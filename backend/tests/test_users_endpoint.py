@@ -9,8 +9,7 @@ def test_users_workflow(client: TestClient, session: Session, setup_data: dict):
         "name": "New Guy",
         "email": "newguy@example.com",
         "password": "securepassword123",
-        "role": "member",
-        "org_id": setup_data["org_id"],
+        "org_name": "New Org",
     }
     response = client.post("/users/", json=new_user_payload)
     assert response.status_code == 200

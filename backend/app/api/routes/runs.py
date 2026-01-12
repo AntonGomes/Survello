@@ -59,7 +59,11 @@ def read_run(
     return run
 
 
-@router.get("/{run_id}/artefacts", response_model=list[Artefact], operation_id="readRunArtefacts")
+@router.get(
+    "/{run_id}/artefacts",
+    response_model=list[Artefact],
+    operation_id="readRunArtefacts",
+)
 def read_run_artefacts(
     run_id: int,
     db: DBDep,

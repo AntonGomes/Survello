@@ -2,11 +2,13 @@ from logging.config import fileConfig
 
 import sys
 import os
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))  # Add project root to sys.path
+
+sys.path.insert(
+    0, os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
+)  # Add project root to sys.path
 from app.models import *  # noqa: E402, F403
 from app.core.settings import Settings
-from sqlmodel import SQLModel 
-
+from sqlmodel import SQLModel
 
 
 from sqlalchemy import engine_from_config
@@ -34,6 +36,7 @@ target_metadata = SQLModel.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
 
 def get_url():
     return Settings().db_url
@@ -79,9 +82,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

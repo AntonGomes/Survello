@@ -13,7 +13,9 @@ from app.models.project_model import (
 router = APIRouter()
 
 
-@router.get("/types", response_model=list[ProjectTypeRead], operation_id="readProjectTypes")
+@router.get(
+    "/types", response_model=list[ProjectTypeRead], operation_id="readProjectTypes"
+)
 def read_project_types(
     db: DBDep,
     current_user: CurrentUserDep,
@@ -24,7 +26,12 @@ def read_project_types(
     return project_types  # pyright: ignore[reportReturnType]
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=ProjectRead, operation_id="createProject")
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ProjectRead,
+    operation_id="createProject",
+)
 def create_project(
     project_in: ProjectCreate,
     current_user: CurrentUserDep,
@@ -94,7 +101,11 @@ def update_project(
     return db_project  # pyright: ignore[reportReturnType]
 
 
-@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="deleteProject")
+@router.delete(
+    "/{project_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    operation_id="deleteProject",
+)
 def delete_project(
     project_id: int,
     current_user: CurrentUserDep,

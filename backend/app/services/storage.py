@@ -12,19 +12,17 @@ class StorageService:
         self.s3 = s3_client
 
     def get_file_data(self, storage_key: str) -> bytes:
-        obj = self.s3.client.get_object(  
-            Bucket=self.s3.bucket_name, Key=storage_key
-        )
+        obj = self.s3.client.get_object(Bucket=self.s3.bucket_name, Key=storage_key)
         return obj["Body"].read()  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
 
     def upload_file(self, storage_key: str, data: bytes) -> None:
-        self.s3.client.put_object(  
+        self.s3.client.put_object(
             Bucket=self.s3.bucket_name, Key=storage_key, Body=data
         )
 
     def check_file_exists(self, storage_key: str) -> bool:
         try:
-            self.s3.client.head_object(Bucket=self.s3.bucket_name, Key=storage_key)  
+            self.s3.client.head_object(Bucket=self.s3.bucket_name, Key=storage_key)
             return True
         except Exception:
             return False
@@ -54,11 +52,13 @@ class StorageService:
             # These override response headers when viewing/downloading
             if mime_type:
                 params["ResponseContentType"] = mime_type
-            
-            disposition_type = "inline" if inline else "attachment"
-            params["ResponseContentDisposition"] = f'{disposition_type}; filename="{file_name}"'
 
-        return self.s3.client.generate_presigned_url(  
+            disposition_type = "inline" if inline else "attachment"
+            params["ResponseContentDisposition"] = (
+                f'{disposition_type}; filename="{file_name}"'
+            )
+
+        return self.s3.client.generate_presigned_url(
             ClientMethod=operation,
             Params=params,
             ExpiresIn=expiration,

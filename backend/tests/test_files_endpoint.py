@@ -38,7 +38,7 @@ def test_files_workflow(
         "org_id": setup_data["org_id"],
     }
 
-    response = client.post("/store/", json=create_payload)
+    response = client.post("/store/single", json=create_payload)
     assert response.status_code == 201
     file_data = response.json()
     assert file_data["file_name"] == "test.docx"

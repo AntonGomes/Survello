@@ -3,7 +3,14 @@ from typing import Any
 from sqlmodel import select
 
 from app.api.deps import DBDep, CurrentUserDep
-from app.models.user_model import User, UserCreate, UserRead, UserUpdate, UserRegister, Org, UserRole
+from app.models.user_model import (
+    User,
+    UserRead,
+    UserUpdate,
+    UserRegister,
+    Org,
+    UserRole,
+)
 from app.core.security import hash_password
 
 router = APIRouter()
@@ -30,7 +37,7 @@ def register_user(user_in: UserRegister, db: DBDep):
         email=user_in.email,
         password_hash=hashed_password,
         org_id=org.id,
-        role=UserRole.ADMIN
+        role=UserRole.ADMIN,
     )
     db.add(user)
     db.commit()

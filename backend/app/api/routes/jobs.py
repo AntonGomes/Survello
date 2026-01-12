@@ -6,7 +6,12 @@ from app.models.job_model import Job, JobCreate, JobRead, JobUpdate
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=JobRead, operation_id="createJob")
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=JobRead,
+    operation_id="createJob",
+)
 def create_job(
     job_in: JobCreate,
     current_user: CurrentUserDep,
@@ -68,7 +73,9 @@ def update_job(
     return job  # pyright: ignore[reportReturnType]
 
 
-@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="deleteJob")
+@router.delete(
+    "/{job_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="deleteJob"
+)
 def delete_job(
     job_id: int,
     db: DBDep,

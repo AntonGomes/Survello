@@ -14,7 +14,12 @@ from app.models.client_model import (
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=ClientRead, operation_id="createClient")
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ClientRead,
+    operation_id="createClient",
+)
 def create_client(
     client_in: ClientCreate,
     current_user: CurrentUserDep,
@@ -112,7 +117,12 @@ def update_client(
     return client  # pyright: ignore[reportReturnType]
 
 
-@router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None, operation_id="deleteClient")
+@router.delete(
+    "/{client_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    operation_id="deleteClient",
+)
 def delete_client(
     client_id: int,
     current_user: CurrentUserDep,
