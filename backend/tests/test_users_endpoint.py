@@ -35,4 +35,5 @@ def test_users_workflow(client: TestClient, session: Session, setup_data: dict):
 
     # Verify DB
     db_user = session.get(User, setup_data["user_id"])
+    assert db_user is not None
     assert db_user.name == "Updated Name"

@@ -14,7 +14,7 @@ from app.models.client_model import (
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=ClientRead)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=ClientRead, operation_id="createClient")
 def create_client(
     client_in: ClientCreate,
     current_user: CurrentUserDep,
@@ -46,7 +46,7 @@ def create_client(
     return client  # pyright: ignore[reportReturnType]
 
 
-@router.get("/", response_model=list[ClientRead])
+@router.get("/", response_model=list[ClientRead], operation_id="readClients")
 def read_clients(
     current_user: CurrentUserDep,
     db: DBDep,
@@ -66,7 +66,7 @@ def read_clients(
     return clients  # pyright: ignore[reportReturnType]
 
 
-@router.get("/{client_id}", response_model=ClientRead)
+@router.get("/{client_id}", response_model=ClientRead, operation_id="readClient")
 def read_client(
     client_id: int,
     current_user: CurrentUserDep,
@@ -85,7 +85,7 @@ def read_client(
     return client  # pyright: ignore[reportReturnType]
 
 
-@router.patch("/{client_id}", response_model=ClientRead)
+@router.patch("/{client_id}", response_model=ClientRead, operation_id="updateClient")
 def update_client(
     client_id: int,
     client_in: ClientUpdate,
@@ -112,7 +112,7 @@ def update_client(
     return client  # pyright: ignore[reportReturnType]
 
 
-@router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None, operation_id="deleteClient")
 def delete_client(
     client_id: int,
     current_user: CurrentUserDep,

@@ -1,21 +1,42 @@
 from logging.config import fileConfig
 
+import sys
+import os
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), '..')))  # Add project root to sys.path
+from app.models import *  # noqa: E402, F403
+from app.core.settings import Settings
+from sqlmodel import SQLModel 
+
+
+
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
 from alembic import context
-from sqlmodel import SQLModel
 
-from app.core.db import Database
-from app.core.settings import get_settings
-
-# Import all models so that SQLModel.metadata is populated
-from app import models  # noqa: F401
-
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
 config = context.config
+
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+# add your model's MetaData object here
+# for 'autogenerate' support
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
 target_metadata = SQLModel.metadata
-settings = get_settings()
-config.set_main_option("sqlalchemy.url", settings.db_url)
+
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
+
+def get_url():
+    return Settings().db_url
 
 
 def run_migrations_offline() -> None:
@@ -30,13 +51,12 @@ def run_migrations_offline() -> None:
     script output.
 
     """
+    url = get_url()
     context.configure(
-        url=config.get_main_option("sqlalchemy.url"),
+        url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        compare_type=True,
-        compare_server_default=True,
     )
 
     with context.begin_transaction():
@@ -50,13 +70,18 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # We use your Database class to ensure the engine is created
-    # with the exact same parameters as your application.
-    db_instance = Database(db_url=settings.db_url)
-    connectable = db_instance.get_engine()
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = get_url()
+    connectable = engine_from_config(
+        configuration,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
 
         with context.begin_transaction():
             context.run_migrations()

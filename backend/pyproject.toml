@@ -1,5 +1,5 @@
 [project]
-name = "doc-gen-api"
+name = "survello-api"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -10,6 +10,7 @@ dependencies = [
     "boto3-stubs>=1.42.7",
     "contextgem>=0.19.4",
     "fastapi[standard]>=0.119.0",
+    "libmagic>=1.0",
     "openai>=2.7.2",
     "openpyxl>=3.1.5",
     "passlib>=1.7.4",
@@ -25,6 +26,7 @@ dependencies = [
     "ruff>=0.14.4",
     "sqlalchemy>=2.0.44",
     "sqlmodel>=0.0.31",
+    "uvicorn>=0.38.0",
 ]
 
 [tool.ruff]
@@ -40,11 +42,3 @@ exclude = ["prompts/*.py"]
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-
-[tool.pyright]
-typeCheckingMode = "strict"
-reportMissingImports = true
-reportAttributeAccessIssue = true
-reportUnknownMemberType = true
-include = ["app"]
-exclude = ["tests"]

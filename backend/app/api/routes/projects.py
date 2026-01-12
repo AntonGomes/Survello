@@ -13,7 +13,7 @@ from app.models.project_model import (
 router = APIRouter()
 
 
-@router.get("/types", response_model=list[ProjectTypeRead])
+@router.get("/types", response_model=list[ProjectTypeRead], operation_id="readProjectTypes")
 def read_project_types(
     db: DBDep,
     current_user: CurrentUserDep,
@@ -24,7 +24,7 @@ def read_project_types(
     return project_types  # pyright: ignore[reportReturnType]
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=ProjectRead)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=ProjectRead, operation_id="createProject")
 def create_project(
     project_in: ProjectCreate,
     current_user: CurrentUserDep,
@@ -38,7 +38,7 @@ def create_project(
     return project  # pyright: ignore[reportReturnType]
 
 
-@router.get("/", response_model=list[ProjectRead])
+@router.get("/", response_model=list[ProjectRead], operation_id="readProjects")
 def read_projects(
     current_user: CurrentUserDep,
     db: DBDep,
@@ -63,7 +63,7 @@ def read_projects(
     return projects  # pyright: ignore[reportReturnType]
 
 
-@router.get("/{project_id}", response_model=ProjectRead)
+@router.get("/{project_id}", response_model=ProjectRead, operation_id="readProject")
 def read_project(
     project_id: int,
     db: DBDep,
@@ -74,7 +74,7 @@ def read_project(
     return project  # pyright: ignore[reportReturnType]
 
 
-@router.patch("/{project_id}", response_model=ProjectRead)
+@router.patch("/{project_id}", response_model=ProjectRead, operation_id="updateProject")
 def update_project(
     project_id: int,
     project_in: ProjectUpdate,
@@ -94,7 +94,7 @@ def update_project(
     return db_project  # pyright: ignore[reportReturnType]
 
 
-@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="deleteProject")
 def delete_project(
     project_id: int,
     current_user: CurrentUserDep,

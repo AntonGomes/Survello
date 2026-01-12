@@ -9,7 +9,7 @@ from sqlmodel import select
 router = APIRouter()
 
 
-@router.post("/login")
+@router.post("/login", operation_id="loginUser")
 def login(login_data: UserLogin, response: Response, db: SessionDep):
     # 1. Verify User
     statement = select(User).where(User.email == login_data.email)
@@ -43,7 +43,7 @@ def login(login_data: UserLogin, response: Response, db: SessionDep):
     return {"message": "Login Successful", "user": user_id}
 
 
-@router.post("/logout")
+@router.post("/logout", operation_id="logoutUser")
 def logout(
     response: Response,
     db: SessionDep,

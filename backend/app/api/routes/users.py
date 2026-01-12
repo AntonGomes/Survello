@@ -3,14 +3,14 @@ from typing import Any
 from sqlmodel import select
 
 from app.api.deps import DBDep, CurrentUserDep
-from app.models.user_model import User, UserCreate, UserRead, UserUpdate
+from app.models.user_model import User, UserCreate, UserRead, UserUpdate, UserRegister, Org, UserRole
 from app.core.security import hash_password
 
 router = APIRouter()
 
 
-@router.post("/", response_model=UserRead)
-def register_user(user_in: UserCreate, db: DBDep):
+@router.post("/", response_model=UserRead, operation_id="registerUser")
+def register_user(user_in: UserRegister, db: DBDep):
     """
     Register a new user.
     """
@@ -18,16 +18,27 @@ def register_user(user_in: UserCreate, db: DBDep):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    # Create Org
+    org = Org(name=user_in.org_name)
+    db.add(org)
+    db.commit()
+    db.refresh(org)
+
     hashed_password = hash_password(user_in.password)
-    extra_data = {"password_hash": hashed_password}
-    user = User.model_validate(user_in, update=extra_data)
+    user = User(
+        name=user_in.name,
+        email=user_in.email,
+        password_hash=hashed_password,
+        org_id=org.id,
+        role=UserRole.ADMIN
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
     return user
 
 
-@router.get("/me", response_model=UserRead)
+@router.get("/me", response_model=UserRead, operation_id="readUserMe")
 def read_user_me(current_user: CurrentUserDep):
     """
     Get current user.
@@ -35,7 +46,7 @@ def read_user_me(current_user: CurrentUserDep):
     return current_user
 
 
-@router.patch("/me", response_model=UserRead)
+@router.patch("/me", response_model=UserRead, operation_id="updateUserMe")
 def update_user_me(
     user_in: UserUpdate, current_user: CurrentUserDep, db: DBDep
 ) -> UserRead:

@@ -6,59 +6,18 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/auth/register": {
-      "post": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Register",
-        "operationId": "register",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SignupRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/auth/login": {
       "post": {
         "tags": [
           "Authentication"
         ],
         "summary": "Login",
-        "operationId": "login",
+        "operationId": "loginUser",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
+                "$ref": "#/components/schemas/UserLogin"
               }
             }
           },
@@ -69,9 +28,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
-                }
+                "schema": {}
               }
             }
           },
@@ -94,7 +51,25 @@
           "Authentication"
         ],
         "summary": "Logout",
-        "operationId": "logout",
+        "operationId": "logoutUser",
+        "parameters": [
+          {
+            "name": "session_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -103,24 +78,13 @@
                 "schema": {}
               }
             }
-          }
-        }
-      }
-    },
-    "/auth/me": {
-      "get": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Me",
-        "operationId": "getCurrentUser",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
+          },
+          "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRead"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -128,23 +92,23 @@
         }
       }
     },
-    "/generate/start_run": {
+    "/runs/": {
       "post": {
         "tags": [
-          "Generation"
+          "Runs"
         ],
-        "summary": "Start Run",
-        "description": "Creates a Run and starts processing in background.",
-        "operationId": "startRun",
+        "summary": "Create Run",
+        "description": "Create a new document generation run and start the orchestrator in the background.",
+        "operationId": "createRun",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StartRunRequest"
+                "$ref": "#/components/schemas/RunCreate"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -152,7 +116,59 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StartRunResponse"
+                  "$ref": "#/components/schemas/RunRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Read Runs",
+        "description": "Retrieve document generation runs for the current user's organization.",
+        "operationId": "readRuns",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunRead"
                 }
               }
             }
@@ -170,14 +186,14 @@
         }
       }
     },
-    "/generate/status/{run_id}": {
+    "/runs/{run_id}": {
       "get": {
         "tags": [
-          "Generation"
+          "Runs"
         ],
-        "summary": "Get Run Status",
-        "description": "Returns the current status, progress, and model responses of a run.",
-        "operationId": "getRunStatus",
+        "summary": "Read Run",
+        "description": "Retrieve a document generation run by its ID.",
+        "operationId": "readRun",
         "parameters": [
           {
             "name": "run_id",
@@ -195,7 +211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RunStatusResponse"
+                  "$ref": "#/components/schemas/RunRead"
                 }
               }
             }
@@ -213,14 +229,14 @@
         }
       }
     },
-    "/generate/latest_artefact/{run_id}": {
+    "/runs/{run_id}/artefacts": {
       "get": {
         "tags": [
-          "Generation"
+          "Runs"
         ],
-        "summary": "Get Download Url",
-        "description": "Return a presigned download URL for the generated document.",
-        "operationId": "getLatestArtefact",
+        "summary": "Read Run Artefacts",
+        "description": "Retrieve artefacts for a run.",
+        "operationId": "readRunArtefacts",
         "parameters": [
           {
             "name": "run_id",
@@ -238,7 +254,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LatestArtefactResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Artefact"
+                  },
+                  "title": "Response Readrunartefacts"
                 }
               }
             }
@@ -256,19 +276,23 @@
         }
       }
     },
-    "/store/presign_uploads": {
+    "/store/presign": {
       "post": {
         "tags": [
           "Storage"
         ],
-        "summary": "Presign Uploads",
-        "description": "Generate presigned URLs for uploading files.",
-        "operationId": "presignUploads",
+        "summary": "Generate Upload Urls",
+        "description": "Generate presigned PUT URLs. Does NOT create DB records yet.",
+        "operationId": "generateFileUploadUrls",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/GetPresignPutsRequest"
+                "items": {
+                  "$ref": "#/components/schemas/FilePresignRequest"
+                },
+                "type": "array",
+                "title": "Files"
               }
             }
           },
@@ -280,7 +304,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetPresignPutsResponse"
+                  "items": {
+                    "$ref": "#/components/schemas/FilePresignResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Generatefileuploadurls"
                 }
               }
             }
@@ -298,31 +326,31 @@
         }
       }
     },
-    "/store/register": {
+    "/store/single": {
       "post": {
         "tags": [
           "Storage"
         ],
-        "summary": "Register Files",
-        "description": "Register uploaded files in the database after verification.",
-        "operationId": "registerFiles",
+        "summary": "Create File",
+        "description": "Standard Create Endpoint.\nClient calls this AFTER successfully uploading to the presigned URL.",
+        "operationId": "createFile",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RegisterFilesRequest"
+                "$ref": "#/components/schemas/FileCreate"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RegisterFilesResponse"
+                  "$ref": "#/components/schemas/FileRead"
                 }
               }
             }
@@ -340,23 +368,372 @@
         }
       }
     },
-    "/jobs/jobs": {
+    "/store/": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Create Files",
+        "description": "Create Endpoint for multiple files.",
+        "operationId": "createFiles",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FileCreate"
+                },
+                "title": "Files In"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileRead"
+                  },
+                  "title": "Response Createfiles"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Read Files",
+        "description": "Retrieve files.",
+        "operationId": "readFiles",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileRead"
+                  },
+                  "title": "Response Readfiles"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store/{file_id}": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Read File",
+        "description": "Get file metadata by ID.",
+        "operationId": "readFile",
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "File Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/store/{file_id}/download": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Generate Download Url",
+        "description": "Generate a presigned download URL for a file.\n\nArgs:\n    inline: If True, sets content-disposition to inline (for browser preview).\n           If False (default), sets to attachment (for download).",
+        "operationId": "generateFileDownloadUrl",
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "File Id"
+            }
+          },
+          {
+            "name": "inline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Inline"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "title": "Response Generatefiledownloadurl"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/": {
       "post": {
         "tags": [
           "Jobs"
         ],
         "summary": "Create Job",
-        "description": "Create a new job.",
         "operationId": "createJob",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/JobCreate"
               }
             }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRead"
+                }
+              }
+            }
           },
-          "required": true
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Jobs"
+        ],
+        "summary": "Read Jobs",
+        "operationId": "readJobs",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JobRead"
+                  },
+                  "title": "Response Readjobs"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "Jobs"
+        ],
+        "summary": "Read Job",
+        "operationId": "readJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Jobs"
+        ],
+        "summary": "Update Job",
+        "operationId": "updateJob",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobUpdate"
+              }
+            }
+          }
         },
         "responses": {
           "200": {
@@ -380,74 +757,13 @@
             }
           }
         }
-      }
-    },
-    "/jobs/jobs/get_jobs_for_user": {
-      "get": {
+      },
+      "delete": {
         "tags": [
           "Jobs"
         ],
-        "summary": "Get Jobs For User",
-        "description": "Get jobs created by the current user with pagination.",
-        "operationId": "getJobs",
-        "parameters": [
-          {
-            "name": "start",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 0,
-              "title": "Start"
-            }
-          },
-          {
-            "name": "end",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 10,
-              "title": "End"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/JobRead"
-                  },
-                  "title": "Response Getjobs"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/jobs/jobs/{job_id}": {
-      "get": {
-        "tags": [
-          "Jobs"
-        ],
-        "summary": "Get Job",
-        "description": "Get job details.",
-        "operationId": "getJob",
+        "summary": "Delete Job",
+        "operationId": "deleteJob",
         "parameters": [
           {
             "name": "job_id",
@@ -460,12 +776,143 @@
           }
         ],
         "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/types": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Read Project Types",
+        "operationId": "readProjectTypes",
+        "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/JobDetailRead"
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectTypeRead"
+                  },
+                  "type": "array",
+                  "title": "Response Readprojecttypes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/": {
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Create Project",
+        "operationId": "createProject",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Read Projects",
+        "operationId": "readProjects",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectRead"
+                  },
+                  "title": "Response Readprojects"
                 }
               }
             }
@@ -483,23 +930,73 @@
         }
       }
     },
-    "/jobs/projects": {
-      "post": {
+    "/projects/{project_id}": {
+      "get": {
         "tags": [
-          "Jobs"
+          "Projects"
         ],
-        "summary": "Create Project",
-        "description": "Create a new project.",
-        "operationId": "create_project_jobs_projects_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProjectCreate"
+        "summary": "Read Project",
+        "operationId": "readProject",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRead"
+                }
               }
             }
           },
-          "required": true
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Update Project",
+        "operationId": "updateProject",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdate"
+              }
+            }
+          }
         },
         "responses": {
           "200": {
@@ -523,16 +1020,13 @@
             }
           }
         }
-      }
-    },
-    "/jobs/projects/{project_id}": {
-      "get": {
+      },
+      "delete": {
         "tags": [
-          "Jobs"
+          "Projects"
         ],
-        "summary": "Get Project",
-        "description": "Get project details.",
-        "operationId": "get_project_jobs_projects__project_id__get",
+        "summary": "Delete Project",
+        "operationId": "deleteProject",
         "parameters": [
           {
             "name": "project_id",
@@ -545,12 +1039,47 @@
           }
         ],
         "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Register User",
+        "description": "Register a new user.",
+        "operationId": "registerUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegister"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectDetailRead"
+                  "$ref": "#/components/schemas/UserRead"
                 }
               }
             }
@@ -568,58 +1097,6 @@
         }
       }
     },
-    "/jobs/project_types": {
-      "get": {
-        "tags": [
-          "Jobs"
-        ],
-        "summary": "Get Project Types",
-        "description": "Get all project types.",
-        "operationId": "get_project_types_jobs_project_types_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ProjectTypeRead"
-                  },
-                  "type": "array",
-                  "title": "Response Get Project Types Jobs Project Types Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/jobs/clients": {
-      "get": {
-        "tags": [
-          "Jobs"
-        ],
-        "summary": "Get Clients",
-        "description": "Get all clients.",
-        "operationId": "get_clients_jobs_clients_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ClientRead"
-                  },
-                  "type": "array",
-                  "title": "Response Get Clients Jobs Clients Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/users/me": {
       "get": {
         "tags": [
@@ -627,7 +1104,7 @@
         ],
         "summary": "Read User Me",
         "description": "Get current user.",
-        "operationId": "read_user_me_users_me_get",
+        "operationId": "readUserMe",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -646,8 +1123,8 @@
           "Users"
         ],
         "summary": "Update User Me",
-        "description": "Update current user.",
-        "operationId": "update_user_me_users_me_patch",
+        "description": "Update own profile.",
+        "operationId": "updateUserMe",
         "requestBody": {
           "content": {
             "application/json": {
@@ -682,25 +1159,97 @@
         }
       }
     },
-    "/users/": {
+    "/clients/": {
+      "post": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Create Client",
+        "description": "Create a new client.",
+        "operationId": "createClient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "tags": [
-          "Users"
+          "Clients"
         ],
-        "summary": "Get Users",
-        "description": "Get all users.",
-        "operationId": "get_users_users__get",
+        "summary": "Read Clients",
+        "description": "Retrieve clients.",
+        "operationId": "readClients",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/UserRead"
-                  },
                   "type": "array",
-                  "title": "Response Get Users Users  Get"
+                  "items": {
+                    "$ref": "#/components/schemas/ClientRead"
+                  },
+                  "title": "Response Readclients"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -708,47 +1257,73 @@
         }
       }
     },
-    "/clients/": {
+    "/clients/{client_id}": {
       "get": {
         "tags": [
           "Clients"
         ],
-        "summary": "Read Clients",
-        "description": "Retrieve clients.",
-        "operationId": "read_clients_clients__get",
+        "summary": "Read Client",
+        "operationId": "readClient",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Client Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ClientRead"
-                  },
-                  "type": "array",
-                  "title": "Response Read Clients Clients  Get"
+                  "$ref": "#/components/schemas/ClientRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           }
         }
       },
-      "post": {
+      "patch": {
         "tags": [
           "Clients"
         ],
-        "summary": "Create Client",
-        "description": "Create a new client.",
-        "operationId": "create_client_clients__post",
+        "summary": "Update Client",
+        "operationId": "updateClient",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Client Id"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ClientCreate"
+                "$ref": "#/components/schemas/ClientUpdate"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -772,15 +1347,138 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Delete Client",
+        "operationId": "deleteClient",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Client Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
   "components": {
     "schemas": {
+      "Artefact": {
+        "properties": {
+          "artefact_type": {
+            "$ref": "#/components/schemas/ArtefactType"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "org_id": {
+            "type": "integer",
+            "title": "Org Id"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "run_id": {
+            "type": "integer",
+            "title": "Run Id"
+          },
+          "file_id": {
+            "type": "integer",
+            "title": "File Id"
+          },
+          "preview_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preview File Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "artefact_type",
+          "version",
+          "run_id",
+          "file_id"
+        ],
+        "title": "Artefact"
+      },
+      "ArtefactType": {
+        "type": "string",
+        "enum": [
+          ".docx",
+          ".xlsx"
+        ],
+        "title": "ArtefactType"
+      },
       "ClientContactCreate": {
         "properties": {
           "name": {
             "type": "string",
+            "maxLength": 255,
             "title": "Name"
           },
           "email": {
@@ -798,7 +1496,8 @@
           "phone": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 64
               },
               {
                 "type": "null"
@@ -809,7 +1508,8 @@
           "role_title": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 255
               },
               {
                 "type": "null"
@@ -828,6 +1528,7 @@
         "properties": {
           "name": {
             "type": "string",
+            "maxLength": 255,
             "title": "Name"
           },
           "email": {
@@ -845,7 +1546,8 @@
           "phone": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 64
               },
               {
                 "type": "null"
@@ -856,7 +1558,8 @@
           "role_title": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 255
               },
               {
                 "type": "null"
@@ -891,6 +1594,7 @@
         "properties": {
           "name": {
             "type": "string",
+            "maxLength": 255,
             "title": "Name"
           },
           "address": {
@@ -917,13 +1621,13 @@
         "required": [
           "name"
         ],
-        "title": "ClientCreate",
-        "description": "Attributes required to create a new Client."
+        "title": "ClientCreate"
       },
       "ClientRead": {
         "properties": {
           "name": {
             "type": "string",
+            "maxLength": 255,
             "title": "Name"
           },
           "address": {
@@ -975,11 +1679,39 @@
         "required": [
           "name",
           "id",
+          "org_id",
           "created_at",
           "updated_at"
         ],
-        "title": "ClientRead",
-        "description": "For reading Client metadata."
+        "title": "ClientRead"
+      },
+      "ClientUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          }
+        },
+        "type": "object",
+        "title": "ClientUpdate"
       },
       "FeeType": {
         "type": "string",
@@ -990,106 +1722,221 @@
         ],
         "title": "FeeType"
       },
-      "FileInput": {
+      "FileCreate": {
         "properties": {
           "file_name": {
             "type": "string",
+            "maxLength": 512,
             "title": "File Name"
           },
           "mime_type": {
             "type": "string",
+            "maxLength": 255,
             "title": "Mime Type"
           },
-          "role": {
-            "$ref": "#/components/schemas/FileRole"
-          },
-          "storage_key": {
-            "type": "string",
-            "title": "Storage Key"
-          }
-        },
-        "type": "object",
-        "required": [
-          "file_name",
-          "mime_type",
-          "role",
-          "storage_key"
-        ],
-        "title": "FileInput",
-        "description": "Attributes for a file that has been uploaded (has a key)."
-      },
-      "FilePresign": {
-        "properties": {
-          "file_name": {
-            "type": "string",
-            "title": "File Name"
-          },
-          "mime_type": {
-            "type": "string",
-            "title": "Mime Type"
-          },
-          "role": {
-            "$ref": "#/components/schemas/FileRole"
-          }
-        },
-        "type": "object",
-        "required": [
-          "file_name",
-          "mime_type",
-          "role"
-        ],
-        "title": "FilePresign",
-        "description": "Attributes required to request a presigned URL."
-      },
-      "FileRead": {
-        "properties": {
-          "file_name": {
-            "type": "string",
-            "title": "File Name"
-          },
-          "mime_type": {
-            "type": "string",
-            "title": "Mime Type"
-          },
-          "role": {
-            "$ref": "#/components/schemas/FileRole"
-          },
-          "storage_key": {
-            "type": "string",
-            "title": "Storage Key"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "owner_user_id": {
-            "type": "integer",
-            "title": "Owner User Id"
-          },
-          "created_at": {
+          "size_bytes": {
             "anyOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Created At"
+            "title": "Size Bytes"
+          },
+          "storage_key": {
+            "type": "string",
+            "title": "Storage Key"
+          },
+          "org_id": {
+            "type": "integer",
+            "title": "Org Id"
+          },
+          "uploaded_by_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploaded By User Id"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "role": {
+            "$ref": "#/components/schemas/FileRole",
+            "default": "input"
           }
         },
         "type": "object",
         "required": [
           "file_name",
           "mime_type",
-          "role",
           "storage_key",
-          "id",
-          "owner_user_id"
+          "org_id"
         ],
-        "title": "FileRead",
-        "description": "DTO for file metadata passed from frontend to backend services."
+        "title": "FileCreate"
+      },
+      "FilePresignRequest": {
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "maxLength": 512,
+            "title": "File Name"
+          },
+          "mime_type": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Mime Type"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_name",
+          "mime_type",
+          "client_id"
+        ],
+        "title": "FilePresignRequest"
+      },
+      "FilePresignResponse": {
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "maxLength": 512,
+            "title": "File Name"
+          },
+          "mime_type": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Mime Type"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
+          "put_url": {
+            "type": "string",
+            "title": "Put Url"
+          },
+          "storage_key": {
+            "type": "string",
+            "title": "Storage Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_name",
+          "mime_type",
+          "client_id",
+          "put_url",
+          "storage_key"
+        ],
+        "title": "FilePresignResponse"
+      },
+      "FileRead": {
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "maxLength": 512,
+            "title": "File Name"
+          },
+          "mime_type": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Mime Type"
+          },
+          "size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size Bytes"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "storage_key": {
+            "type": "string",
+            "title": "Storage Key"
+          },
+          "uploaded_by_user_id": {
+            "type": "integer",
+            "title": "Uploaded By User Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "role": {
+            "$ref": "#/components/schemas/FileRole"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_name",
+          "mime_type",
+          "id",
+          "storage_key",
+          "uploaded_by_user_id",
+          "created_at",
+          "role"
+        ],
+        "title": "FileRead"
       },
       "FileRole": {
         "type": "string",
@@ -1100,38 +1947,6 @@
           "input"
         ],
         "title": "FileRole"
-      },
-      "GetPresignPutsRequest": {
-        "properties": {
-          "files": {
-            "items": {
-              "$ref": "#/components/schemas/FilePresign"
-            },
-            "type": "array",
-            "title": "Files"
-          }
-        },
-        "type": "object",
-        "required": [
-          "files"
-        ],
-        "title": "GetPresignPutsRequest"
-      },
-      "GetPresignPutsResponse": {
-        "properties": {
-          "puts": {
-            "items": {
-              "$ref": "#/components/schemas/PresignedPut"
-            },
-            "type": "array",
-            "title": "Puts"
-          }
-        },
-        "type": "object",
-        "required": [
-          "puts"
-        ],
-        "title": "GetPresignPutsResponse"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1146,59 +1961,12 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "JobClientRead": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
-        "title": "JobClientRead"
-      },
       "JobCreate": {
         "properties": {
-          "org_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Org Id"
-          },
-          "client_id": {
-            "type": "integer",
-            "title": "Client Id"
-          },
-          "created_by_user_id": {
-            "type": "integer",
-            "title": "Created By User Id"
-          },
           "name": {
             "type": "string",
+            "maxLength": 255,
             "title": "Name"
-          },
-          "lead_user_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead User Id"
           },
           "address": {
             "anyOf": [
@@ -1220,45 +1988,10 @@
                 "type": "null"
               }
             ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "client_id",
-          "created_by_user_id",
-          "name"
-        ],
-        "title": "JobCreate",
-        "description": "For creating new Jobs."
-      },
-      "JobDetailRead": {
-        "properties": {
-          "org_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Org Id"
           },
           "client_id": {
             "type": "integer",
             "title": "Client Id"
-          },
-          "created_by_user_id": {
-            "type": "integer",
-            "title": "Created By User Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
           },
           "lead_user_id": {
             "anyOf": [
@@ -1270,6 +2003,21 @@
               }
             ],
             "title": "Lead User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "client_id"
+        ],
+        "title": "JobCreate"
+      },
+      "JobRead": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
           },
           "address": {
             "anyOf": [
@@ -1285,145 +2033,16 @@
           "status": {
             "anyOf": [
               {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          },
-          "client": {
-            "$ref": "#/components/schemas/ClientRead"
-          },
-          "org": {
-            "$ref": "#/components/schemas/OrgRead"
-          },
-          "created_by_user": {
-            "$ref": "#/components/schemas/UserRead"
-          },
-          "lead_user": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/UserRead"
+                "$ref": "#/components/schemas/JobStatus"
               },
               {
                 "type": "null"
               }
             ]
           },
-          "projects": {
-            "items": {
-              "$ref": "#/components/schemas/ProjectRead"
-            },
-            "type": "array",
-            "title": "Projects",
-            "default": []
-          },
-          "job_files": {
-            "items": {
-              "$ref": "#/components/schemas/JobFileRead"
-            },
-            "type": "array",
-            "title": "Job Files",
-            "default": []
-          }
-        },
-        "type": "object",
-        "required": [
-          "client_id",
-          "created_by_user_id",
-          "name",
-          "id",
-          "lead_user_id",
-          "address",
-          "status",
-          "created_at",
-          "updated_at",
-          "client",
-          "org",
-          "created_by_user",
-          "lead_user"
-        ],
-        "title": "JobDetailRead",
-        "description": "For reading nested Job data, E.g. in a full page job view"
-      },
-      "JobFileRead": {
-        "properties": {
-          "file_name": {
-            "type": "string",
-            "title": "File Name"
-          },
-          "mime_type": {
-            "type": "string",
-            "title": "Mime Type"
-          },
-          "role": {
-            "$ref": "#/components/schemas/FileRole"
-          },
           "id": {
             "type": "integer",
             "title": "Id"
-          },
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          },
-          "file": {
-            "$ref": "#/components/schemas/FileRead"
-          },
-          "added_by_user_name": {
-            "type": "string",
-            "title": "Added By User Name"
-          },
-          "created_at": {
-            "type": "string",
-            "title": "Created At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "file_name",
-          "mime_type",
-          "role",
-          "id",
-          "job_id",
-          "file",
-          "added_by_user_name",
-          "created_at"
-        ],
-        "title": "JobFileRead",
-        "description": "For reading JobFile data, we always want full file data."
-      },
-      "JobRead": {
-        "properties": {
-          "org_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Org Id"
           },
           "client_id": {
             "type": "integer",
@@ -1432,14 +2051,6 @@
           "created_by_user_id": {
             "type": "integer",
             "title": "Created By User Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
           },
           "lead_user_id": {
             "anyOf": [
@@ -1452,64 +2063,28 @@
             ],
             "title": "Lead User Id"
           },
-          "address": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status"
-          },
           "created_at": {
             "type": "string",
             "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Updated At"
-          },
-          "client": {
-            "$ref": "#/components/schemas/JobClientRead"
           }
         },
         "type": "object",
         "required": [
-          "client_id",
-          "created_by_user_id",
           "name",
           "id",
+          "client_id",
+          "created_by_user_id",
           "lead_user_id",
-          "address",
-          "status",
           "created_at",
-          "updated_at",
-          "client"
+          "updated_at"
         ],
-        "title": "JobRead",
-        "description": "For reading Job metadata. E.g. in a list or table view,"
+        "title": "JobRead"
       },
       "JobStatus": {
         "type": "string",
@@ -1521,115 +2096,185 @@
         ],
         "title": "JobStatus"
       },
-      "LatestArtefactResponse": {
-        "properties": {
-          "download_url": {
-            "type": "string",
-            "title": "Download Url"
-          },
-          "preview_url": {
-            "type": "string",
-            "title": "Preview Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "download_url",
-          "preview_url"
-        ],
-        "title": "LatestArtefactResponse"
-      },
-      "LoginRequest": {
-        "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
-        "title": "LoginRequest"
-      },
-      "MessageResponse": {
-        "properties": {
-          "message": {
-            "type": "string",
-            "title": "Message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "MessageResponse"
-      },
-      "OrgRead": {
+      "JobUpdate": {
         "properties": {
           "name": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Name"
           },
           "address": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Address"
           },
-          "id": {
-            "type": "integer",
-            "title": "Id"
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
-          "created_at": {
-            "type": "string",
-            "title": "Created At"
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
           },
-          "updated_at": {
-            "type": "string",
-            "title": "Updated At"
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
           }
         },
         "type": "object",
         "required": [
           "name",
           "address",
-          "id",
-          "created_at",
-          "updated_at"
+          "status",
+          "client_id",
+          "lead_user_id"
         ],
-        "title": "OrgRead",
-        "description": "For reading Org metadata."
-      },
-      "PresignedPut": {
-        "properties": {
-          "file": {
-            "$ref": "#/components/schemas/FileInput"
-          },
-          "put_url": {
-            "type": "string",
-            "title": "Put Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "file",
-          "put_url"
-        ],
-        "title": "PresignedPut"
+        "title": "JobUpdate"
       },
       "ProjectCreate": {
         "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours",
+            "default": 0.0
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage",
+            "default": 0.0
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount",
+            "default": 0.0
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount",
+            "default": 0.0
+          },
+          "fee_type": {
+            "$ref": "#/components/schemas/FeeType"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
+          },
           "job_id": {
             "type": "integer",
             "title": "Job Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
           },
           "project_type_id": {
             "anyOf": [
@@ -1641,305 +2286,90 @@
               }
             ],
             "title": "Project Type Id"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate"
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours"
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage"
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount"
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount"
-          },
-          "fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
         "required": [
-          "job_id",
-          "name"
-        ],
-        "title": "ProjectCreate",
-        "description": "For creating new Projects."
-      },
-      "ProjectDetailRead": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          },
-          "job_name": {
-            "type": "string",
-            "title": "Job Name"
-          },
-          "project_type_id": {
-            "type": "integer",
-            "title": "Project Type Id"
-          },
-          "project_type_name": {
-            "type": "string",
-            "title": "Project Type Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "created_at": {
-            "type": "string",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "job": {
-            "$ref": "#/components/schemas/JobRead"
-          },
-          "project_type": {
-            "$ref": "#/components/schemas/ProjectTypeRead"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate"
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours"
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage"
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount"
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount"
-          },
-          "fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
           "name",
-          "job_id",
-          "job_name",
-          "project_type_id",
-          "project_type_name",
           "description",
-          "created_at",
-          "updated_at",
-          "status",
-          "job",
-          "project_type"
+          "fee_type",
+          "job_id"
         ],
-        "title": "ProjectDetailRead",
-        "description": "For reading nested Project data."
+        "title": "ProjectCreate"
       },
       "ProjectRead": {
         "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
           "name": {
             "type": "string",
+            "maxLength": 255,
             "title": "Name"
           },
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          },
-          "job_name": {
-            "type": "string",
-            "title": "Job Name"
-          },
-          "project_type_id": {
-            "type": "integer",
-            "title": "Project Type Id"
-          },
-          "project_type_name": {
-            "type": "string",
-            "title": "Project Type Name"
-          },
           "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Description"
           },
-          "created_at": {
-            "type": "string",
-            "title": "Created At"
-          },
-          "updated_at": {
+          "rate": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "number"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Updated At"
+            "title": "Rate",
+            "default": 0.0
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours",
+            "default": 0.0
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage",
+            "default": 0.0
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount",
+            "default": 0.0
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount",
+            "default": 0.0
+          },
+          "fee_type": {
+            "$ref": "#/components/schemas/FeeType"
           },
           "status": {
             "anyOf": [
@@ -1950,23 +2380,51 @@
                 "type": "null"
               }
             ]
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "project_type_id": {
+            "type": "integer",
+            "title": "Project Type Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
           }
         },
         "type": "object",
         "required": [
-          "id",
           "name",
-          "job_id",
-          "job_name",
-          "project_type_id",
-          "project_type_name",
           "description",
+          "fee_type",
+          "id",
+          "project_type_id",
           "created_at",
-          "updated_at",
-          "status"
+          "updated_at"
         ],
-        "title": "ProjectRead",
-        "description": "For reading Project metadata."
+        "title": "ProjectRead"
       },
       "ProjectStatus": {
         "type": "string",
@@ -1980,12 +2438,70 @@
       },
       "ProjectTypeRead": {
         "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
           "id": {
             "type": "integer",
             "title": "Id"
           },
-          "name": {
+          "created_at": {
             "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ProjectTypeRead"
+      },
+      "ProjectUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Name"
           },
           "description": {
@@ -2009,116 +2525,168 @@
               }
             ],
             "title": "Rate"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "description"
-        ],
-        "title": "ProjectTypeRead",
-        "description": "For reading ProjectType metadata."
-      },
-      "RegisterFilesRequest": {
-        "properties": {
-          "files": {
-            "items": {
-              "$ref": "#/components/schemas/FileInput"
-            },
-            "type": "array",
-            "title": "Files"
-          }
-        },
-        "type": "object",
-        "required": [
-          "files"
-        ],
-        "title": "RegisterFilesRequest"
-      },
-      "RegisterFilesResponse": {
-        "properties": {
-          "files": {
-            "items": {
-              "$ref": "#/components/schemas/FileRead"
-            },
-            "type": "array",
-            "title": "Files"
-          }
-        },
-        "type": "object",
-        "required": [
-          "files"
-        ],
-        "title": "RegisterFilesResponse"
-      },
-      "RunStatusResponse": {
-        "properties": {
-          "run_id": {
-            "type": "integer",
-            "title": "Run Id"
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours"
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage"
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount"
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount"
+          },
+          "fee_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "status": {
-            "type": "string",
-            "title": "Status"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
-          "upload_progress": {
-            "type": "integer",
-            "title": "Upload Progress"
-          },
-          "model_responses": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Model Responses"
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
           }
         },
         "type": "object",
-        "required": [
-          "run_id",
-          "status",
-          "upload_progress",
-          "model_responses"
-        ],
-        "title": "RunStatusResponse"
+        "title": "ProjectUpdate"
       },
-      "SignupRequest": {
+      "RunCreate": {
         "properties": {
-          "email": {
-            "type": "string",
-            "title": "Email"
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
           },
-          "password": {
-            "type": "string",
-            "title": "Password"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "email",
-          "password",
-          "name"
-        ],
-        "title": "SignupRequest"
-      },
-      "StartRunRequest": {
-        "properties": {
-          "template_id": {
+          "template_file_id": {
             "type": "integer",
-            "title": "Template Id"
+            "title": "Template File Id"
           },
           "context_file_ids": {
             "items": {
               "type": "integer"
             },
             "type": "array",
-            "title": "Context File Ids",
+            "title": "Context File Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_file_id",
+          "context_file_ids"
+        ],
+        "title": "RunCreate"
+      },
+      "RunRead": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/RunStatus",
+            "default": "idle"
+          },
+          "upload_progress": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upload Progress"
+          },
+          "model_responses": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Responses",
             "default": []
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_by_user_id": {
+            "type": "integer",
+            "title": "Created By User Id"
+          },
+          "org_id": {
+            "type": "integer",
+            "title": "Org Id"
+          },
+          "template_file_id": {
+            "type": "integer",
+            "title": "Template File Id"
           },
           "job_id": {
             "anyOf": [
@@ -2130,92 +2698,135 @@
               }
             ],
             "title": "Job Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
           }
         },
         "type": "object",
         "required": [
-          "template_id"
+          "id",
+          "created_by_user_id",
+          "org_id",
+          "template_file_id",
+          "created_at",
+          "updated_at"
         ],
-        "title": "StartRunRequest"
+        "title": "RunRead"
       },
-      "StartRunResponse": {
-        "properties": {
-          "run_id": {
-            "type": "integer",
-            "title": "Run Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "run_id"
+      "RunStatus": {
+        "type": "string",
+        "enum": [
+          "idle",
+          "presigning",
+          "uploading",
+          "generating",
+          "finalising",
+          "completed",
+          "error"
         ],
-        "title": "StartRunResponse"
+        "title": "RunStatus"
       },
-      "UserRead": {
+      "UserLogin": {
         "properties": {
           "email": {
             "type": "string",
             "format": "email",
             "title": "Email"
           },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "UserLogin"
+      },
+      "UserRead": {
+        "properties": {
           "name": {
             "type": "string",
+            "maxLength": 255,
             "title": "Name"
           },
-          "role": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "member",
-                  "admin"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Role",
-            "default": "member"
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
           },
           "id": {
             "type": "integer",
             "title": "Id"
           },
           "org_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "integer",
             "title": "Org Id"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
           }
         },
         "type": "object",
         "required": [
-          "email",
           "name",
-          "id"
+          "email",
+          "id",
+          "org_id",
+          "role"
         ],
         "title": "UserRead"
       },
-      "UserUpdate": {
+      "UserRegister": {
         "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
           "email": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "email"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "email",
             "title": "Email"
           },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "org_name": {
+            "type": "string",
+            "title": "Org Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "password",
+          "org_name"
+        ],
+        "title": "UserRegister"
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "member",
+          "admin"
+        ],
+        "title": "UserRole"
+      },
+      "UserUpdate": {
+        "properties": {
           "name": {
             "anyOf": [
               {
@@ -2226,6 +2837,17 @@
               }
             ],
             "title": "Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
           },
           "password": {
             "anyOf": [
@@ -2241,17 +2863,12 @@
           "role": {
             "anyOf": [
               {
-                "type": "string",
-                "enum": [
-                  "member",
-                  "admin"
-                ]
+                "$ref": "#/components/schemas/UserRole"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Role"
+            ]
           }
         },
         "type": "object",

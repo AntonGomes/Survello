@@ -1,3 +1,4 @@
+from uuid import uuid4
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
@@ -13,7 +14,7 @@ from app.models.file_model import (
 router = APIRouter()
 
 
-@router.post("/presign", response_model=list[FilePresignResponse])
+@router.post("/presign", response_model=list[FilePresignResponse], status_code=status.HTTP_200_OK, operation_id="generateFileUploadUrls")
 def generate_upload_urls(
     files: list[FilePresignRequest],
     storage: StorageDep,
@@ -25,7 +26,7 @@ def generate_upload_urls(
     response: list[FilePresignResponse] = []
 
     for f in files:
-        storage_key = f"{user.org_id}/{user.id}/{f.client_id}-{f.file_name}"
+        storage_key = f"{user.org_id}/{user.id}/{f.client_id}-{f.file_name}-{uuid4()}"
 
         url = storage.generate_presigned_url(
             "put_object",
@@ -40,7 +41,7 @@ def generate_upload_urls(
     return response
 
 
-@router.post("/", response_model=FileRead, status_code=status.HTTP_201_CREATED)
+@router.post("/single", response_model=FileRead, status_code=status.HTTP_201_CREATED, operation_id="createFile")
 def create_file(
     file_in: FileCreate,
     db: DBDep,
@@ -63,7 +64,7 @@ def create_file(
     return db_file  # pyright: ignore[reportReturnType]
 
 
-@router.post("/", response_model=list[FileRead], status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=list[FileRead], status_code=status.HTTP_201_CREATED, operation_id="createFiles")
 def create_files(
     files_in: list[FileCreate],
     db: DBDep,
@@ -89,7 +90,7 @@ def create_files(
     return files  # pyright: ignore[reportReturnType]
 
 
-@router.get("/{file_id}", response_model=FileRead)
+@router.get("/{file_id}", response_model=FileRead, operation_id="readFile")
 def read_file(
     file_id: int,
     db: DBDep,
@@ -106,7 +107,37 @@ def read_file(
     return file  # pyright: ignore[reportReturnType]
 
 
-@router.get("/", response_model=list[FileRead])
+@router.get("/{file_id}/download", response_model=str, operation_id="generateFileDownloadUrl")
+def generate_download_url(
+    file_id: int,
+    db: DBDep,
+    storage: StorageDep,
+    current_user: CurrentUserDep,
+    inline: bool = False,
+) -> str:
+    """
+    Generate a presigned download URL for a file.
+    
+    Args:
+        inline: If True, sets content-disposition to inline (for browser preview).
+               If False (default), sets to attachment (for download).
+    """
+    file = db.get(File, file_id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    if file.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    return storage.generate_presigned_url(
+        "get_object", 
+        storage_key=file.storage_key,
+        mime_type=file.mime_type,
+        file_name=file.file_name,
+        inline=inline
+    )
+
+
+@router.get("/", response_model=list[FileRead], operation_id="readFiles")
 def read_files(
     db: DBDep,
     current_user: CurrentUserDep,

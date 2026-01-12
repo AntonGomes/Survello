@@ -6,7 +6,7 @@ from app.models.job_model import Job, JobCreate, JobRead, JobUpdate
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=JobRead)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=JobRead, operation_id="createJob")
 def create_job(
     job_in: JobCreate,
     current_user: CurrentUserDep,
@@ -20,7 +20,7 @@ def create_job(
     return job  # pyright: ignore[reportReturnType]
 
 
-@router.get("/", response_model=list[JobRead])
+@router.get("/", response_model=list[JobRead], operation_id="readJobs")
 def read_jobs(
     current_user: CurrentUserDep,
     db: DBDep,
@@ -33,7 +33,7 @@ def read_jobs(
     return jobs  # pyright: ignore[reportReturnType]
 
 
-@router.get("/{job_id}", response_model=JobRead)
+@router.get("/{job_id}", response_model=JobRead, operation_id="readJob")
 def read_job(
     job_id: int,
     db: DBDep,
@@ -47,7 +47,7 @@ def read_job(
     return job  # pyright: ignore[reportReturnType]
 
 
-@router.patch("/{job_id}", response_model=JobRead)
+@router.patch("/{job_id}", response_model=JobRead, operation_id="updateJob")
 def update_job(
     job_id: int,
     job_in: JobUpdate,
@@ -68,7 +68,7 @@ def update_job(
     return job  # pyright: ignore[reportReturnType]
 
 
-@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="deleteJob")
 def delete_job(
     job_id: int,
     db: DBDep,

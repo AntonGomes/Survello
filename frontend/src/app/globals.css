@@ -1,0 +1,84 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Brand Palette */
+  --brand-primary: #154c7a;
+  --brand-secondary: #efcc57;
+  --brand-tertiary: #53a255;
+  --brand-black: #000000;
+  --brand-white: #ffffff;
+
+  /* UI Semantics Default (Light/App) */
+  --background: var(--brand-white);
+  --foreground: var(--brand-primary);
+  
+  --card: var(--brand-white);
+  --card-foreground: var(--brand-primary);
+  
+  --popover: var(--brand-white);
+  --popover-foreground: var(--brand-primary);
+  
+  --primary: var(--brand-primary);
+  --primary-foreground: var(--brand-white);
+  
+  --secondary: var(--brand-secondary);
+  --secondary-foreground: var(--brand-black);
+  
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  
+  --accent: var(--brand-tertiary);
+  --accent-foreground: var(--brand-white);
+  
+  --destructive: #ef4444;
+  --destructive-foreground: var(--brand-white);
+
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: var(--brand-primary);
+  
+  --radius: 0.5rem;
+}
+
+@theme {
+  --font-serif: var(--font-tiempos), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+}
+
+.font-tiempos {
+  font-family: var(--font-tiempos), "Times New Roman", Times, serif;
+}

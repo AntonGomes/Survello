@@ -11,5 +11,7 @@ fmt-check:
 
 test:
 	uv run pytest
+run:
+	uv run python -m uvicorn app.main:app --reload
 
 ci: lint fmt-check test

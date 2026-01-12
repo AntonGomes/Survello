@@ -118,3 +118,7 @@ class Session(SessionBase, table=True):
 
 class SessionCreate(SessionBase):
     user_id: int
+
+class UserRegister(UserBase):
+    password: str
+    org_name: str

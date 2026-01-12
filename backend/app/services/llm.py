@@ -80,7 +80,7 @@ class OpenAIService(BaseLLMService):
 
     def __init__(self, client: OpenAI) -> None:
         self.client = client
-        self._http = client._client  # type: ignore
+        self._http = client._client  
 
     def _headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.client.api_key}"}
@@ -92,7 +92,7 @@ class OpenAIService(BaseLLMService):
         bio.name = name
         file_id = self.client.files.create(file=bio, purpose="user_data").id
 
-        container = self.client.containers.create(name=f"survello-{run_id}")  # type: ignore
+        container = self.client.containers.create(name=f"survello-{run_id}")  
 
         resp = self._http.post(
             f"/containers/{container.id}/files",
@@ -111,7 +111,7 @@ class OpenAIService(BaseLLMService):
         content = [{"type": "input_text", "text": user}]
         content += [{"type": "input_file", "file_url": f.url} for f in files]
 
-        stream = self.client.responses.create(  # type: ignore
+        stream = self.client.responses.create(  
             model=self.MODEL,
             instructions=system,
             input=[{"role": "user", "content": content}],  # pyright: ignore[reportArgumentType]

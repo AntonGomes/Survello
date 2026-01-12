@@ -10,6 +10,7 @@ from app.models.run_model import (
     RunCreate,
     RunRead,
 )
+from app.models.artefact_model import Artefact
 
 
 router = APIRouter()
@@ -56,6 +57,23 @@ def read_run(
     if run.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
     return run
+
+
+@router.get("/{run_id}/artefacts", response_model=list[Artefact], operation_id="readRunArtefacts")
+def read_run_artefacts(
+    run_id: int,
+    db: DBDep,
+    current_user: CurrentUserDep,
+) -> list[Artefact]:
+    """
+    Retrieve artefacts for a run.
+    """
+    run = db.get(Run, run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    if run.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return run.artefacts
 
 
 @router.get("/", response_model=RunRead, operation_id="readRuns")
