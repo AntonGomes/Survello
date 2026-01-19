@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     )
 
     # OpenAI / App
-    openai_api_key: str = Field(..., alias="OPENAI_API_KEY")
+    openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     container_prefix: str = Field(default="docgen")
 
     # AWS and S3

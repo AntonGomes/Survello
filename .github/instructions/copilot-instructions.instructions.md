@@ -1,8 +1,122 @@
 ---
 applyTo: '**'
 ---
-The datamodels used to define the ORM with SQLModel (docs for this framework are outlined in agent_instructions/sqlmodel.md) are defined in backend/app/models. This is the source of truth for all data types in the project. These models are pydantic datamodels and their CRUD versions are directly returned by the api routes defined in backend/app/api/routes. Using the openapi specification from these types provided by FastAPI, we HeyAPI with the tanstadck query plugin to generate the types and react query hooks used in the frontend. Therefore, any changes to data types must be made in the backend models first, and then the frontend types and hooks can be regenerated using the CLI command `./sync-types` from the root directory. Do not manually edit the generated types or hooks in the frontend, as these will be overwritten the next time the client is generated.
+## Global Instructions
 
-You may edit the models when asked, but soudl also consider the downstream repercussions on the backend tests and the frontend types and hooks. Run the tests and ci in the backend after making changes with `make ci` from the backend directory to ensure nothing is broken. Similalry run `npm run type-check` and `npm run lint` from the frontend directory to ensure the frontend is not broken.
+These instructions apply to the entire repository.
 
-For frontend developement, we are always using components from shadcn, the main set of components have been installed at frontend/src/components/ui. When creating new components, prefer to use and compose these existing components where possible to ensure consistency in design. If you need a new component that does not exist, create it in the ui directory following the same patterns as the existing components or search online at https://github.com/shadcn-ui/ui.
+---
+
+## Backend Execution
+
+* To run any Python script on the backend, always use:
+
+  ```
+  uv run <script>
+  ```
+
+---
+
+## Data Models and Types, Source of Truth
+
+* All data models are defined using **SQLModel** in:
+
+  ```
+  backend/app/models
+  ```
+* These models are the **single source of truth** for all data types in the project.
+* The models are Pydantic based and their CRUD schemas are returned directly by the FastAPI routes in:
+
+  ```
+  backend/app/api/routes
+  ```
+
+---
+
+## API, Type Generation, and Frontend Sync
+
+* The FastAPI OpenAPI specification is used with **HeyAPI** and the **TanStack Query plugin** to generate:
+
+  * TypeScript types
+  * React Query hooks
+* These generated files are used by the frontend.
+
+### Important Rules
+
+* **Never manually edit generated frontend types or hooks.**
+* Any change to data types must follow this order:
+
+  1. Update backend models
+  2. Regenerate frontend types and hooks using:
+
+     ```
+     ./sync-types
+     ```
+* Manual edits to generated files will be overwritten.
+
+---
+
+## Modifying Models Safely
+
+* You may edit backend models when requested.
+* Always consider downstream impact:
+
+  * Backend tests
+  * Frontend generated types
+  * Frontend query hooks
+
+### Required Validation Steps After Model Changes
+
+* From the backend directory:
+
+  ```
+  make ci
+  ```
+* From the frontend directory:
+
+  ```
+  npm run type-check
+  npm run lint
+  ```
+
+---
+
+## Testing Requirements
+
+* Backend tests currently provide basic smoke test coverage for all endpoints.
+* Whenever you implement a new feature:
+
+  * Write **simple, readable smoke tests**
+  * Tests should be capable of failing if the feature is broken
+  * Do not write tests that are guaranteed to pass
+
+---
+
+## Frontend Development Guidelines
+
+* Always use **shadcn/ui** components where possible.
+* Core UI components live in:
+
+  ```
+  frontend/src/components/ui
+  ```
+
+### Creating New Components
+
+* Prefer composing existing shadcn components for consistency.
+* If a required component does not exist:
+
+  * Create it inside the `ui` directory
+  * Follow the same patterns as existing components
+  * You may reference:
+
+    ```
+    https://github.com/shadcn-ui/ui
+    ```
+
+---
+
+## Design Consistency
+
+* Maintain consistent styling, structure, and interaction patterns across the frontend.
+* Avoid introducing custom components when an existing shadcn component can be reused or extended.
