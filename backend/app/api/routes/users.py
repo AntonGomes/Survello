@@ -3,46 +3,10 @@ from typing import Any
 from sqlmodel import select
 
 from app.api.deps import DBDep, CurrentUserDep
-from app.models.user_model import (
-    User,
-    UserRead,
-    UserUpdate,
-    UserRegister,
-    Org,
-    UserRole,
-)
+from app.models.user_model import User, UserRead, UserUpdate
 from app.core.security import hash_password
 
 router = APIRouter()
-
-
-@router.post("/", response_model=UserRead, operation_id="registerUser")
-def register_user(user_in: UserRegister, db: DBDep):
-    """
-    Register a new user.
-    """
-    existing_user = db.exec(select(User).where(User.email == user_in.email)).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    # Create Org
-    org = Org(name=user_in.org_name)
-    db.add(org)
-    db.commit()
-    db.refresh(org)
-
-    hashed_password = hash_password(user_in.password)
-    user = User(
-        name=user_in.name,
-        email=user_in.email,
-        password_hash=hashed_password,
-        org_id=org.id,
-        role=UserRole.ADMIN,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
 
 
 @router.get("/me", response_model=UserRead, operation_id="readUserMe")

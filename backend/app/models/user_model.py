@@ -124,3 +124,79 @@ class SessionCreate(SessionBase):
 class UserRegister(UserBase):
     password: str
     org_name: str
+
+
+# -----------------------------------------------------------------------------
+# INVITATION MODELS
+# -----------------------------------------------------------------------------
+class InvitationStatus(str, Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    EXPIRED = "expired"
+
+
+class Invitation(SQLModel, table=True):
+    __tablename__ = "invitations"  # pyright: ignore[reportAssignmentType]
+    id: int | None = Field(default=None, primary_key=True)
+    email: EmailStr = Field(sa_type=AutoString, index=True)
+    token: str = Field(max_length=255, unique=True, index=True)
+    status: InvitationStatus = Field(
+        default=InvitationStatus.PENDING, sa_type=AutoString
+    )
+    org_id: int = Field(foreign_key="orgs.id")
+    invited_by_user_id: int = Field(foreign_key="users.id")
+    role: UserRole = Field(default=UserRole.MEMBER, sa_type=AutoString)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: datetime = Field(nullable=False)
+
+    # Relationships
+    org: Org = Relationship()
+    invited_by: User = Relationship()
+
+
+class InvitationCreate(SQLModel):
+    email: EmailStr
+    role: UserRole = UserRole.MEMBER
+
+
+class InvitationRead(SQLModel):
+    id: int
+    email: str
+    status: InvitationStatus
+    role: UserRole
+    created_at: datetime
+    expires_at: datetime
+
+
+class InvitationPublic(SQLModel):
+    """Public info shown to invited user (no sensitive data)"""
+
+    email: str
+    org_name: str
+    invited_by_name: str
+    expires_at: datetime
+
+
+class InvitationAccept(SQLModel):
+    token: str
+    name: str
+    password: str
+
+
+# -----------------------------------------------------------------------------
+# ORG USER MANAGEMENT
+# -----------------------------------------------------------------------------
+class OrgUserRead(SQLModel):
+    """User info for org management (admins viewing org members)"""
+
+    id: int
+    name: str
+    email: str
+    role: UserRole
+    created_at: datetime
+
+
+class OrgReadWithUsers(OrgBase):
+    id: int
+    created_at: datetime
+    users: list[OrgUserRead] = []

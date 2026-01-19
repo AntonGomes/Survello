@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from functools import lru_cache
+from typing import Any
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,7 +12,10 @@ class Settings(BaseSettings):
     """Application configuration loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        arbitrary_types_allowed=True, env_file=".env", extra="ignore"
+        arbitrary_types_allowed=True,
+        env_file=".env",
+        extra="ignore",
+        env_parse_none_str="null",
     )
 
     # OpenAI / App
@@ -38,6 +43,31 @@ class Settings(BaseSettings):
     # Feature Flags / Mocks
     use_mock_llm: bool = Field(default=False, alias="USE_MOCK_LLM")
     use_mock_storage: bool = Field(default=False, alias="USE_MOCK_STORAGE")
+
+    # Email / Resend Settings
+    resend_api_key: str | None = Field(default=None, alias="RESEND_API_KEY")
+    email_from: str = Field(default="noreply@survello.com", alias="EMAIL_FROM")
+    email_from_name: str = Field(default="Survello", alias="EMAIL_FROM_NAME")
+
+    # Frontend URL (for email links)
+    frontend_url: str = Field(default="http://localhost:3000", alias="FRONTEND_URL")
+
+    # Invitation settings
+    invitation_expire_days: int = Field(default=7, alias="INVITATION_EXPIRE_DAYS")
+
+    # Testing - whitelist emails that bypass uniqueness checks
+    test_email_whitelist: list[str] = Field(default=[], alias="TEST_EMAIL_WHITELIST")
+
+    @field_validator("test_email_whitelist", mode="before")
+    @classmethod
+    def parse_email_whitelist(cls, v: Any) -> list[str]:
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                # If not valid JSON, treat as comma-separated
+                return [email.strip() for email in v.split(",") if email.strip()]
+        return v or []
 
     @property
     def db_url(self) -> str:

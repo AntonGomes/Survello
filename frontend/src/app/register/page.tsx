@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { ArrowRight, UserPlus, X } from "lucide-react";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -16,13 +19,40 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // Team invites
+  const [wantsToInvite, setWantsToInvite] = useState(false);
+  const [inviteEmails, setInviteEmails] = useState<string[]>([""]);
+
+  const addInviteEmail = () => {
+    setInviteEmails([...inviteEmails, ""]);
+  };
+
+  const removeInviteEmail = (index: number) => {
+    setInviteEmails(inviteEmails.filter((_, i) => i !== index));
+  };
+
+  const updateInviteEmail = (index: number, value: string) => {
+    const updated = [...inviteEmails];
+    updated[index] = value;
+    setInviteEmails(updated);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      await register({ name, email, password, org_name: orgName });
+      const validInviteEmails = wantsToInvite 
+        ? inviteEmails.filter(e => e.trim()) 
+        : [];
+      await register({ 
+        name, 
+        email, 
+        password, 
+        org_name: orgName,
+        inviteEmails: validInviteEmails,
+      });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -92,12 +122,75 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={8}
               />
+            </div>
+
+            {/* Invite Team Option */}
+            <div className="pt-4 border-t">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="invite-team"
+                  checked={wantsToInvite}
+                  onCheckedChange={(checked) => setWantsToInvite(checked === true)}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <Label
+                    htmlFor="invite-team"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    Invite team members
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Send invitations to your team after signing up
+                  </p>
+                </div>
+              </div>
+
+              {wantsToInvite && (
+                <div className="mt-4 space-y-3">
+                  {inviteEmails.map((inviteEmail, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        type="email"
+                        placeholder="colleague@example.com"
+                        value={inviteEmail}
+                        onChange={(e) => updateInviteEmail(index, e.target.value)}
+                      />
+                      {inviteEmails.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeInviteEmail(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addInviteEmail}
+                    className="w-full"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add another
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Sign Up"}
+              {loading ? "Creating account..." : (
+                <>
+                  Sign Up
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
             <div className="text-sm text-center text-gray-500">
               Already have an account?{" "}

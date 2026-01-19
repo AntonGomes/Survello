@@ -15,6 +15,8 @@ from app.api.routes.leads import router as leads_router
 from app.api.routes.quotes import router as quotes_router
 from app.api.routes.surveys import router as surveys_router
 from app.api.routes.tasks import router as tasks_router
+from app.api.routes.invitations import router as invitations_router
+from app.api.routes.org import router as org_router
 
 from contextlib import asynccontextmanager
 from app.core.db import init_db
@@ -45,9 +47,12 @@ app.include_router(leads_router, prefix="/leads", tags=["Leads"])
 app.include_router(quotes_router, prefix="/quotes", tags=["Quotes"])
 app.include_router(surveys_router, prefix="/surveys", tags=["Surveys"])
 app.include_router(tasks_router, prefix="/tasks", tags=["Tasks"])
+app.include_router(invitations_router, prefix="/invitations", tags=["Invitations"])
+app.include_router(org_router, prefix="/org", tags=["Organization"])
 
 origins = [
     "http://localhost:3000",  # For local development
+    "http://localhost:3001",  # For local development
     "https://survello.vercel.app",  # Your Vercel production domain
     "https://survello-git-main.vercel.app",  # Your Vercel preview URLs (optional)
 ]

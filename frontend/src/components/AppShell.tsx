@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Briefcase,
+  Building2,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
 ];
 
 const BOTTOM_ITEMS = [
+  { label: "Organization", icon: Building2, href: "/app/organization" },
   { label: "Settings", icon: Settings, href: "/app/settings" },
   { label: "Account", icon: User, href: "/app/account" },
 ];

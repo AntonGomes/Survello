@@ -429,6 +429,97 @@ export type HttpValidationError = {
 };
 
 /**
+ * InvitationAccept
+ */
+export type InvitationAccept = {
+    /**
+     * Token
+     */
+    token: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
+ * InvitationCreate
+ */
+export type InvitationCreate = {
+    /**
+     * Email
+     */
+    email: string;
+    role?: UserRole;
+};
+
+/**
+ * InvitationPublic
+ *
+ * Public info shown to invited user (no sensitive data)
+ */
+export type InvitationPublic = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Org Name
+     */
+    org_name: string;
+    /**
+     * Invited By Name
+     */
+    invited_by_name: string;
+    /**
+     * Expires At
+     */
+    expires_at: string;
+};
+
+/**
+ * InvitationRead
+ */
+export type InvitationRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Email
+     */
+    email: string;
+    status: InvitationStatus;
+    role: UserRole;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Expires At
+     */
+    expires_at: string;
+};
+
+/**
+ * InvitationStatus
+ */
+export const InvitationStatus = {
+    PENDING: 'pending',
+    ACCEPTED: 'accepted',
+    EXPIRED: 'expired'
+} as const;
+
+/**
+ * InvitationStatus
+ */
+export type InvitationStatus = typeof InvitationStatus[keyof typeof InvitationStatus];
+
+/**
  * JobCreate
  */
 export type JobCreate = {
@@ -762,6 +853,53 @@ export type LeadUpdateEntry = {
      * Text
      */
     text: string;
+};
+
+/**
+ * OrgReadWithUsers
+ */
+export type OrgReadWithUsers = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Users
+     */
+    users?: Array<OrgUserRead>;
+};
+
+/**
+ * OrgUserRead
+ *
+ * User info for org management (admins viewing org members)
+ */
+export type OrgUserRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Email
+     */
+    email: string;
+    role: UserRole;
+    /**
+     * Created At
+     */
+    created_at: string;
 };
 
 /**
@@ -1794,6 +1932,31 @@ export type ValidationError = {
     type: string;
 };
 
+export type RegisterUserData = {
+    body: UserRegister;
+    path?: never;
+    query?: never;
+    url: '/auth/register';
+};
+
+export type RegisterUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RegisterUserError = RegisterUserErrors[keyof RegisterUserErrors];
+
+export type RegisterUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserRead;
+};
+
+export type RegisterUserResponse = RegisterUserResponses[keyof RegisterUserResponses];
+
 export type LoginUserData = {
     body: UserLogin;
     path?: never;
@@ -2527,31 +2690,6 @@ export type UpdateProjectResponses = {
 };
 
 export type UpdateProjectResponse = UpdateProjectResponses[keyof UpdateProjectResponses];
-
-export type RegisterUserData = {
-    body: UserRegister;
-    path?: never;
-    query?: never;
-    url: '/users/';
-};
-
-export type RegisterUserErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RegisterUserError = RegisterUserErrors[keyof RegisterUserErrors];
-
-export type RegisterUserResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserRead;
-};
-
-export type RegisterUserResponse = RegisterUserResponses[keyof RegisterUserResponses];
 
 export type ReadUserMeData = {
     body?: never;
@@ -3641,3 +3779,233 @@ export type ReorderTaskResponses = {
 };
 
 export type ReorderTaskResponse = ReorderTaskResponses[keyof ReorderTaskResponses];
+
+export type ReadInvitationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/invitations/';
+};
+
+export type ReadInvitationsResponses = {
+    /**
+     * Response Readinvitations
+     *
+     * Successful Response
+     */
+    200: Array<InvitationRead>;
+};
+
+export type ReadInvitationsResponse = ReadInvitationsResponses[keyof ReadInvitationsResponses];
+
+export type CreateInvitationData = {
+    body: InvitationCreate;
+    path?: never;
+    query?: never;
+    url: '/invitations/';
+};
+
+export type CreateInvitationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateInvitationError = CreateInvitationErrors[keyof CreateInvitationErrors];
+
+export type CreateInvitationResponses = {
+    /**
+     * Successful Response
+     */
+    200: InvitationRead;
+};
+
+export type CreateInvitationResponse = CreateInvitationResponses[keyof CreateInvitationResponses];
+
+export type VerifyInvitationData = {
+    body?: never;
+    path: {
+        /**
+         * Token
+         */
+        token: string;
+    };
+    query?: never;
+    url: '/invitations/verify/{token}';
+};
+
+export type VerifyInvitationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type VerifyInvitationError = VerifyInvitationErrors[keyof VerifyInvitationErrors];
+
+export type VerifyInvitationResponses = {
+    /**
+     * Successful Response
+     */
+    200: InvitationPublic;
+};
+
+export type VerifyInvitationResponse = VerifyInvitationResponses[keyof VerifyInvitationResponses];
+
+export type AcceptInvitationData = {
+    body: InvitationAccept;
+    path?: never;
+    query?: never;
+    url: '/invitations/accept';
+};
+
+export type AcceptInvitationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AcceptInvitationError = AcceptInvitationErrors[keyof AcceptInvitationErrors];
+
+export type AcceptInvitationResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserRead;
+};
+
+export type AcceptInvitationResponse = AcceptInvitationResponses[keyof AcceptInvitationResponses];
+
+export type ResendInvitationData = {
+    body?: never;
+    path: {
+        /**
+         * Invitation Id
+         */
+        invitation_id: number;
+    };
+    query?: never;
+    url: '/invitations/{invitation_id}/resend';
+};
+
+export type ResendInvitationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResendInvitationError = ResendInvitationErrors[keyof ResendInvitationErrors];
+
+export type ResendInvitationResponses = {
+    /**
+     * Successful Response
+     */
+    200: InvitationRead;
+};
+
+export type ResendInvitationResponse = ResendInvitationResponses[keyof ResendInvitationResponses];
+
+export type DeleteInvitationData = {
+    body?: never;
+    path: {
+        /**
+         * Invitation Id
+         */
+        invitation_id: number;
+    };
+    query?: never;
+    url: '/invitations/{invitation_id}';
+};
+
+export type DeleteInvitationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteInvitationError = DeleteInvitationErrors[keyof DeleteInvitationErrors];
+
+export type DeleteInvitationResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ReadOrgData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/org/';
+};
+
+export type ReadOrgResponses = {
+    /**
+     * Successful Response
+     */
+    200: OrgReadWithUsers;
+};
+
+export type ReadOrgResponse = ReadOrgResponses[keyof ReadOrgResponses];
+
+export type RemoveOrgUserData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: number;
+    };
+    query?: never;
+    url: '/org/users/{user_id}';
+};
+
+export type RemoveOrgUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RemoveOrgUserError = RemoveOrgUserErrors[keyof RemoveOrgUserErrors];
+
+export type RemoveOrgUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type UpdateOrgUserData = {
+    body: UserUpdate;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: number;
+    };
+    query?: never;
+    url: '/org/users/{user_id}';
+};
+
+export type UpdateOrgUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateOrgUserError = UpdateOrgUserErrors[keyof UpdateOrgUserErrors];
+
+export type UpdateOrgUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserRead;
+};
+
+export type UpdateOrgUserResponse = UpdateOrgUserResponses[keyof UpdateOrgUserResponses];

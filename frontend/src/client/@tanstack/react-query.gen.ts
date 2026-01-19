@@ -3,8 +3,27 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { addJobUpdate, addLeadUpdate, addQuoteLine, addQuoteUpdate, convertLead, convertQuote, createClient, createClientContact, createFile, createFiles, createJob, createLead, createProject, createProjectType, createQuote, createRun, createSurvey, createTask, deleteClient, deleteJob, deleteLead, deleteProject, deleteQuote, deleteSurvey, deleteTask, generateFileDownloadUrl, generateFileUploadUrls, getCurrentTimerTimeCurrentGet, loginUser, logoutUser, type Options, readClient, readClients, readFile, readFiles, readJob, readJobs, readLead, readLeads, readProject, readProjects, readProjectTypes, readQuote, readQuotes, readRun, readRunArtefacts, readRuns, readSurvey, readSurveys, readTask, readTasks, readUserMe, registerUser, reorderTask, startTimerTimeStartPost, stopTimerTimeStopPost, updateClient, updateJob, updateLead, updateProject, updateQuote, updateSurvey, updateTask, updateUserMe } from '../sdk.gen';
-import type { AddJobUpdateData, AddJobUpdateError, AddJobUpdateResponse, AddLeadUpdateData, AddLeadUpdateError, AddLeadUpdateResponse, AddQuoteLineData, AddQuoteLineError, AddQuoteLineResponse, AddQuoteUpdateData, AddQuoteUpdateError, AddQuoteUpdateResponse, ConvertLeadData, ConvertLeadError, ConvertLeadResponse2, ConvertQuoteData, ConvertQuoteError, ConvertQuoteResponse2, CreateClientContactData, CreateClientContactError, CreateClientContactResponse, CreateClientData, CreateClientError, CreateClientResponse, CreateFileData, CreateFileError, CreateFileResponse, CreateFilesData, CreateFilesError, CreateFilesResponse, CreateJobData, CreateJobError, CreateJobResponse, CreateLeadData, CreateLeadError, CreateLeadResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateProjectTypeData, CreateProjectTypeError, CreateProjectTypeResponse, CreateQuoteData, CreateQuoteError, CreateQuoteResponse, CreateRunData, CreateRunError, CreateRunResponse, CreateSurveyData, CreateSurveyError, CreateSurveyResponse, CreateTaskData, CreateTaskError, CreateTaskResponse, DeleteClientData, DeleteClientError, DeleteClientResponse, DeleteJobData, DeleteJobError, DeleteJobResponse, DeleteLeadData, DeleteLeadError, DeleteLeadResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteQuoteData, DeleteQuoteError, DeleteQuoteResponse, DeleteSurveyData, DeleteSurveyError, DeleteSurveyResponse, DeleteTaskData, DeleteTaskError, DeleteTaskResponse, GenerateFileDownloadUrlData, GenerateFileDownloadUrlError, GenerateFileDownloadUrlResponse, GenerateFileUploadUrlsData, GenerateFileUploadUrlsError, GenerateFileUploadUrlsResponse, GetCurrentTimerTimeCurrentGetData, GetCurrentTimerTimeCurrentGetResponse, LoginUserData, LoginUserError, LogoutUserData, LogoutUserError, ReadClientData, ReadClientError, ReadClientResponse, ReadClientsData, ReadClientsError, ReadClientsResponse, ReadFileData, ReadFileError, ReadFileResponse, ReadFilesData, ReadFilesError, ReadFilesResponse, ReadJobData, ReadJobError, ReadJobResponse, ReadJobsData, ReadJobsError, ReadJobsResponse, ReadLeadData, ReadLeadError, ReadLeadResponse, ReadLeadsData, ReadLeadsError, ReadLeadsResponse, ReadProjectData, ReadProjectError, ReadProjectResponse, ReadProjectsData, ReadProjectsError, ReadProjectsResponse, ReadProjectTypesData, ReadProjectTypesResponse, ReadQuoteData, ReadQuoteError, ReadQuoteResponse, ReadQuotesData, ReadQuotesError, ReadQuotesResponse, ReadRunArtefactsData, ReadRunArtefactsError, ReadRunArtefactsResponse, ReadRunData, ReadRunError, ReadRunResponse, ReadRunsData, ReadRunsError, ReadRunsResponse, ReadSurveyData, ReadSurveyError, ReadSurveyResponse, ReadSurveysData, ReadSurveysError, ReadSurveysResponse, ReadTaskData, ReadTaskError, ReadTaskResponse, ReadTasksData, ReadTasksError, ReadTasksResponse, ReadUserMeData, ReadUserMeResponse, RegisterUserData, RegisterUserError, RegisterUserResponse, ReorderTaskData, ReorderTaskError, ReorderTaskResponse, StartTimerTimeStartPostData, StartTimerTimeStartPostError, StartTimerTimeStartPostResponse, StopTimerTimeStopPostData, StopTimerTimeStopPostResponse, UpdateClientData, UpdateClientError, UpdateClientResponse, UpdateJobData, UpdateJobError, UpdateJobResponse, UpdateLeadData, UpdateLeadError, UpdateLeadResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateQuoteData, UpdateQuoteError, UpdateQuoteResponse, UpdateSurveyData, UpdateSurveyError, UpdateSurveyResponse, UpdateTaskData, UpdateTaskError, UpdateTaskResponse, UpdateUserMeData, UpdateUserMeError, UpdateUserMeResponse } from '../types.gen';
+import { acceptInvitation, addJobUpdate, addLeadUpdate, addQuoteLine, addQuoteUpdate, convertLead, convertQuote, createClient, createClientContact, createFile, createFiles, createInvitation, createJob, createLead, createProject, createProjectType, createQuote, createRun, createSurvey, createTask, deleteClient, deleteInvitation, deleteJob, deleteLead, deleteProject, deleteQuote, deleteSurvey, deleteTask, generateFileDownloadUrl, generateFileUploadUrls, getCurrentTimerTimeCurrentGet, loginUser, logoutUser, type Options, readClient, readClients, readFile, readFiles, readInvitations, readJob, readJobs, readLead, readLeads, readOrg, readProject, readProjects, readProjectTypes, readQuote, readQuotes, readRun, readRunArtefacts, readRuns, readSurvey, readSurveys, readTask, readTasks, readUserMe, registerUser, removeOrgUser, reorderTask, resendInvitation, startTimerTimeStartPost, stopTimerTimeStopPost, updateClient, updateJob, updateLead, updateOrgUser, updateProject, updateQuote, updateSurvey, updateTask, updateUserMe, verifyInvitation } from '../sdk.gen';
+import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, AddJobUpdateData, AddJobUpdateError, AddJobUpdateResponse, AddLeadUpdateData, AddLeadUpdateError, AddLeadUpdateResponse, AddQuoteLineData, AddQuoteLineError, AddQuoteLineResponse, AddQuoteUpdateData, AddQuoteUpdateError, AddQuoteUpdateResponse, ConvertLeadData, ConvertLeadError, ConvertLeadResponse2, ConvertQuoteData, ConvertQuoteError, ConvertQuoteResponse2, CreateClientContactData, CreateClientContactError, CreateClientContactResponse, CreateClientData, CreateClientError, CreateClientResponse, CreateFileData, CreateFileError, CreateFileResponse, CreateFilesData, CreateFilesError, CreateFilesResponse, CreateInvitationData, CreateInvitationError, CreateInvitationResponse, CreateJobData, CreateJobError, CreateJobResponse, CreateLeadData, CreateLeadError, CreateLeadResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateProjectTypeData, CreateProjectTypeError, CreateProjectTypeResponse, CreateQuoteData, CreateQuoteError, CreateQuoteResponse, CreateRunData, CreateRunError, CreateRunResponse, CreateSurveyData, CreateSurveyError, CreateSurveyResponse, CreateTaskData, CreateTaskError, CreateTaskResponse, DeleteClientData, DeleteClientError, DeleteClientResponse, DeleteInvitationData, DeleteInvitationError, DeleteJobData, DeleteJobError, DeleteJobResponse, DeleteLeadData, DeleteLeadError, DeleteLeadResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteQuoteData, DeleteQuoteError, DeleteQuoteResponse, DeleteSurveyData, DeleteSurveyError, DeleteSurveyResponse, DeleteTaskData, DeleteTaskError, DeleteTaskResponse, GenerateFileDownloadUrlData, GenerateFileDownloadUrlError, GenerateFileDownloadUrlResponse, GenerateFileUploadUrlsData, GenerateFileUploadUrlsError, GenerateFileUploadUrlsResponse, GetCurrentTimerTimeCurrentGetData, GetCurrentTimerTimeCurrentGetResponse, LoginUserData, LoginUserError, LogoutUserData, LogoutUserError, ReadClientData, ReadClientError, ReadClientResponse, ReadClientsData, ReadClientsError, ReadClientsResponse, ReadFileData, ReadFileError, ReadFileResponse, ReadFilesData, ReadFilesError, ReadFilesResponse, ReadInvitationsData, ReadInvitationsResponse, ReadJobData, ReadJobError, ReadJobResponse, ReadJobsData, ReadJobsError, ReadJobsResponse, ReadLeadData, ReadLeadError, ReadLeadResponse, ReadLeadsData, ReadLeadsError, ReadLeadsResponse, ReadOrgData, ReadOrgResponse, ReadProjectData, ReadProjectError, ReadProjectResponse, ReadProjectsData, ReadProjectsError, ReadProjectsResponse, ReadProjectTypesData, ReadProjectTypesResponse, ReadQuoteData, ReadQuoteError, ReadQuoteResponse, ReadQuotesData, ReadQuotesError, ReadQuotesResponse, ReadRunArtefactsData, ReadRunArtefactsError, ReadRunArtefactsResponse, ReadRunData, ReadRunError, ReadRunResponse, ReadRunsData, ReadRunsError, ReadRunsResponse, ReadSurveyData, ReadSurveyError, ReadSurveyResponse, ReadSurveysData, ReadSurveysError, ReadSurveysResponse, ReadTaskData, ReadTaskError, ReadTaskResponse, ReadTasksData, ReadTasksError, ReadTasksResponse, ReadUserMeData, ReadUserMeResponse, RegisterUserData, RegisterUserError, RegisterUserResponse, RemoveOrgUserData, RemoveOrgUserError, ReorderTaskData, ReorderTaskError, ReorderTaskResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, StartTimerTimeStartPostData, StartTimerTimeStartPostError, StartTimerTimeStartPostResponse, StopTimerTimeStopPostData, StopTimerTimeStopPostResponse, UpdateClientData, UpdateClientError, UpdateClientResponse, UpdateJobData, UpdateJobError, UpdateJobResponse, UpdateLeadData, UpdateLeadError, UpdateLeadResponse, UpdateOrgUserData, UpdateOrgUserError, UpdateOrgUserResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateQuoteData, UpdateQuoteError, UpdateQuoteResponse, UpdateSurveyData, UpdateSurveyError, UpdateSurveyResponse, UpdateTaskData, UpdateTaskError, UpdateTaskResponse, UpdateUserMeData, UpdateUserMeError, UpdateUserMeResponse, VerifyInvitationData, VerifyInvitationError, VerifyInvitationResponse } from '../types.gen';
+
+/**
+ * Register
+ *
+ * Register a new user and organization.
+ */
+export const registerUserMutation = (options?: Partial<Options<RegisterUserData>>): UseMutationOptions<RegisterUserResponse, RegisterUserError, Options<RegisterUserData>> => {
+    const mutationOptions: UseMutationOptions<RegisterUserResponse, RegisterUserError, Options<RegisterUserData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await registerUser({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 /**
  * Login
@@ -633,25 +652,6 @@ export const updateProjectMutation = (options?: Partial<Options<UpdateProjectDat
     const mutationOptions: UseMutationOptions<UpdateProjectResponse, UpdateProjectError, Options<UpdateProjectData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await updateProject({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
- * Register User
- *
- * Register a new user.
- */
-export const registerUserMutation = (options?: Partial<Options<RegisterUserData>>): UseMutationOptions<RegisterUserResponse, RegisterUserError, Options<RegisterUserData>> => {
-    const mutationOptions: UseMutationOptions<RegisterUserResponse, RegisterUserError, Options<RegisterUserData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await registerUser({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1510,6 +1510,181 @@ export const reorderTaskMutation = (options?: Partial<Options<ReorderTaskData>>)
     const mutationOptions: UseMutationOptions<ReorderTaskResponse, ReorderTaskError, Options<ReorderTaskData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await reorderTask({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readInvitationsQueryKey = (options?: Options<ReadInvitationsData>) => createQueryKey('readInvitations', options);
+
+/**
+ * Read Invitations
+ *
+ * Get all invitations for the organization. Admin only.
+ */
+export const readInvitationsOptions = (options?: Options<ReadInvitationsData>) => queryOptions<ReadInvitationsResponse, DefaultError, ReadInvitationsResponse, ReturnType<typeof readInvitationsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readInvitations({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readInvitationsQueryKey(options)
+});
+
+/**
+ * Create Invitation
+ *
+ * Invite a new user to the organization. Admin only.
+ */
+export const createInvitationMutation = (options?: Partial<Options<CreateInvitationData>>): UseMutationOptions<CreateInvitationResponse, CreateInvitationError, Options<CreateInvitationData>> => {
+    const mutationOptions: UseMutationOptions<CreateInvitationResponse, CreateInvitationError, Options<CreateInvitationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createInvitation({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const verifyInvitationQueryKey = (options: Options<VerifyInvitationData>) => createQueryKey('verifyInvitation', options);
+
+/**
+ * Verify Invitation
+ *
+ * Verify an invitation token and return public info (org name, etc.).
+ * This is called by the frontend before showing the accept form.
+ */
+export const verifyInvitationOptions = (options: Options<VerifyInvitationData>) => queryOptions<VerifyInvitationResponse, VerifyInvitationError, VerifyInvitationResponse, ReturnType<typeof verifyInvitationQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await verifyInvitation({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: verifyInvitationQueryKey(options)
+});
+
+/**
+ * Accept Invitation
+ *
+ * Accept an invitation and create the user account.
+ */
+export const acceptInvitationMutation = (options?: Partial<Options<AcceptInvitationData>>): UseMutationOptions<AcceptInvitationResponse, AcceptInvitationError, Options<AcceptInvitationData>> => {
+    const mutationOptions: UseMutationOptions<AcceptInvitationResponse, AcceptInvitationError, Options<AcceptInvitationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await acceptInvitation({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Resend Invitation
+ *
+ * Resend an invitation email. Admin only.
+ */
+export const resendInvitationMutation = (options?: Partial<Options<ResendInvitationData>>): UseMutationOptions<ResendInvitationResponse, ResendInvitationError, Options<ResendInvitationData>> => {
+    const mutationOptions: UseMutationOptions<ResendInvitationResponse, ResendInvitationError, Options<ResendInvitationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await resendInvitation({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Invitation
+ *
+ * Cancel/delete an invitation. Admin only.
+ */
+export const deleteInvitationMutation = (options?: Partial<Options<DeleteInvitationData>>): UseMutationOptions<unknown, DeleteInvitationError, Options<DeleteInvitationData>> => {
+    const mutationOptions: UseMutationOptions<unknown, DeleteInvitationError, Options<DeleteInvitationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteInvitation({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readOrgQueryKey = (options?: Options<ReadOrgData>) => createQueryKey('readOrg', options);
+
+/**
+ * Read Org
+ *
+ * Get current user's organization with all members.
+ */
+export const readOrgOptions = (options?: Options<ReadOrgData>) => queryOptions<ReadOrgResponse, DefaultError, ReadOrgResponse, ReturnType<typeof readOrgQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readOrg({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readOrgQueryKey(options)
+});
+
+/**
+ * Remove Org User
+ *
+ * Remove a user from the organization. Admin only.
+ */
+export const removeOrgUserMutation = (options?: Partial<Options<RemoveOrgUserData>>): UseMutationOptions<unknown, RemoveOrgUserError, Options<RemoveOrgUserData>> => {
+    const mutationOptions: UseMutationOptions<unknown, RemoveOrgUserError, Options<RemoveOrgUserData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await removeOrgUser({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Update Org User
+ *
+ * Update a user in the organization. Admin only.
+ */
+export const updateOrgUserMutation = (options?: Partial<Options<UpdateOrgUserData>>): UseMutationOptions<UpdateOrgUserResponse, UpdateOrgUserError, Options<UpdateOrgUserData>> => {
+    const mutationOptions: UseMutationOptions<UpdateOrgUserResponse, UpdateOrgUserError, Options<UpdateOrgUserData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateOrgUser({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

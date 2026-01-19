@@ -23,6 +23,7 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "python-magic>=0.4.27",
     "requests>=2.32.5",
+    "resend>=2.19.0",
     "ruff>=0.14.4",
     "sqlalchemy>=2.0.44",
     "sqlmodel>=0.0.31",

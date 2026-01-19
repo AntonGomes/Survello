@@ -7,15 +7,22 @@ import {
   readUserMeOptions, 
   loginUserMutation, 
   registerUserMutation, 
-  logoutUserMutation 
+  logoutUserMutation,
+  createInvitationMutation,
 } from "@/client/@tanstack/react-query.gen";
 import type { UserRead, UserLogin, UserRegister } from "@/client/types.gen";
+import { UserRole } from "@/client";
+
+interface RegisterWithInvites extends UserRegister {
+  inviteEmails?: string[];
+}
 
 interface AuthContextType {
   user: UserRead | undefined;
   isLoading: boolean;
+  isAdmin: boolean;
   login: (data: UserLogin) => void;
-  register: (data: UserRegister) => void;
+  register: (data: RegisterWithInvites) => Promise<void>;
   logout: () => void;
 }
 
@@ -30,6 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ...readUserMeOptions(),
     retry: false, // Don't retry on 401
   });
+
+  const isAdmin = user?.role === UserRole.ADMIN;
 
   // 2. Login Mutation
   const { mutate: loginMutate } = useMutation({
@@ -46,23 +55,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // 3. Register Mutation
-  const { mutate: registerMutate } = useMutation({
+  const { mutateAsync: registerMutate } = useMutation({
     ...registerUserMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: readUserMeOptions().queryKey });
-      router.push("/");
-    },
   });
 
-  const register = (data: UserRegister) => {
-    registerMutate({ body: data });
+  // 3b. Create invitation mutation (for post-registration invites)
+  const { mutateAsync: createInvite } = useMutation({
+    ...createInvitationMutation(),
+  });
+
+  const register = async (data: RegisterWithInvites): Promise<void> => {
+    const { inviteEmails, ...registerData } = data;
+    
+    // Register the user
+    await registerMutate({ body: registerData });
+    
+    // Invalidate to get user data (needed for sending invites)
+    await queryClient.invalidateQueries({ queryKey: readUserMeOptions().queryKey });
+    
+    // Send invitations if any
+    if (inviteEmails && inviteEmails.length > 0) {
+      const validEmails = inviteEmails.filter(e => e.trim());
+      for (const email of validEmails) {
+        try {
+          await createInvite({ body: { email, role: UserRole.MEMBER } });
+        } catch (e) {
+          // Log but don't fail registration for invite errors
+          console.error(`Failed to send invite to ${email}:`, e);
+        }
+      }
+    }
+    
+    router.push("/app");
   };
 
   // 4. Logout Mutation
   const { mutate: logoutMutate } = useMutation({
     ...logoutUserMutation(),
     onSuccess: () => {
-      queryClient.setQueryData(readUserMeOptions().queryKey, undefined);
+      // Clear ALL queries to ensure no stale user data
+      queryClient.clear();
       router.push("/");
     },
   });
@@ -72,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAdmin, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
