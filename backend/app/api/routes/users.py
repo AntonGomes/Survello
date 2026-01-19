@@ -1,9 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from typing import Any
-from sqlmodel import select
 
 from app.api.deps import DBDep, CurrentUserDep
-from app.models.user_model import User, UserRead, UserUpdate
+from app.models.user_model import UserRead, UserUpdate
 from app.core.security import hash_password
 
 router = APIRouter()

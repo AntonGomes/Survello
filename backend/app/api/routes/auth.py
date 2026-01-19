@@ -4,7 +4,15 @@ from fastapi import APIRouter, Response, HTTPException, Cookie
 from app.api.deps import SessionDep
 from app.core.security import verify_password, hash_password, create_token
 from app.core.settings import get_settings
-from app.models.user_model import UserLogin, UserRegister, UserRead, User, Org, UserRole, Session as DbSession
+from app.models.user_model import (
+    UserLogin,
+    UserRegister,
+    UserRead,
+    User,
+    Org,
+    UserRole,
+    Session as DbSession,
+)
 from sqlmodel import select
 
 router = APIRouter()

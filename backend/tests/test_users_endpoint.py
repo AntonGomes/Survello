@@ -4,14 +4,14 @@ from app.models.user_model import User
 
 
 def test_users_workflow(client: TestClient, session: Session, setup_data: dict):
-    # 1. Register new user
+    # 1. Register new user (via auth endpoint)
     new_user_payload = {
         "name": "New Guy",
         "email": "newguy@example.com",
         "password": "securepassword123",
         "org_name": "New Org",
     }
-    response = client.post("/users/", json=new_user_payload)
+    response = client.post("/auth/register", json=new_user_payload)
     assert response.status_code == 200
     user_data = response.json()
     assert user_data["email"] == new_user_payload["email"]
