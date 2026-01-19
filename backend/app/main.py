@@ -53,7 +53,7 @@ app.include_router(org_router, prefix="/org", tags=["Organization"])
 origins = [
     "http://localhost:3000",  # For local development
     "http://localhost:3001",  # For local development
-    "https://www.survelloapp.com/" # Your production domain
+    "https://www.survelloapp.com/"  # Your production domain
     "https://survello.vercel.app",  # Your Vercel production domain
     "https://survello-git-main.vercel.app",  # Your Vercel preview URLs (optional)
 ]
