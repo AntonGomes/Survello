@@ -62,3 +62,11 @@ def test_projects_workflow(client: TestClient, session: Session, setup_data: dic
     types_data = response.json()
     assert len(types_data) >= 1
     assert types_data[0]["name"] == "Test Type"
+
+    # 6. Read Project Detail
+    response = client.get(f"/projects/{project_data['id']}")
+    assert response.status_code == 200
+    detail = response.json()
+    assert detail["id"] == project_data["id"]
+    assert detail["project_type"]["id"] == pt.id
+    assert detail["job"]["id"] == job.id

@@ -2,16 +2,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, FileText, History, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { FeatureHeader } from "@/components/feature-header";
 
 export default function DashboardPage() {
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Welcome to SiteNotes. Manage your document generation tasks.
-        </p>
-      </div>
+      <FeatureHeader 
+        title="Dashboard" 
+        subtitle="Welcome to SiteNotes. Manage your document generation tasks."
+        badge={null}
+      />
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -45,6 +45,9 @@ interface DataTableProps<TData, TValue> {
       icon?: React.ComponentType<{ className?: string }>
     }[]
   }[]
+  toolbarAction?: React.ReactNode
+  onRowClick?: (row: TData) => void
+  getRowClassName?: (row: TData) => string | undefined
 }
 
 export function DataTable<TData, TValue>({
@@ -52,6 +55,9 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   facetedFilters,
+  toolbarAction,
+  onRowClick,
+  getRowClassName,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -60,6 +66,7 @@ export function DataTable<TData, TValue>({
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = React.useState<string>("")
 
   const table = useReactTable({
     data,
@@ -69,11 +76,13 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      globalFilter,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -91,10 +100,10 @@ export function DataTable<TData, TValue>({
         <div className="flex flex-1 items-center space-x-2">
           {searchKey && (
             <Input
-              placeholder={`Filter ${searchKey}...`}
-              value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+              placeholder="Search..."
+              value={globalFilter}
               onChange={(event) =>
-                table.getColumn(searchKey)?.setFilterValue(event.target.value)
+                setGlobalFilter(event.target.value)
               }
               className="h-8 w-[150px] lg:w-[250px]"
             />
@@ -120,7 +129,7 @@ export function DataTable<TData, TValue>({
             </Button>
           )}
         </div>
-        <DataTableViewOptions table={table} />
+        {toolbarAction}
       </div>
       <div className="rounded-md border">
         <Table>
@@ -148,6 +157,15 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement
+                    // Prevent navigation when clicking actions/checkboxes
+                    if (target.closest("button") || target.closest("a") || target.closest("[role='checkbox']")) {
+                      return
+                    }
+                    onRowClick?.(row.original)
+                  }}
+                  className={`${onRowClick ? "cursor-pointer hover:bg-muted/50" : ""} ${getRowClassName?.(row.original) || ""}`.trim() || undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

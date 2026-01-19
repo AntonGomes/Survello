@@ -61,14 +61,14 @@ export const columns: ColumnDef<JobRead>[] = [
     },
   },
   {
-    accessorKey: "client_id",
+    accessorKey: "client.name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Client ID" />
+      <DataTableColumnHeader column={column} title="Client" />
     ),
     cell: ({ row }) => {
       return (
         <div className="flex items-center">
-          <span>{row.original.client_id}</span>
+          <span>{row.original.client.name}</span>
         </div>
       )
     },
@@ -105,36 +105,6 @@ export const columns: ColumnDef<JobRead>[] = [
         <div className="text-muted-foreground">
           {format(new Date(row.getValue("created_at")), "MMM d, yyyy")}
         </div>
-      )
-    },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const job = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(job.id.toString())}
-            >
-              Copy Job ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={`/app/jobs/${job.id}`}>View details</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>Edit job</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       )
     },
   },

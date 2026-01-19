@@ -90,6 +90,7 @@ class UserUpdate(SQLModel):
 class UserRead(UserBase):
     id: int
     org_id: int
+    name: str
     role: UserRole
 
 

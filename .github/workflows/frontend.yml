@@ -1,0 +1,77 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - 'backend/**' # We trigger on backend changes too, to ensure API types don't drift
+  push:
+    branches: ['main', 'develop']
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+
+jobs:
+  check:
+    name: Typecheck, Build & Drift Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Setup Backend (for Drift Check) ---
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      
+      - name: Install Backend Dependencies
+        run: uv sync --frozen
+        working-directory: backend
+        
+      - name: Generate OpenAPI Spec
+        run: uv run dump_openapi.py
+        working-directory: backend
+
+      # --- Setup Frontend ---
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+        working-directory: frontend
+
+      # --- Run Checks ---
+      
+      - name: Lint
+        run: npm run lint
+        working-directory: frontend
+
+      - name: Generate Client Types (Drift Check)
+        run: npm run generate-types
+        working-directory: frontend
+
+      - name: Check for Uncommitted Changes (Drift Check)
+        # Check both the openapi.json (if it changed based on backend code)
+        # and the generated client files.
+        run: |
+          git status --porcelain
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Generated types or OpenAPI spec are out of sync with the backend code. Please run './sync_types.sh' locally and commit the changes."
+            exit 1
+          fi
+
+      - name: Type Check
+        run: npm run type-check
+        working-directory: frontend
+
+      - name: Build
+        run: npm run build
+        working-directory: frontend

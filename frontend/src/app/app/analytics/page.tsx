@@ -7,7 +7,6 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       <FeatureHeader 
         title="Analytics" 
-        description="Insights into your document generation usage and performance."
       />
 
       <div className="grid gap-4 md:grid-cols-3">

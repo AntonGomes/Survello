@@ -1,0 +1,65 @@
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Clock, Square, Loader2 } from "lucide-react";
+
+import { 
+  getCurrentTimerTimeCurrentGetOptions, 
+  stopTimerTimeStopPostMutation,
+  readProjectOptions
+} from "@/client/@tanstack/react-query.gen";
+import { Button } from "@/components/ui/button";
+
+export function GlobalTimer() {
+  const queryClient = useQueryClient();
+  const { data: activeEntry, isLoading } = useQuery({
+    ...getCurrentTimerTimeCurrentGetOptions(),
+    refetchInterval: 1000 * 60, // Poll every minute to stay roughly in sync if needed, though mostly relying on initial load/invalidation
+  });
+
+  const { mutate: stopTimer, isPending } = useMutation({
+    ...stopTimerTimeStopPostMutation(),
+    onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: getCurrentTimerTimeCurrentGetOptions().queryKey });
+        // Also invalidate the project to show updated hours if we are on that page
+        if (data.project_id) {
+             queryClient.invalidateQueries({
+                queryKey: readProjectOptions({ path: { project_id: data.project_id } }).queryKey
+             });
+        }
+    },
+  });
+
+  if (isLoading) return null; // Don't show anything while initial loading
+  if (!activeEntry) return null;
+
+  return (
+    <div className="flex items-center gap-3 bg-red-50 text-red-900 px-4 py-2 rounded-md border border-red-200 animate-in slide-in-from-top-2">
+      <div className="flex items-center gap-2">
+         <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+        </span>
+        <div className="flex flex-col leading-none">
+            <span className="text-xs font-semibold uppercase tracking-wider text-red-700">Recording</span>
+            <span className="text-sm font-medium truncate max-w-[150px]">{activeEntry.project_name}</span>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <div className="font-mono text-sm font-bold w-[4ch]">
+            {activeEntry.duration_minutes}m
+        </div>
+        <Button 
+            size="sm" 
+            variant="ghost" 
+            className="h-8 w-8 p-0 text-red-700 hover:text-red-900 hover:bg-red-100"
+            onClick={() => stopTimer({})}
+            disabled={isPending}
+        >
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Square className="h-4 w-4 fill-current" />}
+        </Button>
+      </div>
+    </div>
+  );
+}

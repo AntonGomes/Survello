@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Query
 from sqlmodel import select
+from sqlalchemy.orm import joinedload
 from app.api.deps import DBDep, CurrentUserDep
 from app.models.project_model import (
     Project,
@@ -7,8 +8,16 @@ from app.models.project_model import (
     ProjectRead,
     ProjectUpdate,
     ProjectType,
+    ProjectTypeCreate,
     ProjectTypeRead,
 )
+from app.models.job_read_minimal import JobReadMinimal
+
+
+class ProjectReadDetail(ProjectRead):
+    project_type: ProjectTypeRead
+    job: JobReadMinimal
+
 
 router = APIRouter()
 
@@ -24,6 +33,26 @@ def read_project_types(
         select(ProjectType).where(ProjectType.org_id == current_user.org_id)
     ).all()
     return project_types  # pyright: ignore[reportReturnType]
+
+
+@router.post(
+    "/types",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ProjectTypeRead,
+    operation_id="createProjectType",
+)
+def create_project_type(
+    project_type_in: ProjectTypeCreate,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> ProjectTypeRead:
+    project_type = ProjectType.model_validate(
+        project_type_in, update={"org_id": current_user.org_id}
+    )
+    db.add(project_type)
+    db.commit()
+    db.refresh(project_type)
+    return project_type  # pyright: ignore[reportReturnType]
 
 
 @router.post(
@@ -70,14 +99,35 @@ def read_projects(
     return projects  # pyright: ignore[reportReturnType]
 
 
-@router.get("/{project_id}", response_model=ProjectRead, operation_id="readProject")
+@router.get(
+    "/{project_id}", response_model=ProjectReadDetail, operation_id="readProject"
+)
 def read_project(
     project_id: int,
     db: DBDep,
-) -> ProjectRead:
-    project = db.get(Project, project_id)
+    current_user: CurrentUserDep,
+) -> ProjectReadDetail:
+    project = (
+        db.exec(
+            select(Project)
+            .where(Project.id == project_id)
+            .options(
+                joinedload(Project.project_type),  # pyright: ignore[reportArgumentType]
+                joinedload(Project.job),
+            )
+        )
+        .unique()
+        .first()
+    )
+
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    # Verify ownership via Org
+    if project.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    return project  # pyright: ignore[reportReturnType]
     return project  # pyright: ignore[reportReturnType]
 
 

@@ -166,6 +166,62 @@ export type ClientRead = {
 };
 
 /**
+ * ClientReadDetail
+ */
+export type ClientReadDetail = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Address
+     */
+    address?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Org Id
+     */
+    org_id: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Contacts
+     */
+    contacts?: Array<ClientContactRead>;
+    /**
+     * Jobs
+     */
+    jobs: Array<JobReadMinimal>;
+};
+
+/**
+ * ClientReadMinimal
+ */
+export type ClientReadMinimal = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Address
+     */
+    address?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+};
+
+/**
  * ClientUpdate
  */
 export type ClientUpdate = {
@@ -177,6 +233,34 @@ export type ClientUpdate = {
      * Address
      */
     address?: string | null;
+};
+
+/**
+ * ConvertLeadResponse
+ */
+export type ConvertLeadResponse = {
+    /**
+     * Client Id
+     */
+    client_id: number;
+    /**
+     * Contact Id
+     */
+    contact_id?: number | null;
+};
+
+/**
+ * ConvertQuoteResponse
+ */
+export type ConvertQuoteResponse = {
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Client Id
+     */
+    client_id?: number | null;
 };
 
 /**
@@ -358,6 +442,10 @@ export type JobCreate = {
     address?: string | null;
     status?: JobStatus | null;
     /**
+     * Updates
+     */
+    updates?: Array<unknown> | null;
+    /**
      * Client Id
      */
     client_id: number;
@@ -381,21 +469,89 @@ export type JobRead = {
     address?: string | null;
     status?: JobStatus | null;
     /**
+     * Updates
+     */
+    updates?: Array<unknown> | null;
+    /**
      * Id
      */
     id: number;
+    client: ClientReadMinimal;
+    created_by_user: UserRead;
+    lead_user: UserRead | null;
     /**
-     * Client Id
+     * Created At
      */
-    client_id: number;
+    created_at: string;
     /**
-     * Created By User Id
+     * Updated At
      */
-    created_by_user_id: number;
+    updated_at: string;
+};
+
+/**
+ * JobReadDetail
+ */
+export type JobReadDetail = {
     /**
-     * Lead User Id
+     * Name
      */
-    lead_user_id: number | null;
+    name: string;
+    /**
+     * Address
+     */
+    address?: string | null;
+    status?: JobStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<unknown> | null;
+    /**
+     * Id
+     */
+    id: number;
+    client: ClientReadMinimal;
+    created_by_user: UserRead;
+    lead_user: UserRead | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Projects
+     */
+    projects: Array<ProjectRead>;
+    /**
+     * Files
+     */
+    files: Array<FileRead>;
+};
+
+/**
+ * JobReadMinimal
+ */
+export type JobReadMinimal = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Address
+     */
+    address?: string | null;
+    status?: JobStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<unknown> | null;
+    /**
+     * Id
+     */
+    id: number;
     /**
      * Created At
      */
@@ -428,20 +584,184 @@ export type JobUpdate = {
     /**
      * Name
      */
-    name: string | null;
+    name?: string | null;
     /**
      * Address
      */
-    address: string | null;
-    status: JobStatus | null;
+    address?: string | null;
+    status?: JobStatus | null;
     /**
      * Client Id
      */
-    client_id: number | null;
+    client_id?: number | null;
     /**
      * Lead User Id
      */
-    lead_user_id: number | null;
+    lead_user_id?: number | null;
+    /**
+     * Updates
+     */
+    updates?: Array<unknown> | null;
+};
+
+/**
+ * JobUpdateEntry
+ */
+export type JobUpdateEntry = {
+    /**
+     * Text
+     */
+    text: string;
+};
+
+/**
+ * LeadCreate
+ */
+export type LeadCreate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Contact Name
+     */
+    contact_name?: string | null;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    status?: LeadStatus;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
+ * LeadRead
+ */
+export type LeadRead = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Contact Name
+     */
+    contact_name?: string | null;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    status?: LeadStatus;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Org Id
+     */
+    org_id: number;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Updates
+     */
+    updates?: Array<unknown> | null;
+    /**
+     * Converted Client Id
+     */
+    converted_client_id?: number | null;
+};
+
+/**
+ * LeadReadMinimal
+ */
+export type LeadReadMinimal = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Contact Name
+     */
+    contact_name?: string | null;
+    status: LeadStatus;
+};
+
+/**
+ * LeadStatus
+ */
+export const LeadStatus = {
+    NEW: 'new',
+    CONTACTED: 'contacted',
+    QUOTED: 'quoted',
+    CONVERTED: 'converted',
+    LOST: 'lost'
+} as const;
+
+/**
+ * LeadStatus
+ */
+export type LeadStatus = typeof LeadStatus[keyof typeof LeadStatus];
+
+/**
+ * LeadUpdate
+ */
+export type LeadUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Contact Name
+     */
+    contact_name?: string | null;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    status?: LeadStatus | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+};
+
+/**
+ * LeadUpdateEntry
+ */
+export type LeadUpdateEntry = {
+    /**
+     * Text
+     */
+    text: string;
 };
 
 /**
@@ -465,6 +785,10 @@ export type ProjectCreate = {
      */
     forecasted_billable_hours?: number | null;
     /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
      * Contingency Percentage
      */
     contingency_percentage?: number | null;
@@ -472,6 +796,10 @@ export type ProjectCreate = {
      * Forecasted Settlement Amount
      */
     forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
     /**
      * Forecasted Fee Amount
      */
@@ -482,6 +810,14 @@ export type ProjectCreate = {
      * Updates
      */
     updates?: Array<string> | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
     /**
      * Lead User Id
      */
@@ -517,6 +853,10 @@ export type ProjectRead = {
      */
     forecasted_billable_hours?: number | null;
     /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
      * Contingency Percentage
      */
     contingency_percentage?: number | null;
@@ -524,6 +864,10 @@ export type ProjectRead = {
      * Forecasted Settlement Amount
      */
     forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
     /**
      * Forecasted Fee Amount
      */
@@ -535,6 +879,14 @@ export type ProjectRead = {
      */
     updates?: Array<string> | null;
     /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+    /**
      * Id
      */
     id: number;
@@ -543,6 +895,10 @@ export type ProjectRead = {
      */
     project_type_id: number;
     /**
+     * Job Id
+     */
+    job_id: number;
+    /**
      * Created At
      */
     created_at: string;
@@ -550,6 +906,84 @@ export type ProjectRead = {
      * Updated At
      */
     updated_at: string;
+};
+
+/**
+ * ProjectReadDetail
+ */
+export type ProjectReadDetail = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    /**
+     * Forecasted Billable Hours
+     */
+    forecasted_billable_hours?: number | null;
+    /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
+     * Contingency Percentage
+     */
+    contingency_percentage?: number | null;
+    /**
+     * Forecasted Settlement Amount
+     */
+    forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
+    /**
+     * Forecasted Fee Amount
+     */
+    forecasted_fee_amount?: number | null;
+    fee_type: FeeType;
+    status?: ProjectStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<string> | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Project Type Id
+     */
+    project_type_id: number;
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    project_type: ProjectTypeRead;
+    job: JobReadMinimal;
 };
 
 /**
@@ -568,6 +1002,29 @@ export const ProjectStatus = {
 export type ProjectStatus = typeof ProjectStatus[keyof typeof ProjectStatus];
 
 /**
+ * ProjectTypeCreate
+ */
+export type ProjectTypeCreate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    default_fee_type?: FeeType | null;
+    /**
+     * Default Contingency Percentage
+     */
+    default_contingency_percentage?: number | null;
+};
+
+/**
  * ProjectTypeRead
  */
 export type ProjectTypeRead = {
@@ -583,6 +1040,11 @@ export type ProjectTypeRead = {
      * Rate
      */
     rate?: number | null;
+    default_fee_type?: FeeType | null;
+    /**
+     * Default Contingency Percentage
+     */
+    default_contingency_percentage?: number | null;
     /**
      * Id
      */
@@ -618,6 +1080,10 @@ export type ProjectUpdate = {
      */
     forecasted_billable_hours?: number | null;
     /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
      * Contingency Percentage
      */
     contingency_percentage?: number | null;
@@ -625,6 +1091,10 @@ export type ProjectUpdate = {
      * Forecasted Settlement Amount
      */
     forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
     /**
      * Forecasted Fee Amount
      */
@@ -635,6 +1105,211 @@ export type ProjectUpdate = {
      * Updates
      */
     updates?: Array<string> | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+};
+
+/**
+ * QuoteCreate
+ */
+export type QuoteCreate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Estimated Fee
+     */
+    estimated_fee?: number | null;
+    status?: QuoteStatus;
+    /**
+     * Expected Start Date
+     */
+    expected_start_date?: string | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Client Id
+     */
+    client_id?: number | null;
+    /**
+     * Lead Id
+     */
+    lead_id?: number | null;
+    /**
+     * Lines
+     */
+    lines?: Array<QuoteLineCreate>;
+};
+
+/**
+ * QuoteLineCreate
+ */
+export type QuoteLineCreate = {
+    /**
+     * Estimated Fee
+     */
+    estimated_fee?: number | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Project Type Id
+     */
+    project_type_id: number;
+};
+
+/**
+ * QuoteLineRead
+ */
+export type QuoteLineRead = {
+    /**
+     * Estimated Fee
+     */
+    estimated_fee?: number | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Quote Id
+     */
+    quote_id: number;
+    /**
+     * Project Type Id
+     */
+    project_type_id: number;
+    project_type: ProjectTypeRead;
+};
+
+/**
+ * QuoteRead
+ */
+export type QuoteRead = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Estimated Fee
+     */
+    estimated_fee?: number | null;
+    status?: QuoteStatus;
+    /**
+     * Expected Start Date
+     */
+    expected_start_date?: string | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Org Id
+     */
+    org_id: number;
+    /**
+     * Client Id
+     */
+    client_id?: number | null;
+    /**
+     * Lead Id
+     */
+    lead_id?: number | null;
+    /**
+     * Converted Job Id
+     */
+    converted_job_id?: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Updates
+     */
+    updates?: Array<unknown> | null;
+    client?: ClientReadMinimal | null;
+    lead?: LeadReadMinimal | null;
+    /**
+     * Lines
+     */
+    lines?: Array<QuoteLineRead>;
+};
+
+/**
+ * QuoteStatus
+ */
+export const QuoteStatus = {
+    DRAFT: 'draft',
+    SENT: 'sent',
+    ACCEPTED: 'accepted',
+    DECLINED: 'declined'
+} as const;
+
+/**
+ * QuoteStatus
+ */
+export type QuoteStatus = typeof QuoteStatus[keyof typeof QuoteStatus];
+
+/**
+ * QuoteUpdate
+ */
+export type QuoteUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Estimated Fee
+     */
+    estimated_fee?: number | null;
+    status?: QuoteStatus | null;
+    /**
+     * Expected Start Date
+     */
+    expected_start_date?: string | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Client Id
+     */
+    client_id?: number | null;
+    /**
+     * Lead Id
+     */
+    lead_id?: number | null;
+};
+
+/**
+ * QuoteUpdateEntry
+ */
+export type QuoteUpdateEntry = {
+    /**
+     * Text
+     */
+    text: string;
 };
 
 /**
@@ -715,6 +1390,303 @@ export const RunStatus = {
  * RunStatus
  */
 export type RunStatus = typeof RunStatus[keyof typeof RunStatus];
+
+/**
+ * SurveyCreate
+ */
+export type SurveyCreate = {
+    /**
+     * Date
+     */
+    date: string;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Surveyor Id
+     */
+    surveyor_id?: number | null;
+};
+
+/**
+ * SurveyRead
+ */
+export type SurveyRead = {
+    /**
+     * Date
+     */
+    date: string;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Org Id
+     */
+    org_id: number;
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Surveyor Id
+     */
+    surveyor_id?: number | null;
+    surveyor?: SurveyorRead | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Photo Count
+     */
+    photo_count?: number;
+};
+
+/**
+ * SurveyUpdate
+ */
+export type SurveyUpdate = {
+    /**
+     * Date
+     */
+    date?: string | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
+    /**
+     * Surveyor Id
+     */
+    surveyor_id?: number | null;
+};
+
+/**
+ * SurveyorRead
+ */
+export type SurveyorRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * TaskAssigneeRead
+ */
+export type TaskAssigneeRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * TaskCreate
+ */
+export type TaskCreate = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    status?: TaskStatus;
+    /**
+     * Order
+     */
+    order?: number;
+    /**
+     * Estimated Hours
+     */
+    estimated_hours?: number | null;
+    /**
+     * Project Id
+     */
+    project_id: number;
+    /**
+     * Assignee Id
+     */
+    assignee_id?: number | null;
+};
+
+/**
+ * TaskRead
+ */
+export type TaskRead = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    status?: TaskStatus;
+    /**
+     * Order
+     */
+    order?: number;
+    /**
+     * Estimated Hours
+     */
+    estimated_hours?: number | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Org Id
+     */
+    org_id: number;
+    /**
+     * Project Id
+     */
+    project_id: number;
+    /**
+     * Assignee Id
+     */
+    assignee_id?: number | null;
+    assignee?: TaskAssigneeRead | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * TaskReorder
+ *
+ * Request body for reordering a task
+ */
+export type TaskReorder = {
+    status: TaskStatus;
+    /**
+     * Order
+     */
+    order: number;
+};
+
+/**
+ * TaskStatus
+ */
+export const TaskStatus = {
+    TODO: 'todo',
+    IN_PROGRESS: 'in_progress',
+    WAITING: 'waiting',
+    DONE: 'done'
+} as const;
+
+/**
+ * TaskStatus
+ */
+export type TaskStatus = typeof TaskStatus[keyof typeof TaskStatus];
+
+/**
+ * TaskUpdate
+ */
+export type TaskUpdate = {
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    status?: TaskStatus | null;
+    /**
+     * Order
+     */
+    order?: number | null;
+    /**
+     * Estimated Hours
+     */
+    estimated_hours?: number | null;
+    /**
+     * Assignee Id
+     */
+    assignee_id?: number | null;
+};
+
+/**
+ * TimeEntryCreate
+ */
+export type TimeEntryCreate = {
+    /**
+     * Project Id
+     */
+    project_id: number;
+    /**
+     * Description
+     */
+    description?: string | null;
+};
+
+/**
+ * TimeEntryOut
+ */
+export type TimeEntryOut = {
+    /**
+     * Project Id
+     */
+    project_id: number;
+    /**
+     * Start Time
+     */
+    start_time?: string;
+    /**
+     * End Time
+     */
+    end_time?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * User Id
+     */
+    user_id: number;
+    /**
+     * Duration Minutes
+     */
+    duration_minutes?: number | null;
+    /**
+     * Project Name
+     */
+    project_name: string;
+};
 
 /**
  * UserLogin
@@ -1182,9 +2154,9 @@ export type ReadJobsData = {
     path?: never;
     query?: {
         /**
-         * Skip
+         * Offset
          */
-        skip?: number;
+        offset?: number;
         /**
          * Limit
          */
@@ -1293,7 +2265,7 @@ export type ReadJobResponses = {
     /**
      * Successful Response
      */
-    200: JobRead;
+    200: JobReadDetail;
 };
 
 export type ReadJobResponse = ReadJobResponses[keyof ReadJobResponses];
@@ -1328,6 +2300,36 @@ export type UpdateJobResponses = {
 
 export type UpdateJobResponse = UpdateJobResponses[keyof UpdateJobResponses];
 
+export type AddJobUpdateData = {
+    body: JobUpdateEntry;
+    path: {
+        /**
+         * Job Id
+         */
+        job_id: number;
+    };
+    query?: never;
+    url: '/jobs/{job_id}/updates';
+};
+
+export type AddJobUpdateErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddJobUpdateError = AddJobUpdateErrors[keyof AddJobUpdateErrors];
+
+export type AddJobUpdateResponses = {
+    /**
+     * Successful Response
+     */
+    200: JobRead;
+};
+
+export type AddJobUpdateResponse = AddJobUpdateResponses[keyof AddJobUpdateResponses];
+
 export type ReadProjectTypesData = {
     body?: never;
     path?: never;
@@ -1345,6 +2347,31 @@ export type ReadProjectTypesResponses = {
 };
 
 export type ReadProjectTypesResponse = ReadProjectTypesResponses[keyof ReadProjectTypesResponses];
+
+export type CreateProjectTypeData = {
+    body: ProjectTypeCreate;
+    path?: never;
+    query?: never;
+    url: '/projects/types';
+};
+
+export type CreateProjectTypeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateProjectTypeError = CreateProjectTypeErrors[keyof CreateProjectTypeErrors];
+
+export type CreateProjectTypeResponses = {
+    /**
+     * Successful Response
+     */
+    201: ProjectTypeRead;
+};
+
+export type CreateProjectTypeResponse = CreateProjectTypeResponses[keyof CreateProjectTypeResponses];
 
 export type ReadProjectsData = {
     body?: never;
@@ -1466,7 +2493,7 @@ export type ReadProjectResponses = {
     /**
      * Successful Response
      */
-    200: ProjectRead;
+    200: ProjectReadDetail;
 };
 
 export type ReadProjectResponse = ReadProjectResponses[keyof ReadProjectResponses];
@@ -1683,7 +2710,7 @@ export type ReadClientResponses = {
     /**
      * Successful Response
      */
-    200: ClientRead;
+    200: ClientReadDetail;
 };
 
 export type ReadClientResponse = ReadClientResponses[keyof ReadClientResponses];
@@ -1717,3 +2744,900 @@ export type UpdateClientResponses = {
 };
 
 export type UpdateClientResponse = UpdateClientResponses[keyof UpdateClientResponses];
+
+export type CreateClientContactData = {
+    body: ClientContactCreate;
+    path: {
+        /**
+         * Client Id
+         */
+        client_id: number;
+    };
+    query?: never;
+    url: '/clients/{client_id}/contacts';
+};
+
+export type CreateClientContactErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateClientContactError = CreateClientContactErrors[keyof CreateClientContactErrors];
+
+export type CreateClientContactResponses = {
+    /**
+     * Successful Response
+     */
+    201: ClientContactRead;
+};
+
+export type CreateClientContactResponse = CreateClientContactResponses[keyof CreateClientContactResponses];
+
+export type StartTimerTimeStartPostData = {
+    body: TimeEntryCreate;
+    path?: never;
+    query?: never;
+    url: '/time/start';
+};
+
+export type StartTimerTimeStartPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type StartTimerTimeStartPostError = StartTimerTimeStartPostErrors[keyof StartTimerTimeStartPostErrors];
+
+export type StartTimerTimeStartPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TimeEntryOut;
+};
+
+export type StartTimerTimeStartPostResponse = StartTimerTimeStartPostResponses[keyof StartTimerTimeStartPostResponses];
+
+export type StopTimerTimeStopPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/time/stop';
+};
+
+export type StopTimerTimeStopPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TimeEntryOut;
+};
+
+export type StopTimerTimeStopPostResponse = StopTimerTimeStopPostResponses[keyof StopTimerTimeStopPostResponses];
+
+export type GetCurrentTimerTimeCurrentGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/time/current';
+};
+
+export type GetCurrentTimerTimeCurrentGetResponses = {
+    /**
+     * Response Get Current Timer Time Current Get
+     *
+     * Successful Response
+     */
+    200: TimeEntryOut | null;
+};
+
+export type GetCurrentTimerTimeCurrentGetResponse = GetCurrentTimerTimeCurrentGetResponses[keyof GetCurrentTimerTimeCurrentGetResponses];
+
+export type ReadLeadsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Status
+         */
+        status?: LeadStatus | null;
+    };
+    url: '/leads/';
+};
+
+export type ReadLeadsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadLeadsError = ReadLeadsErrors[keyof ReadLeadsErrors];
+
+export type ReadLeadsResponses = {
+    /**
+     * Response Readleads
+     *
+     * Successful Response
+     */
+    200: Array<LeadRead>;
+};
+
+export type ReadLeadsResponse = ReadLeadsResponses[keyof ReadLeadsResponses];
+
+export type CreateLeadData = {
+    body: LeadCreate;
+    path?: never;
+    query?: never;
+    url: '/leads/';
+};
+
+export type CreateLeadErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateLeadError = CreateLeadErrors[keyof CreateLeadErrors];
+
+export type CreateLeadResponses = {
+    /**
+     * Successful Response
+     */
+    201: LeadRead;
+};
+
+export type CreateLeadResponse = CreateLeadResponses[keyof CreateLeadResponses];
+
+export type DeleteLeadData = {
+    body?: never;
+    path: {
+        /**
+         * Lead Id
+         */
+        lead_id: number;
+    };
+    query?: never;
+    url: '/leads/{lead_id}';
+};
+
+export type DeleteLeadErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteLeadError = DeleteLeadErrors[keyof DeleteLeadErrors];
+
+export type DeleteLeadResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteLeadResponse = DeleteLeadResponses[keyof DeleteLeadResponses];
+
+export type ReadLeadData = {
+    body?: never;
+    path: {
+        /**
+         * Lead Id
+         */
+        lead_id: number;
+    };
+    query?: never;
+    url: '/leads/{lead_id}';
+};
+
+export type ReadLeadErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadLeadError = ReadLeadErrors[keyof ReadLeadErrors];
+
+export type ReadLeadResponses = {
+    /**
+     * Successful Response
+     */
+    200: LeadRead;
+};
+
+export type ReadLeadResponse = ReadLeadResponses[keyof ReadLeadResponses];
+
+export type UpdateLeadData = {
+    body: LeadUpdate;
+    path: {
+        /**
+         * Lead Id
+         */
+        lead_id: number;
+    };
+    query?: never;
+    url: '/leads/{lead_id}';
+};
+
+export type UpdateLeadErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateLeadError = UpdateLeadErrors[keyof UpdateLeadErrors];
+
+export type UpdateLeadResponses = {
+    /**
+     * Successful Response
+     */
+    200: LeadRead;
+};
+
+export type UpdateLeadResponse = UpdateLeadResponses[keyof UpdateLeadResponses];
+
+export type AddLeadUpdateData = {
+    body: LeadUpdateEntry;
+    path: {
+        /**
+         * Lead Id
+         */
+        lead_id: number;
+    };
+    query?: never;
+    url: '/leads/{lead_id}/updates';
+};
+
+export type AddLeadUpdateErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddLeadUpdateError = AddLeadUpdateErrors[keyof AddLeadUpdateErrors];
+
+export type AddLeadUpdateResponses = {
+    /**
+     * Successful Response
+     */
+    200: LeadRead;
+};
+
+export type AddLeadUpdateResponse = AddLeadUpdateResponses[keyof AddLeadUpdateResponses];
+
+export type ConvertLeadData = {
+    body?: never;
+    path: {
+        /**
+         * Lead Id
+         */
+        lead_id: number;
+    };
+    query?: never;
+    url: '/leads/{lead_id}/convert';
+};
+
+export type ConvertLeadErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConvertLeadError = ConvertLeadErrors[keyof ConvertLeadErrors];
+
+export type ConvertLeadResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConvertLeadResponse;
+};
+
+export type ConvertLeadResponse2 = ConvertLeadResponses[keyof ConvertLeadResponses];
+
+export type ReadQuotesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Status
+         */
+        status?: QuoteStatus | null;
+        /**
+         * Client Id
+         */
+        client_id?: number | null;
+    };
+    url: '/quotes/';
+};
+
+export type ReadQuotesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadQuotesError = ReadQuotesErrors[keyof ReadQuotesErrors];
+
+export type ReadQuotesResponses = {
+    /**
+     * Response Readquotes
+     *
+     * Successful Response
+     */
+    200: Array<QuoteRead>;
+};
+
+export type ReadQuotesResponse = ReadQuotesResponses[keyof ReadQuotesResponses];
+
+export type CreateQuoteData = {
+    body: QuoteCreate;
+    path?: never;
+    query?: never;
+    url: '/quotes/';
+};
+
+export type CreateQuoteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateQuoteError = CreateQuoteErrors[keyof CreateQuoteErrors];
+
+export type CreateQuoteResponses = {
+    /**
+     * Successful Response
+     */
+    201: QuoteRead;
+};
+
+export type CreateQuoteResponse = CreateQuoteResponses[keyof CreateQuoteResponses];
+
+export type DeleteQuoteData = {
+    body?: never;
+    path: {
+        /**
+         * Quote Id
+         */
+        quote_id: number;
+    };
+    query?: never;
+    url: '/quotes/{quote_id}';
+};
+
+export type DeleteQuoteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteQuoteError = DeleteQuoteErrors[keyof DeleteQuoteErrors];
+
+export type DeleteQuoteResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteQuoteResponse = DeleteQuoteResponses[keyof DeleteQuoteResponses];
+
+export type ReadQuoteData = {
+    body?: never;
+    path: {
+        /**
+         * Quote Id
+         */
+        quote_id: number;
+    };
+    query?: never;
+    url: '/quotes/{quote_id}';
+};
+
+export type ReadQuoteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadQuoteError = ReadQuoteErrors[keyof ReadQuoteErrors];
+
+export type ReadQuoteResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuoteRead;
+};
+
+export type ReadQuoteResponse = ReadQuoteResponses[keyof ReadQuoteResponses];
+
+export type UpdateQuoteData = {
+    body: QuoteUpdate;
+    path: {
+        /**
+         * Quote Id
+         */
+        quote_id: number;
+    };
+    query?: never;
+    url: '/quotes/{quote_id}';
+};
+
+export type UpdateQuoteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateQuoteError = UpdateQuoteErrors[keyof UpdateQuoteErrors];
+
+export type UpdateQuoteResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuoteRead;
+};
+
+export type UpdateQuoteResponse = UpdateQuoteResponses[keyof UpdateQuoteResponses];
+
+export type AddQuoteLineData = {
+    body: QuoteLineCreate;
+    path: {
+        /**
+         * Quote Id
+         */
+        quote_id: number;
+    };
+    query?: never;
+    url: '/quotes/{quote_id}/lines';
+};
+
+export type AddQuoteLineErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddQuoteLineError = AddQuoteLineErrors[keyof AddQuoteLineErrors];
+
+export type AddQuoteLineResponses = {
+    /**
+     * Successful Response
+     */
+    201: QuoteRead;
+};
+
+export type AddQuoteLineResponse = AddQuoteLineResponses[keyof AddQuoteLineResponses];
+
+export type AddQuoteUpdateData = {
+    body: QuoteUpdateEntry;
+    path: {
+        /**
+         * Quote Id
+         */
+        quote_id: number;
+    };
+    query?: never;
+    url: '/quotes/{quote_id}/updates';
+};
+
+export type AddQuoteUpdateErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddQuoteUpdateError = AddQuoteUpdateErrors[keyof AddQuoteUpdateErrors];
+
+export type AddQuoteUpdateResponses = {
+    /**
+     * Successful Response
+     */
+    200: QuoteRead;
+};
+
+export type AddQuoteUpdateResponse = AddQuoteUpdateResponses[keyof AddQuoteUpdateResponses];
+
+export type ConvertQuoteData = {
+    body?: never;
+    path: {
+        /**
+         * Quote Id
+         */
+        quote_id: number;
+    };
+    query?: never;
+    url: '/quotes/{quote_id}/convert';
+};
+
+export type ConvertQuoteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConvertQuoteError = ConvertQuoteErrors[keyof ConvertQuoteErrors];
+
+export type ConvertQuoteResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConvertQuoteResponse;
+};
+
+export type ConvertQuoteResponse2 = ConvertQuoteResponses[keyof ConvertQuoteResponses];
+
+export type ReadSurveysData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Job Id
+         */
+        job_id?: number | null;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/surveys/';
+};
+
+export type ReadSurveysErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadSurveysError = ReadSurveysErrors[keyof ReadSurveysErrors];
+
+export type ReadSurveysResponses = {
+    /**
+     * Response Readsurveys
+     *
+     * Successful Response
+     */
+    200: Array<SurveyRead>;
+};
+
+export type ReadSurveysResponse = ReadSurveysResponses[keyof ReadSurveysResponses];
+
+export type CreateSurveyData = {
+    body: SurveyCreate;
+    path?: never;
+    query?: never;
+    url: '/surveys/';
+};
+
+export type CreateSurveyErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateSurveyError = CreateSurveyErrors[keyof CreateSurveyErrors];
+
+export type CreateSurveyResponses = {
+    /**
+     * Successful Response
+     */
+    201: SurveyRead;
+};
+
+export type CreateSurveyResponse = CreateSurveyResponses[keyof CreateSurveyResponses];
+
+export type DeleteSurveyData = {
+    body?: never;
+    path: {
+        /**
+         * Survey Id
+         */
+        survey_id: number;
+    };
+    query?: never;
+    url: '/surveys/{survey_id}';
+};
+
+export type DeleteSurveyErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteSurveyError = DeleteSurveyErrors[keyof DeleteSurveyErrors];
+
+export type DeleteSurveyResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteSurveyResponse = DeleteSurveyResponses[keyof DeleteSurveyResponses];
+
+export type ReadSurveyData = {
+    body?: never;
+    path: {
+        /**
+         * Survey Id
+         */
+        survey_id: number;
+    };
+    query?: never;
+    url: '/surveys/{survey_id}';
+};
+
+export type ReadSurveyErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadSurveyError = ReadSurveyErrors[keyof ReadSurveyErrors];
+
+export type ReadSurveyResponses = {
+    /**
+     * Successful Response
+     */
+    200: SurveyRead;
+};
+
+export type ReadSurveyResponse = ReadSurveyResponses[keyof ReadSurveyResponses];
+
+export type UpdateSurveyData = {
+    body: SurveyUpdate;
+    path: {
+        /**
+         * Survey Id
+         */
+        survey_id: number;
+    };
+    query?: never;
+    url: '/surveys/{survey_id}';
+};
+
+export type UpdateSurveyErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateSurveyError = UpdateSurveyErrors[keyof UpdateSurveyErrors];
+
+export type UpdateSurveyResponses = {
+    /**
+     * Successful Response
+     */
+    200: SurveyRead;
+};
+
+export type UpdateSurveyResponse = UpdateSurveyResponses[keyof UpdateSurveyResponses];
+
+export type ReadTasksData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Project Id
+         */
+        project_id?: number | null;
+        /**
+         * Status
+         */
+        status?: TaskStatus | null;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/tasks/';
+};
+
+export type ReadTasksErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadTasksError = ReadTasksErrors[keyof ReadTasksErrors];
+
+export type ReadTasksResponses = {
+    /**
+     * Response Readtasks
+     *
+     * Successful Response
+     */
+    200: Array<TaskRead>;
+};
+
+export type ReadTasksResponse = ReadTasksResponses[keyof ReadTasksResponses];
+
+export type CreateTaskData = {
+    body: TaskCreate;
+    path?: never;
+    query?: never;
+    url: '/tasks/';
+};
+
+export type CreateTaskErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateTaskError = CreateTaskErrors[keyof CreateTaskErrors];
+
+export type CreateTaskResponses = {
+    /**
+     * Successful Response
+     */
+    201: TaskRead;
+};
+
+export type CreateTaskResponse = CreateTaskResponses[keyof CreateTaskResponses];
+
+export type DeleteTaskData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: number;
+    };
+    query?: never;
+    url: '/tasks/{task_id}';
+};
+
+export type DeleteTaskErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteTaskError = DeleteTaskErrors[keyof DeleteTaskErrors];
+
+export type DeleteTaskResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteTaskResponse = DeleteTaskResponses[keyof DeleteTaskResponses];
+
+export type ReadTaskData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: number;
+    };
+    query?: never;
+    url: '/tasks/{task_id}';
+};
+
+export type ReadTaskErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadTaskError = ReadTaskErrors[keyof ReadTaskErrors];
+
+export type ReadTaskResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskRead;
+};
+
+export type ReadTaskResponse = ReadTaskResponses[keyof ReadTaskResponses];
+
+export type UpdateTaskData = {
+    body: TaskUpdate;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: number;
+    };
+    query?: never;
+    url: '/tasks/{task_id}';
+};
+
+export type UpdateTaskErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateTaskError = UpdateTaskErrors[keyof UpdateTaskErrors];
+
+export type UpdateTaskResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskRead;
+};
+
+export type UpdateTaskResponse = UpdateTaskResponses[keyof UpdateTaskResponses];
+
+export type ReorderTaskData = {
+    body: TaskReorder;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: number;
+    };
+    query?: never;
+    url: '/tasks/{task_id}/reorder';
+};
+
+export type ReorderTaskErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReorderTaskError = ReorderTaskErrors[keyof ReorderTaskErrors];
+
+export type ReorderTaskResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskRead;
+};
+
+export type ReorderTaskResponse = ReorderTaskResponses[keyof ReorderTaskResponses];

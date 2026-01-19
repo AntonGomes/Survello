@@ -7,6 +7,8 @@ from sqlalchemy import JSON, Column
 
 if TYPE_CHECKING:
     from .user_model import User
+    from .job_model import Job
+    from .task_model import Task
 
 
 class ProjectStatus(str, Enum):
@@ -32,12 +34,16 @@ class ProjectBase(SQLModel):
     description: str
     rate: float | None = 0.0
     forecasted_billable_hours: float | None = 0.0
+    actual_hours: float | None = 0.0
     contingency_percentage: float | None = 0.0
     forecasted_settlement_amount: float | None = 0.0
+    final_settlement_amount: float | None = 0.0
     forecasted_fee_amount: float | None = 0.0
     fee_type: FeeType
     status: ProjectStatus | None = Field(default=None, sa_type=AutoString)
     updates: List[str] | None = Field(default=None, sa_column=Column(JSON))
+    notes: str | None = Field(default=None, sa_type=AutoString)
+    deadline: datetime | None = Field(default=None)
 
 
 class Project(ProjectBase, table=True):
@@ -58,12 +64,14 @@ class Project(ProjectBase, table=True):
     project_type_id: int = Field(foreign_key="project_types.id")
 
     project_type: "ProjectType" = Relationship(back_populates="projects")
+    job: "Job" = Relationship(back_populates="projects")
     created_by_user: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Project.created_by_user_id]"}
     )
     lead_user: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Project.lead_user_id]"}
     )
+    tasks: list["Task"] = Relationship(back_populates="project")
 
 
 class ProjectCreate(ProjectBase):
@@ -77,17 +85,22 @@ class ProjectUpdate(SQLModel):
     description: str | None = None
     rate: float | None = None
     forecasted_billable_hours: float | None = None
+    actual_hours: float | None = None
     contingency_percentage: float | None = None
     forecasted_settlement_amount: float | None = None
+    final_settlement_amount: float | None = None
     forecasted_fee_amount: float | None = None
     fee_type: FeeType | None = None
     status: ProjectStatus | None = None
     updates: List[str] | None = None
+    notes: str | None = None
+    deadline: datetime | None = None
 
 
 class ProjectRead(ProjectBase):
     id: int
     project_type_id: int
+    job_id: int
     created_at: datetime
     updated_at: datetime
 
@@ -101,6 +114,8 @@ class ProjectTypeBase(SQLModel):
     name: str = Field(max_length=255)
     description: str | None
     rate: float | None = 0.0
+    default_fee_type: FeeType | None = FeeType.FIXED
+    default_contingency_percentage: float | None = 0.0
 
 
 class ProjectType(ProjectTypeBase, table=True):
@@ -121,6 +136,10 @@ class ProjectTypeRead(ProjectTypeBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
+
+class ProjectTypeCreate(ProjectTypeBase):
+    pass
 
 
 class ProjectReadWithProjectType(ProjectRead):

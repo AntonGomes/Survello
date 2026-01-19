@@ -7,7 +7,6 @@ export default function SettingsPage() {
     <div className="h-full flex flex-col max-w-4xl">
       <FeatureHeader 
         title="Settings" 
-        description="Manage your workspace preferences, API keys, and notification settings."
       />
 
       <div className="space-y-6 opacity-50 pointer-events-none">

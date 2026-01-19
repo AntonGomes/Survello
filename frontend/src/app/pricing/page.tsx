@@ -1,7 +1,7 @@
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function PricingPage() {
   return (
@@ -66,11 +67,15 @@ export default function PricingPage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-chart-1 hover:bg-chart-1/90 text-white font-semibold" size="lg" asChild>
-                  <Link href="mailto:hello@docgen.com?subject=Request%20Alpha%20Access">
-                    Request Access
-                  </Link>
-                </Button>
+                <Link
+                  href="mailto:hello@docgen.com?subject=Request%20Alpha%20Access"
+                  className={cn(
+                    buttonVariants({ size: "lg" }),
+                    "w-full bg-chart-1 hover:bg-chart-1/90 text-white font-semibold"
+                  )}
+                >
+                  Request Access
+                </Link>
               </CardFooter>
             </Card>
 

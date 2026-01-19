@@ -43,7 +43,7 @@ export function JobCard({ job }: JobCardProps) {
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <User className="h-3.5 w-3.5" />
-                <span>Client #{job.client_id}</span>
+                <span>Client #{job.client?.id ?? "Unknown"}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />

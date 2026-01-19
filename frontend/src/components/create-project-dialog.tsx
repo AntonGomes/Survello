@@ -1,0 +1,405 @@
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, Loader2, X, Check } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectSeparator
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  createProjectMutation, 
+  createProjectTypeMutation,
+  readProjectTypesOptions,
+  readJobOptions
+} from "@/client/@tanstack/react-query.gen";
+import { ProjectStatus, FeeType, type ProjectCreate } from "@/client/types.gen";
+
+const formSchema = z.object({
+  name: z.string().min(2, "Project name must be at least 2 characters"),
+  description: z.string().optional().or(z.literal("")),
+  project_type_id: z.string().min(1, "Please select a project type"),
+  fee_type: z.nativeEnum(FeeType),
+  status: z.nativeEnum(ProjectStatus),
+  rate: z.number().min(0).optional(),
+  contingency_percentage: z.number().min(0).max(100).optional(),
+});
+
+interface CreateProjectDialogProps {
+  jobId: number;
+}
+
+export function CreateProjectDialog({ jobId }: CreateProjectDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [isCreatingType, setIsCreatingType] = useState(false);
+  const [newTypeName, setNewTypeName] = useState("");
+  
+  const queryClient = useQueryClient();
+
+  const { data: projectTypes, isLoading: isLoadingTypes } = useQuery({
+    ...readProjectTypesOptions(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      project_type_id: "",
+      fee_type: FeeType.FIXED,
+      status: ProjectStatus.PLANNED,
+      rate: 0,
+      contingency_percentage: 0,
+    },
+  });
+
+  // Watch for project type selection to autofill values
+  const selectedTypeId = form.watch("project_type_id");
+  const selectedType = projectTypes?.find(t => t.id.toString() === selectedTypeId);
+
+  // Effect to update defaults when Type changes
+  if (selectedType && selectedTypeId) {
+      // Only auto-fill if the user hasn't heavily modified settings (simple check: if rate is 0 or fee type calls for it)
+      // Actually, better to just set them on change. But watch out for infinite loops or overwriting user input during edits.
+      // The cleanest way is to use `form.setValue` in the `onValueChange` of the select, NOT here.
+  }
+
+  const { mutate: createProject, isPending } = useMutation({
+    ...createProjectMutation(),
+    onSuccess: () => {
+      // Invalidate the job query to refresh the projects list
+      queryClient.invalidateQueries({ 
+        queryKey: readJobOptions({ path: { job_id: jobId } }).queryKey 
+      });
+      setOpen(false);
+      form.reset();
+    },
+  });
+
+  const { mutate: createType, isPending: isCreatingTypePending } = useMutation({
+    ...createProjectTypeMutation(),
+    onSuccess: (newType) => {
+        queryClient.invalidateQueries({ queryKey: readProjectTypesOptions().queryKey });
+        form.setValue("project_type_id", newType.id.toString());
+        setIsCreatingType(false);
+        setNewTypeName("");
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const projectData: ProjectCreate = {
+      name: values.name,
+      description: values.description || "",
+      job_id: jobId,
+      project_type_id: parseInt(values.project_type_id),
+      fee_type: values.fee_type,
+      status: values.status,
+      rate: values.rate,
+      contingency_percentage: values.contingency_percentage,
+      forecasted_billable_hours: 0,
+    };
+
+    createProject({
+      body: projectData,
+    });
+  }
+
+  const handleCreateType = () => {
+      if (!newTypeName.trim()) return;
+      createType({
+        body: {
+            name: newTypeName,
+            description: null,
+            rate: 0
+        }
+      });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Create Project
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create Project</DialogTitle>
+          <DialogDescription>
+            Add a new project to this job.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Topographical Survey" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="project_type_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Type</FormLabel>
+                    {isCreatingType ? (
+                        <div className="flex gap-2">
+                            <Input 
+                                value={newTypeName} 
+                                onChange={(e) => setNewTypeName(e.target.value)}
+                                placeholder="New Type Name"
+                                className="h-10"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                    if(e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleCreateType();
+                                    }
+                                }}
+                            />
+                            <Button 
+                                type="button" 
+                                size="icon" 
+                                onClick={handleCreateType}
+                                disabled={isCreatingTypePending || !newTypeName.trim()}
+                            >
+                                {isCreatingTypePending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Check className="h-4 w-4" />
+                                )}
+                            </Button>
+                            <Button 
+                                type="button" 
+                                size="icon" 
+                                variant="ghost"
+                                onClick={() => setIsCreatingType(false)}
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    ) : (
+                        <Select 
+                            onValueChange={(val) => {
+                                if (val === "_new") {
+                                    setIsCreatingType(true);
+                                } else {
+                                    field.onChange(val);
+                                    // Auto-fill defaults from selected type
+                                    const type = projectTypes?.find(t => t.id.toString() === val);
+                                    if (type) {
+                                        if (type.default_fee_type) form.setValue("fee_type", type.default_fee_type);
+                                        if (type.rate) form.setValue("rate", type.rate);
+                                        if (type.default_contingency_percentage) form.setValue("contingency_percentage", type.default_contingency_percentage);
+                                    }
+                                }
+                            }} 
+                            value={field.value}
+                        >
+                        <FormControl>
+                            <SelectTrigger>
+                            <SelectValue placeholder={isLoadingTypes ? "Loading..." : "Select Type"} />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {isLoadingTypes ? (
+                            <div className="flex items-center justify-center p-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            </div>
+                            ) : (
+                                <>
+                                {projectTypes?.map((type) => (
+                                <SelectItem key={type.id} value={type.id.toString()}>
+                                    {type.name}
+                                </SelectItem>
+                                ))}
+                                <SelectSeparator />
+                                <SelectItem value="_new" className="text-primary font-medium cursor-pointer">
+                                    <div className="flex items-center gap-2">
+                                        <Plus className="h-4 w-4" />
+                                        Create New Type...
+                                    </div>
+                                </SelectItem>
+                                </>
+                            )}
+                        </SelectContent>
+                        </Select>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(ProjectStatus).map((status) => (
+                          <SelectItem key={status} value={status} className="capitalize">
+                            {status}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="fee_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fee Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Fee Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(FeeType).map((type) => (
+                          <SelectItem key={type} value={type} className="capitalize">
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="rate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Rate / Fee Amount</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            step="0.01" 
+                            placeholder="0.00"
+                            {...field} 
+                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="contingency_percentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contingency %</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="100"
+                            step="0.01" 
+                            placeholder="0%"
+                            {...field} 
+                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+              </div>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Project details and scope..." 
+                      className="resize-none min-h-[100px]"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Project
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}

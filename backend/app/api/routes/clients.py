@@ -6,10 +6,18 @@ from app.api.deps import DBDep, CurrentUserDep
 from app.models.client_model import (
     Client,
     ClientContact,
+    ClientContactCreate,
+    ClientContactRead,
     ClientCreate,
     ClientRead,
     ClientUpdate,
 )
+from app.models.job_read_minimal import JobReadMinimal
+
+
+class ClientReadDetail(ClientRead):
+    jobs: list[JobReadMinimal]
+
 
 router = APIRouter()
 
@@ -61,27 +69,38 @@ def read_clients(
     """
     Retrieve clients.
     """
-    clients = db.exec(
-        select(Client)
-        .where(Client.org_id == current_user.org_id)
-        .options(joinedload(Client.contacts))  # pyright: ignore[reportArgumentType]
-        .offset(offset)
-        .limit(limit)
-    ).all()
-    return clients  # pyright: ignore[reportReturnType]
+    clients = (
+        db.exec(
+            select(Client)
+            .where(Client.org_id == current_user.org_id)
+            .options(joinedload(Client.contacts))  # pyright: ignore[reportArgumentType]
+            .offset(offset)
+            .limit(limit)
+        )
+        .unique()
+        .all()
+    )
+    return clients
 
 
-@router.get("/{client_id}", response_model=ClientRead, operation_id="readClient")
+@router.get("/{client_id}", response_model=ClientReadDetail, operation_id="readClient")
 def read_client(
     client_id: int,
     current_user: CurrentUserDep,
     db: DBDep,
-) -> ClientRead:
-    client = db.exec(
-        select(Client)
-        .where(Client.id == client_id)
-        .options(joinedload(Client.contacts))  # pyright: ignore[reportArgumentType]
-    ).first()
+) -> ClientReadDetail:
+    client = (
+        db.exec(
+            select(Client)
+            .where(Client.id == client_id)
+            .options(
+                joinedload(Client.contacts),  # pyright: ignore[reportArgumentType]
+                joinedload(Client.jobs),
+            )
+        )
+        .unique()
+        .first()
+    )
 
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
@@ -136,3 +155,33 @@ def delete_client(
     db.delete(client)
     db.commit()
     return
+
+
+@router.post(
+    "/{client_id}/contacts",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ClientContactRead,
+    operation_id="createClientContact",
+)
+def create_client_contact(
+    client_id: int,
+    contact_in: ClientContactCreate,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> ClientContactRead:
+    """
+    Create a new contact for a client.
+    """
+    client = db.get(Client, client_id)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    if client.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    contact = ClientContact.model_validate(
+        contact_in, update={"client_id": client_id, "org_id": current_user.org_id}
+    )
+    db.add(contact)
+    db.commit()
+    db.refresh(contact)
+    return contact  # pyright: ignore[reportReturnType]

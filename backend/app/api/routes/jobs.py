@@ -1,9 +1,17 @@
+from datetime import datetime, timezone
+from typing import Any
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
+from sqlalchemy.orm import joinedload
+from pydantic import BaseModel
 from app.api.deps import DBDep, CurrentUserDep
-from app.models.job_model import Job, JobCreate, JobRead, JobUpdate
+from app.models.job_model import Job, JobCreate, JobRead, JobUpdate, JobReadDetail
 
 router = APIRouter()
+
+
+class JobUpdateEntry(BaseModel):
+    text: str
 
 
 @router.post(
@@ -29,26 +37,48 @@ def create_job(
 def read_jobs(
     current_user: CurrentUserDep,
     db: DBDep,
-    skip: int = 0,
+    offset: int = 0,
     limit: int = 100,
 ) -> list[JobRead]:
-    jobs = db.exec(
-        select(Job).where(Job.org_id == current_user.org_id).offset(skip).limit(limit)
-    ).all()
-    return jobs  # pyright: ignore[reportReturnType]
+    query = (
+        select(Job)
+        .where(Job.org_id == current_user.org_id)  # Security Scope
+        .options(
+            joinedload(Job.client),
+            joinedload(Job.created_by_user),
+            joinedload(Job.lead_user),
+        )
+        .offset(offset)
+        .limit(limit)
+    )
+
+    jobs = db.exec(query).unique().all()
+    return jobs
 
 
-@router.get("/{job_id}", response_model=JobRead, operation_id="readJob")
+@router.get("/{job_id}", response_model=JobReadDetail, operation_id="readJob")
 def read_job(
     job_id: int,
     db: DBDep,
     current_user: CurrentUserDep,
-) -> JobRead:
-    job = db.get(Job, job_id)
+) -> JobReadDetail:
+    query = (
+        select(Job)
+        .where(Job.id == job_id)
+        .where(Job.org_id == current_user.org_id)
+        .options(
+            joinedload(Job.client),
+            joinedload(Job.created_by_user),
+            joinedload(Job.lead_user),
+            joinedload(Job.projects),
+            joinedload(Job.files),
+        )
+    )
+
+    job = db.exec(query).unique().first()
+
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-    if job.org_id != current_user.org_id:
-        raise HTTPException(status_code=403, detail="Not authorized")
     return job  # pyright: ignore[reportReturnType]
 
 
@@ -90,3 +120,51 @@ def delete_job(
     db.delete(job)
     db.commit()
     return
+
+
+@router.post(
+    "/{job_id}/updates",
+    response_model=JobRead,
+    operation_id="addJobUpdate",
+)
+def add_job_update(
+    job_id: int,
+    update_entry: JobUpdateEntry,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> JobRead:
+    """Add an update entry to a job's timeline."""
+    job = (
+        db.exec(
+            select(Job)
+            .where(Job.id == job_id)
+            .options(
+                joinedload(Job.client),
+                joinedload(Job.created_by_user),
+                joinedload(Job.lead_user),
+            )
+        )
+        .unique()
+        .first()
+    )
+
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if job.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    new_update: dict[str, Any] = {
+        "text": update_entry.text,
+        "user_id": current_user.id,
+        "user_name": current_user.name,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    if job.updates is None:
+        job.updates = []
+    job.updates = [new_update] + job.updates  # Prepend new update
+
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+    return job  # pyright: ignore[reportReturnType]

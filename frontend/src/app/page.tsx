@@ -18,7 +18,7 @@ import {
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/context/auth-context";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const { user, isLoading } = useAuth();
@@ -56,27 +57,32 @@ export default function Home() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Button
-                size="lg"
-                variant="secondary"
-                asChild
+              <Link
+                href="/register"
+                className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}
               >
-                <Link href="/register">
-                  Start free trial
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" className="bg-white/10 text-white hover:bg-white/20 border-white/20" variant="outline" asChild>
-                <Link href="/login">
-                  Log in
-                </Link>
-              </Button>
-              <Button size="lg" className="text-white hover:text-secondary hover:bg-white/10" variant="ghost" asChild>
-                <Link href="/pricing">
-                  See pricing
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+                Start free trial
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/login"
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "outline" }),
+                  "bg-white/10 text-white hover:bg-white/20 border-white/20"
+                )}
+              >
+                Log in
+              </Link>
+              <Link
+                href="/pricing"
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "ghost" }),
+                  "text-white hover:text-secondary hover:bg-white/10"
+                )}
+              >
+                See pricing
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
             <div className="flex flex-wrap gap-6 text-sm text-blue-200">
               <span className="flex items-center gap-2">
@@ -245,20 +251,22 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button asChild>
-              <a
-                className="bg-accent text-accent-foreground hover:bg-accent/90"
-                href="/auth/login?screen_hint=signup"
-              >
-                Create account
-              </a>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/contact">
-                Talk to us
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <a
+              className={cn(
+                buttonVariants(),
+                "bg-accent text-accent-foreground hover:bg-accent/90"
+              )}
+              href="/auth/login?screen_hint=signup"
+            >
+              Create account
+            </a>
+            <Link
+              href="/contact"
+              className={cn(buttonVariants({ variant: "outline" }))}
+            >
+              Talk to us
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </section>
       </main>

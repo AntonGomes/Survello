@@ -7,6 +7,7 @@ from .run_model import RunFileLink
 if TYPE_CHECKING:
     from .user_model import User
     from .run_model import Run, RunFileLink
+    from .job_model import Job
 
 
 class FileRole(str, Enum):
@@ -33,9 +34,13 @@ class File(FileBase, table=True):
     uploaded_by_user_id: int | None = Field(foreign_key="users.id", ondelete="RESTRICT")
     job_id: int | None = Field(default=None, foreign_key="jobs.id", ondelete="SET NULL")
     run_id: int | None = Field(default=None, foreign_key="runs.id", ondelete="SET NULL")
+    survey_id: int | None = Field(
+        default=None, foreign_key="surveys.id", ondelete="SET NULL"
+    )
 
     # Relationships
     uploaded_by_user: "User" = Relationship(back_populates="uploaded_files")
+    job: "Job" = Relationship(back_populates="files")
     runs: list["Run"] = Relationship(
         back_populates="context_files", link_model=RunFileLink
     )

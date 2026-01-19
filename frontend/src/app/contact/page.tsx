@@ -1,7 +1,7 @@
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function ContactPage() {
   return (
@@ -62,9 +63,12 @@ export default function ContactPage() {
                   placeholder="Tell us about your team, volume, and timeline."
                 />
               </div>
-              <Button type="button" variant="accent" asChild>
-                <a href="mailto:hello@docgen">Email the team</a>
-              </Button>
+              <a
+                href="mailto:hello@docgen"
+                className={cn(buttonVariants({ variant: "accent" }))}
+              >
+                Email the team
+              </a>
             </CardContent>
           </Card>
 
@@ -94,11 +98,15 @@ export default function ContactPage() {
                   <div className="font-semibold text-slate-900">Schedule</div>
                   <p className="text-slate-700">Book a 20-minute walkthrough.</p>
                 </div>
-                <Button size="sm" variant="accent" className="ml-auto" asChild>
-                  <a href="/auth/login?screen_hint=signup">
-                    Get started
-                  </a>
-                </Button>
+                <a
+                  href="/auth/login?screen_hint=signup"
+                  className={cn(
+                    buttonVariants({ size: "sm", variant: "accent" }),
+                    "ml-auto"
+                  )}
+                >
+                  Get started
+                </a>
               </div>
               <div className="rounded-xl border bg-chart-3 text-[#0f172a] p-5 space-y-3 shadow-sm">
                 <div className="flex items-center gap-2 text-sm uppercase tracking-[0.08em] text-[#334155]">
@@ -109,9 +117,12 @@ export default function ContactPage() {
                   We’ll build a rollout plan tailored to your document volume
                   and review needs.
                 </p>
-                <Button variant="tertiary" asChild>
-                  <a href="/auth/login?screen_hint=signup">Start free trial</a>
-                </Button>
+                <a
+                  href="/auth/login?screen_hint=signup"
+                  className={cn(buttonVariants({ variant: "tertiary" }))}
+                >
+                  Start free trial
+                </a>
               </div>
             </CardContent>
           </Card>

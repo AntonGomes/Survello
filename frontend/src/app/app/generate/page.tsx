@@ -7,6 +7,7 @@ import { ErrorAlert } from "@/components/error-alert";
 import { JobStatusPanel } from "@/components/job-status-panel";
 import { UploadSection } from "@/components/upload-section";
 import { useDocumentGeneration } from "@/hooks/use-document-generation";
+import { FeatureHeader } from "@/components/feature-header";
 
 export default function GeneratePage() {
   const [contextFiles, setContextFiles] = useState<File[]>([]);
@@ -38,13 +39,10 @@ export default function GeneratePage() {
 
     {!isCompleted && !downloadPath && (
       <>
-      <div className="mb-8 space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Generate Document</h1>
-        <p className="text-muted-foreground max-w-3xl">
-          Create professional documents in seconds. Upload your context files (images, PDFs) and a template, 
-          and our AI will intelligently analyze the content to generate a filled document matching your requirements.
-        </p>
-      </div>
+      <FeatureHeader 
+        title="Generate Document" 
+        badge={null}
+      />
 
       <UploadSection
         contextFiles={contextFiles}

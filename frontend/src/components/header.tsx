@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type HeaderProps = {
   authenticated?: boolean;
@@ -41,17 +42,17 @@ export function Header({ authenticated = false }: HeaderProps) {
         <div className="flex items-center gap-2">
           {!authenticated ? (
             <>
-              <Button variant="ghost" asChild>
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/register">Sign up</Link>
-              </Button>
+              <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }))}>
+                Log in
+              </Link>
+              <Link href="/register" className={cn(buttonVariants())}>
+                Sign up
+              </Link>
             </>
           ) : (
-            <Button asChild>
-              <Link href="/app">Dashboard</Link>
-            </Button>
+            <Link href="/app" className={cn(buttonVariants())}>
+              Dashboard
+            </Link>
           )}
         </div>
       </nav>

@@ -79,6 +79,12 @@ class ClientUpdate(SQLModel):
 class ClientRead(ClientBase):
     id: int
     org_id: int | None
+    name: str
     created_at: datetime
     updated_at: datetime
     contacts: list[ClientContactRead] = []
+
+
+class ClientReadMinimal(ClientBase):
+    id: int
+    name: str

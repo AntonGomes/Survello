@@ -26,10 +26,20 @@ def test_jobs_workflow(client: TestClient, session: Session, setup_data: dict):
     assert response.status_code == 201, response.text
     job_data = response.json()
     assert job_data["name"] == "New Job"
-    assert job_data["client_id"] == cli.id
+    assert job_data["client"]["id"] == cli.id
 
     # Verify DB
     db_job = session.get(Job, job_data["id"])
     assert db_job is not None
     assert db_job.org_id == setup_data["org_id"]
     assert db_job.created_by_user_id == setup_data["user_id"]
+
+    # Test Read Job (Detail)
+    response = client.get(f"/jobs/{job_data['id']}")
+    assert response.status_code == 200
+    detail_data = response.json()
+    assert detail_data["id"] == job_data["id"]
+    assert "projects" in detail_data
+    assert isinstance(detail_data["projects"], list)
+    assert "files" in detail_data
+    assert isinstance(detail_data["files"], list)

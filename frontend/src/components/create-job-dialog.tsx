@@ -38,7 +38,8 @@ import { useAuth } from "@/context/auth-context";
 import { 
   createJobMutation, 
   readJobsOptions,
-  readClientsOptions
+  readClientsOptions,
+  readClientOptions
 } from "@/client/@tanstack/react-query.gen";
 import { JobStatus, type JobCreate } from "@/client/types.gen";
 
@@ -49,20 +50,26 @@ const formSchema = z.object({
   status: z.nativeEnum(JobStatus),
 });
 
-export function CreateJobDialog() {
+interface CreateJobDialogProps {
+  initialClientId?: number;
+  trigger?: React.ReactNode;
+}
+
+export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogProps) {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: clients, isLoading: isLoadingClients } = useQuery({
     ...readClientsOptions(),
+    enabled: !initialClientId, // Only fetch clients if we don't have one pre-selected
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      client_id: "",
+      client_id: initialClientId ? initialClientId.toString() : "",
       address: "",
       status: JobStatus.PLANNED,
     },
@@ -71,7 +78,22 @@ export function CreateJobDialog() {
   const { mutate: createJob, isPending } = useMutation({
     ...createJobMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: readJobsOptions().queryKey });
+      // Invalidate the main jobs list (matching the default params used in JobsPage)
+      queryClient.invalidateQueries({ 
+        queryKey: readJobsOptions({ 
+            query: { limit: 100, offset: 0 } 
+        }).queryKey 
+      });
+      // Also invalidate generic jobs queries to be safe
+      queryClient.invalidateQueries({ 
+        queryKey: readJobsOptions().queryKey 
+      });
+      
+      if (initialClientId) {
+        queryClient.invalidateQueries({ 
+            queryKey: readClientOptions({ path: { client_id: initialClientId } }).queryKey 
+        });
+      }
       setOpen(false);
       form.reset();
     },
@@ -97,50 +119,55 @@ export function CreateJobDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-chart-2 text-white hover:bg-chart-1/90 shadow-sm">
-          <Plus className="mr-2 h-4 w-4" />
-          Create Job
-        </Button>
+        {trigger || (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Job
+          </Button>
+        )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create Job</DialogTitle>
+          <DialogDescription>
+            {initialClientId ? "Create a new job for this client." : "Create a new job record."}
+          </DialogDescription>
+        </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <DialogHeader>
-              <DialogTitle>Create New Job</DialogTitle>
-              <DialogDescription>
-                Fill in the details to start a new document generation job.
-              </DialogDescription>
-            </DialogHeader>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Job Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Site Survey - 123 Main St" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Job Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Q1 Report Generation" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+            {!initialClientId && (
               <FormField
                 control={form.control}
                 name="client_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Client</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={isLoadingClients ? "Loading..." : "Select client"} />
+                          <SelectValue placeholder="Select a client" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {clients?.map((client) => (
+                        {isLoadingClients ? (
+                          <div className="flex items-center justify-center p-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          </div>
+                        ) : clients?.map((client) => (
                           <SelectItem key={client.id} value={client.id.toString()}>
                             {client.name}
                           </SelectItem>
@@ -151,6 +178,7 @@ export function CreateJobDialog() {
                   </FormItem>
                 )}
               />
+            )}
 
               <FormField
                 control={form.control}
@@ -196,7 +224,6 @@ export function CreateJobDialog() {
                   </FormItem>
                 )}
               />
-            </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>

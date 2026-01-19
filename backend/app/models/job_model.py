@@ -1,12 +1,15 @@
-from __future__ import annotations
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Any
 from enum import Enum
+from app.models.client_model import ClientReadMinimal, Client
+from app.models.user_model import UserRead, User, Org
+from app.models.project_model import ProjectRead, Project
+from app.models.file_model import FileRead, File
 from sqlmodel import SQLModel, Field, Relationship, AutoString
+from sqlalchemy import JSON, Column
 
 if TYPE_CHECKING:
-    from .user_model import User, Org
-    from .client_model import Client
+    from .survey_model import Survey
 
 
 class JobStatus(str, Enum):
@@ -25,6 +28,8 @@ class JobBase(SQLModel):
     name: str = Field(max_length=255)
     address: str | None = Field(default=None, sa_type=AutoString)
     status: JobStatus | None = Field(default=None, sa_type=AutoString)
+    # JSON array of updates: [{text: str, user_id: int, user_name: str, created_at: str}]
+    updates: List[Any] | None = Field(default=None, sa_column=Column(JSON))
 
 
 class Job(JobBase, table=True):
@@ -54,6 +59,9 @@ class Job(JobBase, table=True):
     lead_user: User = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Job.lead_user_id]"}
     )
+    projects: list[Project] = Relationship(back_populates="job")
+    files: list[File] = Relationship(back_populates="job")
+    surveys: list["Survey"] = Relationship(back_populates="job")
 
 
 class JobCreate(JobBase):
@@ -62,17 +70,24 @@ class JobCreate(JobBase):
 
 
 class JobUpdate(SQLModel):
-    name: str | None
-    address: str | None
-    status: JobStatus | None
-    client_id: int | None
-    lead_user_id: int | None
+    name: str | None = None
+    address: str | None = None
+    status: JobStatus | None = None
+    client_id: int | None = None
+    lead_user_id: int | None = None
+    updates: List[Any] | None = None
 
 
 class JobRead(JobBase):
     id: int
-    client_id: int
-    created_by_user_id: int
-    lead_user_id: int | None
+    client: ClientReadMinimal
+    created_by_user: UserRead
+    lead_user: UserRead | None
     created_at: datetime
     updated_at: datetime
+    updates: List[Any] | None = None
+
+
+class JobReadDetail(JobRead):
+    projects: list[ProjectRead]
+    files: list[FileRead]

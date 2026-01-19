@@ -1,7 +1,7 @@
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -19,6 +19,7 @@ import {
   MessageSquareText,
 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function AboutPage() {
   return (
@@ -165,17 +166,25 @@ export default function AboutPage() {
               Join forward-thinking surveyors who are saving hours on every job with SiteNotes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="text-chart-1 font-semibold" asChild>
-                <Link href="/auth/login?screen_hint=signup">
-                  Get Started Free
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10" asChild>
-                <Link href="/contact">
-                  Contact Sales
-                </Link>
-              </Button>
+              <Link
+                href="/auth/login?screen_hint=signup"
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "secondary" }),
+                  "text-chart-1 font-semibold"
+                )}
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+              <Link
+                href="/contact"
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "outline" }),
+                  "bg-transparent border-white text-white hover:bg-white/10"
+                )}
+              >
+                Contact Sales
+              </Link>
             </div>
           </div>
         </section>

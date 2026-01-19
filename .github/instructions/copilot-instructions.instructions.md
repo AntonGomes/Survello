@@ -1,0 +1,8 @@
+---
+applyTo: '**'
+---
+The datamodels used to define the ORM with SQLModel (docs for this framework are outlined in agent_instructions/sqlmodel.md) are defined in backend/app/models. This is the source of truth for all data types in the project. These models are pydantic datamodels and their CRUD versions are directly returned by the api routes defined in backend/app/api/routes. Using the openapi specification from these types provided by FastAPI, we HeyAPI with the tanstadck query plugin to generate the types and react query hooks used in the frontend. Therefore, any changes to data types must be made in the backend models first, and then the frontend types and hooks can be regenerated using the CLI command `./sync-types` from the root directory. Do not manually edit the generated types or hooks in the frontend, as these will be overwritten the next time the client is generated.
+
+You may edit the models when asked, but soudl also consider the downstream repercussions on the backend tests and the frontend types and hooks. Run the tests and ci in the backend after making changes with `make ci` from the backend directory to ensure nothing is broken. Similalry run `npm run type-check` and `npm run lint` from the frontend directory to ensure the frontend is not broken.
+
+For frontend developement, we are always using components from shadcn, the main set of components have been installed at frontend/src/components/ui. When creating new components, prefer to use and compose these existing components where possible to ensure consistency in design. If you need a new component that does not exist, create it in the ui directory following the same patterns as the existing components or search online at https://github.com/shadcn-ui/ui.

@@ -10,6 +10,11 @@ from app.api.routes.jobs import router as jobs_router
 from app.api.routes.projects import router as projects_router
 from app.api.routes.users import router as users_router
 from app.api.routes.clients import router as clients_router
+from app.api.routes.time import router as time_router
+from app.api.routes.leads import router as leads_router
+from app.api.routes.quotes import router as quotes_router
+from app.api.routes.surveys import router as surveys_router
+from app.api.routes.tasks import router as tasks_router
 
 from contextlib import asynccontextmanager
 from app.core.db import init_db
@@ -35,6 +40,11 @@ app.include_router(jobs_router, prefix="/jobs", tags=["Jobs"])
 app.include_router(projects_router, prefix="/projects", tags=["Projects"])
 app.include_router(users_router, prefix="/users", tags=["Users"])
 app.include_router(clients_router, prefix="/clients", tags=["Clients"])
+app.include_router(time_router, prefix="/time", tags=["Time Tracking"])
+app.include_router(leads_router, prefix="/leads", tags=["Leads"])
+app.include_router(quotes_router, prefix="/quotes", tags=["Quotes"])
+app.include_router(surveys_router, prefix="/surveys", tags=["Surveys"])
+app.include_router(tasks_router, prefix="/tasks", tags=["Tasks"])
 
 origins = [
     "http://localhost:3000",  # For local development

@@ -9,7 +9,6 @@ export default function AccountPage() {
     <div className="h-full flex flex-col max-w-4xl">
       <FeatureHeader 
         title="Account" 
-        description="Manage your profile, subscription plan, and billing information."
       />
 
       <div className="space-y-6 opacity-50 pointer-events-none">
