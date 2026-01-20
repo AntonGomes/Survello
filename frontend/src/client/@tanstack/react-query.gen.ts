@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { acceptInvitation, addJobUpdate, addLeadUpdate, addQuoteLine, addQuoteUpdate, convertLead, convertQuote, createClient, createClientContact, createFile, createFiles, createInvitation, createJob, createLead, createProject, createProjectType, createQuote, createRun, createSurvey, createTask, deleteClient, deleteInvitation, deleteJob, deleteLead, deleteProject, deleteQuote, deleteSurvey, deleteTask, generateFileDownloadUrl, generateFileUploadUrls, getCurrentTimerTimeCurrentGet, loginUser, logoutUser, type Options, readClient, readClients, readFile, readFiles, readInvitations, readJob, readJobs, readLead, readLeads, readOrg, readProject, readProjects, readProjectTypes, readQuote, readQuotes, readRun, readRunArtefacts, readRuns, readSurvey, readSurveys, readTask, readTasks, readUserMe, registerUser, removeOrgUser, reorderTask, resendInvitation, startTimerTimeStartPost, stopTimerTimeStopPost, updateClient, updateJob, updateLead, updateOrgUser, updateProject, updateQuote, updateSurvey, updateTask, updateUserMe, verifyInvitation } from '../sdk.gen';
-import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, AddJobUpdateData, AddJobUpdateError, AddJobUpdateResponse, AddLeadUpdateData, AddLeadUpdateError, AddLeadUpdateResponse, AddQuoteLineData, AddQuoteLineError, AddQuoteLineResponse, AddQuoteUpdateData, AddQuoteUpdateError, AddQuoteUpdateResponse, ConvertLeadData, ConvertLeadError, ConvertLeadResponse2, ConvertQuoteData, ConvertQuoteError, ConvertQuoteResponse2, CreateClientContactData, CreateClientContactError, CreateClientContactResponse, CreateClientData, CreateClientError, CreateClientResponse, CreateFileData, CreateFileError, CreateFileResponse, CreateFilesData, CreateFilesError, CreateFilesResponse, CreateInvitationData, CreateInvitationError, CreateInvitationResponse, CreateJobData, CreateJobError, CreateJobResponse, CreateLeadData, CreateLeadError, CreateLeadResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateProjectTypeData, CreateProjectTypeError, CreateProjectTypeResponse, CreateQuoteData, CreateQuoteError, CreateQuoteResponse, CreateRunData, CreateRunError, CreateRunResponse, CreateSurveyData, CreateSurveyError, CreateSurveyResponse, CreateTaskData, CreateTaskError, CreateTaskResponse, DeleteClientData, DeleteClientError, DeleteClientResponse, DeleteInvitationData, DeleteInvitationError, DeleteJobData, DeleteJobError, DeleteJobResponse, DeleteLeadData, DeleteLeadError, DeleteLeadResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteQuoteData, DeleteQuoteError, DeleteQuoteResponse, DeleteSurveyData, DeleteSurveyError, DeleteSurveyResponse, DeleteTaskData, DeleteTaskError, DeleteTaskResponse, GenerateFileDownloadUrlData, GenerateFileDownloadUrlError, GenerateFileDownloadUrlResponse, GenerateFileUploadUrlsData, GenerateFileUploadUrlsError, GenerateFileUploadUrlsResponse, GetCurrentTimerTimeCurrentGetData, GetCurrentTimerTimeCurrentGetResponse, LoginUserData, LoginUserError, LogoutUserData, LogoutUserError, ReadClientData, ReadClientError, ReadClientResponse, ReadClientsData, ReadClientsError, ReadClientsResponse, ReadFileData, ReadFileError, ReadFileResponse, ReadFilesData, ReadFilesError, ReadFilesResponse, ReadInvitationsData, ReadInvitationsResponse, ReadJobData, ReadJobError, ReadJobResponse, ReadJobsData, ReadJobsError, ReadJobsResponse, ReadLeadData, ReadLeadError, ReadLeadResponse, ReadLeadsData, ReadLeadsError, ReadLeadsResponse, ReadOrgData, ReadOrgResponse, ReadProjectData, ReadProjectError, ReadProjectResponse, ReadProjectsData, ReadProjectsError, ReadProjectsResponse, ReadProjectTypesData, ReadProjectTypesResponse, ReadQuoteData, ReadQuoteError, ReadQuoteResponse, ReadQuotesData, ReadQuotesError, ReadQuotesResponse, ReadRunArtefactsData, ReadRunArtefactsError, ReadRunArtefactsResponse, ReadRunData, ReadRunError, ReadRunResponse, ReadRunsData, ReadRunsError, ReadRunsResponse, ReadSurveyData, ReadSurveyError, ReadSurveyResponse, ReadSurveysData, ReadSurveysError, ReadSurveysResponse, ReadTaskData, ReadTaskError, ReadTaskResponse, ReadTasksData, ReadTasksError, ReadTasksResponse, ReadUserMeData, ReadUserMeResponse, RegisterUserData, RegisterUserError, RegisterUserResponse, RemoveOrgUserData, RemoveOrgUserError, ReorderTaskData, ReorderTaskError, ReorderTaskResponse, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, StartTimerTimeStartPostData, StartTimerTimeStartPostError, StartTimerTimeStartPostResponse, StopTimerTimeStopPostData, StopTimerTimeStopPostResponse, UpdateClientData, UpdateClientError, UpdateClientResponse, UpdateJobData, UpdateJobError, UpdateJobResponse, UpdateLeadData, UpdateLeadError, UpdateLeadResponse, UpdateOrgUserData, UpdateOrgUserError, UpdateOrgUserResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateQuoteData, UpdateQuoteError, UpdateQuoteResponse, UpdateSurveyData, UpdateSurveyError, UpdateSurveyResponse, UpdateTaskData, UpdateTaskError, UpdateTaskResponse, UpdateUserMeData, UpdateUserMeError, UpdateUserMeResponse, VerifyInvitationData, VerifyInvitationError, VerifyInvitationResponse } from '../types.gen';
+import { acceptInvitation, addJobUpdate, addLeadUpdate, addProjectUpdate, addQuoteLine, addQuoteUpdate, convertLead, convertQuote, createClient, createClientContact, createFile, createFiles, createInvitation, createJob, createLead, createProject, createProjectType, createQuote, createRun, createSurvey, deleteClient, deleteInvitation, deleteJob, deleteLead, deleteProject, deleteProjectUpdate, deleteQuote, deleteSurvey, generateFileDownloadUrl, generateFileUploadUrls, getCurrentTimer, getProjectTimeEntries, loginUser, logoutUser, logTimeManually, type Options, readClient, readClients, readFile, readFiles, readInvitations, readJob, readJobs, readLead, readLeads, readOrg, readProject, readProjectFiles, readProjects, readProjectTypes, readQuote, readQuotes, readRun, readRunArtefacts, readRuns, readSurvey, readSurveys, readUserMe, registerUser, removeOrgUser, resendInvitation, startTimer, stopTimer, updateClient, updateJob, updateLead, updateOrgUser, updateProject, updateQuote, updateSurvey, updateUserMe, verifyInvitation } from '../sdk.gen';
+import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, AddJobUpdateData, AddJobUpdateError, AddJobUpdateResponse, AddLeadUpdateData, AddLeadUpdateError, AddLeadUpdateResponse, AddProjectUpdateData, AddProjectUpdateError, AddProjectUpdateResponse, AddQuoteLineData, AddQuoteLineError, AddQuoteLineResponse, AddQuoteUpdateData, AddQuoteUpdateError, AddQuoteUpdateResponse, ConvertLeadData, ConvertLeadError, ConvertLeadResponse2, ConvertQuoteData, ConvertQuoteError, ConvertQuoteResponse2, CreateClientContactData, CreateClientContactError, CreateClientContactResponse, CreateClientData, CreateClientError, CreateClientResponse, CreateFileData, CreateFileError, CreateFileResponse, CreateFilesData, CreateFilesError, CreateFilesResponse, CreateInvitationData, CreateInvitationError, CreateInvitationResponse, CreateJobData, CreateJobError, CreateJobResponse, CreateLeadData, CreateLeadError, CreateLeadResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateProjectTypeData, CreateProjectTypeError, CreateProjectTypeResponse, CreateQuoteData, CreateQuoteError, CreateQuoteResponse, CreateRunData, CreateRunError, CreateRunResponse, CreateSurveyData, CreateSurveyError, CreateSurveyResponse, DeleteClientData, DeleteClientError, DeleteClientResponse, DeleteInvitationData, DeleteInvitationError, DeleteJobData, DeleteJobError, DeleteJobResponse, DeleteLeadData, DeleteLeadError, DeleteLeadResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteProjectUpdateData, DeleteProjectUpdateError, DeleteProjectUpdateResponse, DeleteQuoteData, DeleteQuoteError, DeleteQuoteResponse, DeleteSurveyData, DeleteSurveyError, DeleteSurveyResponse, GenerateFileDownloadUrlData, GenerateFileDownloadUrlError, GenerateFileDownloadUrlResponse, GenerateFileUploadUrlsData, GenerateFileUploadUrlsError, GenerateFileUploadUrlsResponse, GetCurrentTimerData, GetCurrentTimerResponse, GetProjectTimeEntriesData, GetProjectTimeEntriesError, GetProjectTimeEntriesResponse, LoginUserData, LoginUserError, LogoutUserData, LogoutUserError, LogTimeManuallyData, LogTimeManuallyError, LogTimeManuallyResponse, ReadClientData, ReadClientError, ReadClientResponse, ReadClientsData, ReadClientsError, ReadClientsResponse, ReadFileData, ReadFileError, ReadFileResponse, ReadFilesData, ReadFilesError, ReadFilesResponse, ReadInvitationsData, ReadInvitationsResponse, ReadJobData, ReadJobError, ReadJobResponse, ReadJobsData, ReadJobsError, ReadJobsResponse, ReadLeadData, ReadLeadError, ReadLeadResponse, ReadLeadsData, ReadLeadsError, ReadLeadsResponse, ReadOrgData, ReadOrgResponse, ReadProjectData, ReadProjectError, ReadProjectFilesData, ReadProjectFilesError, ReadProjectFilesResponse, ReadProjectResponse, ReadProjectsData, ReadProjectsError, ReadProjectsResponse, ReadProjectTypesData, ReadProjectTypesResponse, ReadQuoteData, ReadQuoteError, ReadQuoteResponse, ReadQuotesData, ReadQuotesError, ReadQuotesResponse, ReadRunArtefactsData, ReadRunArtefactsError, ReadRunArtefactsResponse, ReadRunData, ReadRunError, ReadRunResponse, ReadRunsData, ReadRunsError, ReadRunsResponse, ReadSurveyData, ReadSurveyError, ReadSurveyResponse, ReadSurveysData, ReadSurveysError, ReadSurveysResponse, ReadUserMeData, ReadUserMeResponse, RegisterUserData, RegisterUserError, RegisterUserResponse, RemoveOrgUserData, RemoveOrgUserError, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, StartTimerData, StartTimerError, StartTimerResponse, StopTimerData, StopTimerError, StopTimerResponse, UpdateClientData, UpdateClientError, UpdateClientResponse, UpdateJobData, UpdateJobError, UpdateJobResponse, UpdateLeadData, UpdateLeadError, UpdateLeadResponse, UpdateOrgUserData, UpdateOrgUserError, UpdateOrgUserResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateQuoteData, UpdateQuoteError, UpdateQuoteResponse, UpdateSurveyData, UpdateSurveyError, UpdateSurveyResponse, UpdateUserMeData, UpdateUserMeError, UpdateUserMeResponse, VerifyInvitationData, VerifyInvitationError, VerifyInvitationResponse } from '../types.gen';
 
 /**
  * Register
@@ -253,6 +253,7 @@ export const generateFileUploadUrlsMutation = (options?: Partial<Options<Generat
  *
  * Standard Create Endpoint.
  * Client calls this AFTER successfully uploading to the presigned URL.
+ * Automatically generates PDF preview for DOCX/XLSX files.
  */
 export const createFileMutation = (options?: Partial<Options<CreateFileData>>): UseMutationOptions<CreateFileResponse, CreateFileError, Options<CreateFileData>> => {
     const mutationOptions: UseMutationOptions<CreateFileResponse, CreateFileError, Options<CreateFileData>> = {
@@ -321,6 +322,7 @@ export const readFilesInfiniteOptions = (options?: Options<ReadFilesData>) => in
  * Create Files
  *
  * Create Endpoint for multiple files.
+ * Automatically generates PDF previews for DOCX/XLSX files.
  */
 export const createFilesMutation = (options?: Partial<Options<CreateFilesData>>): UseMutationOptions<CreateFilesResponse, CreateFilesError, Options<CreateFilesData>> => {
     const mutationOptions: UseMutationOptions<CreateFilesResponse, CreateFilesError, Options<CreateFilesData>> = {
@@ -662,6 +664,64 @@ export const updateProjectMutation = (options?: Partial<Options<UpdateProjectDat
     return mutationOptions;
 };
 
+/**
+ * Add Project Update
+ *
+ * Add a new update to the project's update feed.
+ */
+export const addProjectUpdateMutation = (options?: Partial<Options<AddProjectUpdateData>>): UseMutationOptions<AddProjectUpdateResponse, AddProjectUpdateError, Options<AddProjectUpdateData>> => {
+    const mutationOptions: UseMutationOptions<AddProjectUpdateResponse, AddProjectUpdateError, Options<AddProjectUpdateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await addProjectUpdate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Project Update
+ *
+ * Remove an update from the project's update feed by its UUID.
+ */
+export const deleteProjectUpdateMutation = (options?: Partial<Options<DeleteProjectUpdateData>>): UseMutationOptions<DeleteProjectUpdateResponse, DeleteProjectUpdateError, Options<DeleteProjectUpdateData>> => {
+    const mutationOptions: UseMutationOptions<DeleteProjectUpdateResponse, DeleteProjectUpdateError, Options<DeleteProjectUpdateData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteProjectUpdate({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readProjectFilesQueryKey = (options: Options<ReadProjectFilesData>) => createQueryKey('readProjectFiles', options);
+
+/**
+ * Read Project Files
+ *
+ * Get all files attached to a project.
+ */
+export const readProjectFilesOptions = (options: Options<ReadProjectFilesData>) => queryOptions<ReadProjectFilesResponse, ReadProjectFilesError, ReadProjectFilesResponse, ReturnType<typeof readProjectFilesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readProjectFiles({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readProjectFilesQueryKey(options)
+});
+
 export const readUserMeQueryKey = (options?: Options<ReadUserMeData>) => createQueryKey('readUserMe', options);
 
 /**
@@ -845,10 +905,10 @@ export const createClientContactMutation = (options?: Partial<Options<CreateClie
  *
  * Start a new timer for a project. Stops any existing active timer.
  */
-export const startTimerTimeStartPostMutation = (options?: Partial<Options<StartTimerTimeStartPostData>>): UseMutationOptions<StartTimerTimeStartPostResponse, StartTimerTimeStartPostError, Options<StartTimerTimeStartPostData>> => {
-    const mutationOptions: UseMutationOptions<StartTimerTimeStartPostResponse, StartTimerTimeStartPostError, Options<StartTimerTimeStartPostData>> = {
+export const startTimerMutation = (options?: Partial<Options<StartTimerData>>): UseMutationOptions<StartTimerResponse, StartTimerError, Options<StartTimerData>> => {
+    const mutationOptions: UseMutationOptions<StartTimerResponse, StartTimerError, Options<StartTimerData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await startTimerTimeStartPost({
+            const { data } = await startTimer({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -864,10 +924,10 @@ export const startTimerTimeStartPostMutation = (options?: Partial<Options<StartT
  *
  * Stop the currently active timer and update project actual hours.
  */
-export const stopTimerTimeStopPostMutation = (options?: Partial<Options<StopTimerTimeStopPostData>>): UseMutationOptions<StopTimerTimeStopPostResponse, DefaultError, Options<StopTimerTimeStopPostData>> => {
-    const mutationOptions: UseMutationOptions<StopTimerTimeStopPostResponse, DefaultError, Options<StopTimerTimeStopPostData>> = {
+export const stopTimerMutation = (options?: Partial<Options<StopTimerData>>): UseMutationOptions<StopTimerResponse, StopTimerError, Options<StopTimerData>> => {
+    const mutationOptions: UseMutationOptions<StopTimerResponse, StopTimerError, Options<StopTimerData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await stopTimerTimeStopPost({
+            const { data } = await stopTimer({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -878,16 +938,35 @@ export const stopTimerTimeStopPostMutation = (options?: Partial<Options<StopTime
     return mutationOptions;
 };
 
-export const getCurrentTimerTimeCurrentGetQueryKey = (options?: Options<GetCurrentTimerTimeCurrentGetData>) => createQueryKey('getCurrentTimerTimeCurrentGet', options);
+/**
+ * Log Time Manually
+ *
+ * Log time manually without using the timer.
+ */
+export const logTimeManuallyMutation = (options?: Partial<Options<LogTimeManuallyData>>): UseMutationOptions<LogTimeManuallyResponse, LogTimeManuallyError, Options<LogTimeManuallyData>> => {
+    const mutationOptions: UseMutationOptions<LogTimeManuallyResponse, LogTimeManuallyError, Options<LogTimeManuallyData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await logTimeManually({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getCurrentTimerQueryKey = (options?: Options<GetCurrentTimerData>) => createQueryKey('getCurrentTimer', options);
 
 /**
  * Get Current Timer
  *
  * Get the currently active timer if exists.
  */
-export const getCurrentTimerTimeCurrentGetOptions = (options?: Options<GetCurrentTimerTimeCurrentGetData>) => queryOptions<GetCurrentTimerTimeCurrentGetResponse, DefaultError, GetCurrentTimerTimeCurrentGetResponse, ReturnType<typeof getCurrentTimerTimeCurrentGetQueryKey>>({
+export const getCurrentTimerOptions = (options?: Options<GetCurrentTimerData>) => queryOptions<GetCurrentTimerResponse, DefaultError, GetCurrentTimerResponse, ReturnType<typeof getCurrentTimerQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getCurrentTimerTimeCurrentGet({
+        const { data } = await getCurrentTimer({
             ...options,
             ...queryKey[0],
             signal,
@@ -895,7 +974,27 @@ export const getCurrentTimerTimeCurrentGetOptions = (options?: Options<GetCurren
         });
         return data;
     },
-    queryKey: getCurrentTimerTimeCurrentGetQueryKey(options)
+    queryKey: getCurrentTimerQueryKey(options)
+});
+
+export const getProjectTimeEntriesQueryKey = (options: Options<GetProjectTimeEntriesData>) => createQueryKey('getProjectTimeEntries', options);
+
+/**
+ * Get Project Time Entries
+ *
+ * Get all time entries for a specific project.
+ */
+export const getProjectTimeEntriesOptions = (options: Options<GetProjectTimeEntriesData>) => queryOptions<GetProjectTimeEntriesResponse, GetProjectTimeEntriesError, GetProjectTimeEntriesResponse, ReturnType<typeof getProjectTimeEntriesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getProjectTimeEntries({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getProjectTimeEntriesQueryKey(options)
 });
 
 export const readLeadsQueryKey = (options?: Options<ReadLeadsData>) => createQueryKey('readLeads', options);
@@ -1364,152 +1463,6 @@ export const updateSurveyMutation = (options?: Partial<Options<UpdateSurveyData>
     const mutationOptions: UseMutationOptions<UpdateSurveyResponse, UpdateSurveyError, Options<UpdateSurveyData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await updateSurvey({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const readTasksQueryKey = (options?: Options<ReadTasksData>) => createQueryKey('readTasks', options);
-
-/**
- * Read Tasks
- *
- * Retrieve tasks, optionally filtered by project or status.
- */
-export const readTasksOptions = (options?: Options<ReadTasksData>) => queryOptions<ReadTasksResponse, ReadTasksError, ReadTasksResponse, ReturnType<typeof readTasksQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readTasks({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readTasksQueryKey(options)
-});
-
-export const readTasksInfiniteQueryKey = (options?: Options<ReadTasksData>): QueryKey<Options<ReadTasksData>> => createQueryKey('readTasks', options, true);
-
-/**
- * Read Tasks
- *
- * Retrieve tasks, optionally filtered by project or status.
- */
-export const readTasksInfiniteOptions = (options?: Options<ReadTasksData>) => infiniteQueryOptions<ReadTasksResponse, ReadTasksError, InfiniteData<ReadTasksResponse>, QueryKey<Options<ReadTasksData>>, number | Pick<QueryKey<Options<ReadTasksData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<ReadTasksData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                offset: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await readTasks({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readTasksInfiniteQueryKey(options)
-});
-
-/**
- * Create Task
- *
- * Create a new task.
- */
-export const createTaskMutation = (options?: Partial<Options<CreateTaskData>>): UseMutationOptions<CreateTaskResponse, CreateTaskError, Options<CreateTaskData>> => {
-    const mutationOptions: UseMutationOptions<CreateTaskResponse, CreateTaskError, Options<CreateTaskData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await createTask({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
- * Delete Task
- *
- * Delete a task.
- */
-export const deleteTaskMutation = (options?: Partial<Options<DeleteTaskData>>): UseMutationOptions<DeleteTaskResponse, DeleteTaskError, Options<DeleteTaskData>> => {
-    const mutationOptions: UseMutationOptions<DeleteTaskResponse, DeleteTaskError, Options<DeleteTaskData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await deleteTask({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const readTaskQueryKey = (options: Options<ReadTaskData>) => createQueryKey('readTask', options);
-
-/**
- * Read Task
- *
- * Get a specific task by ID.
- */
-export const readTaskOptions = (options: Options<ReadTaskData>) => queryOptions<ReadTaskResponse, ReadTaskError, ReadTaskResponse, ReturnType<typeof readTaskQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readTask({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readTaskQueryKey(options)
-});
-
-/**
- * Update Task
- *
- * Update a task.
- */
-export const updateTaskMutation = (options?: Partial<Options<UpdateTaskData>>): UseMutationOptions<UpdateTaskResponse, UpdateTaskError, Options<UpdateTaskData>> => {
-    const mutationOptions: UseMutationOptions<UpdateTaskResponse, UpdateTaskError, Options<UpdateTaskData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await updateTask({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
- * Reorder Task
- *
- * Reorder a task within a column or move to a different column.
- * Updates the task's status and order position.
- */
-export const reorderTaskMutation = (options?: Partial<Options<ReorderTaskData>>): UseMutationOptions<ReorderTaskResponse, ReorderTaskError, Options<ReorderTaskData>> => {
-    const mutationOptions: UseMutationOptions<ReorderTaskResponse, ReorderTaskError, Options<ReorderTaskData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await reorderTask({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

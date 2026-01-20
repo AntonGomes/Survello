@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 
-import { updateProjectMutation, startTimerTimeStartPostMutation, readProjectOptions, getCurrentTimerTimeCurrentGetOptions } from "@/client/@tanstack/react-query.gen"
+import { updateProjectMutation, startTimerMutation, readProjectOptions, getCurrentTimerOptions } from "@/client/@tanstack/react-query.gen"
 import { FeeType, type ProjectRead } from "@/client/types.gen"
 import {
   AlertDialog,
@@ -52,9 +52,9 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
   })
 
   const { mutate: startTimer, isPending: isStartingTimer } = useMutation({
-    ...startTimerTimeStartPostMutation(),
+    ...startTimerMutation(),
     onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getCurrentTimerTimeCurrentGetOptions().queryKey })
+        queryClient.invalidateQueries({ queryKey: getCurrentTimerOptions().queryKey })
         setShowTimerAlert(false)
         // toast.success("Timer started")
     },

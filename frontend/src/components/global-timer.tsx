@@ -1,11 +1,11 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Clock, Square, Loader2 } from "lucide-react";
+import { Square, Loader2 } from "lucide-react";
 
 import { 
-  getCurrentTimerTimeCurrentGetOptions, 
-  stopTimerTimeStopPostMutation,
+  getCurrentTimerOptions, 
+  stopTimerMutation,
   readProjectOptions
 } from "@/client/@tanstack/react-query.gen";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,14 @@ import { Button } from "@/components/ui/button";
 export function GlobalTimer() {
   const queryClient = useQueryClient();
   const { data: activeEntry, isLoading } = useQuery({
-    ...getCurrentTimerTimeCurrentGetOptions(),
+    ...getCurrentTimerOptions(),
     refetchInterval: 1000 * 60, // Poll every minute to stay roughly in sync if needed, though mostly relying on initial load/invalidation
   });
 
   const { mutate: stopTimer, isPending } = useMutation({
-    ...stopTimerTimeStopPostMutation(),
+    ...stopTimerMutation(),
     onSuccess: (data) => {
-        queryClient.invalidateQueries({ queryKey: getCurrentTimerTimeCurrentGetOptions().queryKey });
+        queryClient.invalidateQueries({ queryKey: getCurrentTimerOptions().queryKey });
         // Also invalidate the project to show updated hours if we are on that page
         if (data.project_id) {
              queryClient.invalidateQueries({
@@ -54,7 +54,7 @@ export function GlobalTimer() {
             size="sm" 
             variant="ghost" 
             className="h-8 w-8 p-0 text-red-700 hover:text-red-900 hover:bg-red-100"
-            onClick={() => stopTimer({})}
+            onClick={() => stopTimer({ query: {} })}
             disabled={isPending}
         >
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Square className="h-4 w-4 fill-current" />}

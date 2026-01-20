@@ -32,9 +32,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/auth-context";
+import { InlineCreateClient } from "@/components/inline-create-client";
+import { InlineCreateLead } from "@/components/inline-create-lead";
 import {
   createQuoteMutation,
   readQuotesOptions,
@@ -44,7 +47,6 @@ import {
 } from "@/client/@tanstack/react-query.gen";
 import { QuoteStatus, type QuoteCreate, type QuoteLineCreate } from "@/client/types.gen";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 
 const quoteLineSchema = z.object({
   project_type_id: z.string().min(1, "Please select a project type"),
@@ -74,6 +76,7 @@ export function CreateQuoteDialog({
   trigger 
 }: CreateQuoteDialogProps) {
   const [open, setOpen] = useState(false);
+  const [creatingType, setCreatingType] = useState<"client" | "lead" | null>(null);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -216,48 +219,91 @@ export function CreateQuoteDialog({
                   render={({ field }) => (
                     <FormItem className="col-span-2">
                       <FormLabel>Client or Lead</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a client or lead" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {(isLoadingClients || isLoadingLeads) ? (
-                            <div className="flex items-center justify-center p-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            </div>
-                          ) : (
-                            <>
-                              {clients && clients.length > 0 && (
-                                <>
-                                  <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                                    Clients
+                      {creatingType === "client" ? (
+                        <InlineCreateClient
+                          onCreated={(clientId) => {
+                            field.onChange(`client:${clientId}`);
+                            setCreatingType(null);
+                          }}
+                          onCancel={() => setCreatingType(null)}
+                        />
+                      ) : creatingType === "lead" ? (
+                        <InlineCreateLead
+                          onCreated={(leadId) => {
+                            field.onChange(`lead:${leadId}`);
+                            setCreatingType(null);
+                          }}
+                          onCancel={() => setCreatingType(null)}
+                        />
+                      ) : (
+                        <Select 
+                          onValueChange={(val) => {
+                            if (val === "_new_client") {
+                              setCreatingType("client");
+                            } else if (val === "_new_lead") {
+                              setCreatingType("lead");
+                            } else {
+                              field.onChange(val);
+                            }
+                          }} 
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a client or lead" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {(isLoadingClients || isLoadingLeads) ? (
+                              <div className="flex items-center justify-center p-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              </div>
+                            ) : (
+                              <>
+                                {clients && clients.length > 0 && (
+                                  <>
+                                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                                      Clients
+                                    </div>
+                                    {clients.map((client) => (
+                                      <SelectItem key={`client:${client.id}`} value={`client:${client.id}`}>
+                                        {client.name}
+                                      </SelectItem>
+                                    ))}
+                                  </>
+                                )}
+                                <SelectSeparator />
+                                <SelectItem value="_new_client" className="text-primary font-medium">
+                                  <div className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4" />
+                                    Create New Client...
                                   </div>
-                                  {clients.map((client) => (
-                                    <SelectItem key={`client:${client.id}`} value={`client:${client.id}`}>
-                                      {client.name}
-                                    </SelectItem>
-                                  ))}
-                                </>
-                              )}
-                              {leads && leads.length > 0 && (
-                                <>
-                                  <Separator className="my-1" />
-                                  <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                                    Leads
+                                </SelectItem>
+                                {leads && leads.length > 0 && (
+                                  <>
+                                    <SelectSeparator />
+                                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                                      Leads
+                                    </div>
+                                    {leads.filter(l => l.status !== "converted" && l.status !== "lost").map((lead) => (
+                                      <SelectItem key={`lead:${lead.id}`} value={`lead:${lead.id}`}>
+                                        {lead.name}
+                                      </SelectItem>
+                                    ))}
+                                  </>
+                                )}
+                                <SelectSeparator />
+                                <SelectItem value="_new_lead" className="text-primary font-medium">
+                                  <div className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4" />
+                                    Create New Lead...
                                   </div>
-                                  {leads.filter(l => l.status !== "converted" && l.status !== "lost").map((lead) => (
-                                    <SelectItem key={`lead:${lead.id}`} value={`lead:${lead.id}`}>
-                                      {lead.name}
-                                    </SelectItem>
-                                  ))}
-                                </>
-                              )}
-                            </>
-                          )}
-                        </SelectContent>
-                      </Select>
+                                </SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}

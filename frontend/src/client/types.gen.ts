@@ -313,6 +313,10 @@ export type FileCreate = {
      * Run Id
      */
     run_id?: number | null;
+    /**
+     * Project Id
+     */
+    project_id?: number | null;
     role?: FileRole;
 };
 
@@ -401,6 +405,14 @@ export type FileRead = {
      */
     created_at: string;
     role: FileRole;
+    /**
+     * Project Id
+     */
+    project_id?: number | null;
+    /**
+     * Preview File Id
+     */
+    preview_file_id?: number | null;
 };
 
 /**
@@ -903,6 +915,22 @@ export type OrgUserRead = {
 };
 
 /**
+ * ProjectAddUpdate
+ *
+ * Request body for adding an update to a project.
+ */
+export type ProjectAddUpdate = {
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Time Entry Id
+     */
+    time_entry_id?: number | null;
+};
+
+/**
  * ProjectCreate
  */
 export type ProjectCreate = {
@@ -913,7 +941,7 @@ export type ProjectCreate = {
     /**
      * Description
      */
-    description: string;
+    description?: string | null;
     /**
      * Rate
      */
@@ -947,11 +975,9 @@ export type ProjectCreate = {
     /**
      * Updates
      */
-    updates?: Array<string> | null;
-    /**
-     * Notes
-     */
-    notes?: string | null;
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
     /**
      * Deadline
      */
@@ -981,7 +1007,7 @@ export type ProjectRead = {
     /**
      * Description
      */
-    description: string;
+    description?: string | null;
     /**
      * Rate
      */
@@ -1015,11 +1041,9 @@ export type ProjectRead = {
     /**
      * Updates
      */
-    updates?: Array<string> | null;
-    /**
-     * Notes
-     */
-    notes?: string | null;
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
     /**
      * Deadline
      */
@@ -1036,6 +1060,10 @@ export type ProjectRead = {
      * Job Id
      */
     job_id: number;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
     /**
      * Created At
      */
@@ -1057,7 +1085,7 @@ export type ProjectReadDetail = {
     /**
      * Description
      */
-    description: string;
+    description?: string | null;
     /**
      * Rate
      */
@@ -1091,11 +1119,9 @@ export type ProjectReadDetail = {
     /**
      * Updates
      */
-    updates?: Array<string> | null;
-    /**
-     * Notes
-     */
-    notes?: string | null;
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
     /**
      * Deadline
      */
@@ -1112,6 +1138,10 @@ export type ProjectReadDetail = {
      * Job Id
      */
     job_id: number;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
     /**
      * Created At
      */
@@ -1242,15 +1272,17 @@ export type ProjectUpdate = {
     /**
      * Updates
      */
-    updates?: Array<string> | null;
-    /**
-     * Notes
-     */
-    notes?: string | null;
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
     /**
      * Deadline
      */
     deadline?: string | null;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
 };
 
 /**
@@ -1627,154 +1659,6 @@ export type SurveyorRead = {
 };
 
 /**
- * TaskAssigneeRead
- */
-export type TaskAssigneeRead = {
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Name
-     */
-    name: string;
-};
-
-/**
- * TaskCreate
- */
-export type TaskCreate = {
-    /**
-     * Title
-     */
-    title: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    status?: TaskStatus;
-    /**
-     * Order
-     */
-    order?: number;
-    /**
-     * Estimated Hours
-     */
-    estimated_hours?: number | null;
-    /**
-     * Project Id
-     */
-    project_id: number;
-    /**
-     * Assignee Id
-     */
-    assignee_id?: number | null;
-};
-
-/**
- * TaskRead
- */
-export type TaskRead = {
-    /**
-     * Title
-     */
-    title: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    status?: TaskStatus;
-    /**
-     * Order
-     */
-    order?: number;
-    /**
-     * Estimated Hours
-     */
-    estimated_hours?: number | null;
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Org Id
-     */
-    org_id: number;
-    /**
-     * Project Id
-     */
-    project_id: number;
-    /**
-     * Assignee Id
-     */
-    assignee_id?: number | null;
-    assignee?: TaskAssigneeRead | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Updated At
-     */
-    updated_at: string;
-};
-
-/**
- * TaskReorder
- *
- * Request body for reordering a task
- */
-export type TaskReorder = {
-    status: TaskStatus;
-    /**
-     * Order
-     */
-    order: number;
-};
-
-/**
- * TaskStatus
- */
-export const TaskStatus = {
-    TODO: 'todo',
-    IN_PROGRESS: 'in_progress',
-    WAITING: 'waiting',
-    DONE: 'done'
-} as const;
-
-/**
- * TaskStatus
- */
-export type TaskStatus = typeof TaskStatus[keyof typeof TaskStatus];
-
-/**
- * TaskUpdate
- */
-export type TaskUpdate = {
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Description
-     */
-    description?: string | null;
-    status?: TaskStatus | null;
-    /**
-     * Order
-     */
-    order?: number | null;
-    /**
-     * Estimated Hours
-     */
-    estimated_hours?: number | null;
-    /**
-     * Assignee Id
-     */
-    assignee_id?: number | null;
-};
-
-/**
  * TimeEntryCreate
  */
 export type TimeEntryCreate = {
@@ -1782,6 +1666,26 @@ export type TimeEntryCreate = {
      * Project Id
      */
     project_id: number;
+    /**
+     * Description
+     */
+    description?: string | null;
+};
+
+/**
+ * TimeEntryManualCreate
+ *
+ * For manually logging time without using the timer.
+ */
+export type TimeEntryManualCreate = {
+    /**
+     * Project Id
+     */
+    project_id: number;
+    /**
+     * Duration Minutes
+     */
+    duration_minutes: number;
     /**
      * Description
      */
@@ -1809,6 +1713,14 @@ export type TimeEntryOut = {
      */
     description?: string | null;
     /**
+     * Duration Minutes
+     */
+    duration_minutes?: number | null;
+    /**
+     * Update Id
+     */
+    update_id?: string | null;
+    /**
      * Id
      */
     id: number;
@@ -1817,13 +1729,51 @@ export type TimeEntryOut = {
      */
     user_id: number;
     /**
+     * Project Name
+     */
+    project_name: string;
+    /**
+     * User Name
+     */
+    user_name?: string | null;
+};
+
+/**
+ * TimeEntryRead
+ */
+export type TimeEntryRead = {
+    /**
+     * Project Id
+     */
+    project_id: number;
+    /**
+     * Start Time
+     */
+    start_time?: string;
+    /**
+     * End Time
+     */
+    end_time?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
      * Duration Minutes
      */
     duration_minutes?: number | null;
     /**
-     * Project Name
+     * Update Id
      */
-    project_name: string;
+    update_id?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * User Id
+     */
+    user_id: number;
 };
 
 /**
@@ -2691,6 +2641,102 @@ export type UpdateProjectResponses = {
 
 export type UpdateProjectResponse = UpdateProjectResponses[keyof UpdateProjectResponses];
 
+export type AddProjectUpdateData = {
+    body: ProjectAddUpdate;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: number;
+    };
+    query?: never;
+    url: '/projects/{project_id}/updates';
+};
+
+export type AddProjectUpdateErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddProjectUpdateError = AddProjectUpdateErrors[keyof AddProjectUpdateErrors];
+
+export type AddProjectUpdateResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProjectRead;
+};
+
+export type AddProjectUpdateResponse = AddProjectUpdateResponses[keyof AddProjectUpdateResponses];
+
+export type DeleteProjectUpdateData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: number;
+        /**
+         * Update Id
+         */
+        update_id: string;
+    };
+    query?: never;
+    url: '/projects/{project_id}/updates/{update_id}';
+};
+
+export type DeleteProjectUpdateErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteProjectUpdateError = DeleteProjectUpdateErrors[keyof DeleteProjectUpdateErrors];
+
+export type DeleteProjectUpdateResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProjectRead;
+};
+
+export type DeleteProjectUpdateResponse = DeleteProjectUpdateResponses[keyof DeleteProjectUpdateResponses];
+
+export type ReadProjectFilesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: number;
+    };
+    query?: never;
+    url: '/projects/{project_id}/files';
+};
+
+export type ReadProjectFilesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadProjectFilesError = ReadProjectFilesErrors[keyof ReadProjectFilesErrors];
+
+export type ReadProjectFilesResponses = {
+    /**
+     * Response Readprojectfiles
+     *
+     * Successful Response
+     */
+    200: Array<FileRead>;
+};
+
+export type ReadProjectFilesResponse = ReadProjectFilesResponses[keyof ReadProjectFilesResponses];
+
 export type ReadUserMeData = {
     body?: never;
     path?: never;
@@ -2913,64 +2959,135 @@ export type CreateClientContactResponses = {
 
 export type CreateClientContactResponse = CreateClientContactResponses[keyof CreateClientContactResponses];
 
-export type StartTimerTimeStartPostData = {
+export type StartTimerData = {
     body: TimeEntryCreate;
     path?: never;
     query?: never;
     url: '/time/start';
 };
 
-export type StartTimerTimeStartPostErrors = {
+export type StartTimerErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type StartTimerTimeStartPostError = StartTimerTimeStartPostErrors[keyof StartTimerTimeStartPostErrors];
+export type StartTimerError = StartTimerErrors[keyof StartTimerErrors];
 
-export type StartTimerTimeStartPostResponses = {
+export type StartTimerResponses = {
     /**
      * Successful Response
      */
     200: TimeEntryOut;
 };
 
-export type StartTimerTimeStartPostResponse = StartTimerTimeStartPostResponses[keyof StartTimerTimeStartPostResponses];
+export type StartTimerResponse = StartTimerResponses[keyof StartTimerResponses];
 
-export type StopTimerTimeStopPostData = {
+export type StopTimerData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Description
+         */
+        description?: string | null;
+    };
     url: '/time/stop';
 };
 
-export type StopTimerTimeStopPostResponses = {
+export type StopTimerErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type StopTimerError = StopTimerErrors[keyof StopTimerErrors];
+
+export type StopTimerResponses = {
     /**
      * Successful Response
      */
     200: TimeEntryOut;
 };
 
-export type StopTimerTimeStopPostResponse = StopTimerTimeStopPostResponses[keyof StopTimerTimeStopPostResponses];
+export type StopTimerResponse = StopTimerResponses[keyof StopTimerResponses];
 
-export type GetCurrentTimerTimeCurrentGetData = {
+export type LogTimeManuallyData = {
+    body: TimeEntryManualCreate;
+    path?: never;
+    query?: never;
+    url: '/time/manual';
+};
+
+export type LogTimeManuallyErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LogTimeManuallyError = LogTimeManuallyErrors[keyof LogTimeManuallyErrors];
+
+export type LogTimeManuallyResponses = {
+    /**
+     * Successful Response
+     */
+    200: TimeEntryOut;
+};
+
+export type LogTimeManuallyResponse = LogTimeManuallyResponses[keyof LogTimeManuallyResponses];
+
+export type GetCurrentTimerData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/time/current';
 };
 
-export type GetCurrentTimerTimeCurrentGetResponses = {
+export type GetCurrentTimerResponses = {
     /**
-     * Response Get Current Timer Time Current Get
+     * Response Getcurrenttimer
      *
      * Successful Response
      */
     200: TimeEntryOut | null;
 };
 
-export type GetCurrentTimerTimeCurrentGetResponse = GetCurrentTimerTimeCurrentGetResponses[keyof GetCurrentTimerTimeCurrentGetResponses];
+export type GetCurrentTimerResponse = GetCurrentTimerResponses[keyof GetCurrentTimerResponses];
+
+export type GetProjectTimeEntriesData = {
+    body?: never;
+    path: {
+        /**
+         * Project Id
+         */
+        project_id: number;
+    };
+    query?: never;
+    url: '/time/project/{project_id}';
+};
+
+export type GetProjectTimeEntriesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetProjectTimeEntriesError = GetProjectTimeEntriesErrors[keyof GetProjectTimeEntriesErrors];
+
+export type GetProjectTimeEntriesResponses = {
+    /**
+     * Response Getprojecttimeentries
+     *
+     * Successful Response
+     */
+    200: Array<TimeEntryRead>;
+};
+
+export type GetProjectTimeEntriesResponse = GetProjectTimeEntriesResponses[keyof GetProjectTimeEntriesResponses];
 
 export type ReadLeadsData = {
     body?: never;
@@ -3590,195 +3707,6 @@ export type UpdateSurveyResponses = {
 };
 
 export type UpdateSurveyResponse = UpdateSurveyResponses[keyof UpdateSurveyResponses];
-
-export type ReadTasksData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Project Id
-         */
-        project_id?: number | null;
-        /**
-         * Status
-         */
-        status?: TaskStatus | null;
-        /**
-         * Offset
-         */
-        offset?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/tasks/';
-};
-
-export type ReadTasksErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadTasksError = ReadTasksErrors[keyof ReadTasksErrors];
-
-export type ReadTasksResponses = {
-    /**
-     * Response Readtasks
-     *
-     * Successful Response
-     */
-    200: Array<TaskRead>;
-};
-
-export type ReadTasksResponse = ReadTasksResponses[keyof ReadTasksResponses];
-
-export type CreateTaskData = {
-    body: TaskCreate;
-    path?: never;
-    query?: never;
-    url: '/tasks/';
-};
-
-export type CreateTaskErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateTaskError = CreateTaskErrors[keyof CreateTaskErrors];
-
-export type CreateTaskResponses = {
-    /**
-     * Successful Response
-     */
-    201: TaskRead;
-};
-
-export type CreateTaskResponse = CreateTaskResponses[keyof CreateTaskResponses];
-
-export type DeleteTaskData = {
-    body?: never;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: number;
-    };
-    query?: never;
-    url: '/tasks/{task_id}';
-};
-
-export type DeleteTaskErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteTaskError = DeleteTaskErrors[keyof DeleteTaskErrors];
-
-export type DeleteTaskResponses = {
-    /**
-     * Successful Response
-     */
-    204: void;
-};
-
-export type DeleteTaskResponse = DeleteTaskResponses[keyof DeleteTaskResponses];
-
-export type ReadTaskData = {
-    body?: never;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: number;
-    };
-    query?: never;
-    url: '/tasks/{task_id}';
-};
-
-export type ReadTaskErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadTaskError = ReadTaskErrors[keyof ReadTaskErrors];
-
-export type ReadTaskResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskRead;
-};
-
-export type ReadTaskResponse = ReadTaskResponses[keyof ReadTaskResponses];
-
-export type UpdateTaskData = {
-    body: TaskUpdate;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: number;
-    };
-    query?: never;
-    url: '/tasks/{task_id}';
-};
-
-export type UpdateTaskErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateTaskError = UpdateTaskErrors[keyof UpdateTaskErrors];
-
-export type UpdateTaskResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskRead;
-};
-
-export type UpdateTaskResponse = UpdateTaskResponses[keyof UpdateTaskResponses];
-
-export type ReorderTaskData = {
-    body: TaskReorder;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: number;
-    };
-    query?: never;
-    url: '/tasks/{task_id}/reorder';
-};
-
-export type ReorderTaskErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReorderTaskError = ReorderTaskErrors[keyof ReorderTaskErrors];
-
-export type ReorderTaskResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskRead;
-};
-
-export type ReorderTaskResponse = ReorderTaskResponses[keyof ReorderTaskResponses];
 
 export type ReadInvitationsData = {
     body?: never;

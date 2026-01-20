@@ -8,7 +8,6 @@ from .run_model import Run, RunFileLink
 from .lead_model import Lead
 from .quote_model import Quote, QuoteLine
 from .survey_model import Survey
-from .task_model import Task
 from .time_entry_model import TimeEntry
 
 __all__ = [
@@ -28,6 +27,5 @@ __all__ = [
     "Quote",
     "QuoteLine",
     "Survey",
-    "Task",
     "TimeEntry",
 ]

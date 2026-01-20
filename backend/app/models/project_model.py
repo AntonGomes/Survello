@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Any
 from enum import Enum
+from uuid import uuid4
+from pydantic import BaseModel
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from sqlalchemy import JSON, Column
 
@@ -8,7 +10,7 @@ from sqlalchemy import JSON, Column
 if TYPE_CHECKING:
     from .user_model import User
     from .job_model import Job
-    from .task_model import Task
+    from .file_model import File
 
 
 class ProjectStatus(str, Enum):
@@ -25,13 +27,32 @@ class FeeType(str, Enum):
 
 
 # -----------------------------------------------------------------------------
+# PROJECT UPDATE (Structured update item for the updates JSON array)
+# -----------------------------------------------------------------------------
+
+
+class ProjectUpdateItem(BaseModel):
+    """A single update entry in the project updates feed."""
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    text: str
+    author_id: int
+    author_name: str | None = None  # Denormalized for display
+    author_initials: str | None = None  # Denormalized for display
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    time_entry_id: int | None = (
+        None  # Links to a time entry if this update was from time tracking
+    )
+
+
+# -----------------------------------------------------------------------------
 # PROJECT (Moved before ProjectType)
 # -----------------------------------------------------------------------------
 
 
 class ProjectBase(SQLModel):
     name: str = Field(max_length=255)
-    description: str
+    description: str | None = Field(default=None, sa_type=AutoString)
     rate: float | None = 0.0
     forecasted_billable_hours: float | None = 0.0
     actual_hours: float | None = 0.0
@@ -41,8 +62,8 @@ class ProjectBase(SQLModel):
     forecasted_fee_amount: float | None = 0.0
     fee_type: FeeType
     status: ProjectStatus | None = Field(default=None, sa_type=AutoString)
-    updates: List[str] | None = Field(default=None, sa_column=Column(JSON))
-    notes: str | None = Field(default=None, sa_type=AutoString)
+    # Unified updates feed - stores list of ProjectUpdateItem dicts
+    updates: List[dict[str, Any]] | None = Field(default=None, sa_column=Column(JSON))
     deadline: datetime | None = Field(default=None)
 
 
@@ -71,7 +92,7 @@ class Project(ProjectBase, table=True):
     lead_user: "User" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Project.lead_user_id]"}
     )
-    tasks: list["Task"] = Relationship(back_populates="project")
+    files: list["File"] = Relationship(back_populates="project")
 
 
 class ProjectCreate(ProjectBase):
@@ -92,15 +113,23 @@ class ProjectUpdate(SQLModel):
     forecasted_fee_amount: float | None = None
     fee_type: FeeType | None = None
     status: ProjectStatus | None = None
-    updates: List[str] | None = None
-    notes: str | None = None
+    updates: List[dict[str, Any]] | None = None
     deadline: datetime | None = None
+    lead_user_id: int | None = None
+
+
+class ProjectAddUpdate(SQLModel):
+    """Request body for adding an update to a project."""
+
+    text: str
+    time_entry_id: int | None = None
 
 
 class ProjectRead(ProjectBase):
     id: int
     project_type_id: int
     job_id: int
+    lead_user_id: int | None = None
     created_at: datetime
     updated_at: datetime
 

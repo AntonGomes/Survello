@@ -1,4 +1,5 @@
 from uuid import uuid4
+import logging
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
@@ -9,9 +10,68 @@ from app.models.file_model import (
     FilePresignRequest,
     FilePresignResponse,
     FileRead,
+    FileRole,
 )
+from app.utils.conversion import to_pdf, ConversionError, DOCX_MIME, XLSX_MIME
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _maybe_generate_preview(
+    db_file: File,
+    storage: StorageDep,
+    db: DBDep,
+    user_id: int,
+    org_id: int,
+) -> None:
+    """Generate PDF preview for DOCX/XLSX files and link it to the original."""
+    if db_file.mime_type not in (DOCX_MIME, XLSX_MIME):
+        return
+
+    try:
+        # Download the file bytes from S3
+        file_bytes = storage.get_file_data(db_file.storage_key)
+        if not file_bytes:
+            logger.warning(
+                f"Could not download file {db_file.id} for preview generation"
+            )
+            return
+
+        # Convert to PDF
+        pdf_bytes = to_pdf(file_bytes)
+
+        # Upload the preview PDF to S3
+        preview_key = f"{org_id}/{user_id}/preview-{uuid4()}.pdf"
+        storage.upload_file(preview_key, pdf_bytes)
+
+        # Create the preview file record
+        preview_file = File(
+            file_name=f"{db_file.file_name}.pdf",
+            mime_type="application/pdf",
+            size_bytes=len(pdf_bytes),
+            storage_key=preview_key,
+            role=FileRole.PREVIEW_PDF,
+            org_id=org_id,
+            uploaded_by_user_id=user_id,
+            job_id=db_file.job_id,
+            project_id=db_file.project_id,
+        )
+        db.add(preview_file)
+        db.commit()
+        db.refresh(preview_file)
+
+        # Link the preview to the original file
+        db_file.preview_file_id = preview_file.id
+        db.add(db_file)
+        db.commit()
+
+        logger.info(f"Generated PDF preview {preview_file.id} for file {db_file.id}")
+    except ConversionError as e:
+        logger.warning(f"Could not generate preview for file {db_file.id}: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error generating preview for file {db_file.id}: {e}")
 
 
 @router.post(
@@ -61,6 +121,7 @@ def create_file(
     """
     Standard Create Endpoint.
     Client calls this AFTER successfully uploading to the presigned URL.
+    Automatically generates PDF preview for DOCX/XLSX files.
     """
     extra_data = {"uploaded_by_user_id": user.id, "org_id": user.org_id}
     if not storage.check_file_exists(file_in.storage_key):
@@ -69,6 +130,10 @@ def create_file(
     db.add(db_file)
 
     db.commit()
+    db.refresh(db_file)
+
+    # Generate PDF preview for Office documents
+    _maybe_generate_preview(db_file, storage, db, user.id, user.org_id)  # pyright: ignore[reportArgumentType]
     db.refresh(db_file)
 
     return db_file  # pyright: ignore[reportReturnType]
@@ -88,6 +153,7 @@ def create_files(
 ) -> list[FileRead]:
     """
     Create Endpoint for multiple files.
+    Automatically generates PDF previews for DOCX/XLSX files.
     """
     files: list[File] = []
     extra_data = {"uploaded_by_user_id": user.id, "org_id": user.org_id}
@@ -100,6 +166,11 @@ def create_files(
 
     db.commit()
     for f in files:
+        db.refresh(f)
+
+    # Generate PDF previews for Office documents
+    for f in files:
+        _maybe_generate_preview(f, storage, db, user.id, user.org_id)  # pyright: ignore[reportArgumentType]
         db.refresh(f)
 
     return files  # pyright: ignore[reportReturnType]

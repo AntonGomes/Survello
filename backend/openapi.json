@@ -374,7 +374,7 @@
           "Storage"
         ],
         "summary": "Create File",
-        "description": "Standard Create Endpoint.\nClient calls this AFTER successfully uploading to the presigned URL.",
+        "description": "Standard Create Endpoint.\nClient calls this AFTER successfully uploading to the presigned URL.\nAutomatically generates PDF preview for DOCX/XLSX files.",
         "operationId": "createFile",
         "requestBody": {
           "content": {
@@ -416,7 +416,7 @@
           "Storage"
         ],
         "summary": "Create Files",
-        "description": "Create Endpoint for multiple files.",
+        "description": "Create Endpoint for multiple files.\nAutomatically generates PDF previews for DOCX/XLSX files.",
         "operationId": "createFiles",
         "requestBody": {
           "required": true,
@@ -1189,6 +1189,158 @@
         }
       }
     },
+    "/projects/{project_id}/updates": {
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Add Project Update",
+        "description": "Add a new update to the project's update feed.",
+        "operationId": "addProjectUpdate",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectAddUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/updates/{update_id}": {
+      "delete": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Delete Project Update",
+        "description": "Remove an update from the project's update feed by its UUID.",
+        "operationId": "deleteProjectUpdate",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "update_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Update Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/files": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Read Project Files",
+        "description": "Get all files attached to a project.",
+        "operationId": "readProjectFiles",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileRead"
+                  },
+                  "title": "Response Readprojectfiles"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users/me": {
       "get": {
         "tags": [
@@ -1534,7 +1686,7 @@
         ],
         "summary": "Start Timer",
         "description": "Start a new timer for a project. Stops any existing active timer.",
-        "operationId": "start_timer_time_start_post",
+        "operationId": "startTimer",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1576,7 +1728,25 @@
         ],
         "summary": "Stop Timer",
         "description": "Stop the currently active timer and update project actual hours.",
-        "operationId": "stop_timer_time_stop_post",
+        "operationId": "stopTimer",
+        "parameters": [
+          {
+            "name": "description",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Description"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1584,6 +1754,58 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TimeEntryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/time/manual": {
+      "post": {
+        "tags": [
+          "Time Tracking"
+        ],
+        "summary": "Log Time Manually",
+        "description": "Log time manually without using the timer.",
+        "operationId": "logTimeManually",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeEntryManualCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeEntryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1598,7 +1820,7 @@
         ],
         "summary": "Get Current Timer",
         "description": "Get the currently active timer if exists.",
-        "operationId": "get_current_timer_time_current_get",
+        "operationId": "getCurrentTimer",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1613,7 +1835,54 @@
                       "type": "null"
                     }
                   ],
-                  "title": "Response Get Current Timer Time Current Get"
+                  "title": "Response Getcurrenttimer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/time/project/{project_id}": {
+      "get": {
+        "tags": [
+          "Time Tracking"
+        ],
+        "summary": "Get Project Time Entries",
+        "description": "Get all time entries for a specific project.",
+        "operationId": "getProjectTimeEntries",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeEntryRead"
+                  },
+                  "title": "Response Getprojecttimeentries"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -2608,317 +2877,6 @@
         }
       }
     },
-    "/tasks/": {
-      "post": {
-        "tags": [
-          "Tasks"
-        ],
-        "summary": "Create Task",
-        "description": "Create a new task.",
-        "operationId": "createTask",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TaskCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskRead"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Tasks"
-        ],
-        "summary": "Read Tasks",
-        "description": "Retrieve tasks, optionally filtered by project or status.",
-        "operationId": "readTasks",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Project Id"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/TaskStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 0,
-              "title": "Offset"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 100,
-              "title": "Limit"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TaskRead"
-                  },
-                  "title": "Response Readtasks"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/tasks/{task_id}": {
-      "get": {
-        "tags": [
-          "Tasks"
-        ],
-        "summary": "Read Task",
-        "description": "Get a specific task by ID.",
-        "operationId": "readTask",
-        "parameters": [
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Task Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskRead"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "Tasks"
-        ],
-        "summary": "Update Task",
-        "description": "Update a task.",
-        "operationId": "updateTask",
-        "parameters": [
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Task Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TaskUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskRead"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Tasks"
-        ],
-        "summary": "Delete Task",
-        "description": "Delete a task.",
-        "operationId": "deleteTask",
-        "parameters": [
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Task Id"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/tasks/{task_id}/reorder": {
-      "patch": {
-        "tags": [
-          "Tasks"
-        ],
-        "summary": "Reorder Task",
-        "description": "Reorder a task within a column or move to a different column.\nUpdates the task's status and order position.",
-        "operationId": "reorderTask",
-        "parameters": [
-          {
-            "name": "task_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Task Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TaskReorder"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskRead"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/invitations/": {
       "get": {
         "tags": [
@@ -3817,6 +3775,17 @@
             ],
             "title": "Run Id"
           },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
           "role": {
             "$ref": "#/components/schemas/FileRole",
             "default": "input"
@@ -3955,6 +3924,28 @@
           },
           "role": {
             "$ref": "#/components/schemas/FileRole"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "preview_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preview File Id"
           }
         },
         "type": "object",
@@ -4882,6 +4873,31 @@
         "title": "OrgUserRead",
         "description": "User info for org management (admins viewing org members)"
       },
+      "ProjectAddUpdate": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "time_entry_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Entry Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "ProjectAddUpdate",
+        "description": "Request body for adding an update to a project."
+      },
       "ProjectCreate": {
         "properties": {
           "name": {
@@ -4890,7 +4906,14 @@
             "title": "Name"
           },
           "description": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Description"
           },
           "rate": {
@@ -4994,7 +5017,8 @@
             "anyOf": [
               {
                 "items": {
-                  "type": "string"
+                  "additionalProperties": true,
+                  "type": "object"
                 },
                 "type": "array"
               },
@@ -5003,17 +5027,6 @@
               }
             ],
             "title": "Updates"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
           },
           "deadline": {
             "anyOf": [
@@ -5057,7 +5070,6 @@
         "type": "object",
         "required": [
           "name",
-          "description",
           "fee_type",
           "job_id"
         ],
@@ -5071,7 +5083,14 @@
             "title": "Name"
           },
           "description": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Description"
           },
           "rate": {
@@ -5175,7 +5194,8 @@
             "anyOf": [
               {
                 "items": {
-                  "type": "string"
+                  "additionalProperties": true,
+                  "type": "object"
                 },
                 "type": "array"
               },
@@ -5184,17 +5204,6 @@
               }
             ],
             "title": "Updates"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
           },
           "deadline": {
             "anyOf": [
@@ -5220,6 +5229,17 @@
             "type": "integer",
             "title": "Job Id"
           },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -5234,7 +5254,6 @@
         "type": "object",
         "required": [
           "name",
-          "description",
           "fee_type",
           "id",
           "project_type_id",
@@ -5252,7 +5271,14 @@
             "title": "Name"
           },
           "description": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Description"
           },
           "rate": {
@@ -5356,7 +5382,8 @@
             "anyOf": [
               {
                 "items": {
-                  "type": "string"
+                  "additionalProperties": true,
+                  "type": "object"
                 },
                 "type": "array"
               },
@@ -5365,17 +5392,6 @@
               }
             ],
             "title": "Updates"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
           },
           "deadline": {
             "anyOf": [
@@ -5400,6 +5416,17 @@
           "job_id": {
             "type": "integer",
             "title": "Job Id"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
           },
           "created_at": {
             "type": "string",
@@ -5421,7 +5448,6 @@
         "type": "object",
         "required": [
           "name",
-          "description",
           "fee_type",
           "id",
           "project_type_id",
@@ -5707,7 +5733,8 @@
             "anyOf": [
               {
                 "items": {
-                  "type": "string"
+                  "additionalProperties": true,
+                  "type": "object"
                 },
                 "type": "array"
               },
@@ -5716,17 +5743,6 @@
               }
             ],
             "title": "Updates"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
           },
           "deadline": {
             "anyOf": [
@@ -5739,6 +5755,17 @@
               }
             ],
             "title": "Deadline"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
           }
         },
         "type": "object",
@@ -6466,277 +6493,6 @@
         ],
         "title": "SurveyorRead"
       },
-      "TaskAssigneeRead": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
-        "title": "TaskAssigneeRead"
-      },
-      "TaskCreate": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Title"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TaskStatus",
-            "default": "todo"
-          },
-          "order": {
-            "type": "integer",
-            "title": "Order",
-            "default": 0
-          },
-          "estimated_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Estimated Hours"
-          },
-          "project_id": {
-            "type": "integer",
-            "title": "Project Id"
-          },
-          "assignee_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assignee Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "project_id"
-        ],
-        "title": "TaskCreate"
-      },
-      "TaskRead": {
-        "properties": {
-          "title": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Title"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "status": {
-            "$ref": "#/components/schemas/TaskStatus",
-            "default": "todo"
-          },
-          "order": {
-            "type": "integer",
-            "title": "Order",
-            "default": 0
-          },
-          "estimated_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Estimated Hours"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "org_id": {
-            "type": "integer",
-            "title": "Org Id"
-          },
-          "project_id": {
-            "type": "integer",
-            "title": "Project Id"
-          },
-          "assignee_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assignee Id"
-          },
-          "assignee": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TaskAssigneeRead"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "title",
-          "id",
-          "org_id",
-          "project_id",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "TaskRead"
-      },
-      "TaskReorder": {
-        "properties": {
-          "status": {
-            "$ref": "#/components/schemas/TaskStatus"
-          },
-          "order": {
-            "type": "integer",
-            "title": "Order"
-          }
-        },
-        "type": "object",
-        "required": [
-          "status",
-          "order"
-        ],
-        "title": "TaskReorder",
-        "description": "Request body for reordering a task"
-      },
-      "TaskStatus": {
-        "type": "string",
-        "enum": [
-          "todo",
-          "in_progress",
-          "waiting",
-          "done"
-        ],
-        "title": "TaskStatus"
-      },
-      "TaskUpdate": {
-        "properties": {
-          "title": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Title"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TaskStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "order": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Order"
-          },
-          "estimated_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Estimated Hours"
-          },
-          "assignee_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assignee Id"
-          }
-        },
-        "type": "object",
-        "title": "TaskUpdate"
-      },
       "TimeEntryCreate": {
         "properties": {
           "project_id": {
@@ -6760,6 +6516,36 @@
           "project_id"
         ],
         "title": "TimeEntryCreate"
+      },
+      "TimeEntryManualCreate": {
+        "properties": {
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id"
+          },
+          "duration_minutes": {
+            "type": "integer",
+            "title": "Duration Minutes"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project_id",
+          "duration_minutes"
+        ],
+        "title": "TimeEntryManualCreate",
+        "description": "For manually logging time without using the timer."
       },
       "TimeEntryOut": {
         "properties": {
@@ -6795,6 +6581,28 @@
             ],
             "title": "Description"
           },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
+          },
+          "update_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Update Id"
+          },
           "id": {
             "type": "integer",
             "title": "Id"
@@ -6802,6 +6610,65 @@
           "user_id": {
             "type": "integer",
             "title": "User Id"
+          },
+          "project_name": {
+            "type": "string",
+            "title": "Project Name"
+          },
+          "user_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project_id",
+          "id",
+          "user_id",
+          "project_name"
+        ],
+        "title": "TimeEntryOut"
+      },
+      "TimeEntryRead": {
+        "properties": {
+          "project_id": {
+            "type": "integer",
+            "title": "Project Id"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
           },
           "duration_minutes": {
             "anyOf": [
@@ -6814,19 +6681,33 @@
             ],
             "title": "Duration Minutes"
           },
-          "project_name": {
-            "type": "string",
-            "title": "Project Name"
+          "update_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Update Id"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
           }
         },
         "type": "object",
         "required": [
           "project_id",
           "id",
-          "user_id",
-          "project_name"
+          "user_id"
         ],
-        "title": "TimeEntryOut"
+        "title": "TimeEntryRead"
       },
       "UserLogin": {
         "properties": {

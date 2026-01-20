@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from .run_model import RunFileLink
@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from .user_model import User
     from .run_model import Run, RunFileLink
     from .job_model import Job
+    from .project_model import Project
 
 
 class FileRole(str, Enum):
@@ -37,12 +38,28 @@ class File(FileBase, table=True):
     survey_id: int | None = Field(
         default=None, foreign_key="surveys.id", ondelete="SET NULL"
     )
+    # New: link files directly to projects
+    project_id: int | None = Field(
+        default=None, foreign_key="projects.id", ondelete="SET NULL"
+    )
+    # New: link to PDF preview file (for docx/xlsx files)
+    preview_file_id: int | None = Field(
+        default=None, foreign_key="files.id", ondelete="SET NULL"
+    )
 
     # Relationships
     uploaded_by_user: "User" = Relationship(back_populates="uploaded_files")
     job: "Job" = Relationship(back_populates="files")
     runs: list["Run"] = Relationship(
         back_populates="context_files", link_model=RunFileLink
+    )
+    project: Optional["Project"] = Relationship(back_populates="files")
+    # Self-referential for preview file
+    preview_file: Optional["File"] = Relationship(
+        sa_relationship_kwargs={
+            "remote_side": "File.id",
+            "foreign_keys": "[File.preview_file_id]",
+        }
     )
 
 
@@ -52,6 +69,7 @@ class FileCreate(FileBase):
     uploaded_by_user_id: int | None = None
     job_id: int | None = None
     run_id: int | None = None
+    project_id: int | None = None
     role: FileRole = FileRole.INPUT
 
 
@@ -68,6 +86,7 @@ class FilePresignResponse(FileBase):
 class FileUpdate(SQLModel):
     file_name: str | None = None
     role: FileRole | None = None
+    preview_file_id: int | None = None
 
 
 class FileRead(FileBase):
@@ -77,3 +96,5 @@ class FileRead(FileBase):
     created_at: datetime
     role: FileRole
     size_bytes: int | None = None
+    project_id: int | None = None
+    preview_file_id: int | None = None

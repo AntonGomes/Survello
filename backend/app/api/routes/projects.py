@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status, Query
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
@@ -10,8 +11,11 @@ from app.models.project_model import (
     ProjectType,
     ProjectTypeCreate,
     ProjectTypeRead,
+    ProjectAddUpdate,
+    ProjectUpdateItem,
 )
 from app.models.job_read_minimal import JobReadMinimal
+from app.models.file_model import File, FileRead
 
 
 class ProjectReadDetail(ProjectRead):
@@ -169,3 +173,111 @@ def delete_project(
     db.delete(project)
     db.commit()
     return
+
+
+# -----------------------------------------------------------------------------
+# PROJECT UPDATES ENDPOINTS
+# -----------------------------------------------------------------------------
+
+
+@router.post(
+    "/{project_id}/updates",
+    response_model=ProjectRead,
+    operation_id="addProjectUpdate",
+)
+def add_project_update(
+    project_id: int,
+    update_in: ProjectAddUpdate,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> ProjectRead:
+    """Add a new update to the project's update feed."""
+    project = db.get(Project, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if project.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Create the update item with user info
+    initials = (
+        "".join(word[0].upper() for word in (current_user.name or "").split()[:2])
+        or "??"
+    )
+
+    update_item = ProjectUpdateItem(
+        text=update_in.text,
+        author_id=current_user.id,  # pyright: ignore[reportArgumentType]
+        author_name=current_user.name,
+        author_initials=initials,
+        created_at=datetime.now(timezone.utc),
+        time_entry_id=update_in.time_entry_id,
+    )
+
+    # Append to existing updates or create new list
+    current_updates = project.updates or []
+    current_updates.append(update_item.model_dump(mode="json"))
+    project.updates = current_updates
+
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    return project  # pyright: ignore[reportReturnType]
+
+
+@router.delete(
+    "/{project_id}/updates/{update_id}",
+    response_model=ProjectRead,
+    operation_id="deleteProjectUpdate",
+)
+def delete_project_update(
+    project_id: int,
+    update_id: str,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> ProjectRead:
+    """Remove an update from the project's update feed by its UUID."""
+    project = db.get(Project, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if project.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    current_updates = project.updates or []
+    # Filter out the update with matching id
+    new_updates = [u for u in current_updates if u.get("id") != update_id]
+
+    if len(new_updates) == len(current_updates):
+        raise HTTPException(status_code=404, detail="Update not found")
+
+    project.updates = new_updates if new_updates else None
+
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    return project  # pyright: ignore[reportReturnType]
+
+
+# -----------------------------------------------------------------------------
+# PROJECT FILES ENDPOINTS
+# -----------------------------------------------------------------------------
+
+
+@router.get(
+    "/{project_id}/files",
+    response_model=list[FileRead],
+    operation_id="readProjectFiles",
+)
+def read_project_files(
+    project_id: int,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> list[FileRead]:
+    """Get all files attached to a project."""
+    project = db.get(Project, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if project.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    files = db.exec(select(File).where(File.project_id == project_id)).all()
+    return files  # pyright: ignore[reportReturnType]
