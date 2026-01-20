@@ -69,7 +69,7 @@ def register(user_in: UserRegister, response: Response, db: SessionDep):
         value=token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",  # Required for cross-origin cookies
         expires=expires,
     )
 
@@ -102,8 +102,8 @@ def login(login_data: UserLogin, response: Response, db: SessionDep):
         key="session_token",
         value=token,
         httponly=True,
-        secure=True,  # Set False only for localhost dev
-        samesite="lax",
+        secure=True,
+        samesite="none",  # Required for cross-origin cookies
         expires=expires,
     )
 
