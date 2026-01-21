@@ -74,7 +74,9 @@ app.add_middleware(
 # Global exception handler to log all unhandled exceptions
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.exception("Unhandled exception on %s %s: %s", request.method, request.url.path, exc)
+    logger.exception(
+        "Unhandled exception on %s %s: %s", request.method, request.url.path, exc
+    )
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal server error"},
@@ -86,6 +88,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 def health_check():
     """Health check endpoint that also tests database connectivity."""
     from sqlmodel import Session
+
     try:
         with Session(engine) as session:
             session.exec(text("SELECT 1"))
@@ -94,7 +97,11 @@ def health_check():
         logger.exception("Health check failed: %s", e)
         return JSONResponse(
             status_code=503,
-            content={"status": "unhealthy", "database": "disconnected", "error": str(e)},
+            content={
+                "status": "unhealthy",
+                "database": "disconnected",
+                "error": str(e),
+            },
         )
 
 

@@ -42,9 +42,7 @@ def upgrade() -> None:
     # 3. Add project_id to files
     file_columns = [col["name"] for col in inspector.get_columns("files")]
     if "project_id" not in file_columns:
-        op.add_column(
-            "files", sa.Column("project_id", sa.Integer(), nullable=True)
-        )
+        op.add_column("files", sa.Column("project_id", sa.Integer(), nullable=True))
         op.create_foreign_key(
             "fk_files_project_id",
             "files",
@@ -79,7 +77,9 @@ def upgrade() -> None:
             sa.Column("end_time", sa.DateTime(), nullable=True),
             sa.Column("description", sa.String(), nullable=True),
             sa.Column("duration_minutes", sa.Integer(), nullable=True),
-            sa.Column("update_id", sa.String(), nullable=True),  # Links to update UUID in project.updates
+            sa.Column(
+                "update_id", sa.String(), nullable=True
+            ),  # Links to update UUID in project.updates
             sa.ForeignKeyConstraint(
                 ["project_id"],
                 ["projects.id"],
@@ -119,9 +119,7 @@ def downgrade() -> None:
     # Add notes column back to projects
     project_columns = [col["name"] for col in inspector.get_columns("projects")]
     if "notes" not in project_columns:
-        op.add_column(
-            "projects", sa.Column("notes", sa.String(), nullable=True)
-        )
+        op.add_column("projects", sa.Column("notes", sa.String(), nullable=True))
 
     # Recreate tasks table
     if "tasks" not in existing_tables:
@@ -139,6 +137,8 @@ def downgrade() -> None:
             sa.Column("project_id", sa.Integer(), nullable=False),
             sa.Column("assignee_id", sa.Integer(), nullable=True),
             sa.ForeignKeyConstraint(["org_id"], ["orgs.id"], ondelete="CASCADE"),
-            sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
+            sa.ForeignKeyConstraint(
+                ["project_id"], ["projects.id"], ondelete="CASCADE"
+            ),
             sa.ForeignKeyConstraint(["assignee_id"], ["users.id"], ondelete="SET NULL"),
         )
