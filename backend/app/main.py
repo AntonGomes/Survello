@@ -1,7 +1,12 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlmodel import text
 
 from app.api.routes.runs import router as runs_router
 from app.api.routes.files import router as files_router
@@ -17,15 +22,37 @@ from app.api.routes.surveys import router as surveys_router
 from app.api.routes.invitations import router as invitations_router
 from app.api.routes.org import router as org_router
 
-from contextlib import asynccontextmanager
-from app.core.db import init_db
+from app.core.db import init_db, engine
+
+# Configure logging to output to stdout (App Runner captures stdout)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
+    logger.info("Starting application...")
+    try:
+        init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.exception("Failed to initialize database: %s", e)
+        raise
     yield
+    logger.info("Shutting down application...")
 
+
+origins = [
+    "http://localhost:3000",  # For local development
+    "http://localhost:3001",  # For local development
+    "https://survelloapp.com",  # Production domain
+    "https://www.survelloapp.com",  # Production domain with www
+    "https://survello.vercel.app",  # Vercel deployment
+    "https://survello-git-main.vercel.app",  # Vercel preview URLs
+]
 
 app = FastAPI(
     title="Document Generation Service",
@@ -34,6 +61,44 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Add CORS middleware FIRST
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# Global exception handler to log all unhandled exceptions
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled exception on %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+    )
+
+
+# Health check endpoint
+@app.get("/health", tags=["Health"])
+def health_check():
+    """Health check endpoint that also tests database connectivity."""
+    from sqlmodel import Session
+    try:
+        with Session(engine) as session:
+            session.exec(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        logger.exception("Health check failed: %s", e)
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "database": "disconnected", "error": str(e)},
+        )
+
+
+# Include routers AFTER middleware
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(runs_router, prefix="/runs", tags=["Runs"])
 app.include_router(files_router, prefix="/store", tags=["Storage"])
@@ -47,20 +112,3 @@ app.include_router(quotes_router, prefix="/quotes", tags=["Quotes"])
 app.include_router(surveys_router, prefix="/surveys", tags=["Surveys"])
 app.include_router(invitations_router, prefix="/invitations", tags=["Invitations"])
 app.include_router(org_router, prefix="/org", tags=["Organization"])
-
-origins = [
-    "http://localhost:3000",  # For local development
-    "http://localhost:3001",  # For local development
-    "https://survelloapp.com",  # Production domain
-    "https://www.survelloapp.com",  # Production domain with www
-    "https://survello.vercel.app",  # Vercel deployment
-    "https://survello-git-main.vercel.app",  # Vercel preview URLs
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,  # STRICT: Only allow these domains
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
