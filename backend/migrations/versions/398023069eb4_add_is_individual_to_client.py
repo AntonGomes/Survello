@@ -22,18 +22,25 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col["name"] for col in inspector.get_columns("clients")]
+
     # Add is_individual field with server_default to handle existing rows
-    op.add_column(
-        "clients",
-        sa.Column(
-            "is_individual",
-            sa.Boolean(),
-            nullable=False,
-            server_default=sa.text("false"),
-        ),
-    )
-    op.add_column("clients", sa.Column("email", sa.String(), nullable=True))
-    op.add_column("clients", sa.Column("phone", sa.String(length=64), nullable=True))
+    if "is_individual" not in columns:
+        op.add_column(
+            "clients",
+            sa.Column(
+                "is_individual",
+                sa.Boolean(),
+                nullable=False,
+                server_default=sa.text("false"),
+            ),
+        )
+    if "email" not in columns:
+        op.add_column("clients", sa.Column("email", sa.String(), nullable=True))
+    if "phone" not in columns:
+        op.add_column("clients", sa.Column("phone", sa.String(length=64), nullable=True))
 
 
 def downgrade() -> None:

@@ -20,18 +20,23 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    op.add_column(
-        "project_types",
-        sa.Column("default_template_file_id", sa.Integer(), nullable=True),
-    )
-    op.create_foreign_key(
-        "fk_project_types_template_file",
-        "project_types",
-        "files",
-        ["default_template_file_id"],
-        ["id"],
-        ondelete="SET NULL",
-    )
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col["name"] for col in inspector.get_columns("project_types")]
+
+    if "default_template_file_id" not in columns:
+        op.add_column(
+            "project_types",
+            sa.Column("default_template_file_id", sa.Integer(), nullable=True),
+        )
+        op.create_foreign_key(
+            "fk_project_types_template_file",
+            "project_types",
+            "files",
+            ["default_template_file_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
 
 
 def downgrade() -> None:

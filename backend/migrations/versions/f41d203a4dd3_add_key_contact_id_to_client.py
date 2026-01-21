@@ -21,15 +21,20 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    op.add_column("clients", sa.Column("key_contact_id", sa.Integer(), nullable=True))
-    op.create_foreign_key(
-        "fk_clients_key_contact_id",
-        "clients",
-        "client_contacts",
-        ["key_contact_id"],
-        ["id"],
-        ondelete="SET NULL",
-    )
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col["name"] for col in inspector.get_columns("clients")]
+
+    if "key_contact_id" not in columns:
+        op.add_column("clients", sa.Column("key_contact_id", sa.Integer(), nullable=True))
+        op.create_foreign_key(
+            "fk_clients_key_contact_id",
+            "clients",
+            "client_contacts",
+            ["key_contact_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
 
 
 def downgrade() -> None:

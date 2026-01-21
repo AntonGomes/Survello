@@ -21,10 +21,16 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Add missing columns to time_entries table."""
-    op.add_column(
-        "time_entries", sa.Column("duration_minutes", sa.Integer(), nullable=True)
-    )
-    op.add_column("time_entries", sa.Column("update_id", sa.String(), nullable=True))
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col["name"] for col in inspector.get_columns("time_entries")]
+
+    if "duration_minutes" not in columns:
+        op.add_column(
+            "time_entries", sa.Column("duration_minutes", sa.Integer(), nullable=True)
+        )
+    if "update_id" not in columns:
+        op.add_column("time_entries", sa.Column("update_id", sa.String(), nullable=True))
 
 
 def downgrade() -> None:

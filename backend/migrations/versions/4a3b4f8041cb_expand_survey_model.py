@@ -21,35 +21,43 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Expand survey model with new fields."""
-    # Rename 'date' to 'conducted_date' for clarity
-    op.alter_column("surveys", "date", new_column_name="conducted_date")
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
+    columns = [col["name"] for col in inspector.get_columns("surveys")]
 
-    # Add new columns
-    op.add_column("surveys", sa.Column("conducted_time", sa.Time(), nullable=True))
-    op.add_column("surveys", sa.Column("site_notes", sa.Text(), nullable=True))
-    op.add_column("surveys", sa.Column("weather", sa.String(255), nullable=True))
-    op.add_column("surveys", sa.Column("project_id", sa.Integer(), nullable=True))
-    op.add_column(
-        "surveys", sa.Column("conducted_by_user_id", sa.Integer(), nullable=True)
-    )
+    # Rename 'date' to 'conducted_date' for clarity (only if 'date' exists and 'conducted_date' doesn't)
+    if "date" in columns and "conducted_date" not in columns:
+        op.alter_column("surveys", "date", new_column_name="conducted_date")
 
-    # Add foreign key constraints
-    op.create_foreign_key(
-        "fk_surveys_project_id",
-        "surveys",
-        "projects",
-        ["project_id"],
-        ["id"],
-        ondelete="SET NULL",
-    )
-    op.create_foreign_key(
-        "fk_surveys_conducted_by_user_id",
-        "surveys",
-        "users",
-        ["conducted_by_user_id"],
-        ["id"],
-        ondelete="SET NULL",
-    )
+    # Add new columns only if they don't exist
+    if "conducted_time" not in columns:
+        op.add_column("surveys", sa.Column("conducted_time", sa.Time(), nullable=True))
+    if "site_notes" not in columns:
+        op.add_column("surveys", sa.Column("site_notes", sa.Text(), nullable=True))
+    if "weather" not in columns:
+        op.add_column("surveys", sa.Column("weather", sa.String(255), nullable=True))
+    if "project_id" not in columns:
+        op.add_column("surveys", sa.Column("project_id", sa.Integer(), nullable=True))
+        op.create_foreign_key(
+            "fk_surveys_project_id",
+            "surveys",
+            "projects",
+            ["project_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
+    if "conducted_by_user_id" not in columns:
+        op.add_column(
+            "surveys", sa.Column("conducted_by_user_id", sa.Integer(), nullable=True)
+        )
+        op.create_foreign_key(
+            "fk_surveys_conducted_by_user_id",
+            "surveys",
+            "users",
+            ["conducted_by_user_id"],
+            ["id"],
+            ondelete="SET NULL",
+        )
 
 
 def downgrade() -> None:
