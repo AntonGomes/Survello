@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status, Query
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
@@ -11,9 +10,11 @@ from app.models.project_model import (
     ProjectType,
     ProjectTypeCreate,
     ProjectTypeRead,
+    ProjectTypeUpdate,
     ProjectAddUpdate,
-    ProjectUpdateItem,
 )
+from app.models.update_model import create_text_update, create_project_created_update
+from app.models.job_model import Job
 from app.models.job_read_minimal import JobReadMinimal
 from app.models.file_model import File, FileRead
 
@@ -59,6 +60,34 @@ def create_project_type(
     return project_type  # pyright: ignore[reportReturnType]
 
 
+@router.patch(
+    "/types/{type_id}",
+    response_model=ProjectTypeRead,
+    operation_id="updateProjectType",
+)
+def update_project_type(
+    type_id: int,
+    project_type_in: ProjectTypeUpdate,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> ProjectTypeRead:
+    project_type = db.exec(
+        select(ProjectType).where(
+            ProjectType.id == type_id,
+            ProjectType.org_id == current_user.org_id,
+        )
+    ).first()
+    if not project_type:
+        raise HTTPException(status_code=404, detail="Project type not found")
+    update_data = project_type_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(project_type, key, value)
+    db.add(project_type)
+    db.commit()
+    db.refresh(project_type)
+    return project_type  # pyright: ignore[reportReturnType]
+
+
 @router.post(
     "/",
     status_code=status.HTTP_201_CREATED,
@@ -75,6 +104,27 @@ def create_project(
     db.add(project)
     db.commit()
     db.refresh(project)
+
+    # Add auto-update to the parent job
+    job = db.get(Job, project.job_id)
+    if job:
+        initials = (
+            "".join(word[0].upper() for word in (current_user.name or "").split()[:2])
+            or "??"
+        )
+        update_item = create_project_created_update(
+            project_name=project.name,
+            project_id=project.id,  # pyright: ignore[reportArgumentType]
+            author_id=current_user.id,  # pyright: ignore[reportArgumentType]
+            author_name=current_user.name,
+            author_initials=initials,
+        )
+        if job.updates is None:
+            job.updates = []
+        job.updates = [update_item.model_dump(mode="json")] + job.updates
+        db.add(job)
+        db.commit()
+
     return project  # pyright: ignore[reportReturnType]
 
 
@@ -204,12 +254,12 @@ def add_project_update(
         or "??"
     )
 
-    update_item = ProjectUpdateItem(
+    # Use unified UpdateItem
+    update_item = create_text_update(
         text=update_in.text,
         author_id=current_user.id,  # pyright: ignore[reportArgumentType]
         author_name=current_user.name,
         author_initials=initials,
-        created_at=datetime.now(timezone.utc),
         time_entry_id=update_in.time_entry_id,
     )
 

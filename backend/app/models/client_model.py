@@ -25,7 +25,10 @@ class ClientContact(ClientContactBase, table=True):
 
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
     client_id: int = Field(foreign_key="clients.id", ondelete="CASCADE")
-    client: "Client" = Relationship(back_populates="contacts")
+    client: "Client" = Relationship(
+        back_populates="contacts",
+        sa_relationship_kwargs={"foreign_keys": "[ClientContact.client_id]"},
+    )
 
 
 class ClientContactCreate(ClientContactBase):
@@ -46,6 +49,10 @@ class ClientContactRead(ClientContactBase):
 class ClientBase(SQLModel):
     name: str = Field(max_length=255)
     address: str | None = Field(default=None, sa_type=AutoString)
+    is_individual: bool = Field(default=False)
+    # Individual client contact fields (used when is_individual=True)
+    email: EmailStr | None = Field(default=None, sa_type=AutoString)
+    phone: str | None = Field(default=None, max_length=64)
 
 
 class Client(ClientBase, table=True):
@@ -58,11 +65,17 @@ class Client(ClientBase, table=True):
     )
 
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
+    key_contact_id: int | None = Field(
+        default=None, foreign_key="client_contacts.id", ondelete="SET NULL"
+    )
 
     # Relationships
     contacts: list[ClientContact] = Relationship(
         back_populates="client",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+        sa_relationship_kwargs={
+            "cascade": "all, delete-orphan",
+            "foreign_keys": "[ClientContact.client_id]",
+        },
     )
     jobs: list["Job"] = Relationship(back_populates="client")
 
@@ -74,6 +87,10 @@ class ClientCreate(ClientBase):
 class ClientUpdate(SQLModel):
     name: str | None = None
     address: str | None = None
+    key_contact_id: int | None = None
+    is_individual: bool | None = None
+    email: str | None = None
+    phone: str | None = None
 
 
 class ClientRead(ClientBase):
@@ -82,9 +99,10 @@ class ClientRead(ClientBase):
     name: str
     created_at: datetime
     updated_at: datetime
+    key_contact_id: int | None = None
     contacts: list[ClientContactRead] = []
 
 
 class ClientReadMinimal(ClientBase):
     id: int
-    name: str
+    # Inherits name and address from ClientBase

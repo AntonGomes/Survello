@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { acceptInvitation, addJobUpdate, addLeadUpdate, addProjectUpdate, addQuoteLine, addQuoteUpdate, convertLead, convertQuote, createClient, createClientContact, createFile, createFiles, createInvitation, createJob, createLead, createProject, createProjectType, createQuote, createRun, createSurvey, deleteClient, deleteInvitation, deleteJob, deleteLead, deleteProject, deleteProjectUpdate, deleteQuote, deleteSurvey, generateFileDownloadUrl, generateFileUploadUrls, getCurrentTimer, getProjectTimeEntries, loginUser, logoutUser, logTimeManually, type Options, readClient, readClients, readFile, readFiles, readInvitations, readJob, readJobs, readLead, readLeads, readOrg, readProject, readProjectFiles, readProjects, readProjectTypes, readQuote, readQuotes, readRun, readRunArtefacts, readRuns, readSurvey, readSurveys, readUserMe, registerUser, removeOrgUser, resendInvitation, startTimer, stopTimer, updateClient, updateJob, updateLead, updateOrgUser, updateProject, updateQuote, updateSurvey, updateUserMe, verifyInvitation } from '../sdk.gen';
-import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, AddJobUpdateData, AddJobUpdateError, AddJobUpdateResponse, AddLeadUpdateData, AddLeadUpdateError, AddLeadUpdateResponse, AddProjectUpdateData, AddProjectUpdateError, AddProjectUpdateResponse, AddQuoteLineData, AddQuoteLineError, AddQuoteLineResponse, AddQuoteUpdateData, AddQuoteUpdateError, AddQuoteUpdateResponse, ConvertLeadData, ConvertLeadError, ConvertLeadResponse2, ConvertQuoteData, ConvertQuoteError, ConvertQuoteResponse2, CreateClientContactData, CreateClientContactError, CreateClientContactResponse, CreateClientData, CreateClientError, CreateClientResponse, CreateFileData, CreateFileError, CreateFileResponse, CreateFilesData, CreateFilesError, CreateFilesResponse, CreateInvitationData, CreateInvitationError, CreateInvitationResponse, CreateJobData, CreateJobError, CreateJobResponse, CreateLeadData, CreateLeadError, CreateLeadResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateProjectTypeData, CreateProjectTypeError, CreateProjectTypeResponse, CreateQuoteData, CreateQuoteError, CreateQuoteResponse, CreateRunData, CreateRunError, CreateRunResponse, CreateSurveyData, CreateSurveyError, CreateSurveyResponse, DeleteClientData, DeleteClientError, DeleteClientResponse, DeleteInvitationData, DeleteInvitationError, DeleteJobData, DeleteJobError, DeleteJobResponse, DeleteLeadData, DeleteLeadError, DeleteLeadResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteProjectUpdateData, DeleteProjectUpdateError, DeleteProjectUpdateResponse, DeleteQuoteData, DeleteQuoteError, DeleteQuoteResponse, DeleteSurveyData, DeleteSurveyError, DeleteSurveyResponse, GenerateFileDownloadUrlData, GenerateFileDownloadUrlError, GenerateFileDownloadUrlResponse, GenerateFileUploadUrlsData, GenerateFileUploadUrlsError, GenerateFileUploadUrlsResponse, GetCurrentTimerData, GetCurrentTimerResponse, GetProjectTimeEntriesData, GetProjectTimeEntriesError, GetProjectTimeEntriesResponse, LoginUserData, LoginUserError, LogoutUserData, LogoutUserError, LogTimeManuallyData, LogTimeManuallyError, LogTimeManuallyResponse, ReadClientData, ReadClientError, ReadClientResponse, ReadClientsData, ReadClientsError, ReadClientsResponse, ReadFileData, ReadFileError, ReadFileResponse, ReadFilesData, ReadFilesError, ReadFilesResponse, ReadInvitationsData, ReadInvitationsResponse, ReadJobData, ReadJobError, ReadJobResponse, ReadJobsData, ReadJobsError, ReadJobsResponse, ReadLeadData, ReadLeadError, ReadLeadResponse, ReadLeadsData, ReadLeadsError, ReadLeadsResponse, ReadOrgData, ReadOrgResponse, ReadProjectData, ReadProjectError, ReadProjectFilesData, ReadProjectFilesError, ReadProjectFilesResponse, ReadProjectResponse, ReadProjectsData, ReadProjectsError, ReadProjectsResponse, ReadProjectTypesData, ReadProjectTypesResponse, ReadQuoteData, ReadQuoteError, ReadQuoteResponse, ReadQuotesData, ReadQuotesError, ReadQuotesResponse, ReadRunArtefactsData, ReadRunArtefactsError, ReadRunArtefactsResponse, ReadRunData, ReadRunError, ReadRunResponse, ReadRunsData, ReadRunsError, ReadRunsResponse, ReadSurveyData, ReadSurveyError, ReadSurveyResponse, ReadSurveysData, ReadSurveysError, ReadSurveysResponse, ReadUserMeData, ReadUserMeResponse, RegisterUserData, RegisterUserError, RegisterUserResponse, RemoveOrgUserData, RemoveOrgUserError, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, StartTimerData, StartTimerError, StartTimerResponse, StopTimerData, StopTimerError, StopTimerResponse, UpdateClientData, UpdateClientError, UpdateClientResponse, UpdateJobData, UpdateJobError, UpdateJobResponse, UpdateLeadData, UpdateLeadError, UpdateLeadResponse, UpdateOrgUserData, UpdateOrgUserError, UpdateOrgUserResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateQuoteData, UpdateQuoteError, UpdateQuoteResponse, UpdateSurveyData, UpdateSurveyError, UpdateSurveyResponse, UpdateUserMeData, UpdateUserMeError, UpdateUserMeResponse, VerifyInvitationData, VerifyInvitationError, VerifyInvitationResponse } from '../types.gen';
+import { acceptInvitation, addJobUpdate, addLeadUpdate, addProjectUpdate, addQuoteLine, addQuoteUpdate, convertLead, convertQuote, createClient, createClientContact, createFile, createFiles, createInvitation, createJob, createLead, createProject, createProjectType, createQuote, createRun, createSurvey, deleteClient, deleteClientContact, deleteInvitation, deleteJob, deleteLead, deleteProject, deleteProjectUpdate, deleteQuote, deleteSurvey, generateFileDownloadUrl, generateFileUploadUrls, getCurrentTimer, getProjectTimeEntries, loginUser, logoutUser, logTimeManually, type Options, readClient, readClients, readFile, readFiles, readInvitations, readJob, readJobs, readLead, readLeads, readOrg, readProject, readProjectFiles, readProjects, readProjectTypes, readQuote, readQuotes, readRun, readRunArtefacts, readRuns, readSurvey, readSurveyFiles, readSurveys, readUserMe, registerUser, removeOrgUser, resendInvitation, setKeyContact, startTimer, stopTimer, updateClient, updateFile, updateJob, updateLead, updateOrgUser, updateProject, updateProjectType, updateQuote, updateSurvey, updateUserMe, verifyInvitation } from '../sdk.gen';
+import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, AddJobUpdateData, AddJobUpdateError, AddJobUpdateResponse, AddLeadUpdateData, AddLeadUpdateError, AddLeadUpdateResponse, AddProjectUpdateData, AddProjectUpdateError, AddProjectUpdateResponse, AddQuoteLineData, AddQuoteLineError, AddQuoteLineResponse, AddQuoteUpdateData, AddQuoteUpdateError, AddQuoteUpdateResponse, ConvertLeadData, ConvertLeadError, ConvertLeadResponse2, ConvertQuoteData, ConvertQuoteError, ConvertQuoteResponse2, CreateClientContactData, CreateClientContactError, CreateClientContactResponse, CreateClientData, CreateClientError, CreateClientResponse, CreateFileData, CreateFileError, CreateFileResponse, CreateFilesData, CreateFilesError, CreateFilesResponse, CreateInvitationData, CreateInvitationError, CreateInvitationResponse, CreateJobData, CreateJobError, CreateJobResponse, CreateLeadData, CreateLeadError, CreateLeadResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateProjectTypeData, CreateProjectTypeError, CreateProjectTypeResponse, CreateQuoteData, CreateQuoteError, CreateQuoteResponse, CreateRunData, CreateRunError, CreateRunResponse, CreateSurveyData, CreateSurveyError, CreateSurveyResponse, DeleteClientContactData, DeleteClientContactError, DeleteClientContactResponse, DeleteClientData, DeleteClientError, DeleteClientResponse, DeleteInvitationData, DeleteInvitationError, DeleteJobData, DeleteJobError, DeleteJobResponse, DeleteLeadData, DeleteLeadError, DeleteLeadResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteProjectUpdateData, DeleteProjectUpdateError, DeleteProjectUpdateResponse, DeleteQuoteData, DeleteQuoteError, DeleteQuoteResponse, DeleteSurveyData, DeleteSurveyError, DeleteSurveyResponse, GenerateFileDownloadUrlData, GenerateFileDownloadUrlError, GenerateFileDownloadUrlResponse, GenerateFileUploadUrlsData, GenerateFileUploadUrlsError, GenerateFileUploadUrlsResponse, GetCurrentTimerData, GetCurrentTimerResponse, GetProjectTimeEntriesData, GetProjectTimeEntriesError, GetProjectTimeEntriesResponse, LoginUserData, LoginUserError, LogoutUserData, LogoutUserError, LogTimeManuallyData, LogTimeManuallyError, LogTimeManuallyResponse, ReadClientData, ReadClientError, ReadClientResponse, ReadClientsData, ReadClientsError, ReadClientsResponse, ReadFileData, ReadFileError, ReadFileResponse, ReadFilesData, ReadFilesError, ReadFilesResponse, ReadInvitationsData, ReadInvitationsResponse, ReadJobData, ReadJobError, ReadJobResponse, ReadJobsData, ReadJobsError, ReadJobsResponse, ReadLeadData, ReadLeadError, ReadLeadResponse, ReadLeadsData, ReadLeadsError, ReadLeadsResponse, ReadOrgData, ReadOrgResponse, ReadProjectData, ReadProjectError, ReadProjectFilesData, ReadProjectFilesError, ReadProjectFilesResponse, ReadProjectResponse, ReadProjectsData, ReadProjectsError, ReadProjectsResponse, ReadProjectTypesData, ReadProjectTypesResponse, ReadQuoteData, ReadQuoteError, ReadQuoteResponse, ReadQuotesData, ReadQuotesError, ReadQuotesResponse, ReadRunArtefactsData, ReadRunArtefactsError, ReadRunArtefactsResponse, ReadRunData, ReadRunError, ReadRunResponse, ReadRunsData, ReadRunsError, ReadRunsResponse, ReadSurveyData, ReadSurveyError, ReadSurveyFilesData, ReadSurveyFilesError, ReadSurveyFilesResponse, ReadSurveyResponse, ReadSurveysData, ReadSurveysError, ReadSurveysResponse, ReadUserMeData, ReadUserMeResponse, RegisterUserData, RegisterUserError, RegisterUserResponse, RemoveOrgUserData, RemoveOrgUserError, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, SetKeyContactData, SetKeyContactError, SetKeyContactResponse, StartTimerData, StartTimerError, StartTimerResponse, StopTimerData, StopTimerError, StopTimerResponse, UpdateClientData, UpdateClientError, UpdateClientResponse, UpdateFileData, UpdateFileError, UpdateFileResponse, UpdateJobData, UpdateJobError, UpdateJobResponse, UpdateLeadData, UpdateLeadError, UpdateLeadResponse, UpdateOrgUserData, UpdateOrgUserError, UpdateOrgUserResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateProjectTypeData, UpdateProjectTypeError, UpdateProjectTypeResponse, UpdateQuoteData, UpdateQuoteError, UpdateQuoteResponse, UpdateSurveyData, UpdateSurveyError, UpdateSurveyResponse, UpdateUserMeData, UpdateUserMeError, UpdateUserMeResponse, VerifyInvitationData, VerifyInvitationError, VerifyInvitationResponse } from '../types.gen';
 
 /**
  * Register
@@ -358,6 +358,25 @@ export const readFileOptions = (options: Options<ReadFileData>) => queryOptions<
     queryKey: readFileQueryKey(options)
 });
 
+/**
+ * Update File
+ *
+ * Update file metadata (e.g., attach to job/project).
+ */
+export const updateFileMutation = (options?: Partial<Options<UpdateFileData>>): UseMutationOptions<UpdateFileResponse, UpdateFileError, Options<UpdateFileData>> => {
+    const mutationOptions: UseMutationOptions<UpdateFileResponse, UpdateFileError, Options<UpdateFileData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateFile({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const generateFileDownloadUrlQueryKey = (options: Options<GenerateFileDownloadUrlData>) => createQueryKey('generateFileDownloadUrl', options);
 
 /**
@@ -540,6 +559,23 @@ export const createProjectTypeMutation = (options?: Partial<Options<CreateProjec
     const mutationOptions: UseMutationOptions<CreateProjectTypeResponse, CreateProjectTypeError, Options<CreateProjectTypeData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await createProjectType({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Update Project Type
+ */
+export const updateProjectTypeMutation = (options?: Partial<Options<UpdateProjectTypeData>>): UseMutationOptions<UpdateProjectTypeResponse, UpdateProjectTypeError, Options<UpdateProjectTypeData>> => {
+    const mutationOptions: UseMutationOptions<UpdateProjectTypeResponse, UpdateProjectTypeError, Options<UpdateProjectTypeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateProjectType({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -890,6 +926,44 @@ export const createClientContactMutation = (options?: Partial<Options<CreateClie
     const mutationOptions: UseMutationOptions<CreateClientContactResponse, CreateClientContactError, Options<CreateClientContactData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await createClientContact({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Set Key Contact
+ *
+ * Set the key contact for a client.
+ */
+export const setKeyContactMutation = (options?: Partial<Options<SetKeyContactData>>): UseMutationOptions<SetKeyContactResponse, SetKeyContactError, Options<SetKeyContactData>> => {
+    const mutationOptions: UseMutationOptions<SetKeyContactResponse, SetKeyContactError, Options<SetKeyContactData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await setKeyContact({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Delete Client Contact
+ *
+ * Delete a contact from a client.
+ */
+export const deleteClientContactMutation = (options?: Partial<Options<DeleteClientContactData>>): UseMutationOptions<DeleteClientContactResponse, DeleteClientContactError, Options<DeleteClientContactData>> => {
+    const mutationOptions: UseMutationOptions<DeleteClientContactResponse, DeleteClientContactError, Options<DeleteClientContactData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteClientContact({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1352,7 +1426,7 @@ export const readSurveysQueryKey = (options?: Options<ReadSurveysData>) => creat
 /**
  * Read Surveys
  *
- * Retrieve surveys, optionally filtered by job.
+ * Retrieve surveys, optionally filtered by job or project.
  */
 export const readSurveysOptions = (options?: Options<ReadSurveysData>) => queryOptions<ReadSurveysResponse, ReadSurveysError, ReadSurveysResponse, ReturnType<typeof readSurveysQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -1372,7 +1446,7 @@ export const readSurveysInfiniteQueryKey = (options?: Options<ReadSurveysData>):
 /**
  * Read Surveys
  *
- * Retrieve surveys, optionally filtered by job.
+ * Retrieve surveys, optionally filtered by job or project.
  */
 export const readSurveysInfiniteOptions = (options?: Options<ReadSurveysData>) => infiniteQueryOptions<ReadSurveysResponse, ReadSurveysError, InfiniteData<ReadSurveysResponse>, QueryKey<Options<ReadSurveysData>>, number | Pick<QueryKey<Options<ReadSurveysData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
@@ -1472,6 +1546,26 @@ export const updateSurveyMutation = (options?: Partial<Options<UpdateSurveyData>
     };
     return mutationOptions;
 };
+
+export const readSurveyFilesQueryKey = (options: Options<ReadSurveyFilesData>) => createQueryKey('readSurveyFiles', options);
+
+/**
+ * Read Survey Files
+ *
+ * Get all files attached to a survey.
+ */
+export const readSurveyFilesOptions = (options: Options<ReadSurveyFilesData>) => queryOptions<ReadSurveyFilesResponse, ReadSurveyFilesError, ReadSurveyFilesResponse, ReturnType<typeof readSurveyFilesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readSurveyFiles({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readSurveyFilesQueryKey(options)
+});
 
 export const readInvitationsQueryKey = (options?: Options<ReadInvitationsData>) => createQueryKey('readInvitations', options);
 

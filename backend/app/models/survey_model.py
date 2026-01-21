@@ -1,10 +1,60 @@
-from datetime import datetime, date as date_type, timezone
-from typing import TYPE_CHECKING
+from datetime import datetime, date as date_type, time as time_type, timezone
+from typing import TYPE_CHECKING, Optional
+from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 
 if TYPE_CHECKING:
     from .job_model import Job
+    from .project_model import Project
     from .user_model import User
+    from .file_model import File
+
+
+# -----------------------------------------------------------------------------
+# SURVEY-SURVEYOR LINK TABLE (Many-to-Many)
+# -----------------------------------------------------------------------------
+
+
+class SurveySurveyorLink(SQLModel, table=True):
+    """Link table for many-to-many relationship between surveys and surveyors (users)."""
+
+    __tablename__ = "survey_surveyor_links"  # pyright: ignore[reportAssignmentType]
+    survey_id: int | None = Field(
+        default=None, foreign_key="surveys.id", primary_key=True, ondelete="CASCADE"
+    )
+    user_id: int | None = Field(
+        default=None, foreign_key="users.id", primary_key=True, ondelete="CASCADE"
+    )
+
+
+# -----------------------------------------------------------------------------
+# WEATHER CONDITIONS ENUM
+# -----------------------------------------------------------------------------
+
+
+class WeatherCondition(str, Enum):
+    """Weather conditions for site surveys."""
+
+    SUNNY = "sunny"
+    PARTLY_CLOUDY = "partly_cloudy"
+    CLOUDY = "cloudy"
+    OVERCAST = "overcast"
+    LIGHT_RAIN = "light_rain"
+    RAIN = "rain"
+    HEAVY_RAIN = "heavy_rain"
+    SHOWERS = "showers"
+    DRIZZLE = "drizzle"
+    THUNDERSTORM = "thunderstorm"
+    SNOW = "snow"
+    SLEET = "sleet"
+    HAIL = "hail"
+    FOG = "fog"
+    MIST = "mist"
+    WINDY = "windy"
+    CLEAR = "clear"
+    FROST = "frost"
+    HOT = "hot"
+    COLD = "cold"
 
 
 # -----------------------------------------------------------------------------
@@ -13,43 +63,102 @@ if TYPE_CHECKING:
 
 
 class SurveyBase(SQLModel):
-    date: date_type
+    """Base fields for a site survey."""
+
+    # When the survey was conducted
+    conducted_date: date_type
+    conducted_time: time_type | None = None
+
+    # Site observations
+    description: str | None = Field(default=None, sa_type=AutoString)
+    site_notes: str | None = Field(default=None, sa_type=AutoString)
+    weather: str | None = Field(default=None, sa_type=AutoString)  # Free-text weather
+
+    # Legacy field kept for compatibility
     notes: str | None = Field(default=None, sa_type=AutoString)
 
 
 class Survey(SurveyBase, table=True):
     __tablename__ = "surveys"  # pyright: ignore[reportAssignmentType]
     id: int | None = Field(default=None, primary_key=True)
+
+    # When the survey data was uploaded/created in the system
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
     )
 
+    # Foreign keys
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
     job_id: int = Field(foreign_key="jobs.id", ondelete="CASCADE")
+    project_id: int | None = Field(
+        default=None, foreign_key="projects.id", ondelete="SET NULL"
+    )
+    conducted_by_user_id: int | None = Field(
+        default=None, foreign_key="users.id", ondelete="SET NULL"
+    )
+    # Legacy surveyor_id - kept for backward compatibility
     surveyor_id: int | None = Field(
         default=None, foreign_key="users.id", ondelete="SET NULL"
     )
 
     # Relationships
     job: "Job" = Relationship(back_populates="surveys")
-    surveyor: "User" = Relationship()
-    # Photos are linked via File.survey_id
+    project: Optional["Project"] = Relationship()
+    conducted_by_user: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Survey.conducted_by_user_id]"}
+    )
+    surveyor: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Survey.surveyor_id]"}
+    )
+    # Images and files are linked via File.survey_id
+    files: list["File"] = Relationship(back_populates="survey")
+    # Many-to-many relationship for surveyors
+    surveyors: list["User"] = Relationship(
+        link_model=SurveySurveyorLink,
+        sa_relationship_kwargs={"lazy": "selectin"},
+    )
 
 
-class SurveyCreate(SurveyBase):
+class SurveyCreate(SQLModel):
     job_id: int
-    surveyor_id: int | None = None
+    project_id: int | None = None
+    conducted_date: date_type
+    conducted_time: time_type | None = None
+    conducted_by_user_id: int | None = None
+    surveyor_ids: list[int] | None = None  # New: list of surveyor user IDs
+    site_notes: str | None = None
+    description: str | None = None  # New: description field
+    weather: str | None = None
+    notes: str | None = None  # Legacy
 
 
 class SurveyUpdate(SQLModel):
-    date: date_type | None = None
-    notes: str | None = None
-    surveyor_id: int | None = None
+    conducted_date: date_type | None = None
+    conducted_time: time_type | None = None
+    project_id: int | None = None
+    conducted_by_user_id: int | None = None
+    surveyor_ids: list[int] | None = None  # New: list of surveyor user IDs
+    site_notes: str | None = None
+    description: str | None = None  # New: description field
+    weather: str | None = None
+    notes: str | None = None  # Legacy
+
+
+class ConductedByUserRead(SQLModel):
+    id: int
+    name: str
+
+
+class ProjectMinimalRead(SQLModel):
+    id: int
+    name: str
 
 
 class SurveyorRead(SQLModel):
+    """Legacy - for backward compatibility."""
+
     id: int
     name: str
 
@@ -58,8 +167,15 @@ class SurveyRead(SurveyBase):
     id: int
     org_id: int
     job_id: int
-    surveyor_id: int | None = None
-    surveyor: SurveyorRead | None = None
+    project_id: int | None = None
+    conducted_by_user_id: int | None = None
+    conducted_by_user: ConductedByUserRead | None = None
+    project: ProjectMinimalRead | None = None
+    surveyor_id: int | None = None  # Legacy
+    surveyor: SurveyorRead | None = None  # Legacy
+    surveyors: list[SurveyorRead] = []  # New: list of surveyors
+    description: str | None = None  # New: description field
     created_at: datetime
     updated_at: datetime
     photo_count: int = 0  # Computed field for number of photos
+    file_count: int = 0  # Computed field for number of attached files

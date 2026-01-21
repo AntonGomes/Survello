@@ -11,12 +11,48 @@ from app.models.file_model import (
     FilePresignResponse,
     FileRead,
     FileRole,
+    FileUpdate,
 )
+from app.models.job_model import Job
+from app.models.update_model import create_file_upload_update
 from app.utils.conversion import to_pdf, ConversionError, DOCX_MIME, XLSX_MIME
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _add_file_upload_update_to_job(
+    db: DBDep,
+    job_id: int | None,
+    file_count: int,
+    user_id: int,
+    user_name: str | None,
+) -> None:
+    """Add an auto-update to the job when files are uploaded."""
+    if not job_id:
+        return
+
+    job = db.get(Job, job_id)
+    if not job:
+        return
+
+    initials = (
+        "".join(word[0].upper() for word in (user_name or "").split()[:2]) or "??"
+    )
+
+    update_item = create_file_upload_update(
+        file_count=file_count,
+        author_id=user_id,
+        author_name=user_name,
+        author_initials=initials,
+    )
+
+    if job.updates is None:
+        job.updates = []
+    job.updates = [update_item.model_dump(mode="json")] + job.updates
+    db.add(job)
+    db.commit()
 
 
 def _maybe_generate_preview(
@@ -136,6 +172,9 @@ def create_file(
     _maybe_generate_preview(db_file, storage, db, user.id, user.org_id)  # pyright: ignore[reportArgumentType]
     db.refresh(db_file)
 
+    # Add auto-update to job if this file is attached to a job
+    _add_file_upload_update_to_job(db, db_file.job_id, 1, user.id, user.name)  # pyright: ignore[reportArgumentType]
+
     return db_file  # pyright: ignore[reportReturnType]
 
 
@@ -173,6 +212,16 @@ def create_files(
         _maybe_generate_preview(f, storage, db, user.id, user.org_id)  # pyright: ignore[reportArgumentType]
         db.refresh(f)
 
+    # Add auto-updates to jobs for uploaded files
+    # Group files by job_id and add one update per job
+    job_file_counts: dict[int, int] = {}
+    for f in files:
+        if f.job_id:
+            job_file_counts[f.job_id] = job_file_counts.get(f.job_id, 0) + 1
+
+    for job_id, count in job_file_counts.items():
+        _add_file_upload_update_to_job(db, job_id, count, user.id, user.name)  # pyright: ignore[reportArgumentType]
+
     return files  # pyright: ignore[reportReturnType]
 
 
@@ -190,6 +239,31 @@ def read_file(
         raise HTTPException(status_code=404, detail="File not found")
     if file.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
+    return file  # pyright: ignore[reportReturnType]
+
+
+@router.patch("/{file_id}", response_model=FileRead, operation_id="updateFile")
+def update_file(
+    file_id: int,
+    file_in: FileUpdate,
+    db: DBDep,
+    current_user: CurrentUserDep,
+) -> FileRead:
+    """
+    Update file metadata (e.g., attach to job/project).
+    """
+    file = db.get(File, file_id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    if file.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    update_data = file_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(file, key, value)
+    db.add(file)
+    db.commit()
+    db.refresh(file)
     return file  # pyright: ignore[reportReturnType]
 
 

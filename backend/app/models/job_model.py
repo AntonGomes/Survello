@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, List, Any
 from enum import Enum
 from app.models.client_model import ClientReadMinimal, Client
 from app.models.user_model import UserRead, User, Org
-from app.models.project_model import ProjectRead, Project
+from app.models.project_model import Project, ProjectReadWithProjectType
 from app.models.file_model import FileRead, File
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from sqlalchemy import JSON, Column
@@ -28,7 +28,8 @@ class JobBase(SQLModel):
     name: str = Field(max_length=255)
     address: str | None = Field(default=None, sa_type=AutoString)
     status: JobStatus | None = Field(default=None, sa_type=AutoString)
-    # JSON array of updates: [{text: str, user_id: int, user_name: str, created_at: str}]
+    # Unified updates feed - stores list of UpdateItem dicts
+    # (see update_model.py for structure)
     updates: List[Any] | None = Field(default=None, sa_column=Column(JSON))
 
 
@@ -86,8 +87,9 @@ class JobRead(JobBase):
     created_at: datetime
     updated_at: datetime
     updates: List[Any] | None = None
+    projects: list["ProjectReadWithProjectType"] = []
 
 
 class JobReadDetail(JobRead):
-    projects: list[ProjectRead]
+    projects: list["ProjectReadWithProjectType"]
     files: list[FileRead]

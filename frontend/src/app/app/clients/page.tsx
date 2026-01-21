@@ -1,128 +1,150 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { FeatureHeader } from "@/components/feature-header";
-import { DataTable } from "@/components/data-table";
-import { columns } from "./columns";
-import { createLeadColumns } from "./lead-columns";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   readClientsOptions,
-  readLeadsOptions,
-  convertLeadMutation,
 } from "@/client/@tanstack/react-query.gen";
 import { CreateClientDialog } from "@/components/create-client-dialog";
-import { CreateLeadDialog } from "@/components/create-lead-dialog";
-import { useRouter } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LeadRead } from "@/client";
-import { getStalenessRowClass } from "@/lib/staleness";
-import { cn } from "@/lib/utils";
+import { ClientCard } from "@/components/client-card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, Loader2, ArrowUpDown, Check } from "lucide-react";
+
+type SortOption = "name-asc" | "name-desc" | "created-asc" | "created-desc" | "updated-asc" | "updated-desc";
+
+const sortOptions: { value: SortOption; label: string }[] = [
+  { value: "name-asc", label: "Name A-Z" },
+  { value: "name-desc", label: "Name Z-A" },
+  { value: "created-desc", label: "Created (Newest)" },
+  { value: "created-asc", label: "Created (Oldest)" },
+  { value: "updated-desc", label: "Updated (Newest)" },
+  { value: "updated-asc", label: "Updated (Oldest)" },
+];
 
 export default function ClientsPage() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
 
-  const { data: clients } = useQuery({
+  const { data: clients, isLoading: isLoadingClients, isError: isErrorClients } = useQuery({
     ...readClientsOptions(),
   });
 
-  const { data: leads } = useQuery({
-    ...readLeadsOptions(),
-  });
-
-  const { mutate: convertLead } = useMutation({
-    ...convertLeadMutation(),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: readLeadsOptions().queryKey });
-      queryClient.invalidateQueries({ queryKey: readClientsOptions().queryKey });
-      // Navigate to the new client
-      router.push(`/app/clients/${data.client_id}`);
-    },
-  });
-
-  const handleConvertLead = (lead: LeadRead) => {
-    if (confirm(`Convert "${lead.name}" to a client?`)) {
-      convertLead({ path: { lead_id: lead.id } });
+  // Filter and sort clients
+  const filteredClients = useMemo(() => {
+    if (!clients) return [];
+    
+    let result = [...clients];
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.name.toLowerCase().includes(query) ||
+          c.address?.toLowerCase().includes(query) ||
+          c.contacts?.some((contact) =>
+            contact.name.toLowerCase().includes(query)
+          )
+      );
     }
-  };
+    
+    // Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "created-asc":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "created-desc":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "updated-asc":
+          return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+        case "updated-desc":
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        default:
+          return 0;
+      }
+    });
+    
+    return result;
+  }, [clients, searchQuery, sortBy]);
 
-  const leadColumns = useMemo(
-    () => createLeadColumns({ onConvert: handleConvertLead }),
-    []
-  );
-
-  // Count active leads (not converted or lost)
-  const activeLeadsCount = leads?.filter(
-    (l) => l.status !== "converted" && l.status !== "lost"
-  ).length;
+  const currentSortLabel = sortOptions.find(o => o.value === sortBy)?.label || "Sort";
 
   return (
     <div className="space-y-6 h-full flex flex-col">
       <FeatureHeader title="Clients" badge={null} />
 
-      <Tabs defaultValue="clients" className="flex-1 flex flex-col">
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="clients">
-              Clients
-              {clients && clients.length > 0 && (
-                <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
-                  {clients.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="leads">
-              Leads
-              {activeLeadsCount !== undefined && activeLeadsCount > 0 && (
-                <span className="ml-2 rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-xs text-blue-800 dark:text-blue-400">
-                  {activeLeadsCount}
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="flex gap-2">
-            <TabsContent value="clients" className="mt-0">
-              <CreateClientDialog />
-            </TabsContent>
-            <TabsContent value="leads" className="mt-0">
-              <CreateLeadDialog />
-            </TabsContent>
+      <div className="flex-1 flex flex-col">
+        {isLoadingClients ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        </div>
+        ) : isErrorClients ? (
+          <div className="text-center py-12 text-destructive border rounded-lg border-dashed border-destructive/50 bg-destructive/10">
+            Failed to load clients. Please try again later.
+          </div>
+        ) : (
+          <>
+            {/* Search, Sort, and Create */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search clients..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 border-dashed">
+                    <ArrowUpDown className="mr-2 h-4 w-4" />
+                    {currentSortLabel}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                    {sortOptions.map((option) => (
+                      <DropdownMenuRadioItem key={option.value} value={option.value}>
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <div className="flex-1" />
+              
+              <CreateClientDialog />
+            </div>
 
-        <TabsContent value="clients" className="flex-1 mt-4">
-          <DataTable
-            columns={columns}
-            data={clients || []}
-            searchKey="name"
-            onRowClick={(row) => router.push(`/app/clients/${row.id}`)}
-          />
-        </TabsContent>
-
-        <TabsContent value="leads" className="flex-1 mt-4">
-          <DataTable
-            columns={leadColumns}
-            data={leads || []}
-            searchKey="name"
-            facetedFilters={[
-              {
-                columnId: "status",
-                title: "Status",
-                options: [
-                  { value: "new", label: "New" },
-                  { value: "contacted", label: "Contacted" },
-                  { value: "quoted", label: "Quoted" },
-                  { value: "converted", label: "Converted" },
-                  { value: "lost", label: "Lost" },
-                ],
-              },
-            ]}
-            getRowClassName={(row) => getStalenessRowClass(row.updated_at)}
-          />
-        </TabsContent>
-      </Tabs>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredClients.map((client) => (
+                <ClientCard key={client.id} client={client} />
+              ))}
+              {filteredClients.length === 0 && (
+                <div className="col-span-full text-center py-12 text-muted-foreground">
+                  {searchQuery ? "No clients match your search" : "No clients yet"}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

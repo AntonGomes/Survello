@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, AddJobUpdateData, AddJobUpdateErrors, AddJobUpdateResponses, AddLeadUpdateData, AddLeadUpdateErrors, AddLeadUpdateResponses, AddProjectUpdateData, AddProjectUpdateErrors, AddProjectUpdateResponses, AddQuoteLineData, AddQuoteLineErrors, AddQuoteLineResponses, AddQuoteUpdateData, AddQuoteUpdateErrors, AddQuoteUpdateResponses, ConvertLeadData, ConvertLeadErrors, ConvertLeadResponses, ConvertQuoteData, ConvertQuoteErrors, ConvertQuoteResponses, CreateClientContactData, CreateClientContactErrors, CreateClientContactResponses, CreateClientData, CreateClientErrors, CreateClientResponses, CreateFileData, CreateFileErrors, CreateFileResponses, CreateFilesData, CreateFilesErrors, CreateFilesResponses, CreateInvitationData, CreateInvitationErrors, CreateInvitationResponses, CreateJobData, CreateJobErrors, CreateJobResponses, CreateLeadData, CreateLeadErrors, CreateLeadResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateProjectTypeData, CreateProjectTypeErrors, CreateProjectTypeResponses, CreateQuoteData, CreateQuoteErrors, CreateQuoteResponses, CreateRunData, CreateRunErrors, CreateRunResponses, CreateSurveyData, CreateSurveyErrors, CreateSurveyResponses, DeleteClientData, DeleteClientErrors, DeleteClientResponses, DeleteInvitationData, DeleteInvitationErrors, DeleteInvitationResponses, DeleteJobData, DeleteJobErrors, DeleteJobResponses, DeleteLeadData, DeleteLeadErrors, DeleteLeadResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteProjectUpdateData, DeleteProjectUpdateErrors, DeleteProjectUpdateResponses, DeleteQuoteData, DeleteQuoteErrors, DeleteQuoteResponses, DeleteSurveyData, DeleteSurveyErrors, DeleteSurveyResponses, GenerateFileDownloadUrlData, GenerateFileDownloadUrlErrors, GenerateFileDownloadUrlResponses, GenerateFileUploadUrlsData, GenerateFileUploadUrlsErrors, GenerateFileUploadUrlsResponses, GetCurrentTimerData, GetCurrentTimerResponses, GetProjectTimeEntriesData, GetProjectTimeEntriesErrors, GetProjectTimeEntriesResponses, LoginUserData, LoginUserErrors, LoginUserResponses, LogoutUserData, LogoutUserErrors, LogoutUserResponses, LogTimeManuallyData, LogTimeManuallyErrors, LogTimeManuallyResponses, ReadClientData, ReadClientErrors, ReadClientResponses, ReadClientsData, ReadClientsErrors, ReadClientsResponses, ReadFileData, ReadFileErrors, ReadFileResponses, ReadFilesData, ReadFilesErrors, ReadFilesResponses, ReadInvitationsData, ReadInvitationsResponses, ReadJobData, ReadJobErrors, ReadJobResponses, ReadJobsData, ReadJobsErrors, ReadJobsResponses, ReadLeadData, ReadLeadErrors, ReadLeadResponses, ReadLeadsData, ReadLeadsErrors, ReadLeadsResponses, ReadOrgData, ReadOrgResponses, ReadProjectData, ReadProjectErrors, ReadProjectFilesData, ReadProjectFilesErrors, ReadProjectFilesResponses, ReadProjectResponses, ReadProjectsData, ReadProjectsErrors, ReadProjectsResponses, ReadProjectTypesData, ReadProjectTypesResponses, ReadQuoteData, ReadQuoteErrors, ReadQuoteResponses, ReadQuotesData, ReadQuotesErrors, ReadQuotesResponses, ReadRunArtefactsData, ReadRunArtefactsErrors, ReadRunArtefactsResponses, ReadRunData, ReadRunErrors, ReadRunResponses, ReadRunsData, ReadRunsErrors, ReadRunsResponses, ReadSurveyData, ReadSurveyErrors, ReadSurveyResponses, ReadSurveysData, ReadSurveysErrors, ReadSurveysResponses, ReadUserMeData, ReadUserMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, RemoveOrgUserData, RemoveOrgUserErrors, RemoveOrgUserResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, StartTimerData, StartTimerErrors, StartTimerResponses, StopTimerData, StopTimerErrors, StopTimerResponses, UpdateClientData, UpdateClientErrors, UpdateClientResponses, UpdateJobData, UpdateJobErrors, UpdateJobResponses, UpdateLeadData, UpdateLeadErrors, UpdateLeadResponses, UpdateOrgUserData, UpdateOrgUserErrors, UpdateOrgUserResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UpdateQuoteData, UpdateQuoteErrors, UpdateQuoteResponses, UpdateSurveyData, UpdateSurveyErrors, UpdateSurveyResponses, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, VerifyInvitationData, VerifyInvitationErrors, VerifyInvitationResponses } from './types.gen';
+import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, AddJobUpdateData, AddJobUpdateErrors, AddJobUpdateResponses, AddLeadUpdateData, AddLeadUpdateErrors, AddLeadUpdateResponses, AddProjectUpdateData, AddProjectUpdateErrors, AddProjectUpdateResponses, AddQuoteLineData, AddQuoteLineErrors, AddQuoteLineResponses, AddQuoteUpdateData, AddQuoteUpdateErrors, AddQuoteUpdateResponses, ConvertLeadData, ConvertLeadErrors, ConvertLeadResponses, ConvertQuoteData, ConvertQuoteErrors, ConvertQuoteResponses, CreateClientContactData, CreateClientContactErrors, CreateClientContactResponses, CreateClientData, CreateClientErrors, CreateClientResponses, CreateFileData, CreateFileErrors, CreateFileResponses, CreateFilesData, CreateFilesErrors, CreateFilesResponses, CreateInvitationData, CreateInvitationErrors, CreateInvitationResponses, CreateJobData, CreateJobErrors, CreateJobResponses, CreateLeadData, CreateLeadErrors, CreateLeadResponses, CreateProjectData, CreateProjectErrors, CreateProjectResponses, CreateProjectTypeData, CreateProjectTypeErrors, CreateProjectTypeResponses, CreateQuoteData, CreateQuoteErrors, CreateQuoteResponses, CreateRunData, CreateRunErrors, CreateRunResponses, CreateSurveyData, CreateSurveyErrors, CreateSurveyResponses, DeleteClientContactData, DeleteClientContactErrors, DeleteClientContactResponses, DeleteClientData, DeleteClientErrors, DeleteClientResponses, DeleteInvitationData, DeleteInvitationErrors, DeleteInvitationResponses, DeleteJobData, DeleteJobErrors, DeleteJobResponses, DeleteLeadData, DeleteLeadErrors, DeleteLeadResponses, DeleteProjectData, DeleteProjectErrors, DeleteProjectResponses, DeleteProjectUpdateData, DeleteProjectUpdateErrors, DeleteProjectUpdateResponses, DeleteQuoteData, DeleteQuoteErrors, DeleteQuoteResponses, DeleteSurveyData, DeleteSurveyErrors, DeleteSurveyResponses, GenerateFileDownloadUrlData, GenerateFileDownloadUrlErrors, GenerateFileDownloadUrlResponses, GenerateFileUploadUrlsData, GenerateFileUploadUrlsErrors, GenerateFileUploadUrlsResponses, GetCurrentTimerData, GetCurrentTimerResponses, GetProjectTimeEntriesData, GetProjectTimeEntriesErrors, GetProjectTimeEntriesResponses, LoginUserData, LoginUserErrors, LoginUserResponses, LogoutUserData, LogoutUserErrors, LogoutUserResponses, LogTimeManuallyData, LogTimeManuallyErrors, LogTimeManuallyResponses, ReadClientData, ReadClientErrors, ReadClientResponses, ReadClientsData, ReadClientsErrors, ReadClientsResponses, ReadFileData, ReadFileErrors, ReadFileResponses, ReadFilesData, ReadFilesErrors, ReadFilesResponses, ReadInvitationsData, ReadInvitationsResponses, ReadJobData, ReadJobErrors, ReadJobResponses, ReadJobsData, ReadJobsErrors, ReadJobsResponses, ReadLeadData, ReadLeadErrors, ReadLeadResponses, ReadLeadsData, ReadLeadsErrors, ReadLeadsResponses, ReadOrgData, ReadOrgResponses, ReadProjectData, ReadProjectErrors, ReadProjectFilesData, ReadProjectFilesErrors, ReadProjectFilesResponses, ReadProjectResponses, ReadProjectsData, ReadProjectsErrors, ReadProjectsResponses, ReadProjectTypesData, ReadProjectTypesResponses, ReadQuoteData, ReadQuoteErrors, ReadQuoteResponses, ReadQuotesData, ReadQuotesErrors, ReadQuotesResponses, ReadRunArtefactsData, ReadRunArtefactsErrors, ReadRunArtefactsResponses, ReadRunData, ReadRunErrors, ReadRunResponses, ReadRunsData, ReadRunsErrors, ReadRunsResponses, ReadSurveyData, ReadSurveyErrors, ReadSurveyFilesData, ReadSurveyFilesErrors, ReadSurveyFilesResponses, ReadSurveyResponses, ReadSurveysData, ReadSurveysErrors, ReadSurveysResponses, ReadUserMeData, ReadUserMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, RemoveOrgUserData, RemoveOrgUserErrors, RemoveOrgUserResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, SetKeyContactData, SetKeyContactErrors, SetKeyContactResponses, StartTimerData, StartTimerErrors, StartTimerResponses, StopTimerData, StopTimerErrors, StopTimerResponses, UpdateClientData, UpdateClientErrors, UpdateClientResponses, UpdateFileData, UpdateFileErrors, UpdateFileResponses, UpdateJobData, UpdateJobErrors, UpdateJobResponses, UpdateLeadData, UpdateLeadErrors, UpdateLeadResponses, UpdateOrgUserData, UpdateOrgUserErrors, UpdateOrgUserResponses, UpdateProjectData, UpdateProjectErrors, UpdateProjectResponses, UpdateProjectTypeData, UpdateProjectTypeErrors, UpdateProjectTypeResponses, UpdateQuoteData, UpdateQuoteErrors, UpdateQuoteResponses, UpdateSurveyData, UpdateSurveyErrors, UpdateSurveyResponses, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, VerifyInvitationData, VerifyInvitationErrors, VerifyInvitationResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -144,6 +144,20 @@ export const createFiles = <ThrowOnError extends boolean = false>(options: Optio
 export const readFile = <ThrowOnError extends boolean = false>(options: Options<ReadFileData, ThrowOnError>) => (options.client ?? client).get<ReadFileResponses, ReadFileErrors, ThrowOnError>({ url: '/store/{file_id}', ...options });
 
 /**
+ * Update File
+ *
+ * Update file metadata (e.g., attach to job/project).
+ */
+export const updateFile = <ThrowOnError extends boolean = false>(options: Options<UpdateFileData, ThrowOnError>) => (options.client ?? client).patch<UpdateFileResponses, UpdateFileErrors, ThrowOnError>({
+    url: '/store/{file_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Generate Download Url
  *
  * Generate a presigned download URL for a file.
@@ -217,6 +231,18 @@ export const readProjectTypes = <ThrowOnError extends boolean = false>(options?:
  */
 export const createProjectType = <ThrowOnError extends boolean = false>(options: Options<CreateProjectTypeData, ThrowOnError>) => (options.client ?? client).post<CreateProjectTypeResponses, CreateProjectTypeErrors, ThrowOnError>({
     url: '/projects/types',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Update Project Type
+ */
+export const updateProjectType = <ThrowOnError extends boolean = false>(options: Options<UpdateProjectTypeData, ThrowOnError>) => (options.client ?? client).patch<UpdateProjectTypeResponses, UpdateProjectTypeErrors, ThrowOnError>({
+    url: '/projects/types/{type_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -368,6 +394,20 @@ export const createClientContact = <ThrowOnError extends boolean = false>(option
         ...options.headers
     }
 });
+
+/**
+ * Set Key Contact
+ *
+ * Set the key contact for a client.
+ */
+export const setKeyContact = <ThrowOnError extends boolean = false>(options: Options<SetKeyContactData, ThrowOnError>) => (options.client ?? client).patch<SetKeyContactResponses, SetKeyContactErrors, ThrowOnError>({ url: '/clients/{client_id}/key-contact/{contact_id}', ...options });
+
+/**
+ * Delete Client Contact
+ *
+ * Delete a contact from a client.
+ */
+export const deleteClientContact = <ThrowOnError extends boolean = false>(options: Options<DeleteClientContactData, ThrowOnError>) => (options.client ?? client).delete<DeleteClientContactResponses, DeleteClientContactErrors, ThrowOnError>({ url: '/clients/{client_id}/contacts/{contact_id}', ...options });
 
 /**
  * Start Timer
@@ -578,7 +618,7 @@ export const convertQuote = <ThrowOnError extends boolean = false>(options: Opti
 /**
  * Read Surveys
  *
- * Retrieve surveys, optionally filtered by job.
+ * Retrieve surveys, optionally filtered by job or project.
  */
 export const readSurveys = <ThrowOnError extends boolean = false>(options?: Options<ReadSurveysData, ThrowOnError>) => (options?.client ?? client).get<ReadSurveysResponses, ReadSurveysErrors, ThrowOnError>({ url: '/surveys/', ...options });
 
@@ -623,6 +663,13 @@ export const updateSurvey = <ThrowOnError extends boolean = false>(options: Opti
         ...options.headers
     }
 });
+
+/**
+ * Read Survey Files
+ *
+ * Get all files attached to a survey.
+ */
+export const readSurveyFiles = <ThrowOnError extends boolean = false>(options: Options<ReadSurveyFilesData, ThrowOnError>) => (options.client ?? client).get<ReadSurveyFilesResponses, ReadSurveyFilesErrors, ThrowOnError>({ url: '/surveys/{survey_id}/files', ...options });
 
 /**
  * Read Invitations

@@ -25,7 +25,7 @@ def start_timer(
     active_entry = db.exec(
         select(TimeEntry)
         .where(TimeEntry.user_id == current_user.id)
-        .where(TimeEntry.end_time is None)
+        .where(TimeEntry.end_time == None)  # noqa: E711
     ).first()
 
     if active_entry:
@@ -68,7 +68,7 @@ def stop_timer(
     active_entry = db.exec(
         select(TimeEntry)
         .where(TimeEntry.user_id == current_user.id)
-        .where(TimeEntry.end_time is None)
+        .where(TimeEntry.end_time == None)  # noqa: E711
     ).first()
 
     if not active_entry:
@@ -157,7 +157,7 @@ def get_current_timer(
     active_entry = db.exec(
         select(TimeEntry)
         .where(TimeEntry.user_id == current_user.id)
-        .where(TimeEntry.end_time is None)
+        .where(TimeEntry.end_time == None)  # noqa: E711
     ).first()
 
     if not active_entry:
@@ -171,7 +171,7 @@ def get_current_timer(
     minutes = int(duration.total_seconds() / 60)
 
     return TimeEntryOut(
-        **active_entry.model_dump(),
+        **active_entry.model_dump(exclude={"duration_minutes"}),
         project_name=project.name if project else "Unknown",
         user_name=current_user.name,
         duration_minutes=minutes,

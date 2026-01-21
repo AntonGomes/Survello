@@ -126,6 +126,18 @@ export type ClientCreate = {
      */
     address?: string | null;
     /**
+     * Is Individual
+     */
+    is_individual?: boolean;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
      * Contacts
      */
     contacts?: Array<ClientContactCreate>;
@@ -144,6 +156,18 @@ export type ClientRead = {
      */
     address?: string | null;
     /**
+     * Is Individual
+     */
+    is_individual?: boolean;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
      * Id
      */
     id: number;
@@ -159,6 +183,10 @@ export type ClientRead = {
      * Updated At
      */
     updated_at: string;
+    /**
+     * Key Contact Id
+     */
+    key_contact_id?: number | null;
     /**
      * Contacts
      */
@@ -178,6 +206,18 @@ export type ClientReadDetail = {
      */
     address?: string | null;
     /**
+     * Is Individual
+     */
+    is_individual?: boolean;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
      * Id
      */
     id: number;
@@ -193,6 +233,10 @@ export type ClientReadDetail = {
      * Updated At
      */
     updated_at: string;
+    /**
+     * Key Contact Id
+     */
+    key_contact_id?: number | null;
     /**
      * Contacts
      */
@@ -216,6 +260,18 @@ export type ClientReadMinimal = {
      */
     address?: string | null;
     /**
+     * Is Individual
+     */
+    is_individual?: boolean;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
      * Id
      */
     id: number;
@@ -233,6 +289,36 @@ export type ClientUpdate = {
      * Address
      */
     address?: string | null;
+    /**
+     * Key Contact Id
+     */
+    key_contact_id?: number | null;
+    /**
+     * Is Individual
+     */
+    is_individual?: boolean | null;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+};
+
+/**
+ * ConductedByUserRead
+ */
+export type ConductedByUserRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
 };
 
 /**
@@ -317,6 +403,10 @@ export type FileCreate = {
      * Project Id
      */
     project_id?: number | null;
+    /**
+     * Survey Id
+     */
+    survey_id?: number | null;
     role?: FileRole;
 };
 
@@ -406,9 +496,17 @@ export type FileRead = {
     created_at: string;
     role: FileRole;
     /**
+     * Job Id
+     */
+    job_id?: number | null;
+    /**
      * Project Id
      */
     project_id?: number | null;
+    /**
+     * Survey Id
+     */
+    survey_id?: number | null;
     /**
      * Preview File Id
      */
@@ -429,6 +527,33 @@ export const FileRole = {
  * FileRole
  */
 export type FileRole = typeof FileRole[keyof typeof FileRole];
+
+/**
+ * FileUpdate
+ */
+export type FileUpdate = {
+    /**
+     * File Name
+     */
+    file_name?: string | null;
+    role?: FileRole | null;
+    /**
+     * Preview File Id
+     */
+    preview_file_id?: number | null;
+    /**
+     * Job Id
+     */
+    job_id?: number | null;
+    /**
+     * Project Id
+     */
+    project_id?: number | null;
+    /**
+     * Survey Id
+     */
+    survey_id?: number | null;
+};
 
 /**
  * HTTPValidationError
@@ -590,6 +715,10 @@ export type JobRead = {
      * Updated At
      */
     updated_at: string;
+    /**
+     * Projects
+     */
+    projects?: Array<ProjectReadWithProjectType>;
 };
 
 /**
@@ -627,7 +756,7 @@ export type JobReadDetail = {
     /**
      * Projects
      */
-    projects: Array<ProjectRead>;
+    projects: Array<ProjectReadWithProjectType>;
     /**
      * Files
      */
@@ -997,6 +1126,20 @@ export type ProjectCreate = {
 };
 
 /**
+ * ProjectMinimalRead
+ */
+export type ProjectMinimalRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
  * ProjectRead
  */
 export type ProjectRead = {
@@ -1155,6 +1298,85 @@ export type ProjectReadDetail = {
 };
 
 /**
+ * ProjectReadWithProjectType
+ */
+export type ProjectReadWithProjectType = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    /**
+     * Forecasted Billable Hours
+     */
+    forecasted_billable_hours?: number | null;
+    /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
+     * Contingency Percentage
+     */
+    contingency_percentage?: number | null;
+    /**
+     * Forecasted Settlement Amount
+     */
+    forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
+    /**
+     * Forecasted Fee Amount
+     */
+    forecasted_fee_amount?: number | null;
+    fee_type: FeeType;
+    status?: ProjectStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Project Type Id
+     */
+    project_type_id: number;
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    project_type: ProjectTypeRead;
+};
+
+/**
  * ProjectStatus
  */
 export const ProjectStatus = {
@@ -1180,7 +1402,7 @@ export type ProjectTypeCreate = {
     /**
      * Description
      */
-    description: string | null;
+    description?: string | null;
     /**
      * Rate
      */
@@ -1190,6 +1412,10 @@ export type ProjectTypeCreate = {
      * Default Contingency Percentage
      */
     default_contingency_percentage?: number | null;
+    /**
+     * Default Template File Id
+     */
+    default_template_file_id?: number | null;
 };
 
 /**
@@ -1203,7 +1429,7 @@ export type ProjectTypeRead = {
     /**
      * Description
      */
-    description: string | null;
+    description?: string | null;
     /**
      * Rate
      */
@@ -1218,6 +1444,10 @@ export type ProjectTypeRead = {
      */
     id: number;
     /**
+     * Default Template File Id
+     */
+    default_template_file_id?: number | null;
+    /**
      * Created At
      */
     created_at: string;
@@ -1225,6 +1455,33 @@ export type ProjectTypeRead = {
      * Updated At
      */
     updated_at: string;
+};
+
+/**
+ * ProjectTypeUpdate
+ */
+export type ProjectTypeUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    default_fee_type?: FeeType | null;
+    /**
+     * Default Contingency Percentage
+     */
+    default_contingency_percentage?: number | null;
+    /**
+     * Default Template File Id
+     */
+    default_template_file_id?: number | null;
 };
 
 /**
@@ -1566,21 +1823,45 @@ export type RunStatus = typeof RunStatus[keyof typeof RunStatus];
  */
 export type SurveyCreate = {
     /**
-     * Date
-     */
-    date: string;
-    /**
-     * Notes
-     */
-    notes?: string | null;
-    /**
      * Job Id
      */
     job_id: number;
     /**
-     * Surveyor Id
+     * Project Id
      */
-    surveyor_id?: number | null;
+    project_id?: number | null;
+    /**
+     * Conducted Date
+     */
+    conducted_date: string;
+    /**
+     * Conducted Time
+     */
+    conducted_time?: string | null;
+    /**
+     * Conducted By User Id
+     */
+    conducted_by_user_id?: number | null;
+    /**
+     * Surveyor Ids
+     */
+    surveyor_ids?: Array<number> | null;
+    /**
+     * Site Notes
+     */
+    site_notes?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Weather
+     */
+    weather?: string | null;
+    /**
+     * Notes
+     */
+    notes?: string | null;
 };
 
 /**
@@ -1588,9 +1869,25 @@ export type SurveyCreate = {
  */
 export type SurveyRead = {
     /**
-     * Date
+     * Conducted Date
      */
-    date: string;
+    conducted_date: string;
+    /**
+     * Conducted Time
+     */
+    conducted_time?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Site Notes
+     */
+    site_notes?: string | null;
+    /**
+     * Weather
+     */
+    weather?: string | null;
     /**
      * Notes
      */
@@ -1608,10 +1905,24 @@ export type SurveyRead = {
      */
     job_id: number;
     /**
+     * Project Id
+     */
+    project_id?: number | null;
+    /**
+     * Conducted By User Id
+     */
+    conducted_by_user_id?: number | null;
+    conducted_by_user?: ConductedByUserRead | null;
+    project?: ProjectMinimalRead | null;
+    /**
      * Surveyor Id
      */
     surveyor_id?: number | null;
     surveyor?: SurveyorRead | null;
+    /**
+     * Surveyors
+     */
+    surveyors?: Array<SurveyorRead>;
     /**
      * Created At
      */
@@ -1624,6 +1935,10 @@ export type SurveyRead = {
      * Photo Count
      */
     photo_count?: number;
+    /**
+     * File Count
+     */
+    file_count?: number;
 };
 
 /**
@@ -1631,21 +1946,47 @@ export type SurveyRead = {
  */
 export type SurveyUpdate = {
     /**
-     * Date
+     * Conducted Date
      */
-    date?: string | null;
+    conducted_date?: string | null;
+    /**
+     * Conducted Time
+     */
+    conducted_time?: string | null;
+    /**
+     * Project Id
+     */
+    project_id?: number | null;
+    /**
+     * Conducted By User Id
+     */
+    conducted_by_user_id?: number | null;
+    /**
+     * Surveyor Ids
+     */
+    surveyor_ids?: Array<number> | null;
+    /**
+     * Site Notes
+     */
+    site_notes?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Weather
+     */
+    weather?: string | null;
     /**
      * Notes
      */
     notes?: string | null;
-    /**
-     * Surveyor Id
-     */
-    surveyor_id?: number | null;
 };
 
 /**
  * SurveyorRead
+ *
+ * Legacy - for backward compatibility.
  */
 export type SurveyorRead = {
     /**
@@ -2225,6 +2566,36 @@ export type ReadFileResponses = {
 
 export type ReadFileResponse = ReadFileResponses[keyof ReadFileResponses];
 
+export type UpdateFileData = {
+    body: FileUpdate;
+    path: {
+        /**
+         * File Id
+         */
+        file_id: number;
+    };
+    query?: never;
+    url: '/store/{file_id}';
+};
+
+export type UpdateFileErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateFileError = UpdateFileErrors[keyof UpdateFileErrors];
+
+export type UpdateFileResponses = {
+    /**
+     * Successful Response
+     */
+    200: FileRead;
+};
+
+export type UpdateFileResponse = UpdateFileResponses[keyof UpdateFileResponses];
+
 export type GenerateFileDownloadUrlData = {
     body?: never;
     path: {
@@ -2485,6 +2856,36 @@ export type CreateProjectTypeResponses = {
 };
 
 export type CreateProjectTypeResponse = CreateProjectTypeResponses[keyof CreateProjectTypeResponses];
+
+export type UpdateProjectTypeData = {
+    body: ProjectTypeUpdate;
+    path: {
+        /**
+         * Type Id
+         */
+        type_id: number;
+    };
+    query?: never;
+    url: '/projects/types/{type_id}';
+};
+
+export type UpdateProjectTypeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateProjectTypeError = UpdateProjectTypeErrors[keyof UpdateProjectTypeErrors];
+
+export type UpdateProjectTypeResponses = {
+    /**
+     * Successful Response
+     */
+    200: ProjectTypeRead;
+};
+
+export type UpdateProjectTypeResponse = UpdateProjectTypeResponses[keyof UpdateProjectTypeResponses];
 
 export type ReadProjectsData = {
     body?: never;
@@ -2958,6 +3359,74 @@ export type CreateClientContactResponses = {
 };
 
 export type CreateClientContactResponse = CreateClientContactResponses[keyof CreateClientContactResponses];
+
+export type SetKeyContactData = {
+    body?: never;
+    path: {
+        /**
+         * Client Id
+         */
+        client_id: number;
+        /**
+         * Contact Id
+         */
+        contact_id: number;
+    };
+    query?: never;
+    url: '/clients/{client_id}/key-contact/{contact_id}';
+};
+
+export type SetKeyContactErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SetKeyContactError = SetKeyContactErrors[keyof SetKeyContactErrors];
+
+export type SetKeyContactResponses = {
+    /**
+     * Successful Response
+     */
+    200: ClientRead;
+};
+
+export type SetKeyContactResponse = SetKeyContactResponses[keyof SetKeyContactResponses];
+
+export type DeleteClientContactData = {
+    body?: never;
+    path: {
+        /**
+         * Client Id
+         */
+        client_id: number;
+        /**
+         * Contact Id
+         */
+        contact_id: number;
+    };
+    query?: never;
+    url: '/clients/{client_id}/contacts/{contact_id}';
+};
+
+export type DeleteClientContactErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteClientContactError = DeleteClientContactErrors[keyof DeleteClientContactErrors];
+
+export type DeleteClientContactResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteClientContactResponse = DeleteClientContactResponses[keyof DeleteClientContactResponses];
 
 export type StartTimerData = {
     body: TimeEntryCreate;
@@ -3562,6 +4031,10 @@ export type ReadSurveysData = {
          */
         job_id?: number | null;
         /**
+         * Project Id
+         */
+        project_id?: number | null;
+        /**
          * Offset
          */
         offset?: number;
@@ -3707,6 +4180,38 @@ export type UpdateSurveyResponses = {
 };
 
 export type UpdateSurveyResponse = UpdateSurveyResponses[keyof UpdateSurveyResponses];
+
+export type ReadSurveyFilesData = {
+    body?: never;
+    path: {
+        /**
+         * Survey Id
+         */
+        survey_id: number;
+    };
+    query?: never;
+    url: '/surveys/{survey_id}/files';
+};
+
+export type ReadSurveyFilesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadSurveyFilesError = ReadSurveyFilesErrors[keyof ReadSurveyFilesErrors];
+
+export type ReadSurveyFilesResponses = {
+    /**
+     * Response Readsurveyfiles
+     *
+     * Successful Response
+     */
+    200: Array<FileRead>;
+};
+
+export type ReadSurveyFilesResponse = ReadSurveyFilesResponses[keyof ReadSurveyFilesResponses];
 
 export type ReadInvitationsData = {
     body?: never;

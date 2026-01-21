@@ -30,7 +30,7 @@ import { DataTableViewOptions } from "@/components/data-table-view-options"
 import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { X } from "lucide-react"
+import { X, Search } from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -99,14 +99,17 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-between">
         <div className="flex flex-1 items-center space-x-2">
           {searchKey && (
-            <Input
-              placeholder="Search..."
-              value={globalFilter}
-              onChange={(event) =>
-                setGlobalFilter(event.target.value)
-              }
-              className="h-8 w-[150px] lg:w-[250px]"
-            />
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search..."
+                value={globalFilter}
+                onChange={(event) =>
+                  setGlobalFilter(event.target.value)
+                }
+                className="pl-9"
+              />
+            </div>
           )}
           {facetedFilters?.map((filter) => (
             table.getColumn(filter.columnId) && (

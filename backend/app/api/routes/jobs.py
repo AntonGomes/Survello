@@ -1,11 +1,11 @@
-from datetime import datetime, timezone
-from typing import Any
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
 from pydantic import BaseModel
 from app.api.deps import DBDep, CurrentUserDep
 from app.models.job_model import Job, JobCreate, JobRead, JobUpdate, JobReadDetail
+from app.models.project_model import Project
+from app.models.update_model import create_text_update
 
 router = APIRouter()
 
@@ -70,7 +70,7 @@ def read_job(
             joinedload(Job.client),
             joinedload(Job.created_by_user),
             joinedload(Job.lead_user),
-            joinedload(Job.projects),
+            joinedload(Job.projects).joinedload(Project.project_type),
             joinedload(Job.files),
         )
     )
@@ -153,16 +153,24 @@ def add_job_update(
     if job.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    new_update: dict[str, Any] = {
-        "text": update_entry.text,
-        "user_id": current_user.id,
-        "user_name": current_user.name,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
+    # Create user initials for display
+    initials = (
+        "".join(word[0].upper() for word in (current_user.name or "").split()[:2])
+        or "??"
+    )
+
+    # Use unified UpdateItem structure
+    update_item = create_text_update(
+        text=update_entry.text,
+        author_id=current_user.id,  # pyright: ignore[reportArgumentType]
+        author_name=current_user.name,
+        author_initials=initials,
+    )
 
     if job.updates is None:
         job.updates = []
-    job.updates = [new_update] + job.updates  # Prepend new update
+    # Prepend new update (newest first)
+    job.updates = [update_item.model_dump(mode="json")] + job.updates
 
     db.add(job)
     db.commit()

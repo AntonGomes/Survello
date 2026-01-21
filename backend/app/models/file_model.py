@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from .run_model import Run, RunFileLink
     from .job_model import Job
     from .project_model import Project
+    from .survey_model import Survey
 
 
 class FileRole(str, Enum):
@@ -54,6 +55,7 @@ class File(FileBase, table=True):
         back_populates="context_files", link_model=RunFileLink
     )
     project: Optional["Project"] = Relationship(back_populates="files")
+    survey: Optional["Survey"] = Relationship(back_populates="files")
     # Self-referential for preview file
     preview_file: Optional["File"] = Relationship(
         sa_relationship_kwargs={
@@ -70,6 +72,7 @@ class FileCreate(FileBase):
     job_id: int | None = None
     run_id: int | None = None
     project_id: int | None = None
+    survey_id: int | None = None
     role: FileRole = FileRole.INPUT
 
 
@@ -87,6 +90,9 @@ class FileUpdate(SQLModel):
     file_name: str | None = None
     role: FileRole | None = None
     preview_file_id: int | None = None
+    job_id: int | None = None
+    project_id: int | None = None
+    survey_id: int | None = None
 
 
 class FileRead(FileBase):
@@ -96,5 +102,7 @@ class FileRead(FileBase):
     created_at: datetime
     role: FileRole
     size_bytes: int | None = None
+    job_id: int | None = None
     project_id: int | None = None
+    survey_id: int | None = None
     preview_file_id: int | None = None

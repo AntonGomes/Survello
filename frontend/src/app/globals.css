@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Prevent layout shift when scrollbar appears/disappears between tabs */
+html {
+  overflow-y: scroll;
+}
+
 :root {
   /* Brand Palette */
   --brand-primary: #154c7a;

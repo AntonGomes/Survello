@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  FolderOpen,
   LayoutDashboard,
   Menu,
   Plus,
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/app/dashboard", disabled: false, comingSoon: false },
   { label: "Jobs", icon: Briefcase, href: "/app/jobs", disabled: false, comingSoon: false },
   { label: "Clients", icon: FileText, href: "/app/clients", disabled: false, comingSoon: false },
+  { label: "Templates", icon: FolderOpen, href: "/app/templates", disabled: false, comingSoon: false },
 ];
 
 const BOTTOM_ITEMS = [

@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List, Any
 from enum import Enum
-from uuid import uuid4
-from pydantic import BaseModel
 from sqlmodel import SQLModel, Field, Relationship, AutoString
-from sqlalchemy import JSON, Column
+from sqlalchemy import JSON, Column, Enum as SAEnum
 
+# Import unified UpdateItem for type hints and re-export for backwards compatibility
+from .update_model import UpdateItem as ProjectUpdateItem  # noqa: F401
 
 if TYPE_CHECKING:
     from .user_model import User
@@ -27,22 +27,9 @@ class FeeType(str, Enum):
 
 
 # -----------------------------------------------------------------------------
-# PROJECT UPDATE (Structured update item for the updates JSON array)
+# PROJECT UPDATE - Now uses unified UpdateItem from update_model.py
+# The ProjectUpdateItem alias is kept for backwards compatibility.
 # -----------------------------------------------------------------------------
-
-
-class ProjectUpdateItem(BaseModel):
-    """A single update entry in the project updates feed."""
-
-    id: str = Field(default_factory=lambda: str(uuid4()))
-    text: str
-    author_id: int
-    author_name: str | None = None  # Denormalized for display
-    author_initials: str | None = None  # Denormalized for display
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    time_entry_id: int | None = (
-        None  # Links to a time entry if this update was from time tracking
-    )
 
 
 # -----------------------------------------------------------------------------
@@ -60,7 +47,16 @@ class ProjectBase(SQLModel):
     forecasted_settlement_amount: float | None = 0.0
     final_settlement_amount: float | None = 0.0
     forecasted_fee_amount: float | None = 0.0
-    fee_type: FeeType
+    fee_type: FeeType = Field(
+        sa_column=Column(
+            SAEnum(
+                FeeType,
+                values_callable=lambda x: [e.value for e in x],
+                name="feetype",
+                create_type=False,
+            )
+        )
+    )
     status: ProjectStatus | None = Field(default=None, sa_type=AutoString)
     # Unified updates feed - stores list of ProjectUpdateItem dicts
     updates: List[dict[str, Any]] | None = Field(default=None, sa_column=Column(JSON))
@@ -141,9 +137,20 @@ class ProjectRead(ProjectBase):
 
 class ProjectTypeBase(SQLModel):
     name: str = Field(max_length=255)
-    description: str | None
+    description: str | None = None
     rate: float | None = 0.0
-    default_fee_type: FeeType | None = FeeType.FIXED
+    default_fee_type: FeeType | None = Field(
+        default=FeeType.FIXED,
+        sa_column=Column(
+            SAEnum(
+                FeeType,
+                values_callable=lambda x: [e.value for e in x],
+                name="feetype",
+                create_type=False,
+            ),
+            nullable=True,
+        ),
+    )
     default_contingency_percentage: float | None = 0.0
 
 
@@ -157,18 +164,31 @@ class ProjectType(ProjectTypeBase, table=True):
     )
 
     org_id: int | None = Field(default=None, foreign_key="orgs.id", ondelete="CASCADE")
+    default_template_file_id: int | None = Field(
+        default=None, foreign_key="files.id", ondelete="SET NULL"
+    )
 
     projects: List["Project"] = Relationship(back_populates="project_type")
 
 
 class ProjectTypeRead(ProjectTypeBase):
     id: int
+    default_template_file_id: int | None = None
     created_at: datetime
     updated_at: datetime
 
 
 class ProjectTypeCreate(ProjectTypeBase):
-    pass
+    default_template_file_id: int | None = None
+
+
+class ProjectTypeUpdate(SQLModel):
+    name: str | None = None
+    description: str | None = None
+    rate: float | None = None
+    default_fee_type: FeeType | None = None
+    default_contingency_percentage: float | None = None
+    default_template_file_id: int | None = None
 
 
 class ProjectReadWithProjectType(ProjectRead):

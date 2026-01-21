@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Loader2, X, Check } from "lucide-react";
+import { Plus, Loader2, X, Check, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,13 @@ import {
   SelectSeparator
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { 
   createProjectMutation, 
   createProjectTypeMutation,
@@ -51,13 +59,15 @@ const formSchema = z.object({
   status: z.nativeEnum(ProjectStatus),
   rate: z.number().min(0).optional(),
   contingency_percentage: z.number().min(0).max(100).optional(),
+  deadline: z.date().optional(),
 });
 
 interface CreateProjectDialogProps {
   jobId: number;
+  trigger?: React.ReactNode;
 }
 
-export function CreateProjectDialog({ jobId }: CreateProjectDialogProps) {
+export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps) {
   const [open, setOpen] = useState(false);
   const [isCreatingType, setIsCreatingType] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
@@ -78,6 +88,7 @@ export function CreateProjectDialog({ jobId }: CreateProjectDialogProps) {
       status: ProjectStatus.PLANNED,
       rate: 0,
       contingency_percentage: 0,
+      deadline: undefined,
     },
   });
 
@@ -125,6 +136,7 @@ export function CreateProjectDialog({ jobId }: CreateProjectDialogProps) {
       rate: values.rate,
       contingency_percentage: values.contingency_percentage,
       forecasted_billable_hours: 0,
+      deadline: values.deadline?.toISOString() ?? null,
     };
 
     createProject({
@@ -146,10 +158,12 @@ export function CreateProjectDialog({ jobId }: CreateProjectDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Plus className="mr-2 h-4 w-4" />
-          Create Project
-        </Button>
+        {trigger || (
+          <Button variant="outline" size="sm">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Project
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
@@ -295,6 +309,60 @@ export function CreateProjectDialog({ jobId }: CreateProjectDialogProps) {
                 )}
               />
             </div>
+
+            {/* Deadline Field */}
+            <FormField
+              control={form.control}
+              name="deadline"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Deadline (Optional)</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a deadline date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                      {field.value && (
+                        <div className="p-2 border-t">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => field.onChange(undefined)}
+                          >
+                            Clear deadline
+                          </Button>
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

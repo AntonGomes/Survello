@@ -557,6 +557,57 @@
             }
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Update File",
+        "description": "Update file metadata (e.g., attach to job/project).",
+        "operationId": "updateFile",
+        "parameters": [
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "File Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/store/{file_id}/download": {
@@ -929,6 +980,58 @@
         },
         "responses": {
           "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectTypeRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/types/{type_id}": {
+      "patch": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Update Project Type",
+        "operationId": "updateProjectType",
+        "parameters": [
+          {
+            "name": "type_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Type Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectTypeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
@@ -1665,6 +1768,103 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/{client_id}/key-contact/{contact_id}": {
+      "patch": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Set Key Contact",
+        "description": "Set the key contact for a client.",
+        "operationId": "setKeyContact",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "contact_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Contact Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/{client_id}/contacts/{contact_id}": {
+      "delete": {
+        "tags": [
+          "Clients"
+        ],
+        "summary": "Delete Client Contact",
+        "description": "Delete a contact from a client.",
+        "operationId": "deleteClientContact",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "contact_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Contact Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -2681,7 +2881,7 @@
           "Surveys"
         ],
         "summary": "Read Surveys",
-        "description": "Retrieve surveys, optionally filtered by job.",
+        "description": "Retrieve surveys, optionally filtered by job or project.",
         "operationId": "readSurveys",
         "parameters": [
           {
@@ -2698,6 +2898,22 @@
                 }
               ],
               "title": "Job Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Project Id"
             }
           },
           {
@@ -2863,6 +3079,53 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/surveys/{survey_id}/files": {
+      "get": {
+        "tags": [
+          "Surveys"
+        ],
+        "summary": "Read Survey Files",
+        "description": "Get all files attached to a survey.",
+        "operationId": "readSurveyFiles",
+        "parameters": [
+          {
+            "name": "survey_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Survey Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileRead"
+                  },
+                  "title": "Response Readsurveyfiles"
+                }
+              }
+            }
           },
           "422": {
             "description": "Validation Error",
@@ -3452,6 +3715,35 @@
             ],
             "title": "Address"
           },
+          "is_individual": {
+            "type": "boolean",
+            "title": "Is Individual",
+            "default": false
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
           "contacts": {
             "items": {
               "$ref": "#/components/schemas/ClientContactCreate"
@@ -3484,6 +3776,35 @@
             ],
             "title": "Address"
           },
+          "is_individual": {
+            "type": "boolean",
+            "title": "Is Individual",
+            "default": false
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
           "id": {
             "type": "integer",
             "title": "Id"
@@ -3508,6 +3829,17 @@
             "type": "string",
             "format": "date-time",
             "title": "Updated At"
+          },
+          "key_contact_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key Contact Id"
           },
           "contacts": {
             "items": {
@@ -3545,6 +3877,35 @@
             ],
             "title": "Address"
           },
+          "is_individual": {
+            "type": "boolean",
+            "title": "Is Individual",
+            "default": false
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
           "id": {
             "type": "integer",
             "title": "Id"
@@ -3569,6 +3930,17 @@
             "type": "string",
             "format": "date-time",
             "title": "Updated At"
+          },
+          "key_contact_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key Contact Id"
           },
           "contacts": {
             "items": {
@@ -3601,6 +3973,7 @@
         "properties": {
           "name": {
             "type": "string",
+            "maxLength": 255,
             "title": "Name"
           },
           "address": {
@@ -3613,6 +3986,35 @@
               }
             ],
             "title": "Address"
+          },
+          "is_individual": {
+            "type": "boolean",
+            "title": "Is Individual",
+            "default": false
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
           },
           "id": {
             "type": "integer",
@@ -3649,10 +4051,72 @@
               }
             ],
             "title": "Address"
+          },
+          "key_contact_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key Contact Id"
+          },
+          "is_individual": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Individual"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
           }
         },
         "type": "object",
         "title": "ClientUpdate"
+      },
+      "ConductedByUserRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "ConductedByUserRead"
       },
       "ConvertLeadResponse": {
         "properties": {
@@ -3785,6 +4249,17 @@
               }
             ],
             "title": "Project Id"
+          },
+          "survey_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Survey Id"
           },
           "role": {
             "$ref": "#/components/schemas/FileRole",
@@ -3925,6 +4400,17 @@
           "role": {
             "$ref": "#/components/schemas/FileRole"
           },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
           "project_id": {
             "anyOf": [
               {
@@ -3935,6 +4421,17 @@
               }
             ],
             "title": "Project Id"
+          },
+          "survey_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Survey Id"
           },
           "preview_file_id": {
             "anyOf": [
@@ -3969,6 +4466,77 @@
           "input"
         ],
         "title": "FileRole"
+      },
+      "FileUpdate": {
+        "properties": {
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FileRole"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "preview_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preview File Id"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "survey_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Survey Id"
+          }
+        },
+        "type": "object",
+        "title": "FileUpdate"
       },
       "HTTPValidationError": {
         "properties": {
@@ -4233,6 +4801,14 @@
             "type": "string",
             "format": "date-time",
             "title": "Updated At"
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectReadWithProjectType"
+            },
+            "type": "array",
+            "title": "Projects",
+            "default": []
           }
         },
         "type": "object",
@@ -4319,7 +4895,7 @@
           },
           "projects": {
             "items": {
-              "$ref": "#/components/schemas/ProjectRead"
+              "$ref": "#/components/schemas/ProjectReadWithProjectType"
             },
             "type": "array",
             "title": "Projects"
@@ -5075,6 +5651,24 @@
         ],
         "title": "ProjectCreate"
       },
+      "ProjectMinimalRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "ProjectMinimalRead"
+      },
       "ProjectRead": {
         "properties": {
           "name": {
@@ -5459,6 +6053,198 @@
         ],
         "title": "ProjectReadDetail"
       },
+      "ProjectReadWithProjectType": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours",
+            "default": 0.0
+          },
+          "actual_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Hours",
+            "default": 0.0
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage",
+            "default": 0.0
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount",
+            "default": 0.0
+          },
+          "final_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Settlement Amount",
+            "default": 0.0
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount",
+            "default": 0.0
+          },
+          "fee_type": {
+            "$ref": "#/components/schemas/FeeType"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "project_type_id": {
+            "type": "integer",
+            "title": "Project Type Id"
+          },
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "project_type": {
+            "$ref": "#/components/schemas/ProjectTypeRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "fee_type",
+          "id",
+          "project_type_id",
+          "job_id",
+          "created_at",
+          "updated_at",
+          "project_type"
+        ],
+        "title": "ProjectReadWithProjectType"
+      },
       "ProjectStatus": {
         "type": "string",
         "enum": [
@@ -5521,12 +6307,22 @@
             ],
             "title": "Default Contingency Percentage",
             "default": 0.0
+          },
+          "default_template_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Template File Id"
           }
         },
         "type": "object",
         "required": [
-          "name",
-          "description"
+          "name"
         ],
         "title": "ProjectTypeCreate"
       },
@@ -5587,6 +6383,17 @@
             "type": "integer",
             "title": "Id"
           },
+          "default_template_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Template File Id"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -5601,12 +6408,82 @@
         "type": "object",
         "required": [
           "name",
-          "description",
           "id",
           "created_at",
           "updated_at"
         ],
         "title": "ProjectTypeRead"
+      },
+      "ProjectTypeUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "default_fee_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default_contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Contingency Percentage"
+          },
+          "default_template_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Template File Id"
+          }
+        },
+        "type": "object",
+        "title": "ProjectTypeUpdate"
       },
       "ProjectUpdate": {
         "properties": {
@@ -6318,10 +7195,95 @@
       },
       "SurveyCreate": {
         "properties": {
-          "date": {
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "conducted_date": {
             "type": "string",
             "format": "date",
-            "title": "Date"
+            "title": "Conducted Date"
+          },
+          "conducted_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conducted Time"
+          },
+          "conducted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conducted By User Id"
+          },
+          "surveyor_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surveyor Ids"
+          },
+          "site_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Notes"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "weather": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weather"
           },
           "notes": {
             "anyOf": [
@@ -6333,36 +7295,66 @@
               }
             ],
             "title": "Notes"
-          },
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          },
-          "surveyor_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Surveyor Id"
           }
         },
         "type": "object",
         "required": [
-          "date",
-          "job_id"
+          "job_id",
+          "conducted_date"
         ],
         "title": "SurveyCreate"
       },
       "SurveyRead": {
         "properties": {
-          "date": {
+          "conducted_date": {
             "type": "string",
             "format": "date",
-            "title": "Date"
+            "title": "Conducted Date"
+          },
+          "conducted_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conducted Time"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "site_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Notes"
+          },
+          "weather": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weather"
           },
           "notes": {
             "anyOf": [
@@ -6387,6 +7379,48 @@
             "type": "integer",
             "title": "Job Id"
           },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "conducted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conducted By User Id"
+          },
+          "conducted_by_user": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConductedByUserRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "project": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMinimalRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "surveyor_id": {
             "anyOf": [
               {
@@ -6408,6 +7442,14 @@
               }
             ]
           },
+          "surveyors": {
+            "items": {
+              "$ref": "#/components/schemas/SurveyorRead"
+            },
+            "type": "array",
+            "title": "Surveyors",
+            "default": []
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -6422,11 +7464,16 @@
             "type": "integer",
             "title": "Photo Count",
             "default": 0
+          },
+          "file_count": {
+            "type": "integer",
+            "title": "File Count",
+            "default": 0
           }
         },
         "type": "object",
         "required": [
-          "date",
+          "conducted_date",
           "id",
           "org_id",
           "job_id",
@@ -6437,7 +7484,7 @@
       },
       "SurveyUpdate": {
         "properties": {
-          "date": {
+          "conducted_date": {
             "anyOf": [
               {
                 "type": "string",
@@ -6447,7 +7494,88 @@
                 "type": "null"
               }
             ],
-            "title": "Date"
+            "title": "Conducted Date"
+          },
+          "conducted_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conducted Time"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "conducted_by_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conducted By User Id"
+          },
+          "surveyor_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Surveyor Ids"
+          },
+          "site_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Notes"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "weather": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weather"
           },
           "notes": {
             "anyOf": [
@@ -6459,17 +7587,6 @@
               }
             ],
             "title": "Notes"
-          },
-          "surveyor_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Surveyor Id"
           }
         },
         "type": "object",
@@ -6491,7 +7608,8 @@
           "id",
           "name"
         ],
-        "title": "SurveyorRead"
+        "title": "SurveyorRead",
+        "description": "Legacy - for backward compatibility."
       },
       "TimeEntryCreate": {
         "properties": {

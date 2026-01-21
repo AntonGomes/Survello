@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useState, FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Loader2 } from "lucide-react";
 
@@ -17,61 +14,93 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/context/auth-context";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { 
   createClientMutation,
   readClientsOptions
 } from "@/client/@tanstack/react-query.gen";
 import { type ClientCreate } from "@/client/types.gen";
-
-const formSchema = z.object({
-  name: z.string().min(2, "Client name must be at least 2 characters"),
-  address: z.string().optional(),
-});
+import { toast } from "sonner";
 
 export function CreateClientDialog() {
   const [open, setOpen] = useState(false);
-  const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      address: "",
-    },
-  });
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [isIndividual, setIsIndividual] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const resetForm = () => {
+    setName("");
+    setAddress("");
+    setIsIndividual(false);
+    setContactName("");
+    setEmail("");
+    setPhone("");
+  };
 
   const { mutate: createClient, isPending } = useMutation({
     ...createClientMutation(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: readClientsOptions().queryKey });
       setOpen(false);
-      form.reset();
+      resetForm();
+      toast.success("Client created");
+    },
+    onError: () => {
+      toast.error("Failed to create client");
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) return;
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    
+    if (name.length < 2) {
+      toast.error("Client name must be at least 2 characters");
+      return;
+    }
 
-    const clientData: ClientCreate = {
-      name: values.name,
-      address: values.address || null,
-      contacts: [],
-    };
-
-    createClient({
-      body: clientData,
-    });
+    if (isIndividual) {
+      // Individual: use client-level email/phone, create contact with client name
+      const clientData: ClientCreate = {
+        name,
+        address: address || null,
+        is_individual: true,
+        email: email || null,
+        phone: phone || null,
+        contacts: [{
+          name: name, // Use client name as contact name
+          email: email || null,
+          phone: phone || null,
+        }],
+      };
+      createClient({ body: clientData });
+    } else {
+      // Business: require a contact
+      if (!contactName || contactName.length < 2) {
+        toast.error("Please provide a contact name");
+        return;
+      }
+      
+      const clientData: ClientCreate = {
+        name,
+        address: address || null,
+        is_individual: false,
+        email: null,
+        phone: null,
+        contacts: [{
+          name: contactName,
+          email: email || null,
+          phone: phone || null,
+        }],
+      };
+      createClient({ body: clientData });
+    }
   }
 
   return (
@@ -89,42 +118,86 @@ export function CreateClientDialog() {
             Add a new client to your organization.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Client Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Acme Corp" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="is-individual" className="text-sm">
+              Individual (no separate contacts)
+            </Label>
+            <Switch
+              id="is-individual"
+              checked={isIndividual}
+              onCheckedChange={setIsIndividual}
             />
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="123 Main St, City, Country" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="name">
+              {isIndividual ? "Name" : "Company Name"}
+            </Label>
+            <Input
+              id="name"
+              placeholder={isIndividual ? "John Smith" : "Acme Corp"}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
             />
-            <DialogFooter>
-              <Button type="submit" disabled={isPending}>
-                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Client
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Address</Label>
+            <Input
+              id="address"
+              placeholder="123 Main St, City, Country"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+
+          {!isIndividual && (
+            <div className="space-y-2">
+              <Label htmlFor="contact-name">Primary Contact Name</Label>
+              <Input
+                id="contact-name"
+                placeholder="Jane Doe"
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+                required={!isIndividual}
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="contact@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="+1 234 567 8900"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Client
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

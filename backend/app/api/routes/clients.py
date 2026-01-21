@@ -185,3 +185,75 @@ def create_client_contact(
     db.commit()
     db.refresh(contact)
     return contact  # pyright: ignore[reportReturnType]
+
+
+@router.patch(
+    "/{client_id}/key-contact/{contact_id}",
+    response_model=ClientRead,
+    operation_id="setKeyContact",
+)
+def set_key_contact(
+    client_id: int,
+    contact_id: int,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> ClientRead:
+    """
+    Set the key contact for a client.
+    """
+    client = db.exec(
+        select(Client)
+        .where(Client.id == client_id)
+        .options(joinedload(Client.contacts))  # pyright: ignore[reportArgumentType]
+    ).first()
+
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    if client.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Verify the contact belongs to this client
+    contact = db.get(ClientContact, contact_id)
+    if not contact or contact.client_id != client_id:
+        raise HTTPException(status_code=404, detail="Contact not found for this client")
+
+    client.key_contact_id = contact_id
+    db.add(client)
+    db.commit()
+    db.refresh(client)
+    return client  # pyright: ignore[reportReturnType]
+
+
+@router.delete(
+    "/{client_id}/contacts/{contact_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    operation_id="deleteClientContact",
+)
+def delete_client_contact(
+    client_id: int,
+    contact_id: int,
+    current_user: CurrentUserDep,
+    db: DBDep,
+) -> None:
+    """
+    Delete a contact from a client.
+    """
+    client = db.get(Client, client_id)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    if client.org_id != current_user.org_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    contact = db.get(ClientContact, contact_id)
+    if not contact or contact.client_id != client_id:
+        raise HTTPException(status_code=404, detail="Contact not found for this client")
+
+    # If this was the key contact, clear it
+    if client.key_contact_id == contact_id:
+        client.key_contact_id = None
+        db.add(client)
+
+    db.delete(contact)
+    db.commit()
+    return
