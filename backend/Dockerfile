@@ -43,8 +43,11 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Place the virtual environment in the PATH
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Make start script executable
+RUN chmod +x start.sh
+
 # Expose the port the app runs on
 EXPOSE 8080
 
-# Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Run migrations then start the application
+CMD ["./start.sh"]
