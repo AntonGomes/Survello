@@ -9,10 +9,12 @@ import { ErrorAlert } from "@/components/error-alert";
 import { JobStatusPanel } from "@/components/job-status-panel";
 import { UploadCard } from "@/components/upload-card";
 import { useDocumentGeneration } from "@/hooks/use-document-generation";
+import { useAuth } from "@/context/auth-context";
 
 export function Main() {
   const [contextFiles, setContextFiles] = useState<File[]>([]);
   const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const { user } = useAuth();
 
   const {
     updates,
@@ -79,7 +81,7 @@ export function Main() {
         canStart={canStart}
         status={status}
         uploadProgress={uploadProgress}
-        onStart={() => start({ templateFile, contextFiles })}
+        onStart={() => start({ templateFile, contextFiles, orgId: user?.org_id ?? 0 })}
         updates={updates}
       />
       )}

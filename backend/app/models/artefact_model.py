@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     from .file_model import File
@@ -21,7 +21,7 @@ class ArtefactBase(SQLModel):
 
 
 class Artefact(ArtefactBase, table=True):
-    __tablename__ = "artefacts"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "artefacts"
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

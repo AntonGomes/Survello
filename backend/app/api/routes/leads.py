@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, cast
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from pydantic import BaseModel
@@ -51,7 +51,7 @@ def create_lead(
     db.add(lead)
     db.commit()
     db.refresh(lead)
-    return lead  # pyright: ignore[reportReturnType]
+    return cast(LeadRead, lead)
 
 
 @router.get("/", response_model=list[LeadRead], operation_id="readLeads")
@@ -69,7 +69,7 @@ def read_leads(
         query = query.where(Lead.status == status)
 
     leads = db.exec(query.offset(offset).limit(limit)).all()
-    return leads  # pyright: ignore[reportReturnType]
+    return cast(list[LeadRead], leads)
 
 
 @router.get("/{lead_id}", response_model=LeadRead, operation_id="readLead")
@@ -86,7 +86,7 @@ def read_lead(
     if lead.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    return lead  # pyright: ignore[reportReturnType]
+    return cast(LeadRead, lead)
 
 
 @router.patch("/{lead_id}", response_model=LeadRead, operation_id="updateLead")
@@ -110,7 +110,7 @@ def update_lead(
     db.add(lead)
     db.commit()
     db.refresh(lead)
-    return lead  # pyright: ignore[reportReturnType]
+    return cast(LeadRead, lead)
 
 
 @router.delete(
@@ -169,7 +169,7 @@ def add_lead_update(
     db.add(lead)
     db.commit()
     db.refresh(lead)
-    return lead  # pyright: ignore[reportReturnType]
+    return cast(LeadRead, lead)
 
 
 @router.post(

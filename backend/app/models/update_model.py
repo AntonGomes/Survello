@@ -19,7 +19,8 @@ class UpdateType(str, Enum):
 
     TEXT = "text"  # Manual text update from user
     FILE_UPLOAD = "file_upload"  # Files were uploaded
-    PROJECT_CREATED = "project_created"  # A project was created
+    INSTRUCTION_CREATED = "instruction_created"  # An instruction was created
+    PROJECT_CREATED = "instruction_created"  # Alias for backwards compatibility
     SURVEY_CREATED = "survey_created"  # A survey was created
     STATUS_CHANGE = "status_change"  # Status was changed
     JOB_CREATED = "job_created"  # Job was created
@@ -91,6 +92,25 @@ def create_file_upload_update(
     )
 
 
+def create_instruction_created_update(
+    instruction_name: str,
+    instruction_id: int,
+    author_id: int,
+    author_name: str | None = None,
+    author_initials: str | None = None,
+) -> UpdateItem:
+    """Create a system update for instruction creation."""
+    return UpdateItem(
+        update_type=UpdateType.INSTRUCTION_CREATED,
+        text=f'created instruction "{instruction_name}"',
+        author_id=author_id,
+        author_name=author_name,
+        author_initials=author_initials,
+        project_id=instruction_id,  # Keep as project_id for backwards compat
+    )
+
+
+# Backwards compatibility alias
 def create_project_created_update(
     project_name: str,
     project_id: int,
@@ -98,14 +118,13 @@ def create_project_created_update(
     author_name: str | None = None,
     author_initials: str | None = None,
 ) -> UpdateItem:
-    """Create a system update for project creation."""
-    return UpdateItem(
-        update_type=UpdateType.PROJECT_CREATED,
-        text=f'created project "{project_name}"',
+    """Create a system update for project/instruction creation. Deprecated: use create_instruction_created_update."""
+    return create_instruction_created_update(
+        instruction_name=project_name,
+        instruction_id=project_id,
         author_id=author_id,
         author_name=author_name,
         author_initials=author_initials,
-        project_id=project_id,
     )
 
 

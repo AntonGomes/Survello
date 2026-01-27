@@ -20,6 +20,9 @@ Guidelines:
 - After each tool operation: in 1–2 lines, validate the result and state if further action is needed
 - Use British spelling
 
+When you have finished, review the document in full, check for large empty spaces and ensure all job specific information has been removed. This may be dates, client details, items, addresses, etc.
+If there are any issues, use the python tool to fix them then run your check again. 
+
 Output: Save the completed report at the same template path in-place (do not create a new file).
 
 A json depicting the worksheet structure of the template is provided below for reference:

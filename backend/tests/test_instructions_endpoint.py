@@ -1,11 +1,11 @@
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-from app.models.project_model import ProjectType, FeeType
+from app.models.instruction_model import InstructionType, FeeType
 from app.models.job_model import Job, JobStatus
 from app.models.client_model import Client
 
 
-def test_projects_workflow(client: TestClient, session: Session, setup_data: dict):
+def test_instructions_workflow(client: TestClient, session: Session, setup_data: dict):
     # Setup dependencies
     # 0. Create Client
     cli = Client(name="Test Client", org_id=setup_data["org_id"])
@@ -23,8 +23,8 @@ def test_projects_workflow(client: TestClient, session: Session, setup_data: dic
     )
     session.add(job)
 
-    # 2. Create a ProjectType (needed for Project)
-    pt = ProjectType(
+    # 2. Create a InstructionType (needed for Project)
+    pt = InstructionType(
         name="Test Type", org_id=setup_data["org_id"], description="Test desc"
     )
     session.add(pt)
@@ -36,35 +36,35 @@ def test_projects_workflow(client: TestClient, session: Session, setup_data: dic
     client.cookies = {"session_token": setup_data["token"]}
 
     project_payload = {
-        "name": "Test Project",
+        "name": "Test Instruction",
         "description": "A description",
         "job_id": job.id,
-        "project_type_id": pt.id,
+        "instruction_type_id": pt.id,
         "fee_type": FeeType.HOURLY,
         "status": "planned",
     }
 
-    response = client.post("/projects/", json=project_payload)
+    response = client.post("/instructions/", json=project_payload)
     assert response.status_code == 201, response.text
     project_data = response.json()
-    assert project_data["name"] == "Test Project"
+    assert project_data["name"] == "Test Instruction"
 
     # 4. List Projects
-    response = client.get("/projects/")
+    response = client.get("/instructions/")
     assert response.status_code == 200
     list_data = response.json()
     assert len(list_data) >= 1
     assert any(p["id"] == project_data["id"] for p in list_data)
 
     # 5. List Project Types
-    response = client.get("/projects/types")
+    response = client.get("/instructions/types")
     assert response.status_code == 200
     types_data = response.json()
     assert len(types_data) >= 1
     assert types_data[0]["name"] == "Test Type"
 
     # 6. Read Project Detail
-    response = client.get(f"/projects/{project_data['id']}")
+    response = client.get(f"/instructions/{project_data['id']}")
     assert response.status_code == 200
     detail = response.json()
     assert detail["id"] == project_data["id"]

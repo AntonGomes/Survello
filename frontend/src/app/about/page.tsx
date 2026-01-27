@@ -1,7 +1,6 @@
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,11 +14,12 @@ import {
   UploadCloud,
   Wand2,
   CheckCircle2,
-  ArrowRight,
   MessageSquareText,
+  Heart,
+  Shield,
+  Zap,
+  Quote,
 } from "lucide-react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 export default function AboutPage() {
   return (
@@ -28,164 +28,190 @@ export default function AboutPage() {
 
       <main className="flex-1 w-full">
         {/* Hero Section */}
-        <section className="w-full py-20 px-6 bg-white border-b border-border">
+        <section className="w-full py-20 px-6 bg-white ">
           <div className="max-w-5xl mx-auto space-y-6 text-center">
-            <Badge variant="outline" className="mx-auto w-fit border-chart-1 text-chart-1 bg-chart-1/5">
-              About SiteNotes
+            <Badge variant="outline" className="mx-auto w-fit border-primary text-primary bg-accent/5">
+              About Survello
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold text-foreground tracking-tight">
-              Surveying, <span className="text-chart-1">Simplified.</span>
+              Surveying, <span className="text-accent border-b-4 border-secondary">simplified.</span>
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-              SiteNotes empowers surveyors to turn site visits into signed schedules in minutes, not hours. 
-              We combine industry expertise with cutting-edge AI to automate the heavy lifting of report writing.
+              Survello empowers surveyors to turn site visits into signed schedules in minutes, not hours. 
+              We combine industry expertise with thoughtful AI to eliminate the tedious parts of desk work, allowing you to focus on what matters.
             </p>
+          </div>
+        </section>
+
+        {/* The Challenge Section */}
+        <section className="py-20 px-6 bg-secondary">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12 space-y-4">
+              <Badge variant="outline" className="border-primary text-primary">
+                The Challenge
+              </Badge>
+              <h2 className="text-3xl font-bold text-foreground">
+                Digital tools often feel built for someone else.
+              </h2>
+            </div>
+
+            <div className="bg-white rounded-xl p-8 border-l-4 border-accent shadow-sm">
+              <blockquote className="space-y-4">
+                <p className="text-lg text-slate-700 italic leading-relaxed">
+                  &ldquo;Despite the UK&apos;s global leadership in tech and AI, smaller SMEs can face persistent barriers to digital adoption: products often feel built for larger enterprises, switching and adoption costs can be high, many report lack of confidence or expertise to implement new tools, and digital support for SMEs can feel fragmented.&rdquo;
+                </p>
+                <footer className="text-sm text-muted-foreground font-medium">
+                  — Phil Smith CBE, SME Digital Adoption Taskforce
+                </footer>
+              </blockquote>
+            </div>
+
+            <div className="mt-8 text-center">
+              <p className="leading-relaxed max-w-3xl mx-auto">
+                We built Survello to be different. Simple to adopt, priced fairly, and designed specifically for the surveying profession.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Philosophy Section */}
+        <section className="py-20 px-6 bg-primary">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12 space-y-4">
+              <Badge variant="outline" className="border-secondary text-secondary">
+                Our Philosophy
+              </Badge>
+              <h2 className="text-3xl font-bold text-white">Built with purpose, not features.</h2>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="bg-white/10 border-white/20 text-white">
+                <CardHeader className="pb-7">
+                  <div className="h-12 w-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4 border-l-4 border-accent">
+                    <Zap className="h-6 w-6 text-secondary" />
+                  </div>
+                  <CardTitle className="text-lg text-white">Functional Utility</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-blue-100 text-sm leading-relaxed">
+                    No bells and whistles. Every feature exists because it solves a real problem that surveyors face daily. We believe in tools that work, not tools that impress.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20 text-white">
+                <CardHeader className="pb-0">
+                  <div className="h-12 w-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4 border-l-4 border-accent">
+                    <Heart className="h-6 w-6 text-secondary" />
+                  </div>
+                  <CardTitle className="text-lg text-white">Built with Surveyors,<br/> for Surveyors</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-blue-100 text-sm leading-relaxed">
+                    Technology should serve people, not frustrate them. We design with compassion, understanding that your time is precious and your work is important.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/10 border-white/20 text-white">
+                <CardHeader className="pb-7">
+                  <div className="h-12 w-12 rounded-lg bg-accent/20 flex items-center justify-center mb-4 border-l-4 border-accent">
+                    <Shield className="h-6 w-6 text-secondary" />
+                  </div>
+                  <CardTitle className="text-lg text-white">Serious & Reliable</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-blue-100 text-sm leading-relaxed">
+                    Your clients depend on you, and you deserve to depend on your tools. We&apos;re building infrastructure that&apos;s as dependable as your professional standards.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Quote Section */}
+        <section className="py-16 px-6 bg-secondary border-y-4 border-accent">
+          <div className="max-w-4xl mx-auto">
+            <blockquote className="text-center">
+              <Quote className="h-8 w-8 text-accent mx-auto mb-4 opacity-60" />
+              <p className="text-xl md:text-2xl text-foreground font-medium italic leading-relaxed">
+                &ldquo;It won&apos;t do my work for me, but it will help me do my work more effectively.&rdquo;
+              </p>
+              <footer className="mt-4 text-muted-foreground text-sm">
+                — SME Professional on AI tools
+              </footer>
+            </blockquote>
           </div>
         </section>
 
         {/* Features Grid */}
-        <section className="py-20 px-6 max-w-6xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl font-bold text-foreground">Built for the Modern Surveyor</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto">
-              Everything you need to streamline your workflow and deliver higher quality reports faster.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-t-4 border-t-chart-1 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-chart-1/10 flex items-center justify-center mb-4">
-                  <FileText className="h-6 w-6 text-chart-1" />
-                </div>
-                <CardTitle className="text-xl">Automated Reporting</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">
-                  Instantly convert raw site notes, photos, and dictations into professional, formatted schedules of condition and dilapidations.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-t-4 border-t-chart-2 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-chart-2/10 flex items-center justify-center mb-4">
-                  <Bot className="h-6 w-6 text-chart-2" />
-                </div>
-                <CardTitle className="text-xl">AI Assistant</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">
-                  Our context-aware AI understands building pathology. Chat with your documents to refine clauses, expand descriptions, or check for consistency.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-t-4 border-t-chart-3 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-chart-3/10 flex items-center justify-center mb-4">
-                  <Layers className="h-6 w-6 text-chart-3" />
-                </div>
-                <CardTitle className="text-xl">Job Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">
-                  Keep track of all your instructions in one place. Monitor status from site visit to final sign-off with our intuitive dashboard.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section className="py-20 px-6 bg-white border-y border-border">
+        <section className="py-20 px-6 bg-white">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <Badge variant="secondary" className="mb-4">Workflow</Badge>
-              <h2 className="text-3xl font-bold text-foreground">How It Works</h2>
+            <div className="text-center mb-16 space-y-4">
+              <Badge variant="outline" className="border-accent text-accent">
+                Capabilities
+              </Badge>
+              <h2 className="text-3xl font-bold text-foreground">Built for the Modern Surveyor</h2>
+              <p className="text-slate-600 max-w-2xl mx-auto">
+                Everything you need to streamline your workflow and deliver higher quality reports faster.
+              </p>
             </div>
 
-            <div className="relative">
-              {/* Connecting Line (Desktop) */}
-              <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 z-0" />
-
-              <div className="grid md:grid-cols-4 gap-8 relative z-10">
-                {[
-                  {
-                    step: "01",
-                    title: "Upload",
-                    desc: "Upload your site notes and photos securely.",
-                    icon: <UploadCloud className="h-6 w-6 text-white" />,
-                    color: "bg-chart-1",
-                  },
-                  {
-                    step: "02",
-                    title: "Generate",
-                    desc: "AI processes data into a structured draft.",
-                    icon: <Wand2 className="h-6 w-6 text-white" />,
-                    color: "bg-chart-2",
-                  },
-                  {
-                    step: "03",
-                    title: "Refine",
-                    desc: "Chat with the doc to tweak details.",
-                    icon: <MessageSquareText className="h-6 w-6 text-white" />,
-                    color: "bg-chart-3",
-                  },
-                  {
-                    step: "04",
-                    title: "Deliver",
-                    desc: "Download the signed, professional PDF.",
-                    icon: <CheckCircle2 className="h-6 w-6 text-white" />,
-                    color: "bg-chart-4",
-                  },
-                ].map((item) => (
-                  <div key={item.step} className="flex flex-col items-center text-center group">
-                    <div className={`w-16 h-16 rounded-2xl ${item.color} flex items-center justify-center shadow-lg mb-6 transform group-hover:scale-110 transition-transform duration-300`}>
-                      {item.icon}
-                    </div>
-                    <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-                      <span className="text-slate-300 font-mono text-sm">{item.step}</span>
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-600 text-sm leading-relaxed">
-                      {item.desc}
-                    </p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <Card className="border-t-4 border-t-accent shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardHeader>
+                  <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+                    <FileText className="h-6 w-6 text-accent" />
                   </div>
-                ))}
-              </div>
+                  <CardTitle className="text-xl">Automated Reporting</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-600">
+                    Instantly convert raw site notes, photos, and dictations into professional, formatted schedules of condition and dilapidations.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-t-4 border-t-accent shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardHeader>
+                  <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+                    <Bot className="h-6 w-6 text-accent" />
+                  </div>
+                  <CardTitle className="text-xl">AI Assistant</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-600">
+                    Our context-aware AI understands building pathology. Chat with your documents to refine clauses, expand descriptions, or check for consistency.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-t-4 border-t-accent shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardHeader>
+                  <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+                    <Layers className="h-6 w-6 text-accent" />
+                  </div>
+                  <CardTitle className="text-xl">Job Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-600">
+                    Keep track of all your instructions in one place. Monitor status from site visit to final sign-off with our intuitive dashboard.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-24 px-6">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-chart-1 to-blue-600 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to modernize your surveying practice?</h2>
-            <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
-              Join forward-thinking surveyors who are saving hours on every job with SiteNotes.
+               {/* Final Quote */}
+        <section className="py-16 px-6 bg-primary border-t-4 border-accent">
+          <div className="max-w-4xl mx-auto text-center">
+            <p className="text-lg md:text-xl text-white italic leading-relaxed">
+              &ldquo;Wider use of digital tools such as customer relationship management systems, resource planning software... can have a significant impact for both SMEs and the broader economy.&rdquo;
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/auth/login?screen_hint=signup"
-                className={cn(
-                  buttonVariants({ size: "lg", variant: "secondary" }),
-                  "text-chart-1 font-semibold"
-                )}
-              >
-                Get Started Free
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-              <Link
-                href="/contact"
-                className={cn(
-                  buttonVariants({ size: "lg", variant: "outline" }),
-                  "bg-transparent border-white text-white hover:bg-white/10"
-                )}
-              >
-                Contact Sales
-              </Link>
-            </div>
+            <p className="text-blue-200 text-sm mt-3 font-medium">
+              — Minister for Services, Small Business and Exports
+            </p>
           </div>
         </section>
       </main>

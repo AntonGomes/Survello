@@ -6,7 +6,7 @@ import { Square, Loader2 } from "lucide-react";
 import { 
   getCurrentTimerOptions, 
   stopTimerMutation,
-  readProjectOptions
+  readInstructionOptions
 } from "@/client/@tanstack/react-query.gen";
 import { Button } from "@/components/ui/button";
 
@@ -21,10 +21,10 @@ export function GlobalTimer() {
     ...stopTimerMutation(),
     onSuccess: (data) => {
         queryClient.invalidateQueries({ queryKey: getCurrentTimerOptions().queryKey });
-        // Also invalidate the project to show updated hours if we are on that page
-        if (data.project_id) {
+        // Also invalidate the instruction to show updated hours if we are on that page
+        if (data.instruction_id) {
              queryClient.invalidateQueries({
-                queryKey: readProjectOptions({ path: { project_id: data.project_id } }).queryKey
+                queryKey: readInstructionOptions({ path: { instruction_id: data.instruction_id } }).queryKey
              });
         }
     },
@@ -42,7 +42,7 @@ export function GlobalTimer() {
         </span>
         <div className="flex flex-col leading-none">
             <span className="text-xs font-semibold uppercase tracking-wider text-red-700">Recording</span>
-            <span className="text-sm font-medium truncate max-w-[150px]">{activeEntry.project_name}</span>
+            <span className="text-sm font-medium truncate max-w-[150px]">{activeEntry.instruction_name}</span>
         </div>
       </div>
       

@@ -400,9 +400,9 @@ export type FileCreate = {
      */
     run_id?: number | null;
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id?: number | null;
+    instruction_id?: number | null;
     /**
      * Survey Id
      */
@@ -500,9 +500,9 @@ export type FileRead = {
      */
     job_id?: number | null;
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id?: number | null;
+    instruction_id?: number | null;
     /**
      * Survey Id
      */
@@ -546,9 +546,9 @@ export type FileUpdate = {
      */
     job_id?: number | null;
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id?: number | null;
+    instruction_id?: number | null;
     /**
      * Survey Id
      */
@@ -563,6 +563,505 @@ export type HttpValidationError = {
      * Detail
      */
     detail?: Array<ValidationError>;
+};
+
+/**
+ * InstructionAddUpdate
+ *
+ * Request body for adding an update to an instruction.
+ */
+export type InstructionAddUpdate = {
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Time Entry Id
+     */
+    time_entry_id?: number | null;
+};
+
+/**
+ * InstructionCreate
+ */
+export type InstructionCreate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    /**
+     * Forecasted Billable Hours
+     */
+    forecasted_billable_hours?: number | null;
+    /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
+     * Contingency Percentage
+     */
+    contingency_percentage?: number | null;
+    /**
+     * Forecasted Settlement Amount
+     */
+    forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
+    /**
+     * Forecasted Fee Amount
+     */
+    forecasted_fee_amount?: number | null;
+    fee_type: FeeType;
+    status?: InstructionStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Instruction Type Id
+     */
+    instruction_type_id?: number | null;
+};
+
+/**
+ * InstructionMinimalRead
+ */
+export type InstructionMinimalRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * InstructionRead
+ */
+export type InstructionRead = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    /**
+     * Forecasted Billable Hours
+     */
+    forecasted_billable_hours?: number | null;
+    /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
+     * Contingency Percentage
+     */
+    contingency_percentage?: number | null;
+    /**
+     * Forecasted Settlement Amount
+     */
+    forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
+    /**
+     * Forecasted Fee Amount
+     */
+    forecasted_fee_amount?: number | null;
+    fee_type: FeeType;
+    status?: InstructionStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Instruction Type Id
+     */
+    instruction_type_id: number;
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * InstructionReadDetail
+ */
+export type InstructionReadDetail = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    /**
+     * Forecasted Billable Hours
+     */
+    forecasted_billable_hours?: number | null;
+    /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
+     * Contingency Percentage
+     */
+    contingency_percentage?: number | null;
+    /**
+     * Forecasted Settlement Amount
+     */
+    forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
+    /**
+     * Forecasted Fee Amount
+     */
+    forecasted_fee_amount?: number | null;
+    fee_type: FeeType;
+    status?: InstructionStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Instruction Type Id
+     */
+    instruction_type_id: number;
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    instruction_type: InstructionTypeRead;
+    job: JobReadMinimal;
+};
+
+/**
+ * InstructionReadWithInstructionType
+ */
+export type InstructionReadWithInstructionType = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    /**
+     * Forecasted Billable Hours
+     */
+    forecasted_billable_hours?: number | null;
+    /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
+     * Contingency Percentage
+     */
+    contingency_percentage?: number | null;
+    /**
+     * Forecasted Settlement Amount
+     */
+    forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
+    /**
+     * Forecasted Fee Amount
+     */
+    forecasted_fee_amount?: number | null;
+    fee_type: FeeType;
+    status?: InstructionStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Instruction Type Id
+     */
+    instruction_type_id: number;
+    /**
+     * Job Id
+     */
+    job_id: number;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    instruction_type: InstructionTypeRead;
+};
+
+/**
+ * InstructionStatus
+ */
+export const InstructionStatus = {
+    PLANNED: 'planned',
+    ACTIVE: 'active',
+    COMPLETED: 'completed',
+    ARCHIVED: 'archived'
+} as const;
+
+/**
+ * InstructionStatus
+ */
+export type InstructionStatus = typeof InstructionStatus[keyof typeof InstructionStatus];
+
+/**
+ * InstructionTypeCreate
+ */
+export type InstructionTypeCreate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    default_fee_type?: FeeType | null;
+    /**
+     * Default Contingency Percentage
+     */
+    default_contingency_percentage?: number | null;
+    /**
+     * Default Template File Id
+     */
+    default_template_file_id?: number | null;
+};
+
+/**
+ * InstructionTypeRead
+ */
+export type InstructionTypeRead = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    default_fee_type?: FeeType | null;
+    /**
+     * Default Contingency Percentage
+     */
+    default_contingency_percentage?: number | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Default Template File Id
+     */
+    default_template_file_id?: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * InstructionTypeUpdate
+ */
+export type InstructionTypeUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    default_fee_type?: FeeType | null;
+    /**
+     * Default Contingency Percentage
+     */
+    default_contingency_percentage?: number | null;
+    /**
+     * Default Template File Id
+     */
+    default_template_file_id?: number | null;
+};
+
+/**
+ * InstructionUpdate
+ */
+export type InstructionUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Rate
+     */
+    rate?: number | null;
+    /**
+     * Forecasted Billable Hours
+     */
+    forecasted_billable_hours?: number | null;
+    /**
+     * Actual Hours
+     */
+    actual_hours?: number | null;
+    /**
+     * Contingency Percentage
+     */
+    contingency_percentage?: number | null;
+    /**
+     * Forecasted Settlement Amount
+     */
+    forecasted_settlement_amount?: number | null;
+    /**
+     * Final Settlement Amount
+     */
+    final_settlement_amount?: number | null;
+    /**
+     * Forecasted Fee Amount
+     */
+    forecasted_fee_amount?: number | null;
+    fee_type?: FeeType | null;
+    status?: InstructionStatus | null;
+    /**
+     * Updates
+     */
+    updates?: Array<{
+        [key: string]: unknown;
+    }> | null;
+    /**
+     * Deadline
+     */
+    deadline?: string | null;
+    /**
+     * Lead User Id
+     */
+    lead_user_id?: number | null;
 };
 
 /**
@@ -716,9 +1215,9 @@ export type JobRead = {
      */
     updated_at: string;
     /**
-     * Projects
+     * Instructions
      */
-    projects?: Array<ProjectReadWithProjectType>;
+    instructions?: Array<InstructionReadWithInstructionType>;
 };
 
 /**
@@ -754,9 +1253,9 @@ export type JobReadDetail = {
      */
     updated_at: string;
     /**
-     * Projects
+     * Instructions
      */
-    projects: Array<ProjectReadWithProjectType>;
+    instructions: Array<InstructionReadWithInstructionType>;
     /**
      * Files
      */
@@ -1044,505 +1543,6 @@ export type OrgUserRead = {
 };
 
 /**
- * ProjectAddUpdate
- *
- * Request body for adding an update to a project.
- */
-export type ProjectAddUpdate = {
-    /**
-     * Text
-     */
-    text: string;
-    /**
-     * Time Entry Id
-     */
-    time_entry_id?: number | null;
-};
-
-/**
- * ProjectCreate
- */
-export type ProjectCreate = {
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type: FeeType;
-    status?: ProjectStatus | null;
-    /**
-     * Updates
-     */
-    updates?: Array<{
-        [key: string]: unknown;
-    }> | null;
-    /**
-     * Deadline
-     */
-    deadline?: string | null;
-    /**
-     * Lead User Id
-     */
-    lead_user_id?: number | null;
-    /**
-     * Job Id
-     */
-    job_id: number;
-    /**
-     * Project Type Id
-     */
-    project_type_id?: number | null;
-};
-
-/**
- * ProjectMinimalRead
- */
-export type ProjectMinimalRead = {
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Name
-     */
-    name: string;
-};
-
-/**
- * ProjectRead
- */
-export type ProjectRead = {
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type: FeeType;
-    status?: ProjectStatus | null;
-    /**
-     * Updates
-     */
-    updates?: Array<{
-        [key: string]: unknown;
-    }> | null;
-    /**
-     * Deadline
-     */
-    deadline?: string | null;
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Project Type Id
-     */
-    project_type_id: number;
-    /**
-     * Job Id
-     */
-    job_id: number;
-    /**
-     * Lead User Id
-     */
-    lead_user_id?: number | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Updated At
-     */
-    updated_at: string;
-};
-
-/**
- * ProjectReadDetail
- */
-export type ProjectReadDetail = {
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type: FeeType;
-    status?: ProjectStatus | null;
-    /**
-     * Updates
-     */
-    updates?: Array<{
-        [key: string]: unknown;
-    }> | null;
-    /**
-     * Deadline
-     */
-    deadline?: string | null;
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Project Type Id
-     */
-    project_type_id: number;
-    /**
-     * Job Id
-     */
-    job_id: number;
-    /**
-     * Lead User Id
-     */
-    lead_user_id?: number | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Updated At
-     */
-    updated_at: string;
-    project_type: ProjectTypeRead;
-    job: JobReadMinimal;
-};
-
-/**
- * ProjectReadWithProjectType
- */
-export type ProjectReadWithProjectType = {
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type: FeeType;
-    status?: ProjectStatus | null;
-    /**
-     * Updates
-     */
-    updates?: Array<{
-        [key: string]: unknown;
-    }> | null;
-    /**
-     * Deadline
-     */
-    deadline?: string | null;
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Project Type Id
-     */
-    project_type_id: number;
-    /**
-     * Job Id
-     */
-    job_id: number;
-    /**
-     * Lead User Id
-     */
-    lead_user_id?: number | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Updated At
-     */
-    updated_at: string;
-    project_type: ProjectTypeRead;
-};
-
-/**
- * ProjectStatus
- */
-export const ProjectStatus = {
-    PLANNED: 'planned',
-    ACTIVE: 'active',
-    COMPLETED: 'completed',
-    ARCHIVED: 'archived'
-} as const;
-
-/**
- * ProjectStatus
- */
-export type ProjectStatus = typeof ProjectStatus[keyof typeof ProjectStatus];
-
-/**
- * ProjectTypeCreate
- */
-export type ProjectTypeCreate = {
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    default_fee_type?: FeeType | null;
-    /**
-     * Default Contingency Percentage
-     */
-    default_contingency_percentage?: number | null;
-    /**
-     * Default Template File Id
-     */
-    default_template_file_id?: number | null;
-};
-
-/**
- * ProjectTypeRead
- */
-export type ProjectTypeRead = {
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    default_fee_type?: FeeType | null;
-    /**
-     * Default Contingency Percentage
-     */
-    default_contingency_percentage?: number | null;
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Default Template File Id
-     */
-    default_template_file_id?: number | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Updated At
-     */
-    updated_at: string;
-};
-
-/**
- * ProjectTypeUpdate
- */
-export type ProjectTypeUpdate = {
-    /**
-     * Name
-     */
-    name?: string | null;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    default_fee_type?: FeeType | null;
-    /**
-     * Default Contingency Percentage
-     */
-    default_contingency_percentage?: number | null;
-    /**
-     * Default Template File Id
-     */
-    default_template_file_id?: number | null;
-};
-
-/**
- * ProjectUpdate
- */
-export type ProjectUpdate = {
-    /**
-     * Name
-     */
-    name?: string | null;
-    /**
-     * Description
-     */
-    description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type?: FeeType | null;
-    status?: ProjectStatus | null;
-    /**
-     * Updates
-     */
-    updates?: Array<{
-        [key: string]: unknown;
-    }> | null;
-    /**
-     * Deadline
-     */
-    deadline?: string | null;
-    /**
-     * Lead User Id
-     */
-    lead_user_id?: number | null;
-};
-
-/**
  * QuoteCreate
  */
 export type QuoteCreate = {
@@ -1590,9 +1590,9 @@ export type QuoteLineCreate = {
      */
     notes?: string | null;
     /**
-     * Project Type Id
+     * Instruction Type Id
      */
-    project_type_id: number;
+    instruction_type_id: number;
 };
 
 /**
@@ -1616,10 +1616,10 @@ export type QuoteLineRead = {
      */
     quote_id: number;
     /**
-     * Project Type Id
+     * Instruction Type Id
      */
-    project_type_id: number;
-    project_type: ProjectTypeRead;
+    instruction_type_id: number;
+    instruction_type: InstructionTypeRead;
 };
 
 /**
@@ -1827,9 +1827,9 @@ export type SurveyCreate = {
      */
     job_id: number;
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id?: number | null;
+    instruction_id?: number | null;
     /**
      * Conducted Date
      */
@@ -1905,15 +1905,15 @@ export type SurveyRead = {
      */
     job_id: number;
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id?: number | null;
+    instruction_id?: number | null;
     /**
      * Conducted By User Id
      */
     conducted_by_user_id?: number | null;
     conducted_by_user?: ConductedByUserRead | null;
-    project?: ProjectMinimalRead | null;
+    instruction?: InstructionMinimalRead | null;
     /**
      * Surveyor Id
      */
@@ -1954,9 +1954,9 @@ export type SurveyUpdate = {
      */
     conducted_time?: string | null;
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id?: number | null;
+    instruction_id?: number | null;
     /**
      * Conducted By User Id
      */
@@ -2004,9 +2004,9 @@ export type SurveyorRead = {
  */
 export type TimeEntryCreate = {
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id: number;
+    instruction_id: number;
     /**
      * Description
      */
@@ -2020,9 +2020,9 @@ export type TimeEntryCreate = {
  */
 export type TimeEntryManualCreate = {
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id: number;
+    instruction_id: number;
     /**
      * Duration Minutes
      */
@@ -2038,9 +2038,9 @@ export type TimeEntryManualCreate = {
  */
 export type TimeEntryOut = {
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id: number;
+    instruction_id: number;
     /**
      * Start Time
      */
@@ -2070,9 +2070,9 @@ export type TimeEntryOut = {
      */
     user_id: number;
     /**
-     * Project Name
+     * Instruction Name
      */
-    project_name: string;
+    instruction_name: string;
     /**
      * User Name
      */
@@ -2084,9 +2084,9 @@ export type TimeEntryOut = {
  */
 export type TimeEntryRead = {
     /**
-     * Project Id
+     * Instruction Id
      */
-    project_id: number;
+    instruction_id: number;
     /**
      * Start Time
      */
@@ -2221,6 +2221,68 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
+};
+
+/**
+ * WaitlistCreate
+ *
+ * Schema for creating a waitlist entry.
+ */
+export type WaitlistCreate = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Company
+     */
+    company?: string | null;
+};
+
+/**
+ * WaitlistRead
+ *
+ * Schema for reading a waitlist entry.
+ */
+export type WaitlistRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Name
+     */
+    name: string | null;
+    /**
+     * Company
+     */
+    company: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+export type HealthCheckHealthGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/health';
+};
+
+export type HealthCheckHealthGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
 };
 
 export type RegisterUserData = {
@@ -2814,51 +2876,51 @@ export type AddJobUpdateResponses = {
 
 export type AddJobUpdateResponse = AddJobUpdateResponses[keyof AddJobUpdateResponses];
 
-export type ReadProjectTypesData = {
+export type ReadInstructionTypesData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/projects/types';
+    url: '/instructions/types';
 };
 
-export type ReadProjectTypesResponses = {
+export type ReadInstructionTypesResponses = {
     /**
-     * Response Readprojecttypes
+     * Response Readinstructiontypes
      *
      * Successful Response
      */
-    200: Array<ProjectTypeRead>;
+    200: Array<InstructionTypeRead>;
 };
 
-export type ReadProjectTypesResponse = ReadProjectTypesResponses[keyof ReadProjectTypesResponses];
+export type ReadInstructionTypesResponse = ReadInstructionTypesResponses[keyof ReadInstructionTypesResponses];
 
-export type CreateProjectTypeData = {
-    body: ProjectTypeCreate;
+export type CreateInstructionTypeData = {
+    body: InstructionTypeCreate;
     path?: never;
     query?: never;
-    url: '/projects/types';
+    url: '/instructions/types';
 };
 
-export type CreateProjectTypeErrors = {
+export type CreateInstructionTypeErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateProjectTypeError = CreateProjectTypeErrors[keyof CreateProjectTypeErrors];
+export type CreateInstructionTypeError = CreateInstructionTypeErrors[keyof CreateInstructionTypeErrors];
 
-export type CreateProjectTypeResponses = {
+export type CreateInstructionTypeResponses = {
     /**
      * Successful Response
      */
-    201: ProjectTypeRead;
+    201: InstructionTypeRead;
 };
 
-export type CreateProjectTypeResponse = CreateProjectTypeResponses[keyof CreateProjectTypeResponses];
+export type CreateInstructionTypeResponse = CreateInstructionTypeResponses[keyof CreateInstructionTypeResponses];
 
-export type UpdateProjectTypeData = {
-    body: ProjectTypeUpdate;
+export type UpdateInstructionTypeData = {
+    body: InstructionTypeUpdate;
     path: {
         /**
          * Type Id
@@ -2866,28 +2928,28 @@ export type UpdateProjectTypeData = {
         type_id: number;
     };
     query?: never;
-    url: '/projects/types/{type_id}';
+    url: '/instructions/types/{type_id}';
 };
 
-export type UpdateProjectTypeErrors = {
+export type UpdateInstructionTypeErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateProjectTypeError = UpdateProjectTypeErrors[keyof UpdateProjectTypeErrors];
+export type UpdateInstructionTypeError = UpdateInstructionTypeErrors[keyof UpdateInstructionTypeErrors];
 
-export type UpdateProjectTypeResponses = {
+export type UpdateInstructionTypeResponses = {
     /**
      * Successful Response
      */
-    200: ProjectTypeRead;
+    200: InstructionTypeRead;
 };
 
-export type UpdateProjectTypeResponse = UpdateProjectTypeResponses[keyof UpdateProjectTypeResponses];
+export type UpdateInstructionTypeResponse = UpdateInstructionTypeResponses[keyof UpdateInstructionTypeResponses];
 
-export type ReadProjectsData = {
+export type ReadInstructionsData = {
     body?: never;
     path?: never;
     query?: {
@@ -2904,239 +2966,239 @@ export type ReadProjectsData = {
          */
         job_id?: number | null;
     };
-    url: '/projects/';
+    url: '/instructions/';
 };
 
-export type ReadProjectsErrors = {
+export type ReadInstructionsErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadProjectsError = ReadProjectsErrors[keyof ReadProjectsErrors];
+export type ReadInstructionsError = ReadInstructionsErrors[keyof ReadInstructionsErrors];
 
-export type ReadProjectsResponses = {
+export type ReadInstructionsResponses = {
     /**
-     * Response Readprojects
+     * Response Readinstructions
      *
      * Successful Response
      */
-    200: Array<ProjectRead>;
+    200: Array<InstructionRead>;
 };
 
-export type ReadProjectsResponse = ReadProjectsResponses[keyof ReadProjectsResponses];
+export type ReadInstructionsResponse = ReadInstructionsResponses[keyof ReadInstructionsResponses];
 
-export type CreateProjectData = {
-    body: ProjectCreate;
+export type CreateInstructionData = {
+    body: InstructionCreate;
     path?: never;
     query?: never;
-    url: '/projects/';
+    url: '/instructions/';
 };
 
-export type CreateProjectErrors = {
+export type CreateInstructionErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateProjectError = CreateProjectErrors[keyof CreateProjectErrors];
+export type CreateInstructionError = CreateInstructionErrors[keyof CreateInstructionErrors];
 
-export type CreateProjectResponses = {
+export type CreateInstructionResponses = {
     /**
      * Successful Response
      */
-    201: ProjectRead;
+    201: InstructionRead;
 };
 
-export type CreateProjectResponse = CreateProjectResponses[keyof CreateProjectResponses];
+export type CreateInstructionResponse = CreateInstructionResponses[keyof CreateInstructionResponses];
 
-export type DeleteProjectData = {
+export type DeleteInstructionData = {
     body?: never;
     path: {
         /**
-         * Project Id
+         * Instruction Id
          */
-        project_id: number;
+        instruction_id: number;
     };
     query?: never;
-    url: '/projects/{project_id}';
+    url: '/instructions/{instruction_id}';
 };
 
-export type DeleteProjectErrors = {
+export type DeleteInstructionErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteProjectError = DeleteProjectErrors[keyof DeleteProjectErrors];
+export type DeleteInstructionError = DeleteInstructionErrors[keyof DeleteInstructionErrors];
 
-export type DeleteProjectResponses = {
+export type DeleteInstructionResponses = {
     /**
      * Successful Response
      */
     204: void;
 };
 
-export type DeleteProjectResponse = DeleteProjectResponses[keyof DeleteProjectResponses];
+export type DeleteInstructionResponse = DeleteInstructionResponses[keyof DeleteInstructionResponses];
 
-export type ReadProjectData = {
+export type ReadInstructionData = {
     body?: never;
     path: {
         /**
-         * Project Id
+         * Instruction Id
          */
-        project_id: number;
+        instruction_id: number;
     };
     query?: never;
-    url: '/projects/{project_id}';
+    url: '/instructions/{instruction_id}';
 };
 
-export type ReadProjectErrors = {
+export type ReadInstructionErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadProjectError = ReadProjectErrors[keyof ReadProjectErrors];
+export type ReadInstructionError = ReadInstructionErrors[keyof ReadInstructionErrors];
 
-export type ReadProjectResponses = {
+export type ReadInstructionResponses = {
     /**
      * Successful Response
      */
-    200: ProjectReadDetail;
+    200: InstructionReadDetail;
 };
 
-export type ReadProjectResponse = ReadProjectResponses[keyof ReadProjectResponses];
+export type ReadInstructionResponse = ReadInstructionResponses[keyof ReadInstructionResponses];
 
-export type UpdateProjectData = {
-    body: ProjectUpdate;
+export type UpdateInstructionData = {
+    body: InstructionUpdate;
     path: {
         /**
-         * Project Id
+         * Instruction Id
          */
-        project_id: number;
+        instruction_id: number;
     };
     query?: never;
-    url: '/projects/{project_id}';
+    url: '/instructions/{instruction_id}';
 };
 
-export type UpdateProjectErrors = {
+export type UpdateInstructionErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateProjectError = UpdateProjectErrors[keyof UpdateProjectErrors];
+export type UpdateInstructionError = UpdateInstructionErrors[keyof UpdateInstructionErrors];
 
-export type UpdateProjectResponses = {
+export type UpdateInstructionResponses = {
     /**
      * Successful Response
      */
-    200: ProjectRead;
+    200: InstructionRead;
 };
 
-export type UpdateProjectResponse = UpdateProjectResponses[keyof UpdateProjectResponses];
+export type UpdateInstructionResponse = UpdateInstructionResponses[keyof UpdateInstructionResponses];
 
-export type AddProjectUpdateData = {
-    body: ProjectAddUpdate;
+export type AddInstructionUpdateData = {
+    body: InstructionAddUpdate;
     path: {
         /**
-         * Project Id
+         * Instruction Id
          */
-        project_id: number;
+        instruction_id: number;
     };
     query?: never;
-    url: '/projects/{project_id}/updates';
+    url: '/instructions/{instruction_id}/updates';
 };
 
-export type AddProjectUpdateErrors = {
+export type AddInstructionUpdateErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type AddProjectUpdateError = AddProjectUpdateErrors[keyof AddProjectUpdateErrors];
+export type AddInstructionUpdateError = AddInstructionUpdateErrors[keyof AddInstructionUpdateErrors];
 
-export type AddProjectUpdateResponses = {
+export type AddInstructionUpdateResponses = {
     /**
      * Successful Response
      */
-    200: ProjectRead;
+    200: InstructionRead;
 };
 
-export type AddProjectUpdateResponse = AddProjectUpdateResponses[keyof AddProjectUpdateResponses];
+export type AddInstructionUpdateResponse = AddInstructionUpdateResponses[keyof AddInstructionUpdateResponses];
 
-export type DeleteProjectUpdateData = {
+export type DeleteInstructionUpdateData = {
     body?: never;
     path: {
         /**
-         * Project Id
+         * Instruction Id
          */
-        project_id: number;
+        instruction_id: number;
         /**
          * Update Id
          */
         update_id: string;
     };
     query?: never;
-    url: '/projects/{project_id}/updates/{update_id}';
+    url: '/instructions/{instruction_id}/updates/{update_id}';
 };
 
-export type DeleteProjectUpdateErrors = {
+export type DeleteInstructionUpdateErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteProjectUpdateError = DeleteProjectUpdateErrors[keyof DeleteProjectUpdateErrors];
+export type DeleteInstructionUpdateError = DeleteInstructionUpdateErrors[keyof DeleteInstructionUpdateErrors];
 
-export type DeleteProjectUpdateResponses = {
+export type DeleteInstructionUpdateResponses = {
     /**
      * Successful Response
      */
-    200: ProjectRead;
+    200: InstructionRead;
 };
 
-export type DeleteProjectUpdateResponse = DeleteProjectUpdateResponses[keyof DeleteProjectUpdateResponses];
+export type DeleteInstructionUpdateResponse = DeleteInstructionUpdateResponses[keyof DeleteInstructionUpdateResponses];
 
-export type ReadProjectFilesData = {
+export type ReadInstructionFilesData = {
     body?: never;
     path: {
         /**
-         * Project Id
+         * Instruction Id
          */
-        project_id: number;
+        instruction_id: number;
     };
     query?: never;
-    url: '/projects/{project_id}/files';
+    url: '/instructions/{instruction_id}/files';
 };
 
-export type ReadProjectFilesErrors = {
+export type ReadInstructionFilesErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadProjectFilesError = ReadProjectFilesErrors[keyof ReadProjectFilesErrors];
+export type ReadInstructionFilesError = ReadInstructionFilesErrors[keyof ReadInstructionFilesErrors];
 
-export type ReadProjectFilesResponses = {
+export type ReadInstructionFilesResponses = {
     /**
-     * Response Readprojectfiles
+     * Response Readinstructionfiles
      *
      * Successful Response
      */
     200: Array<FileRead>;
 };
 
-export type ReadProjectFilesResponse = ReadProjectFilesResponses[keyof ReadProjectFilesResponses];
+export type ReadInstructionFilesResponse = ReadInstructionFilesResponses[keyof ReadInstructionFilesResponses];
 
 export type ReadUserMeData = {
     body?: never;
@@ -3526,37 +3588,37 @@ export type GetCurrentTimerResponses = {
 
 export type GetCurrentTimerResponse = GetCurrentTimerResponses[keyof GetCurrentTimerResponses];
 
-export type GetProjectTimeEntriesData = {
+export type GetInstructionTimeEntriesData = {
     body?: never;
     path: {
         /**
-         * Project Id
+         * Instruction Id
          */
-        project_id: number;
+        instruction_id: number;
     };
     query?: never;
-    url: '/time/project/{project_id}';
+    url: '/time/instruction/{instruction_id}';
 };
 
-export type GetProjectTimeEntriesErrors = {
+export type GetInstructionTimeEntriesErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetProjectTimeEntriesError = GetProjectTimeEntriesErrors[keyof GetProjectTimeEntriesErrors];
+export type GetInstructionTimeEntriesError = GetInstructionTimeEntriesErrors[keyof GetInstructionTimeEntriesErrors];
 
-export type GetProjectTimeEntriesResponses = {
+export type GetInstructionTimeEntriesResponses = {
     /**
-     * Response Getprojecttimeentries
+     * Response Getinstructiontimeentries
      *
      * Successful Response
      */
     200: Array<TimeEntryRead>;
 };
 
-export type GetProjectTimeEntriesResponse = GetProjectTimeEntriesResponses[keyof GetProjectTimeEntriesResponses];
+export type GetInstructionTimeEntriesResponse = GetInstructionTimeEntriesResponses[keyof GetInstructionTimeEntriesResponses];
 
 export type ReadLeadsData = {
     body?: never;
@@ -4031,9 +4093,9 @@ export type ReadSurveysData = {
          */
         job_id?: number | null;
         /**
-         * Project Id
+         * Instruction Id
          */
-        project_id?: number | null;
+        instruction_id?: number | null;
         /**
          * Offset
          */
@@ -4442,3 +4504,28 @@ export type UpdateOrgUserResponses = {
 };
 
 export type UpdateOrgUserResponse = UpdateOrgUserResponses[keyof UpdateOrgUserResponses];
+
+export type JoinWaitlistData = {
+    body: WaitlistCreate;
+    path?: never;
+    query?: never;
+    url: '/waitlist';
+};
+
+export type JoinWaitlistErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type JoinWaitlistError = JoinWaitlistErrors[keyof JoinWaitlistErrors];
+
+export type JoinWaitlistResponses = {
+    /**
+     * Successful Response
+     */
+    200: WaitlistRead;
+};
+
+export type JoinWaitlistResponse = JoinWaitlistResponses[keyof JoinWaitlistResponses];

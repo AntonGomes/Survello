@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 
 import magic
-from contextgem import DocxConverter  # pyright: ignore[reportMissingTypeStubs]
+from contextgem import DocxConverter  # ty: ignore[import-untyped]
 from openpyxl import load_workbook
 
 

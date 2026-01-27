@@ -1,3 +1,4 @@
+from typing import cast
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
@@ -56,7 +57,7 @@ def create_client(
 
     db.commit()
     db.refresh(client)
-    return client  # pyright: ignore[reportReturnType]
+    return cast(ClientRead, client)
 
 
 @router.get("/", response_model=list[ClientRead], operation_id="readClients")
@@ -73,7 +74,7 @@ def read_clients(
         db.exec(
             select(Client)
             .where(Client.org_id == current_user.org_id)
-            .options(joinedload(Client.contacts))  # pyright: ignore[reportArgumentType]
+            .options(joinedload(Client.contacts))  # ty: ignore[arg-type]
             .offset(offset)
             .limit(limit)
         )
@@ -94,7 +95,7 @@ def read_client(
             select(Client)
             .where(Client.id == client_id)
             .options(
-                joinedload(Client.contacts),  # pyright: ignore[reportArgumentType]
+                joinedload(Client.contacts),  # ty: ignore[arg-type]
                 joinedload(Client.jobs),
             )
         )
@@ -106,7 +107,7 @@ def read_client(
         raise HTTPException(status_code=404, detail="Client not found")
     if client.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
-    return client  # pyright: ignore[reportReturnType]
+    return cast(ClientReadDetail, client)
 
 
 @router.patch("/{client_id}", response_model=ClientRead, operation_id="updateClient")
@@ -119,7 +120,7 @@ def update_client(
     client = db.exec(
         select(Client)
         .where(Client.id == client_id)
-        .options(joinedload(Client.contacts))  # pyright: ignore[reportArgumentType]
+        .options(joinedload(Client.contacts))  # ty: ignore[arg-type]
     ).first()
 
     if not client:
@@ -133,7 +134,7 @@ def update_client(
     db.add(client)
     db.commit()
     db.refresh(client)
-    return client  # pyright: ignore[reportReturnType]
+    return cast(ClientRead, client)
 
 
 @router.delete(
@@ -184,7 +185,7 @@ def create_client_contact(
     db.add(contact)
     db.commit()
     db.refresh(contact)
-    return contact  # pyright: ignore[reportReturnType]
+    return cast(ClientContactRead, contact)
 
 
 @router.patch(
@@ -204,7 +205,7 @@ def set_key_contact(
     client = db.exec(
         select(Client)
         .where(Client.id == client_id)
-        .options(joinedload(Client.contacts))  # pyright: ignore[reportArgumentType]
+        .options(joinedload(Client.contacts))  # ty: ignore[arg-type]
     ).first()
 
     if not client:
@@ -221,7 +222,7 @@ def set_key_contact(
     db.add(client)
     db.commit()
     db.refresh(client)
-    return client  # pyright: ignore[reportReturnType]
+    return cast(ClientRead, client)
 
 
 @router.delete(

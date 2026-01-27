@@ -22,21 +22,21 @@ import {
   stopTimerMutation,
   logTimeManuallyMutation,
   getCurrentTimerOptions,
-  readProjectOptions,
+  readInstructionOptions,
 } from "@/client/@tanstack/react-query.gen"
 import { toast } from "sonner"
 
 interface TimeTrackingModalProps {
-  projectId: number
-  projectName: string
+  instructionId: number
+  instructionName: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onTimeLogged?: (description: string, durationMinutes: number, timeEntryId?: number) => void
 }
 
 export function TimeTrackingModal({
-  projectId,
-  projectName,
+  instructionId,
+  instructionName,
   open,
   onOpenChange,
   onTimeLogged,
@@ -86,7 +86,7 @@ export function TimeTrackingModal({
         queryKey: getCurrentTimerOptions().queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: readProjectOptions({ path: { project_id: projectId } }).queryKey,
+        queryKey: readInstructionOptions({ path: { instruction_id: instructionId } }).queryKey,
       })
 
       toast.success(`Logged ${data.duration_minutes} minutes`)
@@ -107,7 +107,7 @@ export function TimeTrackingModal({
     ...logTimeManuallyMutation(),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: readProjectOptions({ path: { project_id: projectId } }).queryKey,
+        queryKey: readInstructionOptions({ path: { instruction_id: instructionId } }).queryKey,
       })
 
       const totalMinutes = parseInt(manualHours || "0") * 60 + parseInt(manualMinutes || "0")
@@ -144,16 +144,16 @@ export function TimeTrackingModal({
     }
   }, [isRecording])
 
-  // Check if we already have an active timer for this project
+  // Check if we already have an active timer for this instruction
   useEffect(() => {
-    if (activeTimer && activeTimer.project_id === projectId && activeTimer.start_time) {
+    if (activeTimer && activeTimer.instruction_id === instructionId && activeTimer.start_time) {
       setIsRecording(true)
       // Calculate elapsed from start_time
       const startTime = new Date(activeTimer.start_time).getTime()
       const now = Date.now()
       setElapsedSeconds(Math.floor((now - startTime) / 1000))
     }
-  }, [activeTimer, projectId])
+  }, [activeTimer, instructionId])
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600)
@@ -165,7 +165,7 @@ export function TimeTrackingModal({
   const handleStartRecording = () => {
     startTimer({
       body: {
-        project_id: projectId,
+        instruction_id: instructionId,
         description: description || undefined,
       },
     })
@@ -189,15 +189,15 @@ export function TimeTrackingModal({
 
     logManually({
       body: {
-        project_id: projectId,
+        instruction_id: instructionId,
         duration_minutes: totalMinutes,
         description: manualDescription || undefined,
       },
     })
   }
 
-  // Check if timer is running for a different project
-  const timerOnDifferentProject = activeTimer && activeTimer.project_id !== projectId
+  // Check if timer is running for a different instruction
+  const timerOnDifferentInstruction = activeTimer && activeTimer.instruction_id !== instructionId
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -208,14 +208,14 @@ export function TimeTrackingModal({
             Log Time
           </DialogTitle>
           <DialogDescription>
-            Track time for <span className="font-medium">{projectName}</span>
+            Track time for <span className="font-medium">{instructionName}</span>
           </DialogDescription>
         </DialogHeader>
 
-        {timerOnDifferentProject ? (
+        {timerOnDifferentInstruction ? (
           <div className="py-4 text-center">
             <p className="text-sm text-muted-foreground">
-              You have an active timer running for another project. Please stop
+              You have an active timer running for another instruction. Please stop
               it first.
             </p>
           </div>

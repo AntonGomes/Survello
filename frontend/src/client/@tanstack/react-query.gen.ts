@@ -3,8 +3,61 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { acceptInvitation, addJobUpdate, addLeadUpdate, addProjectUpdate, addQuoteLine, addQuoteUpdate, convertLead, convertQuote, createClient, createClientContact, createFile, createFiles, createInvitation, createJob, createLead, createProject, createProjectType, createQuote, createRun, createSurvey, deleteClient, deleteClientContact, deleteInvitation, deleteJob, deleteLead, deleteProject, deleteProjectUpdate, deleteQuote, deleteSurvey, generateFileDownloadUrl, generateFileUploadUrls, getCurrentTimer, getProjectTimeEntries, loginUser, logoutUser, logTimeManually, type Options, readClient, readClients, readFile, readFiles, readInvitations, readJob, readJobs, readLead, readLeads, readOrg, readProject, readProjectFiles, readProjects, readProjectTypes, readQuote, readQuotes, readRun, readRunArtefacts, readRuns, readSurvey, readSurveyFiles, readSurveys, readUserMe, registerUser, removeOrgUser, resendInvitation, setKeyContact, startTimer, stopTimer, updateClient, updateFile, updateJob, updateLead, updateOrgUser, updateProject, updateProjectType, updateQuote, updateSurvey, updateUserMe, verifyInvitation } from '../sdk.gen';
-import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, AddJobUpdateData, AddJobUpdateError, AddJobUpdateResponse, AddLeadUpdateData, AddLeadUpdateError, AddLeadUpdateResponse, AddProjectUpdateData, AddProjectUpdateError, AddProjectUpdateResponse, AddQuoteLineData, AddQuoteLineError, AddQuoteLineResponse, AddQuoteUpdateData, AddQuoteUpdateError, AddQuoteUpdateResponse, ConvertLeadData, ConvertLeadError, ConvertLeadResponse2, ConvertQuoteData, ConvertQuoteError, ConvertQuoteResponse2, CreateClientContactData, CreateClientContactError, CreateClientContactResponse, CreateClientData, CreateClientError, CreateClientResponse, CreateFileData, CreateFileError, CreateFileResponse, CreateFilesData, CreateFilesError, CreateFilesResponse, CreateInvitationData, CreateInvitationError, CreateInvitationResponse, CreateJobData, CreateJobError, CreateJobResponse, CreateLeadData, CreateLeadError, CreateLeadResponse, CreateProjectData, CreateProjectError, CreateProjectResponse, CreateProjectTypeData, CreateProjectTypeError, CreateProjectTypeResponse, CreateQuoteData, CreateQuoteError, CreateQuoteResponse, CreateRunData, CreateRunError, CreateRunResponse, CreateSurveyData, CreateSurveyError, CreateSurveyResponse, DeleteClientContactData, DeleteClientContactError, DeleteClientContactResponse, DeleteClientData, DeleteClientError, DeleteClientResponse, DeleteInvitationData, DeleteInvitationError, DeleteJobData, DeleteJobError, DeleteJobResponse, DeleteLeadData, DeleteLeadError, DeleteLeadResponse, DeleteProjectData, DeleteProjectError, DeleteProjectResponse, DeleteProjectUpdateData, DeleteProjectUpdateError, DeleteProjectUpdateResponse, DeleteQuoteData, DeleteQuoteError, DeleteQuoteResponse, DeleteSurveyData, DeleteSurveyError, DeleteSurveyResponse, GenerateFileDownloadUrlData, GenerateFileDownloadUrlError, GenerateFileDownloadUrlResponse, GenerateFileUploadUrlsData, GenerateFileUploadUrlsError, GenerateFileUploadUrlsResponse, GetCurrentTimerData, GetCurrentTimerResponse, GetProjectTimeEntriesData, GetProjectTimeEntriesError, GetProjectTimeEntriesResponse, LoginUserData, LoginUserError, LogoutUserData, LogoutUserError, LogTimeManuallyData, LogTimeManuallyError, LogTimeManuallyResponse, ReadClientData, ReadClientError, ReadClientResponse, ReadClientsData, ReadClientsError, ReadClientsResponse, ReadFileData, ReadFileError, ReadFileResponse, ReadFilesData, ReadFilesError, ReadFilesResponse, ReadInvitationsData, ReadInvitationsResponse, ReadJobData, ReadJobError, ReadJobResponse, ReadJobsData, ReadJobsError, ReadJobsResponse, ReadLeadData, ReadLeadError, ReadLeadResponse, ReadLeadsData, ReadLeadsError, ReadLeadsResponse, ReadOrgData, ReadOrgResponse, ReadProjectData, ReadProjectError, ReadProjectFilesData, ReadProjectFilesError, ReadProjectFilesResponse, ReadProjectResponse, ReadProjectsData, ReadProjectsError, ReadProjectsResponse, ReadProjectTypesData, ReadProjectTypesResponse, ReadQuoteData, ReadQuoteError, ReadQuoteResponse, ReadQuotesData, ReadQuotesError, ReadQuotesResponse, ReadRunArtefactsData, ReadRunArtefactsError, ReadRunArtefactsResponse, ReadRunData, ReadRunError, ReadRunResponse, ReadRunsData, ReadRunsError, ReadRunsResponse, ReadSurveyData, ReadSurveyError, ReadSurveyFilesData, ReadSurveyFilesError, ReadSurveyFilesResponse, ReadSurveyResponse, ReadSurveysData, ReadSurveysError, ReadSurveysResponse, ReadUserMeData, ReadUserMeResponse, RegisterUserData, RegisterUserError, RegisterUserResponse, RemoveOrgUserData, RemoveOrgUserError, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, SetKeyContactData, SetKeyContactError, SetKeyContactResponse, StartTimerData, StartTimerError, StartTimerResponse, StopTimerData, StopTimerError, StopTimerResponse, UpdateClientData, UpdateClientError, UpdateClientResponse, UpdateFileData, UpdateFileError, UpdateFileResponse, UpdateJobData, UpdateJobError, UpdateJobResponse, UpdateLeadData, UpdateLeadError, UpdateLeadResponse, UpdateOrgUserData, UpdateOrgUserError, UpdateOrgUserResponse, UpdateProjectData, UpdateProjectError, UpdateProjectResponse, UpdateProjectTypeData, UpdateProjectTypeError, UpdateProjectTypeResponse, UpdateQuoteData, UpdateQuoteError, UpdateQuoteResponse, UpdateSurveyData, UpdateSurveyError, UpdateSurveyResponse, UpdateUserMeData, UpdateUserMeError, UpdateUserMeResponse, VerifyInvitationData, VerifyInvitationError, VerifyInvitationResponse } from '../types.gen';
+import { acceptInvitation, addInstructionUpdate, addJobUpdate, addLeadUpdate, addQuoteLine, addQuoteUpdate, convertLead, convertQuote, createClient, createClientContact, createFile, createFiles, createInstruction, createInstructionType, createInvitation, createJob, createLead, createQuote, createRun, createSurvey, deleteClient, deleteClientContact, deleteInstruction, deleteInstructionUpdate, deleteInvitation, deleteJob, deleteLead, deleteQuote, deleteSurvey, generateFileDownloadUrl, generateFileUploadUrls, getCurrentTimer, getInstructionTimeEntries, healthCheckHealthGet, joinWaitlist, loginUser, logoutUser, logTimeManually, type Options, readClient, readClients, readFile, readFiles, readInstruction, readInstructionFiles, readInstructions, readInstructionTypes, readInvitations, readJob, readJobs, readLead, readLeads, readOrg, readQuote, readQuotes, readRun, readRunArtefacts, readRuns, readSurvey, readSurveyFiles, readSurveys, readUserMe, registerUser, removeOrgUser, resendInvitation, setKeyContact, startTimer, stopTimer, updateClient, updateFile, updateInstruction, updateInstructionType, updateJob, updateLead, updateOrgUser, updateQuote, updateSurvey, updateUserMe, verifyInvitation } from '../sdk.gen';
+import type { AcceptInvitationData, AcceptInvitationError, AcceptInvitationResponse, AddInstructionUpdateData, AddInstructionUpdateError, AddInstructionUpdateResponse, AddJobUpdateData, AddJobUpdateError, AddJobUpdateResponse, AddLeadUpdateData, AddLeadUpdateError, AddLeadUpdateResponse, AddQuoteLineData, AddQuoteLineError, AddQuoteLineResponse, AddQuoteUpdateData, AddQuoteUpdateError, AddQuoteUpdateResponse, ConvertLeadData, ConvertLeadError, ConvertLeadResponse2, ConvertQuoteData, ConvertQuoteError, ConvertQuoteResponse2, CreateClientContactData, CreateClientContactError, CreateClientContactResponse, CreateClientData, CreateClientError, CreateClientResponse, CreateFileData, CreateFileError, CreateFileResponse, CreateFilesData, CreateFilesError, CreateFilesResponse, CreateInstructionData, CreateInstructionError, CreateInstructionResponse, CreateInstructionTypeData, CreateInstructionTypeError, CreateInstructionTypeResponse, CreateInvitationData, CreateInvitationError, CreateInvitationResponse, CreateJobData, CreateJobError, CreateJobResponse, CreateLeadData, CreateLeadError, CreateLeadResponse, CreateQuoteData, CreateQuoteError, CreateQuoteResponse, CreateRunData, CreateRunError, CreateRunResponse, CreateSurveyData, CreateSurveyError, CreateSurveyResponse, DeleteClientContactData, DeleteClientContactError, DeleteClientContactResponse, DeleteClientData, DeleteClientError, DeleteClientResponse, DeleteInstructionData, DeleteInstructionError, DeleteInstructionResponse, DeleteInstructionUpdateData, DeleteInstructionUpdateError, DeleteInstructionUpdateResponse, DeleteInvitationData, DeleteInvitationError, DeleteJobData, DeleteJobError, DeleteJobResponse, DeleteLeadData, DeleteLeadError, DeleteLeadResponse, DeleteQuoteData, DeleteQuoteError, DeleteQuoteResponse, DeleteSurveyData, DeleteSurveyError, DeleteSurveyResponse, GenerateFileDownloadUrlData, GenerateFileDownloadUrlError, GenerateFileDownloadUrlResponse, GenerateFileUploadUrlsData, GenerateFileUploadUrlsError, GenerateFileUploadUrlsResponse, GetCurrentTimerData, GetCurrentTimerResponse, GetInstructionTimeEntriesData, GetInstructionTimeEntriesError, GetInstructionTimeEntriesResponse, HealthCheckHealthGetData, JoinWaitlistData, JoinWaitlistError, JoinWaitlistResponse, LoginUserData, LoginUserError, LogoutUserData, LogoutUserError, LogTimeManuallyData, LogTimeManuallyError, LogTimeManuallyResponse, ReadClientData, ReadClientError, ReadClientResponse, ReadClientsData, ReadClientsError, ReadClientsResponse, ReadFileData, ReadFileError, ReadFileResponse, ReadFilesData, ReadFilesError, ReadFilesResponse, ReadInstructionData, ReadInstructionError, ReadInstructionFilesData, ReadInstructionFilesError, ReadInstructionFilesResponse, ReadInstructionResponse, ReadInstructionsData, ReadInstructionsError, ReadInstructionsResponse, ReadInstructionTypesData, ReadInstructionTypesResponse, ReadInvitationsData, ReadInvitationsResponse, ReadJobData, ReadJobError, ReadJobResponse, ReadJobsData, ReadJobsError, ReadJobsResponse, ReadLeadData, ReadLeadError, ReadLeadResponse, ReadLeadsData, ReadLeadsError, ReadLeadsResponse, ReadOrgData, ReadOrgResponse, ReadQuoteData, ReadQuoteError, ReadQuoteResponse, ReadQuotesData, ReadQuotesError, ReadQuotesResponse, ReadRunArtefactsData, ReadRunArtefactsError, ReadRunArtefactsResponse, ReadRunData, ReadRunError, ReadRunResponse, ReadRunsData, ReadRunsError, ReadRunsResponse, ReadSurveyData, ReadSurveyError, ReadSurveyFilesData, ReadSurveyFilesError, ReadSurveyFilesResponse, ReadSurveyResponse, ReadSurveysData, ReadSurveysError, ReadSurveysResponse, ReadUserMeData, ReadUserMeResponse, RegisterUserData, RegisterUserError, RegisterUserResponse, RemoveOrgUserData, RemoveOrgUserError, ResendInvitationData, ResendInvitationError, ResendInvitationResponse, SetKeyContactData, SetKeyContactError, SetKeyContactResponse, StartTimerData, StartTimerError, StartTimerResponse, StopTimerData, StopTimerError, StopTimerResponse, UpdateClientData, UpdateClientError, UpdateClientResponse, UpdateFileData, UpdateFileError, UpdateFileResponse, UpdateInstructionData, UpdateInstructionError, UpdateInstructionResponse, UpdateInstructionTypeData, UpdateInstructionTypeError, UpdateInstructionTypeResponse, UpdateJobData, UpdateJobError, UpdateJobResponse, UpdateLeadData, UpdateLeadError, UpdateLeadResponse, UpdateOrgUserData, UpdateOrgUserError, UpdateOrgUserResponse, UpdateQuoteData, UpdateQuoteError, UpdateQuoteResponse, UpdateSurveyData, UpdateSurveyError, UpdateSurveyResponse, UpdateUserMeData, UpdateUserMeError, UpdateUserMeResponse, VerifyInvitationData, VerifyInvitationError, VerifyInvitationResponse } from '../types.gen';
+
+export type QueryKey<TOptions extends Options> = [
+    Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
+        _id: string;
+        _infinite?: boolean;
+        tags?: ReadonlyArray<string>;
+    }
+];
+
+const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions, infinite?: boolean, tags?: ReadonlyArray<string>): [
+    QueryKey<TOptions>[0]
+] => {
+    const params: QueryKey<TOptions>[0] = { _id: id, baseUrl: options?.baseUrl || (options?.client ?? client).getConfig().baseUrl } as QueryKey<TOptions>[0];
+    if (infinite) {
+        params._infinite = infinite;
+    }
+    if (tags) {
+        params.tags = tags;
+    }
+    if (options?.body) {
+        params.body = options.body;
+    }
+    if (options?.headers) {
+        params.headers = options.headers;
+    }
+    if (options?.path) {
+        params.path = options.path;
+    }
+    if (options?.query) {
+        params.query = options.query;
+    }
+    return [params];
+};
+
+export const healthCheckHealthGetQueryKey = (options?: Options<HealthCheckHealthGetData>) => createQueryKey('healthCheckHealthGet', options);
+
+/**
+ * Health Check
+ *
+ * Health check endpoint that also tests database connectivity.
+ */
+export const healthCheckHealthGetOptions = (options?: Options<HealthCheckHealthGetData>) => queryOptions<unknown, DefaultError, unknown, ReturnType<typeof healthCheckHealthGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await healthCheckHealthGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: healthCheckHealthGetQueryKey(options)
+});
 
 /**
  * Register
@@ -57,39 +110,6 @@ export const logoutUserMutation = (options?: Partial<Options<LogoutUserData>>): 
         }
     };
     return mutationOptions;
-};
-
-export type QueryKey<TOptions extends Options> = [
-    Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
-        _id: string;
-        _infinite?: boolean;
-        tags?: ReadonlyArray<string>;
-    }
-];
-
-const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions, infinite?: boolean, tags?: ReadonlyArray<string>): [
-    QueryKey<TOptions>[0]
-] => {
-    const params: QueryKey<TOptions>[0] = { _id: id, baseUrl: options?.baseUrl || (options?.client ?? client).getConfig().baseUrl } as QueryKey<TOptions>[0];
-    if (infinite) {
-        params._infinite = infinite;
-    }
-    if (tags) {
-        params.tags = tags;
-    }
-    if (options?.body) {
-        params.body = options.body;
-    }
-    if (options?.headers) {
-        params.headers = options.headers;
-    }
-    if (options?.path) {
-        params.path = options.path;
-    }
-    if (options?.query) {
-        params.query = options.query;
-    }
-    return [params];
 };
 
 export const readRunsQueryKey = (options?: Options<ReadRunsData>) => createQueryKey('readRuns', options);
@@ -534,14 +554,14 @@ export const addJobUpdateMutation = (options?: Partial<Options<AddJobUpdateData>
     return mutationOptions;
 };
 
-export const readProjectTypesQueryKey = (options?: Options<ReadProjectTypesData>) => createQueryKey('readProjectTypes', options);
+export const readInstructionTypesQueryKey = (options?: Options<ReadInstructionTypesData>) => createQueryKey('readInstructionTypes', options);
 
 /**
- * Read Project Types
+ * Read Instruction Types
  */
-export const readProjectTypesOptions = (options?: Options<ReadProjectTypesData>) => queryOptions<ReadProjectTypesResponse, DefaultError, ReadProjectTypesResponse, ReturnType<typeof readProjectTypesQueryKey>>({
+export const readInstructionTypesOptions = (options?: Options<ReadInstructionTypesData>) => queryOptions<ReadInstructionTypesResponse, DefaultError, ReadInstructionTypesResponse, ReturnType<typeof readInstructionTypesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readProjectTypes({
+        const { data } = await readInstructionTypes({
             ...options,
             ...queryKey[0],
             signal,
@@ -549,16 +569,16 @@ export const readProjectTypesOptions = (options?: Options<ReadProjectTypesData>)
         });
         return data;
     },
-    queryKey: readProjectTypesQueryKey(options)
+    queryKey: readInstructionTypesQueryKey(options)
 });
 
 /**
- * Create Project Type
+ * Create Instruction Type
  */
-export const createProjectTypeMutation = (options?: Partial<Options<CreateProjectTypeData>>): UseMutationOptions<CreateProjectTypeResponse, CreateProjectTypeError, Options<CreateProjectTypeData>> => {
-    const mutationOptions: UseMutationOptions<CreateProjectTypeResponse, CreateProjectTypeError, Options<CreateProjectTypeData>> = {
+export const createInstructionTypeMutation = (options?: Partial<Options<CreateInstructionTypeData>>): UseMutationOptions<CreateInstructionTypeResponse, CreateInstructionTypeError, Options<CreateInstructionTypeData>> => {
+    const mutationOptions: UseMutationOptions<CreateInstructionTypeResponse, CreateInstructionTypeError, Options<CreateInstructionTypeData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await createProjectType({
+            const { data } = await createInstructionType({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -570,12 +590,12 @@ export const createProjectTypeMutation = (options?: Partial<Options<CreateProjec
 };
 
 /**
- * Update Project Type
+ * Update Instruction Type
  */
-export const updateProjectTypeMutation = (options?: Partial<Options<UpdateProjectTypeData>>): UseMutationOptions<UpdateProjectTypeResponse, UpdateProjectTypeError, Options<UpdateProjectTypeData>> => {
-    const mutationOptions: UseMutationOptions<UpdateProjectTypeResponse, UpdateProjectTypeError, Options<UpdateProjectTypeData>> = {
+export const updateInstructionTypeMutation = (options?: Partial<Options<UpdateInstructionTypeData>>): UseMutationOptions<UpdateInstructionTypeResponse, UpdateInstructionTypeError, Options<UpdateInstructionTypeData>> => {
+    const mutationOptions: UseMutationOptions<UpdateInstructionTypeResponse, UpdateInstructionTypeError, Options<UpdateInstructionTypeData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateProjectType({
+            const { data } = await updateInstructionType({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -586,14 +606,14 @@ export const updateProjectTypeMutation = (options?: Partial<Options<UpdateProjec
     return mutationOptions;
 };
 
-export const readProjectsQueryKey = (options?: Options<ReadProjectsData>) => createQueryKey('readProjects', options);
+export const readInstructionsQueryKey = (options?: Options<ReadInstructionsData>) => createQueryKey('readInstructions', options);
 
 /**
- * Read Projects
+ * Read Instructions
  */
-export const readProjectsOptions = (options?: Options<ReadProjectsData>) => queryOptions<ReadProjectsResponse, ReadProjectsError, ReadProjectsResponse, ReturnType<typeof readProjectsQueryKey>>({
+export const readInstructionsOptions = (options?: Options<ReadInstructionsData>) => queryOptions<ReadInstructionsResponse, ReadInstructionsError, ReadInstructionsResponse, ReturnType<typeof readInstructionsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readProjects({
+        const { data } = await readInstructions({
             ...options,
             ...queryKey[0],
             signal,
@@ -601,26 +621,26 @@ export const readProjectsOptions = (options?: Options<ReadProjectsData>) => quer
         });
         return data;
     },
-    queryKey: readProjectsQueryKey(options)
+    queryKey: readInstructionsQueryKey(options)
 });
 
-export const readProjectsInfiniteQueryKey = (options?: Options<ReadProjectsData>): QueryKey<Options<ReadProjectsData>> => createQueryKey('readProjects', options, true);
+export const readInstructionsInfiniteQueryKey = (options?: Options<ReadInstructionsData>): QueryKey<Options<ReadInstructionsData>> => createQueryKey('readInstructions', options, true);
 
 /**
- * Read Projects
+ * Read Instructions
  */
-export const readProjectsInfiniteOptions = (options?: Options<ReadProjectsData>) => infiniteQueryOptions<ReadProjectsResponse, ReadProjectsError, InfiniteData<ReadProjectsResponse>, QueryKey<Options<ReadProjectsData>>, number | Pick<QueryKey<Options<ReadProjectsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const readInstructionsInfiniteOptions = (options?: Options<ReadInstructionsData>) => infiniteQueryOptions<ReadInstructionsResponse, ReadInstructionsError, InfiniteData<ReadInstructionsResponse>, QueryKey<Options<ReadInstructionsData>>, number | Pick<QueryKey<Options<ReadInstructionsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<ReadProjectsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<ReadInstructionsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 offset: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await readProjects({
+        const { data } = await readInstructions({
             ...options,
             ...params,
             signal,
@@ -628,16 +648,16 @@ export const readProjectsInfiniteOptions = (options?: Options<ReadProjectsData>)
         });
         return data;
     },
-    queryKey: readProjectsInfiniteQueryKey(options)
+    queryKey: readInstructionsInfiniteQueryKey(options)
 });
 
 /**
- * Create Project
+ * Create Instruction
  */
-export const createProjectMutation = (options?: Partial<Options<CreateProjectData>>): UseMutationOptions<CreateProjectResponse, CreateProjectError, Options<CreateProjectData>> => {
-    const mutationOptions: UseMutationOptions<CreateProjectResponse, CreateProjectError, Options<CreateProjectData>> = {
+export const createInstructionMutation = (options?: Partial<Options<CreateInstructionData>>): UseMutationOptions<CreateInstructionResponse, CreateInstructionError, Options<CreateInstructionData>> => {
+    const mutationOptions: UseMutationOptions<CreateInstructionResponse, CreateInstructionError, Options<CreateInstructionData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await createProject({
+            const { data } = await createInstruction({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -649,12 +669,12 @@ export const createProjectMutation = (options?: Partial<Options<CreateProjectDat
 };
 
 /**
- * Delete Project
+ * Delete Instruction
  */
-export const deleteProjectMutation = (options?: Partial<Options<DeleteProjectData>>): UseMutationOptions<DeleteProjectResponse, DeleteProjectError, Options<DeleteProjectData>> => {
-    const mutationOptions: UseMutationOptions<DeleteProjectResponse, DeleteProjectError, Options<DeleteProjectData>> = {
+export const deleteInstructionMutation = (options?: Partial<Options<DeleteInstructionData>>): UseMutationOptions<DeleteInstructionResponse, DeleteInstructionError, Options<DeleteInstructionData>> => {
+    const mutationOptions: UseMutationOptions<DeleteInstructionResponse, DeleteInstructionError, Options<DeleteInstructionData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await deleteProject({
+            const { data } = await deleteInstruction({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -665,14 +685,14 @@ export const deleteProjectMutation = (options?: Partial<Options<DeleteProjectDat
     return mutationOptions;
 };
 
-export const readProjectQueryKey = (options: Options<ReadProjectData>) => createQueryKey('readProject', options);
+export const readInstructionQueryKey = (options: Options<ReadInstructionData>) => createQueryKey('readInstruction', options);
 
 /**
- * Read Project
+ * Read Instruction
  */
-export const readProjectOptions = (options: Options<ReadProjectData>) => queryOptions<ReadProjectResponse, ReadProjectError, ReadProjectResponse, ReturnType<typeof readProjectQueryKey>>({
+export const readInstructionOptions = (options: Options<ReadInstructionData>) => queryOptions<ReadInstructionResponse, ReadInstructionError, ReadInstructionResponse, ReturnType<typeof readInstructionQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readProject({
+        const { data } = await readInstruction({
             ...options,
             ...queryKey[0],
             signal,
@@ -680,16 +700,16 @@ export const readProjectOptions = (options: Options<ReadProjectData>) => queryOp
         });
         return data;
     },
-    queryKey: readProjectQueryKey(options)
+    queryKey: readInstructionQueryKey(options)
 });
 
 /**
- * Update Project
+ * Update Instruction
  */
-export const updateProjectMutation = (options?: Partial<Options<UpdateProjectData>>): UseMutationOptions<UpdateProjectResponse, UpdateProjectError, Options<UpdateProjectData>> => {
-    const mutationOptions: UseMutationOptions<UpdateProjectResponse, UpdateProjectError, Options<UpdateProjectData>> = {
+export const updateInstructionMutation = (options?: Partial<Options<UpdateInstructionData>>): UseMutationOptions<UpdateInstructionResponse, UpdateInstructionError, Options<UpdateInstructionData>> => {
+    const mutationOptions: UseMutationOptions<UpdateInstructionResponse, UpdateInstructionError, Options<UpdateInstructionData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateProject({
+            const { data } = await updateInstruction({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -701,14 +721,14 @@ export const updateProjectMutation = (options?: Partial<Options<UpdateProjectDat
 };
 
 /**
- * Add Project Update
+ * Add Instruction Update
  *
- * Add a new update to the project's update feed.
+ * Add a new update to the instruction's update feed.
  */
-export const addProjectUpdateMutation = (options?: Partial<Options<AddProjectUpdateData>>): UseMutationOptions<AddProjectUpdateResponse, AddProjectUpdateError, Options<AddProjectUpdateData>> => {
-    const mutationOptions: UseMutationOptions<AddProjectUpdateResponse, AddProjectUpdateError, Options<AddProjectUpdateData>> = {
+export const addInstructionUpdateMutation = (options?: Partial<Options<AddInstructionUpdateData>>): UseMutationOptions<AddInstructionUpdateResponse, AddInstructionUpdateError, Options<AddInstructionUpdateData>> => {
+    const mutationOptions: UseMutationOptions<AddInstructionUpdateResponse, AddInstructionUpdateError, Options<AddInstructionUpdateData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await addProjectUpdate({
+            const { data } = await addInstructionUpdate({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -720,14 +740,14 @@ export const addProjectUpdateMutation = (options?: Partial<Options<AddProjectUpd
 };
 
 /**
- * Delete Project Update
+ * Delete Instruction Update
  *
- * Remove an update from the project's update feed by its UUID.
+ * Remove an update from the instruction's update feed by its UUID.
  */
-export const deleteProjectUpdateMutation = (options?: Partial<Options<DeleteProjectUpdateData>>): UseMutationOptions<DeleteProjectUpdateResponse, DeleteProjectUpdateError, Options<DeleteProjectUpdateData>> => {
-    const mutationOptions: UseMutationOptions<DeleteProjectUpdateResponse, DeleteProjectUpdateError, Options<DeleteProjectUpdateData>> = {
+export const deleteInstructionUpdateMutation = (options?: Partial<Options<DeleteInstructionUpdateData>>): UseMutationOptions<DeleteInstructionUpdateResponse, DeleteInstructionUpdateError, Options<DeleteInstructionUpdateData>> => {
+    const mutationOptions: UseMutationOptions<DeleteInstructionUpdateResponse, DeleteInstructionUpdateError, Options<DeleteInstructionUpdateData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await deleteProjectUpdate({
+            const { data } = await deleteInstructionUpdate({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -738,16 +758,16 @@ export const deleteProjectUpdateMutation = (options?: Partial<Options<DeleteProj
     return mutationOptions;
 };
 
-export const readProjectFilesQueryKey = (options: Options<ReadProjectFilesData>) => createQueryKey('readProjectFiles', options);
+export const readInstructionFilesQueryKey = (options: Options<ReadInstructionFilesData>) => createQueryKey('readInstructionFiles', options);
 
 /**
- * Read Project Files
+ * Read Instruction Files
  *
- * Get all files attached to a project.
+ * Get all files attached to an instruction.
  */
-export const readProjectFilesOptions = (options: Options<ReadProjectFilesData>) => queryOptions<ReadProjectFilesResponse, ReadProjectFilesError, ReadProjectFilesResponse, ReturnType<typeof readProjectFilesQueryKey>>({
+export const readInstructionFilesOptions = (options: Options<ReadInstructionFilesData>) => queryOptions<ReadInstructionFilesResponse, ReadInstructionFilesError, ReadInstructionFilesResponse, ReturnType<typeof readInstructionFilesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readProjectFiles({
+        const { data } = await readInstructionFiles({
             ...options,
             ...queryKey[0],
             signal,
@@ -755,7 +775,7 @@ export const readProjectFilesOptions = (options: Options<ReadProjectFilesData>) 
         });
         return data;
     },
-    queryKey: readProjectFilesQueryKey(options)
+    queryKey: readInstructionFilesQueryKey(options)
 });
 
 export const readUserMeQueryKey = (options?: Options<ReadUserMeData>) => createQueryKey('readUserMe', options);
@@ -977,7 +997,7 @@ export const deleteClientContactMutation = (options?: Partial<Options<DeleteClie
 /**
  * Start Timer
  *
- * Start a new timer for a project. Stops any existing active timer.
+ * Start a new timer for an instruction. Stops any existing active timer.
  */
 export const startTimerMutation = (options?: Partial<Options<StartTimerData>>): UseMutationOptions<StartTimerResponse, StartTimerError, Options<StartTimerData>> => {
     const mutationOptions: UseMutationOptions<StartTimerResponse, StartTimerError, Options<StartTimerData>> = {
@@ -996,7 +1016,7 @@ export const startTimerMutation = (options?: Partial<Options<StartTimerData>>): 
 /**
  * Stop Timer
  *
- * Stop the currently active timer and update project actual hours.
+ * Stop the currently active timer and update instruction actual hours.
  */
 export const stopTimerMutation = (options?: Partial<Options<StopTimerData>>): UseMutationOptions<StopTimerResponse, StopTimerError, Options<StopTimerData>> => {
     const mutationOptions: UseMutationOptions<StopTimerResponse, StopTimerError, Options<StopTimerData>> = {
@@ -1051,16 +1071,16 @@ export const getCurrentTimerOptions = (options?: Options<GetCurrentTimerData>) =
     queryKey: getCurrentTimerQueryKey(options)
 });
 
-export const getProjectTimeEntriesQueryKey = (options: Options<GetProjectTimeEntriesData>) => createQueryKey('getProjectTimeEntries', options);
+export const getInstructionTimeEntriesQueryKey = (options: Options<GetInstructionTimeEntriesData>) => createQueryKey('getInstructionTimeEntries', options);
 
 /**
- * Get Project Time Entries
+ * Get Instruction Time Entries
  *
- * Get all time entries for a specific project.
+ * Get all time entries for a specific instruction.
  */
-export const getProjectTimeEntriesOptions = (options: Options<GetProjectTimeEntriesData>) => queryOptions<GetProjectTimeEntriesResponse, GetProjectTimeEntriesError, GetProjectTimeEntriesResponse, ReturnType<typeof getProjectTimeEntriesQueryKey>>({
+export const getInstructionTimeEntriesOptions = (options: Options<GetInstructionTimeEntriesData>) => queryOptions<GetInstructionTimeEntriesResponse, GetInstructionTimeEntriesError, GetInstructionTimeEntriesResponse, ReturnType<typeof getInstructionTimeEntriesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getProjectTimeEntries({
+        const { data } = await getInstructionTimeEntries({
             ...options,
             ...queryKey[0],
             signal,
@@ -1068,7 +1088,7 @@ export const getProjectTimeEntriesOptions = (options: Options<GetProjectTimeEntr
         });
         return data;
     },
-    queryKey: getProjectTimeEntriesQueryKey(options)
+    queryKey: getInstructionTimeEntriesQueryKey(options)
 });
 
 export const readLeadsQueryKey = (options?: Options<ReadLeadsData>) => createQueryKey('readLeads', options);
@@ -1426,7 +1446,7 @@ export const readSurveysQueryKey = (options?: Options<ReadSurveysData>) => creat
 /**
  * Read Surveys
  *
- * Retrieve surveys, optionally filtered by job or project.
+ * Retrieve surveys, optionally filtered by job or instruction.
  */
 export const readSurveysOptions = (options?: Options<ReadSurveysData>) => queryOptions<ReadSurveysResponse, ReadSurveysError, ReadSurveysResponse, ReturnType<typeof readSurveysQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -1446,7 +1466,7 @@ export const readSurveysInfiniteQueryKey = (options?: Options<ReadSurveysData>):
 /**
  * Read Surveys
  *
- * Retrieve surveys, optionally filtered by job or project.
+ * Retrieve surveys, optionally filtered by job or instruction.
  */
 export const readSurveysInfiniteOptions = (options?: Options<ReadSurveysData>) => infiniteQueryOptions<ReadSurveysResponse, ReadSurveysError, InfiniteData<ReadSurveysResponse>, QueryKey<Options<ReadSurveysData>>, number | Pick<QueryKey<Options<ReadSurveysData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
@@ -1732,6 +1752,26 @@ export const updateOrgUserMutation = (options?: Partial<Options<UpdateOrgUserDat
     const mutationOptions: UseMutationOptions<UpdateOrgUserResponse, UpdateOrgUserError, Options<UpdateOrgUserData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await updateOrgUser({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Join Waitlist
+ *
+ * Join the waitlist for early access.
+ * Sends confirmation email to user and notification to admin.
+ */
+export const joinWaitlistMutation = (options?: Partial<Options<JoinWaitlistData>>): UseMutationOptions<JoinWaitlistResponse, JoinWaitlistError, Options<JoinWaitlistData>> => {
+    const mutationOptions: UseMutationOptions<JoinWaitlistResponse, JoinWaitlistError, Options<JoinWaitlistData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await joinWaitlist({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

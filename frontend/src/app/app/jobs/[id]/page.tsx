@@ -9,7 +9,6 @@ import {
   FileText, 
   Briefcase, 
   Files,
-  DollarSign,
   Clock,
   Camera,
   Calendar,
@@ -18,22 +17,20 @@ import {
   Image as ImageIcon,
   ChevronRight,
   Plus,
-  Settings2,
-  ChevronDown,
   Sparkles,
   Timer,
 } from "lucide-react"
 import Link from "next/link"
-import { format, differenceInDays } from "date-fns"
+import { format } from "date-fns"
 import { Label, Pie, PieChart } from "recharts"
 
-import { readJobOptions, readSurveysOptions, addJobUpdateMutation, updateProjectMutation, getCurrentTimerOptions } from "@/client/@tanstack/react-query.gen"
-import { FeeType, ProjectStatus, UserRole } from "@/client"
+import { readJobOptions, readSurveysOptions, addJobUpdateMutation, getCurrentTimerOptions } from "@/client/@tanstack/react-query.gen"
+import { UserRole } from "@/client"
 import { FeatureHeader } from "@/components/feature-header"
-import { CreateProjectDialog } from "@/components/create-project-dialog"
+import { CreateInstructionDialog } from "@/components/create-instruction-dialog"
 import { CreateSurveyDialog } from "@/components/create-survey-dialog"
 import { UpdateFeed } from "@/components/update-feed"
-import { EditProjectDialog } from "@/components/edit-project-dialog"
+import { InstructionCard } from "@/components/instruction-card"
 import { JobTimeTrackingModal } from "@/components/job-time-tracking-modal"
 import { Spinner } from "@/components/ui/spinner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -43,12 +40,6 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
@@ -60,10 +51,10 @@ import { useAuth } from "@/context/auth-context"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
-// Chart config for project status donut chart
+// Chart config for instruction status donut chart
 const statusChartConfig = {
   count: {
-    label: "Projects",
+    label: "Instructions",
   },
   planned: {
     label: "Planned",
@@ -83,31 +74,7 @@ const statusChartConfig = {
   },
 } satisfies ChartConfig
 
-// Weather condition labels for display
-const weatherLabels: Record<string, string> = {
-  sunny: "☀️ Sunny",
-  partly_cloudy: "⛅ Partly Cloudy",
-  cloudy: "☁️ Cloudy",
-  overcast: "🌥️ Overcast",
-  light_rain: "🌧️ Light Rain",
-  rain: "🌧️ Rain",
-  heavy_rain: "🌧️ Heavy Rain",
-  showers: "🌦️ Showers",
-  drizzle: "🌧️ Drizzle",
-  thunderstorm: "⛈️ Thunderstorm",
-  snow: "❄️ Snow",
-  sleet: "🌨️ Sleet",
-  hail: "🌨️ Hail",
-  fog: "🌫️ Fog",
-  mist: "🌫️ Mist",
-  windy: "💨 Windy",
-  clear: "🌙 Clear",
-  frost: "🥶 Frost",
-  hot: "🔥 Hot",
-  cold: "❄️ Cold",
-}
-
-// Donut chart component for project status
+// Donut chart component for instruction status
 function StatusPieChart({ 
   data
 }: { 
@@ -123,7 +90,7 @@ function StatusPieChart({
   if (total === 0) {
     return (
       <div className="flex items-center justify-center h-[100px] w-[100px] rounded-full bg-muted mx-auto">
-        <span className="text-xs text-muted-foreground">No projects</span>
+        <span className="text-xs text-muted-foreground">No instructions</span>
       </div>
     )
   }
@@ -188,13 +155,13 @@ export default function JobDetailPage() {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState("overview")
   const [expandedSurveys, setExpandedSurveys] = useState<Set<number>>(new Set())
-  const [projectStatusFilter, setProjectStatusFilter] = useState<string>("all")
+  const [instructionStatusFilter, setInstructionStatusFilter] = useState<string>("all")
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false)
-  const [selectedProjectIdForTime, setSelectedProjectIdForTime] = useState<number | undefined>(undefined)
+  const [selectedInstructionIdForTime, setSelectedInstructionIdForTime] = useState<number | undefined>(undefined)
   
-  // Helper to open time modal with optional project pre-selected
-  const openTimeModal = (projectId?: number) => {
-    setSelectedProjectIdForTime(projectId)
+  // Helper to open time modal with optional instruction pre-selected
+  const openTimeModal = (instructionId?: number) => {
+    setSelectedInstructionIdForTime(instructionId)
     setIsTimeModalOpen(true)
   }
   
@@ -208,7 +175,7 @@ export default function JobDetailPage() {
     refetchInterval: 1000 * 60, // Poll every minute
   })
 
-  const hasActiveTimerForJob = activeTimer && job?.projects?.some(p => p.id === activeTimer.project_id)
+  const hasActiveTimerForJob = activeTimer && job?.instructions?.some(p => p.id === activeTimer.instruction_id)
 
   const { data: surveys, isLoading: isLoadingSurveys } = useQuery({
     ...readSurveysOptions({ query: { job_id: jobId } }),
@@ -228,28 +195,16 @@ export default function JobDetailPage() {
     },
   })
 
-  const { mutate: updateProject } = useMutation({
-    ...updateProjectMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: readJobOptions({ path: { job_id: jobId } }).queryKey,
-      })
-    },
-    onError: () => {
-      toast.error("Failed to update project")
-    },
-  })
-
-  // Compute project status breakdown for pie chart
-  const projectStatusData = useMemo(() => {
-    if (!job?.projects) return []
+  // Compute instruction status breakdown for pie chart
+  const instructionStatusData = useMemo(() => {
+    if (!job?.instructions) return []
     const counts: Record<string, number> = {
       planned: 0,
       active: 0,
       completed: 0,
       archived: 0,
     }
-    job.projects.forEach(p => {
+    job.instructions.forEach(p => {
       const status = p.status || 'planned'
       counts[status] = (counts[status] || 0) + 1
     })
@@ -258,7 +213,7 @@ export default function JobDetailPage() {
       count,
       fill: `var(--color-${status})`,
     }))
-  }, [job?.projects])
+  }, [job?.instructions])
 
   // Compute total images from surveys
   const totalSurveyImages = useMemo(() => {
@@ -274,32 +229,15 @@ export default function JobDetailPage() {
     )[0]
   }, [surveys])
 
-  // Compute most common weather across surveys
-  const mostCommonWeather = useMemo(() => {
-    if (!surveys || surveys.length === 0) return null
-    const weatherCounts: Record<string, number> = {}
-    surveys.forEach(s => {
-      if (s.weather) {
-        weatherCounts[s.weather] = (weatherCounts[s.weather] || 0) + 1
-      }
-    })
-    const entries = Object.entries(weatherCounts)
-    if (entries.length === 0) return null
-    const sorted = entries.sort((a, b) => b[1] - a[1])
-    const top = sorted[0]
-    if (!top) return null
-    return { weather: top[0], count: top[1] }
-  }, [surveys])
-
-  // Find next deadline (project with nearest deadline in future)
-  const nextDeadlineProject = useMemo(() => {
-    if (!job?.projects) return null
+  // Find next deadline (instruction with nearest deadline in future)
+  const nextDeadlineInstruction = useMemo(() => {
+    if (!job?.instructions) return null
     const now = new Date()
-    const projectsWithDeadlines = job.projects
+    const instructionsWithDeadlines = job.instructions
       .filter(p => p.deadline && new Date(p.deadline) > now)
       .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
-    return projectsWithDeadlines[0] || null
-  }, [job?.projects])
+    return instructionsWithDeadlines[0] || null
+  }, [job?.instructions])
 
   const handleAddUpdate = (text: string) => {
     if (!user) return
@@ -325,25 +263,16 @@ export default function JobDetailPage() {
     })
   }
 
-  // Filter projects by status
-  const filteredProjects = useMemo(() => {
-    if (!job?.projects) return []
-    if (projectStatusFilter === "all") return job.projects
-    return job.projects.filter(p => (p.status || "planned") === projectStatusFilter)
-  }, [job?.projects, projectStatusFilter])
-
-  // Handle status change for a project
-  const handleProjectStatusChange = (projectId: number, newStatus: ProjectStatus) => {
-    updateProject({
-      path: { project_id: projectId },
-      body: { status: newStatus },
-    })
-    toast.success(`Status updated to ${newStatus}`)
-  }
+  // Filter instructions by status
+  const filteredInstructions = useMemo(() => {
+    if (!job?.instructions) return []
+    if (instructionStatusFilter === "all") return job.instructions
+    return job.instructions.filter(p => (p.status || "planned") === instructionStatusFilter)
+  }, [job?.instructions, instructionStatusFilter])
 
   // Handle time logged from modal - adds to job updates
   const handleTimeLogged = (
-    projectName: string, 
+    instructionName: string, 
     description: string, 
     durationMinutes: number, 
     collaboratorNames?: string[]
@@ -352,8 +281,8 @@ export default function JobDetailPage() {
     const mins = durationMinutes % 60
     const timeText = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
     let updateText = description 
-      ? `**Time logged on ${projectName}: ${timeText}** — ${description}`
-      : `**Time logged on ${projectName}: ${timeText}**`
+      ? `**Time logged on ${instructionName}: ${timeText}** — ${description}`
+      : `**Time logged on ${instructionName}: ${timeText}**`
     
     if (collaboratorNames && collaboratorNames.length > 0) {
       updateText += ` (with ${collaboratorNames.join(", ")})`
@@ -421,9 +350,9 @@ export default function JobDetailPage() {
               <Building2 className="h-4 w-4" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="projects" className="gap-2">
+            <TabsTrigger value="instructions" className="gap-2">
               <Briefcase className="h-4 w-4" />
-              Projects
+              Instructions
             </TabsTrigger>
             <TabsTrigger value="surveys" className="gap-2">
               <Camera className="h-4 w-4" />
@@ -492,16 +421,16 @@ export default function JobDetailPage() {
                 </CardContent>
               </Card>
 
-              {/* Projects Status Card with Pie Chart & Next Deadline */}
+              {/* Instructions Status Card with Pie Chart & Next Deadline */}
               <Card className="lg:col-span-1">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-medium">Projects</CardTitle>
+                  <CardTitle className="text-base font-medium">Instructions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <StatusPieChart data={projectStatusData} />
+                    <StatusPieChart data={instructionStatusData} />
                     <div className="space-y-1 flex-1">
-                      {projectStatusData.filter(d => d.count > 0).map(d => {
+                      {instructionStatusData.filter(d => d.count > 0).map(d => {
                         const config = statusChartConfig[d.status as keyof typeof statusChartConfig]
                         const color = config && 'color' in config ? config.color : undefined
                         return (
@@ -515,8 +444,8 @@ export default function JobDetailPage() {
                           </div>
                         )
                       })}
-                      {projectStatusData.every(d => d.count === 0) && (
-                        <p className="text-sm text-muted-foreground italic">No projects yet</p>
+                      {instructionStatusData.every(d => d.count === 0) && (
+                        <p className="text-sm text-muted-foreground italic">No instructions yet</p>
                       )}
                     </div>
                   </div>
@@ -527,13 +456,13 @@ export default function JobDetailPage() {
                       <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
                       <div className="min-w-0 flex-1">
                         <p className="text-xs text-muted-foreground mb-0.5">Next Deadline</p>
-                        {nextDeadlineProject ? (
+                        {nextDeadlineInstruction ? (
                           <div>
                             <p className="text-sm font-medium">
-                              {format(new Date(nextDeadlineProject.deadline!), "d MMM yyyy")}
+                              {format(new Date(nextDeadlineInstruction.deadline!), "d MMM yyyy")}
                             </p>
                             <p className="text-xs text-muted-foreground truncate">
-                              {nextDeadlineProject.name}
+                              {nextDeadlineInstruction.name}
                             </p>
                           </div>
                         ) : (
@@ -623,8 +552,8 @@ export default function JobDetailPage() {
                     )}
                   </Button>
 
-                  {/* Create Project Button */}
-                  <CreateProjectDialog 
+                  {/* Create Instruction Button */}
+                  <CreateInstructionDialog 
                     jobId={job.id} 
                     trigger={
                       <Button
@@ -633,7 +562,7 @@ export default function JobDetailPage() {
                         className="h-auto py-4 flex-col gap-2 w-full"
                       >
                         <Briefcase className="h-5 w-5" />
-                        <span className="text-sm font-medium">New Project</span>
+                        <span className="text-sm font-medium">New Instruction</span>
                       </Button>
                     }
                   />
@@ -669,13 +598,13 @@ export default function JobDetailPage() {
             </div>
           </TabsContent>
 
-          {/* Projects Tab */}
-          <TabsContent value="projects" className="space-y-4">
-            {/* Projects List Header with Status Filter */}
+          {/* Instructions Tab */}
+          <TabsContent value="instructions" className="space-y-4">
+            {/* Instructions List Header with Status Filter */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <h3 className="text-lg font-semibold">All Projects</h3>
-                <Select value={projectStatusFilter} onValueChange={setProjectStatusFilter}>
+                <h3 className="text-lg font-semibold">All Instructions</h3>
+                <Select value={instructionStatusFilter} onValueChange={setInstructionStatusFilter}>
                   <SelectTrigger className="w-[140px] h-8 text-xs">
                     <SelectValue />
                   </SelectTrigger>
@@ -688,175 +617,36 @@ export default function JobDetailPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <CreateProjectDialog jobId={job.id} />
+              <CreateInstructionDialog jobId={job.id} />
             </div>
 
-            {/* Scrollable Projects List - max height on desktop, natural scroll on mobile */}
-            {filteredProjects.length > 0 ? (
+            {/* Scrollable Instructions List - max height on desktop, natural scroll on mobile */}
+            {filteredInstructions.length > 0 ? (
               <div className="space-y-4 lg:max-h-[calc(100vh-280px)] lg:overflow-y-auto lg:pr-2">
-                {filteredProjects.map((project) => {
-                  const isHourlyOrMixed = project.fee_type === FeeType.HOURLY || project.fee_type === FeeType.MIXED
-                  const daysUntilDeadline = project.deadline 
-                    ? differenceInDays(new Date(project.deadline), new Date()) 
-                    : null
-                  const isOverdue = daysUntilDeadline !== null && daysUntilDeadline < 0
-                  const hoursUsed = project.actual_hours ?? 0
-                  const hoursForecasted = project.forecasted_billable_hours ?? 0
-                  const hoursPercent = hoursForecasted > 0 ? Math.min((hoursUsed / hoursForecasted) * 100, 100) : 0
-                  
-                  // Status styling
-                  const statusStyles: Record<string, string> = {
-                    planned: "bg-slate-100 text-slate-700",
-                    active: "bg-blue-100 text-blue-700",
-                    completed: "bg-green-100 text-green-700",
-                    archived: "bg-gray-100 text-gray-700",
-                  }
-                  const currentStatus = project.status || "planned"
-                  
-                  return (
-                    <Card key={project.id} className="overflow-hidden hover:border-primary/50 transition-colors">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between gap-4">
-                          <Link href={`/app/projects/${project.id}`} className="min-w-0 flex-1 hover:opacity-80">
-                            <div className="flex items-center gap-2 mb-1">
-                              <CardTitle className="text-lg font-medium truncate">
-                                {project.name}
-                              </CardTitle>
-                              <Badge variant="outline" className="shrink-0 text-xs font-normal">
-                                {project.project_type?.name || "Project"}
-                              </Badge>
-                            </div>
-                            <CardDescription className="line-clamp-2">
-                              {project.description || "No description"}
-                            </CardDescription>
-                          </Link>
-                          <div className="flex items-center gap-2 shrink-0">
-                            {/* Status Dropdown */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className={cn("gap-1 h-7 px-2", statusStyles[currentStatus])}
-                                >
-                                  {currentStatus}
-                                  <ChevronDown className="h-3 w-3" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                {Object.values(ProjectStatus).map((status) => (
-                                  <DropdownMenuItem 
-                                    key={status}
-                                    onClick={() => handleProjectStatusChange(project.id, status)}
-                                    className={cn(currentStatus === status && "bg-muted")}
-                                  >
-                                    <div className={cn(
-                                      "w-2 h-2 rounded-full mr-2",
-                                      status === "planned" && "bg-slate-400",
-                                      status === "active" && "bg-blue-500",
-                                      status === "completed" && "bg-green-500",
-                                      status === "archived" && "bg-gray-400",
-                                    )} />
-                                    <span className="capitalize">{status}</span>
-                                  </DropdownMenuItem>
-                                ))}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                            
-                            {/* Edit button - admin only */}
-                            {isAdmin && (
-                              <EditProjectDialog 
-                                project={project} 
-                                jobId={job.id}
-                                trigger={
-                                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                                    <Settings2 className="h-4 w-4" />
-                                  </Button>
-                                }
-                              />
-                            )}
-                            
-                            {/* Record Time Button */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => openTimeModal(project.id)}
-                            >
-                              <Timer className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0 space-y-3">
-                        {/* Project Info Row */}
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          {/* Deadline */}
-                          {project.deadline && (
-                            <div className={cn(
-                              "flex items-center gap-1",
-                              isOverdue && "text-red-600"
-                            )}>
-                              <Calendar className="h-3.5 w-3.5" />
-                              <span>{format(new Date(project.deadline), "d MMM yyyy")}</span>
-                              {daysUntilDeadline !== null && (
-                                <span className="text-xs opacity-60">
-                                  ({isOverdue ? `${Math.abs(daysUntilDeadline)}d overdue` : `${daysUntilDeadline}d`})
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          
-                          {/* Hours - for hourly projects */}
-                          {isHourlyOrMixed && (
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3.5 w-3.5" />
-                              <span>{hoursUsed}h / {hoursForecasted}h</span>
-                            </div>
-                          )}
-                          
-                          {/* Rate - admin only */}
-                          {isAdmin && isHourlyOrMixed && project.rate && project.rate > 0 && (
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="h-3.5 w-3.5" />
-                              <span>£{project.rate}/hr</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Hours Progress Bar - for hourly projects */}
-                        {isHourlyOrMixed && hoursForecasted > 0 && (
-                          <div className="space-y-1">
-                            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                              <div 
-                                className={cn(
-                                  "h-full rounded-full transition-all",
-                                  hoursPercent >= 100 ? "bg-red-500" : "bg-primary"
-                                )}
-                                style={{ width: `${hoursPercent}%` }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )
-                })}
+                {filteredInstructions.map((instruction) => (
+                  <InstructionCard
+                    key={instruction.id}
+                    instruction={instruction}
+                    jobId={job.id}
+                    isAdmin={isAdmin}
+                    onRecordTime={openTimeModal}
+                  />
+                ))}
               </div>
-            ) : job.projects && job.projects.length > 0 ? (
+            ) : job.instructions && job.instructions.length > 0 ? (
               <div className="rounded-lg border border-dashed p-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  No projects match the selected filter.
+                  No instructions match the selected filter.
                 </p>
               </div>
             ) : (
               <div className="rounded-lg border border-dashed p-12 text-center">
                 <Briefcase className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="font-medium mb-1">No projects yet</h3>
+                <h3 className="font-medium mb-1">No instructions yet</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Create your first project for this job.
+                  Create your first instruction for this job.
                 </p>
-                <CreateProjectDialog jobId={job.id} />
+                <CreateInstructionDialog jobId={job.id} />
               </div>
             )}
           </TabsContent>
@@ -896,9 +686,9 @@ export default function JobDetailPage() {
                             <ChevronRight className="h-4 w-4 text-muted-foreground" />
                           </div>
                         </div>
-                        {survey.project && (
+                        {survey.instruction && (
                           <Badge variant="outline" className="w-fit mt-1">
-                            {survey.project.name}
+                            {survey.instruction.name}
                           </Badge>
                         )}
                       </CardHeader>
@@ -970,18 +760,18 @@ export default function JobDetailPage() {
                 </div>
               )}
 
-              {/* Project Files */}
-              {job.projects && job.projects.some(p => p.id) && (
+              {/* Instruction Files */}
+              {job.instructions && job.instructions.some(p => p.id) && (
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Project Files</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Instruction Files</h3>
                   <div className="rounded-md border divide-y">
-                    {job.projects.map((project) => (
-                      <div key={project.id} className="p-3">
+                    {job.instructions.map((instruction) => (
+                      <div key={instruction.id} className="p-3">
                         <div className="flex items-center gap-2 text-sm">
                           <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{project.name}</span>
+                          <span className="font-medium">{instruction.name}</span>
                           <span className="text-muted-foreground text-xs">
-                            (View in project)
+                            (View in instruction)
                           </span>
                         </div>
                       </div>
@@ -1096,9 +886,9 @@ export default function JobDetailPage() {
                   <div className="p-4 rounded-lg border bg-muted/50">
                     <div className="flex items-center gap-2 mb-2">
                       <Briefcase className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Projects</span>
+                      <span className="text-sm font-medium">Instructions</span>
                     </div>
-                    <p className="text-2xl font-bold">{job.projects?.length || 0}</p>
+                    <p className="text-2xl font-bold">{job.instructions?.length || 0}</p>
                     <p className="text-xs text-muted-foreground">For attaching outputs</p>
                   </div>
                 </div>
@@ -1113,9 +903,9 @@ export default function JobDetailPage() {
         open={isTimeModalOpen}
         onOpenChange={setIsTimeModalOpen}
         jobId={job.id}
-        projects={job.projects || []}
+        instructions={job.instructions || []}
         onTimeLogged={handleTimeLogged}
-        defaultProjectId={selectedProjectIdForTime}
+        defaultInstructionId={selectedInstructionIdForTime}
       />
     </div>
   )

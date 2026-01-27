@@ -1,12 +1,12 @@
 from datetime import datetime, date, timezone
-from typing import TYPE_CHECKING, List, Any
+from typing import TYPE_CHECKING, List, Any, ClassVar
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from sqlalchemy import JSON, Column
 
 from .client_model import Client, ClientReadMinimal
 from .lead_model import Lead, LeadReadMinimal
-from .project_model import ProjectType, ProjectTypeRead
+from .instruction_model import InstructionType, InstructionTypeRead
 
 
 if TYPE_CHECKING:
@@ -31,25 +31,25 @@ class QuoteLineBase(SQLModel):
 
 
 class QuoteLine(QuoteLineBase, table=True):
-    __tablename__ = "quote_lines"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "quote_lines"
     id: int | None = Field(default=None, primary_key=True)
 
     quote_id: int = Field(foreign_key="quotes.id", ondelete="CASCADE")
-    project_type_id: int = Field(foreign_key="project_types.id", ondelete="RESTRICT")
+    instruction_type_id: int = Field(foreign_key="project_types.id", ondelete="RESTRICT")
 
     quote: "Quote" = Relationship(back_populates="lines")
-    project_type: ProjectType = Relationship()
+    instruction_type: InstructionType = Relationship()
 
 
 class QuoteLineCreate(QuoteLineBase):
-    project_type_id: int
+    instruction_type_id: int
 
 
 class QuoteLineRead(QuoteLineBase):
     id: int
     quote_id: int
-    project_type_id: int
-    project_type: ProjectTypeRead
+    instruction_type_id: int
+    instruction_type: InstructionTypeRead
 
 
 # -----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ class QuoteBase(SQLModel):
 
 
 class Quote(QuoteBase, table=True):
-    __tablename__ = "quotes"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "quotes"
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(

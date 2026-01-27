@@ -33,7 +33,7 @@ const NAV_ITEMS = [
 ];
 
 const BOTTOM_ITEMS = [
-  { label: "Organization", icon: Building2, href: "/app/organization" },
+  { label: "Organisation", icon: Building2, href: "/app/organisation" },
   { label: "Settings", icon: Settings, href: "/app/settings" },
   { label: "Account", icon: User, href: "/app/account" },
 ];

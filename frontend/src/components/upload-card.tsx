@@ -33,7 +33,7 @@ export function UploadCard({
         maxFiles={maxFiles}
         onDrop={onDrop}
         src={files}
-        className="border-2 border-dashed border-accent/40 bg-secondary/60 hover:border-accent hover:bg-accent/10 transition-all rounded-xl"
+        className="border-2 border-dashed border-accent/40 bg-primary/10 hover:border-accent hover:bg-accent/10 transition-all rounded-xl"
       >
         <DropzoneEmptyState />
         <DropzoneContent />

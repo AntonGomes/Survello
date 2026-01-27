@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from pydantic import EmailStr
@@ -27,7 +27,7 @@ class OrgBase(SQLModel):
 
 
 class Org(OrgBase, table=True):
-    __tablename__ = "orgs"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "orgs"
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -55,7 +55,7 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
-    __tablename__ = "users"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "users"
     id: int | None = Field(default=None, primary_key=True)
     password_hash: str = Field(default=None, max_length=255)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -108,7 +108,7 @@ class SessionBase(SQLModel):
 
 
 class Session(SessionBase, table=True):
-    __tablename__ = "sessions"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "sessions"
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id", ondelete="CASCADE", index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -136,7 +136,7 @@ class InvitationStatus(str, Enum):
 
 
 class Invitation(SQLModel, table=True):
-    __tablename__ = "invitations"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "invitations"
     id: int | None = Field(default=None, primary_key=True)
     email: EmailStr = Field(sa_type=AutoString, index=True)
     token: str = Field(max_length=255, unique=True, index=True)

@@ -11,6 +11,7 @@ from app.models.run_model import (
     RunRead,
 )
 from app.models.artefact_model import Artefact
+from app.models.file_model import File
 
 
 router = APIRouter()
@@ -28,9 +29,21 @@ def create_run(
     """
     Create a new document generation run and start the orchestrator in the background.
     """
+    # Fetch context files first
+    context_files: list[File] = []
+    for file_id in run_in.context_file_ids:
+        file = db.get(File, file_id)
+        if not file:
+            raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+        context_files.append(file)
+
     # Create the Run record
     extra_data = {"org_id": current_user.org_id, "created_by_user_id": current_user.id}
     db_run = Run.model_validate(run_in, update=extra_data)
+    
+    # Assign context files directly - SQLModel handles the link table
+    db_run.context_files = context_files
+    
     db.add(db_run)
     db.commit()
     db.refresh(db_run)

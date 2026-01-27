@@ -1,3 +1,4 @@
+from typing import cast
 from uuid import uuid4
 import logging
 from fastapi import APIRouter, HTTPException, status
@@ -92,7 +93,7 @@ def _maybe_generate_preview(
             org_id=org_id,
             uploaded_by_user_id=user_id,
             job_id=db_file.job_id,
-            project_id=db_file.project_id,
+            instruction_id=db_file.instruction_id,
         )
         db.add(preview_file)
         db.commit()
@@ -168,14 +169,15 @@ def create_file(
     db.commit()
     db.refresh(db_file)
 
+    assert user.id is not None
     # Generate PDF preview for Office documents
-    _maybe_generate_preview(db_file, storage, db, user.id, user.org_id)  # pyright: ignore[reportArgumentType]
+    _maybe_generate_preview(db_file, storage, db, user.id, user.org_id)
     db.refresh(db_file)
 
     # Add auto-update to job if this file is attached to a job
-    _add_file_upload_update_to_job(db, db_file.job_id, 1, user.id, user.name)  # pyright: ignore[reportArgumentType]
+    _add_file_upload_update_to_job(db, db_file.job_id, 1, user.id, user.name)
 
-    return db_file  # pyright: ignore[reportReturnType]
+    return cast(FileRead, db_file)
 
 
 @router.post(
@@ -207,9 +209,10 @@ def create_files(
     for f in files:
         db.refresh(f)
 
+    assert user.id is not None
     # Generate PDF previews for Office documents
     for f in files:
-        _maybe_generate_preview(f, storage, db, user.id, user.org_id)  # pyright: ignore[reportArgumentType]
+        _maybe_generate_preview(f, storage, db, user.id, user.org_id)
         db.refresh(f)
 
     # Add auto-updates to jobs for uploaded files
@@ -220,9 +223,9 @@ def create_files(
             job_file_counts[f.job_id] = job_file_counts.get(f.job_id, 0) + 1
 
     for job_id, count in job_file_counts.items():
-        _add_file_upload_update_to_job(db, job_id, count, user.id, user.name)  # pyright: ignore[reportArgumentType]
+        _add_file_upload_update_to_job(db, job_id, count, user.id, user.name)
 
-    return files  # pyright: ignore[reportReturnType]
+    return cast(list[FileRead], files)
 
 
 @router.get("/{file_id}", response_model=FileRead, operation_id="readFile")
@@ -239,7 +242,7 @@ def read_file(
         raise HTTPException(status_code=404, detail="File not found")
     if file.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
-    return file  # pyright: ignore[reportReturnType]
+    return cast(FileRead, file)
 
 
 @router.patch("/{file_id}", response_model=FileRead, operation_id="updateFile")
@@ -264,7 +267,7 @@ def update_file(
     db.add(file)
     db.commit()
     db.refresh(file)
-    return file  # pyright: ignore[reportReturnType]
+    return cast(FileRead, file)
 
 
 @router.get(
@@ -319,4 +322,4 @@ def read_files(
         raise HTTPException(status_code=404, detail="No files found")
     if any(file.org_id != current_user.org_id for file in files):
         raise HTTPException(status_code=403, detail="Not authorized")
-    return files  # pyright: ignore[reportReturnType]
+    return cast(list[FileRead], files)

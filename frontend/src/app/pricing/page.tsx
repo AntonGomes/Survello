@@ -126,7 +126,7 @@ export default function PricingPage() {
               </div>
               <CardHeader>
                 <CardTitle className="text-2xl">Enterprise</CardTitle>
-                <CardDescription>For large organizations with specific needs.</CardDescription>
+                <CardDescription>For large organisations with specific needs.</CardDescription>
               </CardHeader>
               <CardContent className="flex-1">
                 <div className="mb-6">

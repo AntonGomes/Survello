@@ -46,7 +46,7 @@ export function SaveToSurvelloModal({
   const [selectedJobId, setSelectedJobId] = useState<string>(
     initialJobId?.toString() || ""
   );
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [selectedInstructionId, setSelectedInstructionId] = useState<string>("");
 
   // Fetch minimal jobs list
   const { data: jobs, isLoading: isLoadingJobs } = useQuery({
@@ -54,7 +54,7 @@ export function SaveToSurvelloModal({
     enabled: open,
   });
 
-  // Fetch selected job details for projects
+  // Fetch selected job details for instructions
   const { data: selectedJob, isLoading: isLoadingJob } = useQuery({
     ...readJobOptions({
       path: { job_id: parseInt(selectedJobId) },
@@ -85,9 +85,9 @@ export function SaveToSurvelloModal({
     },
   });
 
-  // Reset project selection when job changes
+  // Reset instruction selection when job changes
   useEffect(() => {
-    setSelectedProjectId("");
+    setSelectedInstructionId("");
   }, [selectedJobId]);
 
   // Set initial job if provided
@@ -109,17 +109,17 @@ export function SaveToSurvelloModal({
       return;
     }
 
-    // Update the artefact file to attach to job/project
+    // Update the artefact file to attach to job/instruction
     updateFile({
       path: { file_id: artefact.file_id },
       body: {
         job_id: selectedJobId ? parseInt(selectedJobId) : null,
-        project_id: selectedProjectId ? parseInt(selectedProjectId) : null,
+        instruction_id: selectedInstructionId ? parseInt(selectedInstructionId) : null,
       },
     });
   };
 
-  const projects = selectedJob?.projects || [];
+  const instructions = selectedJob?.instructions || [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -127,7 +127,7 @@ export function SaveToSurvelloModal({
         <DialogHeader>
           <DialogTitle>Save to Survello</DialogTitle>
           <DialogDescription>
-            Attach the generated document to a job and optionally a project.
+            Attach the generated document to a job and optionally an instruction.
           </DialogDescription>
         </DialogHeader>
 
@@ -156,33 +156,33 @@ export function SaveToSurvelloModal({
             </Select>
           </div>
 
-          {/* Project Selection (optional) */}
+          {/* Instruction Selection (optional) */}
           {selectedJobId && (
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Briefcase className="h-4 w-4" />
-                Project (Optional)
+                Instruction (Optional)
               </Label>
               <Select
-                value={selectedProjectId}
-                onValueChange={setSelectedProjectId}
-                disabled={isLoadingJob || projects.length === 0}
+                value={selectedInstructionId}
+                onValueChange={setSelectedInstructionId}
+                disabled={isLoadingJob || instructions.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue
                     placeholder={
                       isLoadingJob
                         ? "Loading..."
-                        : projects.length === 0
-                        ? "No projects in this job"
-                        : "Select a project..."
+                        : instructions.length === 0
+                        ? "No instructions in this job"
+                        : "Select an instruction..."
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
-                      {project.name}
+                  {instructions.map((instruction) => (
+                    <SelectItem key={instruction.id} value={instruction.id.toString()}>
+                      {instruction.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

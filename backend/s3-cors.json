@@ -1,0 +1,29 @@
+{
+  "CORSRules": [
+    {
+      "AllowedOrigins": [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://survelloapp.com",
+        "https://www.survelloapp.com",
+        "https://survello.vercel.app",
+        "https://survello-git-main.vercel.app"
+      ],
+      "AllowedMethods": [
+        "GET",
+        "PUT",
+        "POST",
+        "DELETE",
+        "HEAD"
+      ],
+      "AllowedHeaders": [
+        "*"
+      ],
+      "ExposeHeaders": [
+        "ETag",
+        "x-amz-meta-custom-header"
+      ],
+      "MaxAgeSeconds": 3600
+    }
+  ]
+}

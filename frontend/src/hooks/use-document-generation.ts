@@ -8,11 +8,6 @@ import {
   readRunArtefactsOptions,
   generateFileDownloadUrlOptions
 } from "@/client/@tanstack/react-query.gen";
-import { 
-  type FilePresignRequest,
-  type FileCreate,
-  type RunCreate,
-} from "@/client/types.gen";
 import { uploadFilesToS3 } from "@/lib/upload";
 
 export type Status =
@@ -28,6 +23,7 @@ type StartArgs = {
   templateFile: File | null;
   contextFiles: File[];
   jobId?: number;
+  orgId: number;
 };
 
 export function useDocumentGeneration() {
@@ -47,103 +43,71 @@ export function useDocumentGeneration() {
     ...createRunMutation(),
   });
 
-  // 2. Main workflow function
-  const startGeneration = async ({ templateFile, contextFiles, jobId }: StartArgs) => {
+  // Main workflow function
+  const startGeneration = async ({ templateFile, contextFiles, jobId, orgId }: StartArgs) => {
       if (!templateFile) throw new Error("Template file is required");
       
       setLocalStatus("presigning");
       setUploadProgress(0);
 
-      // A. Presign
-      const filesToPresign: FilePresignRequest[] = [
-        {
-            file_name: templateFile.name,
-            mime_type: templateFile.type || "application/octet-stream",
-            size_bytes: templateFile.size,
-            client_id: "template"
-        },
-        ...contextFiles.map((file, index) => ({
-            file_name: file.name,
-            mime_type: file.type || "application/octet-stream",
-            size_bytes: file.size,
-            client_id: `context-${index}`
-        }))
+      // Combine all files with a simple structure we'll use throughout
+      const allFiles = [
+        { file: templateFile, clientId: "template" },
+        ...contextFiles.map((file, i) => ({ file, clientId: `context-${i}` }))
       ];
 
+      // A. Presign
       const presignData = await presignMutation.mutateAsync({
-          body: filesToPresign
+          body: allFiles.map(({ file, clientId }) => ({
+              file_name: file.name,
+              mime_type: file.type || "application/octet-stream",
+              size_bytes: file.size,
+              client_id: clientId
+          }))
       });
 
       if (!presignData) throw new Error("Failed to get presigned URLs");
 
+      // Match presign responses back to files by client_id
+      const fileDataMap = new Map(allFiles.map(f => [f.clientId, f.file]));
+      const uploads = presignData.map(p => ({
+          file: fileDataMap.get(p.client_id!)!,
+          ...p
+      }));
+
       // B. Upload
       setLocalStatus("uploading");
-      
-      const uploads = presignData.map(p => {
-          let file: File | undefined;
-          if (p.client_id === "template") {
-              file = templateFile;
-          } else if (p.client_id?.startsWith("context-")) {
-              const index = parseInt(p.client_id.split("-")[1] || "0");
-              file = contextFiles[index];
-          }
-          
-          if (!file) throw new Error(`Could not match presigned URL for client_id ${p.client_id}`);
-          
-          return {
-              file,
-              url: p.put_url,
-              ...p 
-          };
-      });
-
-      // Upload files
-      const fileUrlsMap = uploads.map(u => ({ put_url: u.url }));
-
-      const filesToUpload = uploads.map(u => u.file); // Use the ordered files from uploads match
-
-      await uploadFilesToS3(filesToUpload, fileUrlsMap, (progress) => {
-          setUploadProgress(progress);
-      });
+      await uploadFilesToS3(
+          uploads.map(u => u.file),
+          uploads.map(u => ({ put_url: u.put_url })),
+          setUploadProgress
+      );
 
       // C. Register
-      const filesToRegister: FileCreate[] = uploads.map(u => ({
-          file_name: u.file.name,
-          mime_type: u.file.type || "application/octet-stream",
-          size_bytes: u.file.size,
-          storage_key: u.storage_key,
-          org_id: 1, // TODO: Use actual user org_id
-      }));
-      
-      const registerResponse = await registerFilesMutation.mutateAsync({
-          body: filesToRegister
+      const registeredFiles = await registerFilesMutation.mutateAsync({
+          body: uploads.map(u => ({
+              file_name: u.file.name,
+              mime_type: u.file.type || "application/octet-stream",
+              size_bytes: u.file.size,
+              storage_key: u.storage_key,
+              org_id: orgId,
+          }))
       });
 
-      if (!registerResponse) throw new Error("Failed to register files");
-      
-      const registeredFiles = registerResponse;
-      if (!registeredFiles || registeredFiles.length === 0) throw new Error("No files registered");
-      
-      // We need to map back from registered files to what we sent
-      // The backend returns them in order created, but let's be safe if we can.
-      // Actually the backend `create_files` just returns `list[FileRead]`.
-      // We assume order is preserved.
-      
-      // Identify template and context files based on the order we sent them (template first)
-      const templateFileRegistered = registeredFiles[0];
-      const contextFilesRegistered = registeredFiles.slice(1);
-      
-      if (!templateFileRegistered) throw new Error("Template file not registered correctly");
+      if (!registeredFiles?.length) throw new Error("No files registered");
+      console.log("Registered files:", registeredFiles); // Debug log
 
-      // D. Start Run
-      const runData: RunCreate = {
-          template_file_id: templateFileRegistered.id,
-          context_file_ids: contextFilesRegistered.map(f => f.id),
-          job_id: jobId
-      };
+      // D. Start Run (template is first, rest are context)
+      const [templateFileRegistered, ...contextFilesRegistered] = registeredFiles;
+      
+      if (!templateFileRegistered) throw new Error("Template file not registered");
 
       const startResponse = await startRun.mutateAsync({
-          body: runData
+          body: {
+              template_file_id: templateFileRegistered.id,
+              context_file_ids: contextFilesRegistered.map(f => f.id),
+              job_id: jobId
+          }
       });
 
       if (!startResponse) throw new Error("Failed to start run");

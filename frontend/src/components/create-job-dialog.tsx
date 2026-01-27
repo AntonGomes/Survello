@@ -40,14 +40,14 @@ import { useAuth } from "@/context/auth-context";
 import { InlineCreateClient } from "@/components/inline-create-client";
 import { 
   createJobMutation, 
-  createProjectMutation,
-  createProjectTypeMutation,
+  createInstructionMutation,
+  createInstructionTypeMutation,
   readJobsOptions,
   readClientsOptions,
   readClientOptions,
-  readProjectTypesOptions,
+  readInstructionTypesOptions,
 } from "@/client/@tanstack/react-query.gen";
-import { JobStatus, ProjectStatus, FeeType, type JobCreate, type ProjectCreate } from "@/client/types.gen";
+import { JobStatus, InstructionStatus, FeeType, type JobCreate, type InstructionCreate } from "@/client/types.gen";
 
 const formSchema = z.object({
   // Job fields
@@ -55,9 +55,9 @@ const formSchema = z.object({
   client_id: z.string().min(1, "Please select a client"),
   address: z.string().optional(),
   status: z.nativeEnum(JobStatus),
-  // Project fields
-  project_name: z.string().min(2, "Project name must be at least 2 characters"),
-  project_type_id: z.string().min(1, "Please select a project type"),
+  // Instruction fields
+  instruction_name: z.string().min(2, "Instruction name must be at least 2 characters"),
+  instruction_type_id: z.string().min(1, "Please select an instruction type"),
   fee_type: z.nativeEnum(FeeType),
   rate: z.number().min(0).optional(),
 });
@@ -80,8 +80,8 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
     enabled: !initialClientId,
   });
 
-  const { data: projectTypes, isLoading: isLoadingTypes } = useQuery({
-    ...readProjectTypesOptions(),
+  const { data: instructionTypes, isLoading: isLoadingTypes } = useQuery({
+    ...readInstructionTypesOptions(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -91,8 +91,8 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
       client_id: initialClientId ? initialClientId.toString() : "",
       address: "",
       status: JobStatus.PLANNED,
-      project_name: "",
-      project_type_id: "",
+      instruction_name: "",
+      instruction_type_id: "",
       fee_type: FeeType.FIXED,
       rate: 0,
     },
@@ -102,21 +102,21 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
     ...createJobMutation(),
   });
 
-  const { mutateAsync: createProject, isPending: isCreatingProject } = useMutation({
-    ...createProjectMutation(),
+  const { mutateAsync: createInstruction, isPending: isCreatingInstruction } = useMutation({
+    ...createInstructionMutation(),
   });
 
   const { mutate: createType, isPending: isCreatingTypePending } = useMutation({
-    ...createProjectTypeMutation(),
+    ...createInstructionTypeMutation(),
     onSuccess: (newType) => {
-      queryClient.invalidateQueries({ queryKey: readProjectTypesOptions().queryKey });
-      form.setValue("project_type_id", newType.id.toString());
+      queryClient.invalidateQueries({ queryKey: readInstructionTypesOptions().queryKey });
+      form.setValue("instruction_type_id", newType.id.toString());
       setIsCreatingType(false);
       setNewTypeName("");
     },
   });
 
-  const isPending = isCreatingJob || isCreatingProject;
+  const isPending = isCreatingJob || isCreatingInstruction;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) return;
@@ -132,20 +132,20 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
 
       const newJob = await createJob({ body: jobData });
 
-      // Then create the project
-      const projectData: ProjectCreate = {
-        name: values.project_name,
+      // Then create the instruction
+      const instructionData: InstructionCreate = {
+        name: values.instruction_name,
         description: "",
         job_id: newJob.id,
-        project_type_id: parseInt(values.project_type_id),
+        instruction_type_id: parseInt(values.instruction_type_id),
         fee_type: values.fee_type,
-        status: ProjectStatus.PLANNED,
+        status: InstructionStatus.PLANNED,
         rate: values.rate,
         contingency_percentage: 0,
         forecasted_billable_hours: 0,
       };
 
-      await createProject({ body: projectData });
+      await createInstruction({ body: instructionData });
 
       // Invalidate queries
       queryClient.invalidateQueries({ 
@@ -194,8 +194,8 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
           <DialogTitle>Create Job</DialogTitle>
           <DialogDescription>
             {initialClientId 
-              ? "Create a new job with its first project for this client." 
-              : "Create a new job with its first project."}
+              ? "Create a new job with its first instruction for this client." 
+              : "Create a new job with its first instruction."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -328,16 +328,16 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
 
             <Separator />
 
-            {/* Project Details Section */}
+            {/* Instruction Details Section */}
             <div className="space-y-4">
-              <h4 className="text-sm font-medium text-muted-foreground">First Project</h4>
+              <h4 className="text-sm font-medium text-muted-foreground">First Instruction</h4>
               
               <FormField
                 control={form.control}
-                name="project_name"
+                name="instruction_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Name</FormLabel>
+                    <FormLabel>Instruction Name</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g. Topographical Survey" {...field} />
                     </FormControl>
@@ -349,10 +349,10 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="project_type_id"
+                  name="instruction_type_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Project Type</FormLabel>
+                      <FormLabel>Instruction Type</FormLabel>
                       {isCreatingType ? (
                         <div className="flex gap-2">
                           <Input 
@@ -404,7 +404,7 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
                             } else {
                               field.onChange(val);
                               // Auto-fill defaults from selected type
-                              const type = projectTypes?.find(t => t.id.toString() === val);
+                              const type = instructionTypes?.find(t => t.id.toString() === val);
                               if (type) {
                                 if (type.default_fee_type) form.setValue("fee_type", type.default_fee_type);
                                 if (type.rate) form.setValue("rate", type.rate);
@@ -425,7 +425,7 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
                               </div>
                             ) : (
                               <>
-                                {projectTypes?.map((type) => (
+                                {instructionTypes?.map((type) => (
                                   <SelectItem key={type.id} value={type.id.toString()}>
                                     {type.name}
                                   </SelectItem>
@@ -502,7 +502,7 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Job & Project
+                Create Job & Instruction
               </Button>
             </DialogFooter>
           </form>

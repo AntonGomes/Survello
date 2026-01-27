@@ -58,7 +58,15 @@ class Settings(BaseSettings):
     # Testing - whitelist emails that bypass uniqueness checks
     test_email_whitelist: list[str] = Field(default=[], alias="TEST_EMAIL_WHITELIST")
 
-    @field_validator("test_email_whitelist", mode="before")
+    # Registration whitelist - only these emails can register (empty = allow all)
+    registration_whitelist: list[str] = Field(default=[], alias="REGISTRATION_WHITELIST")
+
+    # Admin notification email for waitlist signups
+    admin_notification_email: str = Field(
+        default="aomlgomes@gmail.com", alias="ADMIN_NOTIFICATION_EMAIL"
+    )
+
+    @field_validator("test_email_whitelist", "registration_whitelist", mode="before")
     @classmethod
     def parse_email_whitelist(cls, v: Any) -> list[str]:
         if isinstance(v, str):
@@ -80,4 +88,4 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     # BaseSettings automatically reads from .env and os.environ
-    return Settings()  # pyright: ignore[reportCallIssue]
+    return Settings()  # ty: ignore[call-arg]

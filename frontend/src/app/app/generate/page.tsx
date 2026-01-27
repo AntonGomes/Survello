@@ -15,12 +15,14 @@ import { SaveToSurvelloModal } from "@/components/save-to-survello-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { readJobOptions } from "@/client/@tanstack/react-query.gen";
+import { useAuth } from "@/context/auth-context";
 
 export default function GeneratePage() {
   const searchParams = useSearchParams();
   const jobIdParam = searchParams.get("jobId");
   const jobId = jobIdParam ? parseInt(jobIdParam) : undefined;
   
+  const { user } = useAuth();
   const [contextFiles, setContextFiles] = useState<File[]>([]);
   const [templateFile, setTemplateFile] = useState<File | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -135,7 +137,7 @@ export default function GeneratePage() {
           canStart={canStart}
           status={status}
           uploadProgress={uploadProgress}
-          onStart={() => start({ templateFile, contextFiles, jobId })}
+          onStart={() => start({ templateFile, contextFiles, jobId, orgId: user?.org_id ?? 0 })}
           updates={updates}
         />
       )}
@@ -144,7 +146,6 @@ export default function GeneratePage() {
       {isCompleted && downloadPath && previewUrl && (
         <div className="px-8 pb-8 space-y-6">
           <DocumentViewerWithChat 
-            downloadPath={downloadPath} 
             previewUrl={previewUrl}
           />
           

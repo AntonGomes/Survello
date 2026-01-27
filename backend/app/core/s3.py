@@ -26,12 +26,12 @@ class S3Client:
                 aws_secret_access_key=secret_key,
                 region_name=region,
             )
-            self.client = session.client(  # pyright: ignore[reportUnknownMemberType]
+            self.client = session.client(  # ty: ignore[assignment]
                 "s3", region_name=region, endpoint_url=endpoint_url, config=config
             )
         else:
             # IAM Role authentication (App Runner / EC2)
-            self.client = boto3.client(  # pyright: ignore[reportUnknownMemberType]
+            self.client = boto3.client(  # ty: ignore[assignment]
                 "s3", region_name=region, endpoint_url=endpoint_url, config=config
             )
 

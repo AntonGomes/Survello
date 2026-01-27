@@ -44,38 +44,38 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { 
-  createProjectMutation, 
-  createProjectTypeMutation,
-  readProjectTypesOptions,
+  createInstructionMutation, 
+  createInstructionTypeMutation,
+  readInstructionTypesOptions,
   readJobOptions
 } from "@/client/@tanstack/react-query.gen";
-import { ProjectStatus, FeeType, type ProjectCreate } from "@/client/types.gen";
+import { InstructionStatus, FeeType, type InstructionCreate } from "@/client/types.gen";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Project name must be at least 2 characters"),
+  name: z.string().min(2, "Instruction name must be at least 2 characters"),
   description: z.string().optional().or(z.literal("")),
-  project_type_id: z.string().min(1, "Please select a project type"),
+  instruction_type_id: z.string().min(1, "Please select an instruction type"),
   fee_type: z.nativeEnum(FeeType),
-  status: z.nativeEnum(ProjectStatus),
+  status: z.nativeEnum(InstructionStatus),
   rate: z.number().min(0).optional(),
   contingency_percentage: z.number().min(0).max(100).optional(),
   deadline: z.date().optional(),
 });
 
-interface CreateProjectDialogProps {
+interface CreateInstructionDialogProps {
   jobId: number;
   trigger?: React.ReactNode;
 }
 
-export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps) {
+export function CreateInstructionDialog({ jobId, trigger }: CreateInstructionDialogProps) {
   const [open, setOpen] = useState(false);
   const [isCreatingType, setIsCreatingType] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
   
   const queryClient = useQueryClient();
 
-  const { data: projectTypes, isLoading: isLoadingTypes } = useQuery({
-    ...readProjectTypesOptions(),
+  const { data: instructionTypes, isLoading: isLoadingTypes } = useQuery({
+    ...readInstructionTypesOptions(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,30 +83,23 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
     defaultValues: {
       name: "",
       description: "",
-      project_type_id: "",
+      instruction_type_id: "",
       fee_type: FeeType.FIXED,
-      status: ProjectStatus.PLANNED,
+      status: InstructionStatus.PLANNED,
       rate: 0,
       contingency_percentage: 0,
       deadline: undefined,
     },
   });
 
-  // Watch for project type selection to autofill values
-  const selectedTypeId = form.watch("project_type_id");
-  const selectedType = projectTypes?.find(t => t.id.toString() === selectedTypeId);
+  // Watch for instruction type selection to autofill values
+  const selectedTypeId = form.watch("instruction_type_id");
+  const selectedType = instructionTypes?.find(t => t.id.toString() === selectedTypeId);
 
-  // Effect to update defaults when Type changes
-  if (selectedType && selectedTypeId) {
-      // Only auto-fill if the user hasn't heavily modified settings (simple check: if rate is 0 or fee type calls for it)
-      // Actually, better to just set them on change. But watch out for infinite loops or overwriting user input during edits.
-      // The cleanest way is to use `form.setValue` in the `onValueChange` of the select, NOT here.
-  }
-
-  const { mutate: createProject, isPending } = useMutation({
-    ...createProjectMutation(),
+  const { mutate: createInstruction, isPending } = useMutation({
+    ...createInstructionMutation(),
     onSuccess: () => {
-      // Invalidate the job query to refresh the projects list
+      // Invalidate the job query to refresh the instructions list
       queryClient.invalidateQueries({ 
         queryKey: readJobOptions({ path: { job_id: jobId } }).queryKey 
       });
@@ -116,21 +109,21 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
   });
 
   const { mutate: createType, isPending: isCreatingTypePending } = useMutation({
-    ...createProjectTypeMutation(),
+    ...createInstructionTypeMutation(),
     onSuccess: (newType) => {
-        queryClient.invalidateQueries({ queryKey: readProjectTypesOptions().queryKey });
-        form.setValue("project_type_id", newType.id.toString());
+        queryClient.invalidateQueries({ queryKey: readInstructionTypesOptions().queryKey });
+        form.setValue("instruction_type_id", newType.id.toString());
         setIsCreatingType(false);
         setNewTypeName("");
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const projectData: ProjectCreate = {
+    const instructionData: InstructionCreate = {
       name: values.name,
       description: values.description || "",
       job_id: jobId,
-      project_type_id: parseInt(values.project_type_id),
+      instruction_type_id: parseInt(values.instruction_type_id),
       fee_type: values.fee_type,
       status: values.status,
       rate: values.rate,
@@ -139,8 +132,8 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
       deadline: values.deadline?.toISOString() ?? null,
     };
 
-    createProject({
-      body: projectData,
+    createInstruction({
+      body: instructionData,
     });
   }
 
@@ -161,15 +154,15 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
         {trigger || (
           <Button variant="outline" size="sm">
             <Plus className="mr-2 h-4 w-4" />
-            Create Project
+            Create Instruction
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Project</DialogTitle>
+          <DialogTitle>Create Instruction</DialogTitle>
           <DialogDescription>
-            Add a new project to this job.
+            Add a new instruction to this job.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -180,7 +173,7 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project Name</FormLabel>
+                  <FormLabel>Instruction Name</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g. Topographical Survey" {...field} />
                   </FormControl>
@@ -192,10 +185,10 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="project_type_id"
+                name="instruction_type_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Type</FormLabel>
+                    <FormLabel>Instruction Type</FormLabel>
                     {isCreatingType ? (
                         <div className="flex gap-2">
                             <Input 
@@ -240,7 +233,7 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
                                 } else {
                                     field.onChange(val);
                                     // Auto-fill defaults from selected type
-                                    const type = projectTypes?.find(t => t.id.toString() === val);
+                                    const type = instructionTypes?.find(t => t.id.toString() === val);
                                     if (type) {
                                         if (type.default_fee_type) form.setValue("fee_type", type.default_fee_type);
                                         if (type.rate) form.setValue("rate", type.rate);
@@ -262,7 +255,7 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
                             </div>
                             ) : (
                                 <>
-                                {projectTypes?.map((type) => (
+                                {instructionTypes?.map((type) => (
                                 <SelectItem key={type.id} value={type.id.toString()}>
                                     {type.name}
                                 </SelectItem>
@@ -297,7 +290,7 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(ProjectStatus).map((status) => (
+                        {Object.values(InstructionStatus).map((status) => (
                           <SelectItem key={status} value={status} className="capitalize">
                             {status}
                           </SelectItem>
@@ -446,7 +439,7 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Project details and scope..." 
+                      placeholder="Instruction details and scope..." 
                       className="resize-none min-h-[100px]"
                       {...field} 
                     />
@@ -462,7 +455,7 @@ export function CreateProjectDialog({ jobId, trigger }: CreateProjectDialogProps
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Project
+                Create Instruction
               </Button>
             </DialogFooter>
           </form>

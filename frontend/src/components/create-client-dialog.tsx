@@ -115,7 +115,7 @@ export function CreateClientDialog() {
         <DialogHeader>
           <DialogTitle>Create Client</DialogTitle>
           <DialogDescription>
-            Add a new client to your organization.
+            Add a new client to your organisation.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">

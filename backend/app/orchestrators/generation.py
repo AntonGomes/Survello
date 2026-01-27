@@ -58,22 +58,21 @@ def execute(
         template_bytes = storage.get_file_data(template.storage_key)
         summary = to_summary(template_bytes, template.mime_type)
 
-        # Convert unsupported context files to PDF
+        # Prepare context files for LLM (use existing PDF previews for unsupported types)
         llm_files: list[LLMFile] = []
         for f in context_files:
-            if f.mime_type not in LLM_SUPPORTED_TYPES:
-                data = storage.get_file_data(f.storage_key)
-                pdf = to_pdf(data)
-                f.storage_key = str(Path(f.storage_key).with_suffix(".pdf"))
-                f.mime_type = "application/pdf"
-                f.file_name = Path(f.file_name).with_suffix(".pdf").name
-                storage.upload_file(f.storage_key, pdf)
-                db.flush()
-
-            url = storage.generate_presigned_url(
-                "get_object", f.storage_key, f.mime_type, f.file_name, inline=True
-            )
-            llm_files.append(LLMFile(url=url, name=f.file_name))
+            # Use preview file if available and original is not LLM-supported
+            if f.mime_type not in LLM_SUPPORTED_TYPES and f.preview_file:
+                preview = f.preview_file
+                url = storage.generate_presigned_url(
+                    "get_object", preview.storage_key, preview.mime_type, preview.file_name, inline=True
+                )
+                llm_files.append(LLMFile(url=url, name=preview.file_name))
+            else:
+                url = storage.generate_presigned_url(
+                    "get_object", f.storage_key, f.mime_type, f.file_name, inline=True
+                )
+                llm_files.append(LLMFile(url=url, name=f.file_name))
 
             # Initialize if None
             if run.upload_progress is None:

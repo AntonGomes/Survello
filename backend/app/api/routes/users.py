@@ -1,5 +1,5 @@
+from typing import Any, cast
 from fastapi import APIRouter
-from typing import Any
 
 from app.api.deps import DBDep, CurrentUserDep
 from app.models.user_model import UserRead, UserUpdate
@@ -32,4 +32,4 @@ def update_user_me(
     db.add(current_user)
     db.commit()
     db.refresh(current_user)
-    return current_user  # pyright: ignore[reportReturnType]
+    return cast(UserRead, current_user)

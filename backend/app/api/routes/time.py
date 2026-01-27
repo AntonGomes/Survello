@@ -1,6 +1,7 @@
+from typing import cast
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
-from sqlmodel import select
+from sqlmodel import select, desc
 from app.api.deps import DBDep, CurrentUserDep
 from app.models.time_entry_model import (
     TimeEntry,
@@ -9,7 +10,7 @@ from app.models.time_entry_model import (
     TimeEntryOut,
     TimeEntryRead,
 )
-from app.models.project_model import Project
+from app.models.instruction_model import Instruction
 
 router = APIRouter()
 
@@ -20,7 +21,7 @@ def start_timer(
     current_user: CurrentUserDep,
     db: DBDep,
 ):
-    """Start a new timer for a project. Stops any existing active timer."""
+    """Start a new timer for an instruction. Stops any existing active timer."""
     # 1. Check if ANY timer is active for this user
     active_entry = db.exec(
         select(TimeEntry)
@@ -33,16 +34,16 @@ def start_timer(
             status_code=400, detail="Timer already running. Stop it first."
         )
 
-    # 2. Check project existence and authorization
-    project = db.get(Project, entry_in.project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    if project.org_id != current_user.org_id:
+    # 2. Check instruction existence and authorization
+    instruction = db.get(Instruction, entry_in.instruction_id)
+    if not instruction:
+        raise HTTPException(status_code=404, detail="Instruction not found")
+    if instruction.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
     # 3. Create entry
     entry = TimeEntry(
-        project_id=entry_in.project_id,
+        instruction_id=entry_in.instruction_id,
         user_id=current_user.id,
         start_time=datetime.now(timezone.utc),
         description=entry_in.description,
@@ -53,7 +54,7 @@ def start_timer(
 
     return TimeEntryOut(
         **entry.model_dump(),
-        project_name=project.name,
+        instruction_name=instruction.name,
         user_name=current_user.name,
     )
 
@@ -64,7 +65,7 @@ def stop_timer(
     db: DBDep,
     description: str | None = None,
 ):
-    """Stop the currently active timer and update project actual hours."""
+    """Stop the currently active timer and update instruction actual hours."""
     active_entry = db.exec(
         select(TimeEntry)
         .where(TimeEntry.user_id == current_user.id)
@@ -88,11 +89,11 @@ def stop_timer(
     if description:
         active_entry.description = description
 
-    # Update Project actual_hours
-    project = db.get(Project, active_entry.project_id)
-    if project:
-        project.actual_hours = (project.actual_hours or 0) + hours_to_add
-        db.add(project)
+    # Update Instruction actual_hours
+    instruction = db.get(Instruction, active_entry.instruction_id)
+    if instruction:
+        instruction.actual_hours = (instruction.actual_hours or 0) + hours_to_add
+        db.add(instruction)
 
     db.add(active_entry)
     db.commit()
@@ -100,7 +101,7 @@ def stop_timer(
 
     return TimeEntryOut(
         **active_entry.model_dump(),
-        project_name=project.name if project else "Unknown",
+        instruction_name=instruction.name if instruction else "Unknown",
         user_name=current_user.name,
     )
 
@@ -112,17 +113,17 @@ def log_time_manually(
     db: DBDep,
 ):
     """Log time manually without using the timer."""
-    # Check project existence and authorization
-    project = db.get(Project, entry_in.project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    if project.org_id != current_user.org_id:
+    # Check instruction existence and authorization
+    instruction = db.get(Instruction, entry_in.instruction_id)
+    if not instruction:
+        raise HTTPException(status_code=404, detail="Instruction not found")
+    if instruction.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
     # Create entry with start and end time based on duration
     now = datetime.now(timezone.utc)
     entry = TimeEntry(
-        project_id=entry_in.project_id,
+        instruction_id=entry_in.instruction_id,
         user_id=current_user.id,
         start_time=now,
         end_time=now,  # Same as start for manual entries
@@ -131,17 +132,17 @@ def log_time_manually(
     )
     db.add(entry)
 
-    # Update Project actual_hours
+    # Update Instruction actual_hours
     hours_to_add = entry_in.duration_minutes / 60.0
-    project.actual_hours = (project.actual_hours or 0) + hours_to_add
-    db.add(project)
+    instruction.actual_hours = (instruction.actual_hours or 0) + hours_to_add
+    db.add(instruction)
 
     db.commit()
     db.refresh(entry)
 
     return TimeEntryOut(
         **entry.model_dump(),
-        project_name=project.name,
+        instruction_name=instruction.name,
         user_name=current_user.name,
     )
 
@@ -163,7 +164,7 @@ def get_current_timer(
     if not active_entry:
         return None
 
-    project = db.get(Project, active_entry.project_id)
+    instruction = db.get(Instruction, active_entry.instruction_id)
 
     # Calc current duration on the fly for display
     now = datetime.now(timezone.utc)
@@ -172,33 +173,33 @@ def get_current_timer(
 
     return TimeEntryOut(
         **active_entry.model_dump(exclude={"duration_minutes"}),
-        project_name=project.name if project else "Unknown",
+        instruction_name=instruction.name if instruction else "Unknown",
         user_name=current_user.name,
         duration_minutes=minutes,
     )
 
 
 @router.get(
-    "/project/{project_id}",
+    "/instruction/{instruction_id}",
     response_model=list[TimeEntryRead],
-    operation_id="getProjectTimeEntries",
+    operation_id="getInstructionTimeEntries",
 )
-def get_project_time_entries(
-    project_id: int,
+def get_instruction_time_entries(
+    instruction_id: int,
     current_user: CurrentUserDep,
     db: DBDep,
 ):
-    """Get all time entries for a specific project."""
-    project = db.get(Project, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    if project.org_id != current_user.org_id:
+    """Get all time entries for a specific instruction."""
+    instruction = db.get(Instruction, instruction_id)
+    if not instruction:
+        raise HTTPException(status_code=404, detail="Instruction not found")
+    if instruction.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
     entries = db.exec(
         select(TimeEntry)
-        .where(TimeEntry.project_id == project_id)
-        .order_by(TimeEntry.start_time.desc())  # pyright: ignore[reportAttributeAccessIssue]
+        .where(TimeEntry.instruction_id == instruction_id)
+        .order_by(desc(TimeEntry.start_time))
     ).all()
 
-    return entries  # pyright: ignore[reportReturnType]
+    return cast(list[TimeEntryRead], entries)

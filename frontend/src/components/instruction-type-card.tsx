@@ -4,24 +4,24 @@ import { FolderOpen, DollarSign, Percent, FileText, Pencil, Paperclip } from "lu
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { ProjectTypeRead } from "@/client";
+import type { InstructionTypeRead } from "@/client";
 
-interface ProjectTypeCardProps {
-  projectType: ProjectTypeRead;
+interface InstructionTypeCardProps {
+  instructionType: InstructionTypeRead;
 }
 
-export function ProjectTypeCard({ projectType }: ProjectTypeCardProps) {
-  const hasTemplate = !!projectType.default_template_file_id;
+export function InstructionTypeCard({ instructionType }: InstructionTypeCardProps) {
+  const hasTemplate = !!instructionType.default_template_file_id;
 
   return (
     <Card className="group hover:border-primary/50 transition-colors">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-lg truncate">{projectType.name}</CardTitle>
-            {projectType.description && (
+            <CardTitle className="text-lg truncate">{instructionType.name}</CardTitle>
+            {instructionType.description && (
               <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                {projectType.description}
+                {instructionType.description}
               </p>
             )}
           </div>
@@ -34,18 +34,18 @@ export function ProjectTypeCard({ projectType }: ProjectTypeCardProps) {
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <DollarSign className="h-3.5 w-3.5" />
-            <span>Rate: £{projectType.rate?.toFixed(2) ?? "0.00"}</span>
+            <span>Rate: £{instructionType.rate?.toFixed(2) ?? "0.00"}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Percent className="h-3.5 w-3.5" />
-            <span>Contingency: {projectType.default_contingency_percentage ?? 0}%</span>
+            <span>Contingency: {instructionType.default_contingency_percentage ?? 0}%</span>
           </div>
         </div>
 
         {/* Fee Type Badge */}
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="capitalize">
-            {projectType.default_fee_type?.replace("_", " ") ?? "Fixed"}
+            {instructionType.default_fee_type?.replace("_", " ") ?? "Fixed"}
           </Badge>
           {hasTemplate ? (
             <Badge variant="secondary" className="gap-1">

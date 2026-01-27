@@ -1,3 +1,5 @@
+from typing import cast
+
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select, func
 from sqlalchemy.orm import joinedload
@@ -27,7 +29,7 @@ def _build_survey_read(survey: Survey, db) -> SurveyRead:
         db.exec(
             select(func.count(File.id))
             .where(File.survey_id == survey.id)
-            .where(File.mime_type.startswith("image/"))  # pyright: ignore
+            .where(File.mime_type.startswith("image/"))  # ty: ignore[arg-type]
         ).first()
         or 0
     )
@@ -37,14 +39,14 @@ def _build_survey_read(survey: Survey, db) -> SurveyRead:
         db.exec(
             select(func.count(File.id))
             .where(File.survey_id == survey.id)
-            .where(~File.mime_type.startswith("image/"))  # pyright: ignore
+            .where(~File.mime_type.startswith("image/"))  # ty: ignore[arg-type]
         ).first()
         or 0
     )
 
     # Build surveyors list from the many-to-many relationship
     surveyors_list = [
-        SurveyorRead(id=u.id, name=u.name)  # pyright: ignore
+        SurveyorRead(id=cast(int, u.id), name=u.name)
         for u in survey.surveyors
     ]
 
@@ -70,7 +72,7 @@ def create_survey(
     survey = Survey(
         org_id=current_user.org_id,
         job_id=survey_in.job_id,
-        project_id=survey_in.project_id,
+        instruction_id=survey_in.instruction_id,
         conducted_date=survey_in.conducted_date,
         conducted_time=survey_in.conducted_time,
         conducted_by_user_id=survey_in.conducted_by_user_id or current_user.id,
@@ -103,8 +105,9 @@ def create_survey(
             "".join(word[0].upper() for word in (current_user.name or "").split()[:2])
             or "??"
         )
+        assert current_user.id is not None
         update_item = create_survey_created_update(
-            author_id=current_user.id,  # pyright: ignore[reportArgumentType]
+            author_id=current_user.id,
             author_name=current_user.name,
             author_initials=initials,
             survey_id=survey.id,
@@ -120,13 +123,13 @@ def create_survey(
         select(Survey)
         .where(Survey.id == survey.id)
         .options(
-            joinedload(Survey.surveyor),  # pyright: ignore[reportArgumentType]
-            joinedload(Survey.conducted_by_user),  # pyright: ignore[reportArgumentType]
-            joinedload(Survey.project),  # pyright: ignore[reportArgumentType]
+            joinedload(Survey.surveyor),  # ty: ignore[arg-type]
+            joinedload(Survey.conducted_by_user),  # ty: ignore[arg-type]
+            joinedload(Survey.instruction),  # ty: ignore[arg-type]
         )
     ).first()
 
-    return _build_survey_read(result, db)
+    return _build_survey_read(cast(Survey, result), db)
 
 
 @router.get("/", response_model=list[SurveyRead], operation_id="readSurveys")
@@ -134,25 +137,25 @@ def read_surveys(
     current_user: CurrentUserDep,
     db: DBDep,
     job_id: int | None = None,
-    project_id: int | None = None,
+    instruction_id: int | None = None,
     offset: int = 0,
     limit: int = 100,
 ) -> list[SurveyRead]:
-    """Retrieve surveys, optionally filtered by job or project."""
+    """Retrieve surveys, optionally filtered by job or instruction."""
     query = (
         select(Survey)
         .where(Survey.org_id == current_user.org_id)
         .options(
-            joinedload(Survey.surveyor),  # pyright: ignore[reportArgumentType]
-            joinedload(Survey.conducted_by_user),  # pyright: ignore[reportArgumentType]
-            joinedload(Survey.project),  # pyright: ignore[reportArgumentType]
+            joinedload(Survey.surveyor),  # ty: ignore[arg-type]
+            joinedload(Survey.conducted_by_user),  # ty: ignore[arg-type]
+            joinedload(Survey.instruction),  # ty: ignore[arg-type]
         )
     )
 
     if job_id:
         query = query.where(Survey.job_id == job_id)
-    if project_id:
-        query = query.where(Survey.project_id == project_id)
+    if instruction_id:
+        query = query.where(Survey.instruction_id == instruction_id)
 
     surveys = db.exec(query.offset(offset).limit(limit)).unique().all()
 
@@ -170,9 +173,9 @@ def read_survey(
         select(Survey)
         .where(Survey.id == survey_id)
         .options(
-            joinedload(Survey.surveyor),  # pyright: ignore[reportArgumentType]
-            joinedload(Survey.conducted_by_user),  # pyright: ignore[reportArgumentType]
-            joinedload(Survey.project),  # pyright: ignore[reportArgumentType]
+            joinedload(Survey.surveyor),  # ty: ignore[arg-type]
+            joinedload(Survey.conducted_by_user),  # ty: ignore[arg-type]
+            joinedload(Survey.instruction),  # ty: ignore[arg-type]
         )
     ).first()
 
@@ -181,7 +184,7 @@ def read_survey(
     if survey.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    return _build_survey_read(survey, db)
+    return _build_survey_read(cast(Survey, survey), db)
 
 
 @router.patch("/{survey_id}", response_model=SurveyRead, operation_id="updateSurvey")
@@ -196,9 +199,9 @@ def update_survey(
         select(Survey)
         .where(Survey.id == survey_id)
         .options(
-            joinedload(Survey.surveyor),  # pyright: ignore[reportArgumentType]
-            joinedload(Survey.conducted_by_user),  # pyright: ignore[reportArgumentType]
-            joinedload(Survey.project),  # pyright: ignore[reportArgumentType]
+            joinedload(Survey.surveyor),  # ty: ignore[arg-type]
+            joinedload(Survey.conducted_by_user),  # ty: ignore[arg-type]
+            joinedload(Survey.instruction),  # ty: ignore[arg-type]
         )
     ).first()
 
@@ -290,4 +293,4 @@ def read_survey_files(
 
     files = db.exec(select(File).where(File.survey_id == survey_id)).all()
 
-    return files  # pyright: ignore[reportReturnType]
+    return cast(list[FileRead], files)

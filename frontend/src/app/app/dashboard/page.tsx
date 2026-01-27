@@ -110,14 +110,14 @@ export default function DashboardPage() {
 
   // Compute hours tracked this week
   const hoursStats = useMemo(() => {
-    if (!jobs) return { thisWeek: 0, totalProjects: 0 }
+    if (!jobs) return { thisWeek: 0, totalInstructions: 0 }
     
-    const allProjects = jobs.flatMap(j => j.projects || [])
-    const totalHours = allProjects.reduce((sum, p) => sum + (p.actual_hours || 0), 0)
+    const allInstructions = jobs.flatMap(j => j.instructions || [])
+    const totalHours = allInstructions.reduce((sum, p) => sum + (p.actual_hours || 0), 0)
     
     return {
       thisWeek: totalHours, // For now, showing total - backend would need time entries query for proper weekly stats
-      totalProjects: allProjects.length,
+      totalInstructions: allInstructions.length,
     }
   }, [jobs])
 
@@ -326,13 +326,13 @@ export default function DashboardPage() {
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-1.5">
                 <Target className="h-3.5 w-3.5" />
-                Projects
+                Instructions
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold">{hoursStats.totalProjects}</span>
-                <span className="text-sm text-muted-foreground">total projects</span>
+                <span className="text-2xl font-bold">{hoursStats.totalInstructions}</span>
+                <span className="text-sm text-muted-foreground">total instructions</span>
               </div>
               <div className="mt-2 text-xs text-muted-foreground">
                 {hoursStats.thisWeek.toFixed(1)} hours tracked

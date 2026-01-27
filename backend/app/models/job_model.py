@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, List, Any
+from typing import TYPE_CHECKING, List, Any, ClassVar
 from enum import Enum
 from app.models.client_model import ClientReadMinimal, Client
 from app.models.user_model import UserRead, User, Org
-from app.models.project_model import Project, ProjectReadWithProjectType
+from app.models.instruction_model import Instruction, InstructionReadWithInstructionType
 from app.models.file_model import FileRead, File
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from sqlalchemy import JSON, Column
@@ -34,7 +34,7 @@ class JobBase(SQLModel):
 
 
 class Job(JobBase, table=True):
-    __tablename__ = "jobs"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "jobs"
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(
@@ -60,7 +60,7 @@ class Job(JobBase, table=True):
     lead_user: User = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Job.lead_user_id]"}
     )
-    projects: list[Project] = Relationship(back_populates="job")
+    instructions: list[Instruction] = Relationship(back_populates="job")
     files: list[File] = Relationship(back_populates="job")
     surveys: list["Survey"] = Relationship(back_populates="job")
 
@@ -87,9 +87,9 @@ class JobRead(JobBase):
     created_at: datetime
     updated_at: datetime
     updates: List[Any] | None = None
-    projects: list["ProjectReadWithProjectType"] = []
+    instructions: list["InstructionReadWithInstructionType"] = []
 
 
 class JobReadDetail(JobRead):
-    projects: list["ProjectReadWithProjectType"]
+    instructions: list["InstructionReadWithInstructionType"]
     files: list[FileRead]

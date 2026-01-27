@@ -1,11 +1,11 @@
 from datetime import datetime, date as date_type, time as time_type, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, ClassVar
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 
 if TYPE_CHECKING:
     from .job_model import Job
-    from .project_model import Project
+    from .instruction_model import Instruction
     from .user_model import User
     from .file_model import File
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class SurveySurveyorLink(SQLModel, table=True):
     """Link table for many-to-many relationship between surveys and surveyors (users)."""
 
-    __tablename__ = "survey_surveyor_links"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "survey_surveyor_links"
     survey_id: int | None = Field(
         default=None, foreign_key="surveys.id", primary_key=True, ondelete="CASCADE"
     )
@@ -79,7 +79,7 @@ class SurveyBase(SQLModel):
 
 
 class Survey(SurveyBase, table=True):
-    __tablename__ = "surveys"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "surveys"
     id: int | None = Field(default=None, primary_key=True)
 
     # When the survey data was uploaded/created in the system
@@ -92,7 +92,7 @@ class Survey(SurveyBase, table=True):
     # Foreign keys
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
     job_id: int = Field(foreign_key="jobs.id", ondelete="CASCADE")
-    project_id: int | None = Field(
+    instruction_id: int | None = Field(
         default=None, foreign_key="projects.id", ondelete="SET NULL"
     )
     conducted_by_user_id: int | None = Field(
@@ -105,7 +105,7 @@ class Survey(SurveyBase, table=True):
 
     # Relationships
     job: "Job" = Relationship(back_populates="surveys")
-    project: Optional["Project"] = Relationship()
+    instruction: Optional["Instruction"] = Relationship()
     conducted_by_user: Optional["User"] = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Survey.conducted_by_user_id]"}
     )
@@ -123,7 +123,7 @@ class Survey(SurveyBase, table=True):
 
 class SurveyCreate(SQLModel):
     job_id: int
-    project_id: int | None = None
+    instruction_id: int | None = None
     conducted_date: date_type
     conducted_time: time_type | None = None
     conducted_by_user_id: int | None = None
@@ -137,7 +137,7 @@ class SurveyCreate(SQLModel):
 class SurveyUpdate(SQLModel):
     conducted_date: date_type | None = None
     conducted_time: time_type | None = None
-    project_id: int | None = None
+    instruction_id: int | None = None
     conducted_by_user_id: int | None = None
     surveyor_ids: list[int] | None = None  # New: list of surveyor user IDs
     site_notes: str | None = None
@@ -151,9 +151,13 @@ class ConductedByUserRead(SQLModel):
     name: str
 
 
-class ProjectMinimalRead(SQLModel):
+class InstructionMinimalRead(SQLModel):
     id: int
     name: str
+
+
+# Backwards compatibility alias
+ProjectMinimalRead = InstructionMinimalRead
 
 
 class SurveyorRead(SQLModel):
@@ -167,10 +171,10 @@ class SurveyRead(SurveyBase):
     id: int
     org_id: int
     job_id: int
-    project_id: int | None = None
+    instruction_id: int | None = None
     conducted_by_user_id: int | None = None
     conducted_by_user: ConductedByUserRead | None = None
-    project: ProjectMinimalRead | None = None
+    instruction: InstructionMinimalRead | None = None
     surveyor_id: int | None = None  # Legacy
     surveyor: SurveyorRead | None = None  # Legacy
     surveyors: list[SurveyorRead] = []  # New: list of surveyors

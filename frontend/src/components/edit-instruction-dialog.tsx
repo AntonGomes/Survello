@@ -44,17 +44,17 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 
 import { 
-  updateProjectMutation, 
+  updateInstructionMutation, 
   readJobOptions,
-  readProjectTypesOptions,
+  readInstructionTypesOptions,
 } from "@/client/@tanstack/react-query.gen"
-import { FeeType, ProjectStatus, type ProjectReadWithProjectType } from "@/client/types.gen"
+import { FeeType, InstructionStatus, type InstructionReadWithInstructionType } from "@/client/types.gen"
 import { toast } from "sonner"
 
 const formSchema = z.object({
-  name: z.string().min(2, "Project name must be at least 2 characters"),
+  name: z.string().min(2, "Instruction name must be at least 2 characters"),
   description: z.string().optional().or(z.literal("")),
-  status: z.nativeEnum(ProjectStatus),
+  status: z.nativeEnum(InstructionStatus),
   fee_type: z.nativeEnum(FeeType),
   rate: z.number().min(0).optional(),
   forecasted_billable_hours: z.number().min(0).optional(),
@@ -62,67 +62,67 @@ const formSchema = z.object({
   deadline: z.date().optional().nullable(),
 })
 
-interface EditProjectDialogProps {
-  project: ProjectReadWithProjectType
+interface EditInstructionDialogProps {
+  instruction: InstructionReadWithInstructionType
   jobId: number
   trigger?: React.ReactNode
 }
 
-export function EditProjectDialog({ project, jobId, trigger }: EditProjectDialogProps) {
+export function EditInstructionDialog({ instruction, jobId, trigger }: EditInstructionDialogProps) {
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const { data: projectTypes } = useQuery({
-    ...readProjectTypesOptions(),
+  const { data: instructionTypes } = useQuery({
+    ...readInstructionTypesOptions(),
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: project.name,
-      description: project.description || "",
-      status: project.status || ProjectStatus.PLANNED,
-      fee_type: project.fee_type || FeeType.FIXED,
-      rate: project.rate || 0,
-      forecasted_billable_hours: project.forecasted_billable_hours || 0,
-      contingency_percentage: project.contingency_percentage || 0,
-      deadline: project.deadline ? new Date(project.deadline) : null,
+      name: instruction.name,
+      description: instruction.description || "",
+      status: instruction.status || InstructionStatus.PLANNED,
+      fee_type: instruction.fee_type || FeeType.FIXED,
+      rate: instruction.rate || 0,
+      forecasted_billable_hours: instruction.forecasted_billable_hours || 0,
+      contingency_percentage: instruction.contingency_percentage || 0,
+      deadline: instruction.deadline ? new Date(instruction.deadline) : null,
     },
   })
 
-  // Reset form when dialog opens with fresh project data
+  // Reset form when dialog opens with fresh instruction data
   useEffect(() => {
     if (open) {
       form.reset({
-        name: project.name,
-        description: project.description || "",
-        status: project.status || ProjectStatus.PLANNED,
-        fee_type: project.fee_type || FeeType.FIXED,
-        rate: project.rate || 0,
-        forecasted_billable_hours: project.forecasted_billable_hours || 0,
-        contingency_percentage: project.contingency_percentage || 0,
-        deadline: project.deadline ? new Date(project.deadline) : null,
+        name: instruction.name,
+        description: instruction.description || "",
+        status: instruction.status || InstructionStatus.PLANNED,
+        fee_type: instruction.fee_type || FeeType.FIXED,
+        rate: instruction.rate || 0,
+        forecasted_billable_hours: instruction.forecasted_billable_hours || 0,
+        contingency_percentage: instruction.contingency_percentage || 0,
+        deadline: instruction.deadline ? new Date(instruction.deadline) : null,
       })
     }
-  }, [open, project, form])
+  }, [open, instruction, form])
 
-  const { mutate: updateProject, isPending } = useMutation({
-    ...updateProjectMutation(),
+  const { mutate: updateInstruction, isPending } = useMutation({
+    ...updateInstructionMutation(),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: readJobOptions({ path: { job_id: jobId } }).queryKey,
       })
-      toast.success("Project updated")
+      toast.success("Instruction updated")
       setOpen(false)
     },
     onError: () => {
-      toast.error("Failed to update project")
+      toast.error("Failed to update instruction")
     },
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    updateProject({
-      path: { project_id: project.id },
+    updateInstruction({
+      path: { instruction_id: instruction.id },
       body: {
         name: values.name,
         description: values.description || null,
@@ -151,9 +151,9 @@ export function EditProjectDialog({ project, jobId, trigger }: EditProjectDialog
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Project</DialogTitle>
+          <DialogTitle>Edit Instruction</DialogTitle>
           <DialogDescription>
-            Update project details. {project.project_type?.name && `Type: ${project.project_type.name}`}
+            Update instruction details. {instruction.instruction_type?.name && `Type: ${instruction.instruction_type.name}`}
           </DialogDescription>
         </DialogHeader>
 
@@ -165,7 +165,7 @@ export function EditProjectDialog({ project, jobId, trigger }: EditProjectDialog
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project Name</FormLabel>
+                  <FormLabel>Instruction Name</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -185,7 +185,7 @@ export function EditProjectDialog({ project, jobId, trigger }: EditProjectDialog
                     <Textarea 
                       {...field} 
                       rows={3}
-                      placeholder="Add a project description..."
+                      placeholder="Add an instruction description..."
                     />
                   </FormControl>
                   <FormMessage />
@@ -208,7 +208,7 @@ export function EditProjectDialog({ project, jobId, trigger }: EditProjectDialog
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(ProjectStatus).map((status) => (
+                        {Object.values(InstructionStatus).map((status) => (
                           <SelectItem key={status} value={status} className="capitalize">
                             {status}
                           </SelectItem>

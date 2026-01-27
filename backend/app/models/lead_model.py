@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, List, Any
+from typing import TYPE_CHECKING, List, Any, ClassVar
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from sqlalchemy import JSON, Column
@@ -32,7 +32,7 @@ class LeadBase(SQLModel):
 
 
 class Lead(LeadBase, table=True):
-    __tablename__ = "leads"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "leads"
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(

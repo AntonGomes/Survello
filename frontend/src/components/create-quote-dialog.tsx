@@ -43,13 +43,13 @@ import {
   readQuotesOptions,
   readClientsOptions,
   readLeadsOptions,
-  readProjectTypesOptions,
+  readInstructionTypesOptions,
 } from "@/client/@tanstack/react-query.gen";
 import { QuoteStatus, type QuoteCreate, type QuoteLineCreate } from "@/client/types.gen";
 import { Separator } from "@/components/ui/separator";
 
 const quoteLineSchema = z.object({
-  project_type_id: z.string().min(1, "Please select a project type"),
+  instruction_type_id: z.string().min(1, "Please select an instruction type"),
   estimated_fee: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -90,8 +90,8 @@ export function CreateQuoteDialog({
     enabled: !initialClientId && !initialLeadId,
   });
 
-  const { data: projectTypes, isLoading: isLoadingProjectTypes } = useQuery({
-    ...readProjectTypesOptions(),
+  const { data: instructionTypes, isLoading: isLoadingInstructionTypes } = useQuery({
+    ...readInstructionTypesOptions(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -157,7 +157,7 @@ export function CreateQuoteDialog({
     }
 
     const quoteLines: QuoteLineCreate[] = (values.lines || []).map(line => ({
-      project_type_id: parseInt(line.project_type_id),
+      instruction_type_id: parseInt(line.instruction_type_id),
       estimated_fee: line.estimated_fee ? parseFloat(line.estimated_fee) : null,
       notes: line.notes || null,
     }));
@@ -382,24 +382,24 @@ export function CreateQuoteDialog({
               />
             </div>
 
-            {/* Quote Lines (Potential Projects) */}
+            {/* Quote Lines (Potential Instructions) */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">Potential Projects</h4>
+                <h4 className="text-sm font-medium">Potential Instructions</h4>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => append({ project_type_id: "", estimated_fee: "", notes: "" })}
+                  onClick={() => append({ instruction_type_id: "", estimated_fee: "", notes: "" })}
                 >
                   <Plus className="mr-1 h-3 w-3" />
-                  Add Project
+                  Add Instruction
                 </Button>
               </div>
 
               {fields.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-2">
-                  No projects added yet. Add potential projects this quote covers.
+                  No instructions added yet. Add potential instructions this quote covers.
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -410,10 +410,10 @@ export function CreateQuoteDialog({
                     >
                       <FormField
                         control={form.control}
-                        name={`lines.${index}.project_type_id`}
+                        name={`lines.${index}.instruction_type_id`}
                         render={({ field }) => (
                           <FormItem className="col-span-5">
-                            <FormLabel className="text-xs">Project Type</FormLabel>
+                            <FormLabel className="text-xs">Instruction Type</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger className="h-8">
@@ -421,12 +421,12 @@ export function CreateQuoteDialog({
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {isLoadingProjectTypes ? (
+                                {isLoadingInstructionTypes ? (
                                   <div className="flex items-center justify-center p-2">
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   </div>
                                 ) : (
-                                  projectTypes?.map((pt) => (
+                                  instructionTypes?.map((pt) => (
                                     <SelectItem key={pt.id} value={pt.id.toString()}>
                                       {pt.name}
                                     </SelectItem>

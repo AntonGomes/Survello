@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from sqlalchemy import JSON, Column
@@ -23,7 +23,7 @@ class RunStatus(str, Enum):
 # RUN FILE LINK (Many-to-Many)
 # -----------------------------------------------------------------------------
 class RunFileLink(SQLModel, table=True):
-    __tablename__ = "run_file_links"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "run_file_links"
     run_id: int | None = Field(
         default=None, foreign_key="runs.id", primary_key=True, ondelete="CASCADE"
     )
@@ -42,7 +42,7 @@ class RunBase(SQLModel):
 
 
 class Run(RunBase, table=True):
-    __tablename__ = "runs"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "runs"
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(

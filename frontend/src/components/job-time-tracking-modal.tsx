@@ -33,38 +33,38 @@ import {
   logTimeManuallyMutation,
   getCurrentTimerOptions,
   readJobOptions,
-  updateProjectMutation,
+  updateInstructionMutation,
   readOrgOptions,
 } from "@/client/@tanstack/react-query.gen"
-import { FeeType, type ProjectRead } from "@/client"
+import { FeeType, type InstructionRead } from "@/client"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 interface JobTimeTrackingModalProps {
   jobId: number
-  projects: ProjectRead[]
+  instructions: InstructionRead[]
   open: boolean
   onOpenChange: (open: boolean) => void
-  onTimeLogged?: (projectName: string, description: string, durationMinutes: number, collaboratorNames?: string[]) => void
-  defaultProjectId?: number
+  onTimeLogged?: (instructionName: string, description: string, durationMinutes: number, collaboratorNames?: string[]) => void
+  defaultInstructionId?: number
 }
 
-type ModalStep = "select-project" | "confirm-billing" | "recording" | "stopped-collaborators"
+type ModalStep = "select-instruction" | "confirm-billing" | "recording" | "stopped-collaborators"
 
 export function JobTimeTrackingModal({
   jobId,
-  projects,
+  instructions,
   open,
   onOpenChange,
   onTimeLogged,
-  defaultProjectId,
+  defaultInstructionId,
 }: JobTimeTrackingModalProps) {
   const queryClient = useQueryClient()
 
   // Modal step state
-  const [step, setStep] = useState<ModalStep>("select-project")
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(
-    defaultProjectId ? defaultProjectId.toString() : ""
+  const [step, setStep] = useState<ModalStep>("select-instruction")
+  const [selectedInstructionId, setSelectedInstructionId] = useState<string>(
+    defaultInstructionId ? defaultInstructionId.toString() : ""
   )
   const [description, setDescription] = useState("")
   
@@ -83,7 +83,7 @@ export function JobTimeTrackingModal({
   const [selectedCollaborators, setSelectedCollaborators] = useState<number[]>([])
   const [stoppedDuration, setStoppedDuration] = useState<number>(0)
   const [stoppedDescription, setStoppedDescription] = useState<string>("")
-  const [stoppedProjectId, setStoppedProjectId] = useState<number | null>(null)
+  const [stoppedInstructionId, setStoppedInstructionId] = useState<number | null>(null)
 
   // Fetch org users for collaborator selection
   const { data: org } = useQuery({
@@ -96,27 +96,27 @@ export function JobTimeTrackingModal({
     refetchInterval: isRecording ? 1000 : false,
   })
 
-  const selectedProject = useMemo(() => {
-    if (!selectedProjectId) return null
-    return projects.find(p => p.id.toString() === selectedProjectId)
-  }, [selectedProjectId, projects])
+  const selectedInstruction = useMemo(() => {
+    if (!selectedInstructionId) return null
+    return instructions.find(p => p.id.toString() === selectedInstructionId)
+  }, [selectedInstructionId, instructions])
 
-  const isHourlyOrMixed = selectedProject?.fee_type === FeeType.HOURLY || selectedProject?.fee_type === FeeType.MIXED
+  const isHourlyOrMixed = selectedInstruction?.fee_type === FeeType.HOURLY || selectedInstruction?.fee_type === FeeType.MIXED
 
-  // Update project mutation for changing fee type
-  const { mutate: updateProject, isPending: isUpdatingProject } = useMutation({
-    ...updateProjectMutation(),
+  // Update instruction mutation for changing fee type
+  const { mutate: updateInstruction, isPending: isUpdatingInstruction } = useMutation({
+    ...updateInstructionMutation(),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: readJobOptions({ path: { job_id: jobId } }).queryKey,
       })
-      toast.success("Project billing updated to hourly")
-      setStep("select-project")
+      toast.success("Instruction billing updated to hourly")
+      setStep("select-instruction")
       // After updating, proceed with recording
       handleStartRecordingConfirmed()
     },
     onError: () => {
-      toast.error("Failed to update project billing")
+      toast.error("Failed to update instruction billing")
     },
   })
 
@@ -144,7 +144,7 @@ export function JobTimeTrackingModal({
       // Store stopped data for collaborator selection
       setStoppedDuration(data.duration_minutes || 0)
       setStoppedDescription(description || data.description || "")
-      setStoppedProjectId(data.project_id || null)
+      setStoppedInstructionId(data.instruction_id || null)
       
       // Invalidate queries
       queryClient.invalidateQueries({
@@ -175,7 +175,7 @@ export function JobTimeTrackingModal({
       // Store stopped data for collaborator selection
       setStoppedDuration(totalMinutes)
       setStoppedDescription(manualDescription)
-      setStoppedProjectId(data.project_id || null)
+      setStoppedInstructionId(data.instruction_id || null)
       
       // Move to collaborator selection step
       setStep("stopped-collaborators")
@@ -215,12 +215,12 @@ export function JobTimeTrackingModal({
   // Check if we already have an active timer
   useEffect(() => {
     if (activeTimer && activeTimer.start_time) {
-      const timerProjectId = activeTimer.project_id
-      const isForThisJob = projects.some(p => p.id === timerProjectId)
+      const timerInstructionId = activeTimer.instruction_id
+      const isForThisJob = instructions.some(p => p.id === timerInstructionId)
       
       if (isForThisJob) {
         setIsRecording(true)
-        setSelectedProjectId(timerProjectId?.toString() || "")
+        setSelectedInstructionId(timerInstructionId?.toString() || "")
         setStep("recording")
         // Calculate elapsed from start_time
         const startTime = new Date(activeTimer.start_time).getTime()
@@ -228,15 +228,15 @@ export function JobTimeTrackingModal({
         setElapsedSeconds(Math.floor((now - startTime) / 1000))
       }
     }
-  }, [activeTimer, projects])
+  }, [activeTimer, instructions])
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (!open) {
       // Only reset if not recording
       if (!isRecording) {
-        setStep("select-project")
-        setSelectedProjectId(defaultProjectId ? defaultProjectId.toString() : "")
+        setStep("select-instruction")
+        setSelectedInstructionId(defaultInstructionId ? defaultInstructionId.toString() : "")
         setDescription("")
         setManualHours("")
         setManualMinutes("")
@@ -245,7 +245,7 @@ export function JobTimeTrackingModal({
         setActiveTab("timer")
       }
     }
-  }, [open, isRecording, defaultProjectId])
+  }, [open, isRecording, defaultInstructionId])
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600)
@@ -254,13 +254,13 @@ export function JobTimeTrackingModal({
     return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
-  const handleProjectSelect = (projectId: string) => {
-    setSelectedProjectId(projectId)
+  const handleInstructionSelect = (instructionId: string) => {
+    setSelectedInstructionId(instructionId)
   }
 
   const handleStartRecording = () => {
-    if (!selectedProject) {
-      toast.error("Please select a project first")
+    if (!selectedInstruction) {
+      toast.error("Please select an instruction first")
       return
     }
 
@@ -274,21 +274,21 @@ export function JobTimeTrackingModal({
   }
 
   const handleStartRecordingConfirmed = () => {
-    if (!selectedProject) return
+    if (!selectedInstruction) return
     
     startTimer({
       body: {
-        project_id: selectedProject.id,
+        instruction_id: selectedInstruction.id,
         description: description || undefined,
       },
     })
   }
 
   const handleConvertToHourly = () => {
-    if (!selectedProject) return
+    if (!selectedInstruction) return
     
-    updateProject({
-      path: { project_id: selectedProject.id },
+    updateInstruction({
+      path: { instruction_id: selectedInstruction.id },
       body: { fee_type: FeeType.HOURLY },
     })
   }
@@ -300,12 +300,12 @@ export function JobTimeTrackingModal({
   }
 
   const handleManualSubmit = () => {
-    if (!selectedProject) {
-      toast.error("Please select a project first")
+    if (!selectedInstruction) {
+      toast.error("Please select an instruction first")
       return
     }
 
-    // Check if project is hourly/mixed
+    // Check if instruction is hourly/mixed
     if (!isHourlyOrMixed) {
       setStep("confirm-billing")
       return
@@ -322,7 +322,7 @@ export function JobTimeTrackingModal({
 
     logManually({
       body: {
-        project_id: selectedProject.id,
+        instruction_id: selectedInstruction.id,
         duration_minutes: totalMinutes,
         description: manualDescription || undefined,
       },
@@ -330,16 +330,16 @@ export function JobTimeTrackingModal({
   }
 
   const handleFinishWithCollaborators = async () => {
-    const projectName = projects.find(p => p.id === stoppedProjectId)?.name || "Project"
+    const instructionName = instructions.find(p => p.id === stoppedInstructionId)?.name || "Instruction"
     
     // Log time for each collaborator
-    if (selectedCollaborators.length > 0 && stoppedProjectId) {
+    if (selectedCollaborators.length > 0 && stoppedInstructionId) {
       for (let i = 0; i < selectedCollaborators.length; i++) {
         // Note: This logs time under current user, not collaborator
         // For proper multi-user logging, backend would need enhancement
         logCollaboratorTime({
           body: {
-            project_id: stoppedProjectId,
+            instruction_id: stoppedInstructionId,
             duration_minutes: stoppedDuration,
             description: stoppedDescription ? `${stoppedDescription} (with collaborators)` : "Collaborative work",
           },
@@ -355,12 +355,12 @@ export function JobTimeTrackingModal({
     toast.success(`Logged ${stoppedDuration} minutes`)
     
     if (onTimeLogged) {
-      onTimeLogged(projectName, stoppedDescription, stoppedDuration, collaboratorNames.length > 0 ? collaboratorNames : undefined)
+      onTimeLogged(instructionName, stoppedDescription, stoppedDuration, collaboratorNames.length > 0 ? collaboratorNames : undefined)
     }
 
     // Reset and close
-    setStep("select-project")
-    setSelectedProjectId("")
+    setStep("select-instruction")
+    setSelectedInstructionId("")
     setDescription("")
     setManualHours("")
     setManualMinutes("")
@@ -370,17 +370,17 @@ export function JobTimeTrackingModal({
   }
 
   const handleSkipCollaborators = () => {
-    const projectName = projects.find(p => p.id === stoppedProjectId)?.name || "Project"
+    const instructionName = instructions.find(p => p.id === stoppedInstructionId)?.name || "Instruction"
     
     toast.success(`Logged ${stoppedDuration} minutes`)
     
     if (onTimeLogged) {
-      onTimeLogged(projectName, stoppedDescription, stoppedDuration)
+      onTimeLogged(instructionName, stoppedDescription, stoppedDuration)
     }
 
     // Reset and close
-    setStep("select-project")
-    setSelectedProjectId("")
+    setStep("select-instruction")
+    setSelectedInstructionId("")
     setDescription("")
     setManualHours("")
     setManualMinutes("")
@@ -398,13 +398,13 @@ export function JobTimeTrackingModal({
   }
 
   // Check if timer is running for a different job
-  const timerOnDifferentJob = activeTimer && !projects.some(p => p.id === activeTimer.project_id)
+  const timerOnDifferentJob = activeTimer && !instructions.some(p => p.id === activeTimer.instruction_id)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        {/* Step: Select Project */}
-        {step === "select-project" && (
+        {/* Step: Select Instruction */}
+        {step === "select-instruction" && (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -412,7 +412,7 @@ export function JobTimeTrackingModal({
                 Log Time
               </DialogTitle>
               <DialogDescription>
-                Select a project and track your time
+                Select an instruction and track your time
               </DialogDescription>
             </DialogHeader>
 
@@ -428,19 +428,19 @@ export function JobTimeTrackingModal({
               </div>
             ) : (
               <div className="space-y-4 py-4">
-                {/* Project Selection */}
+                {/* Instruction Selection */}
                 <div className="space-y-2">
-                  <Label>Project</Label>
-                  <Select value={selectedProjectId} onValueChange={handleProjectSelect}>
+                  <Label>Instruction</Label>
+                  <Select value={selectedInstructionId} onValueChange={handleInstructionSelect}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a project..." />
+                      <SelectValue placeholder="Select an instruction..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {projects.map((project) => (
-                        <SelectItem key={project.id} value={project.id.toString()}>
+                      {instructions.map((instruction) => (
+                        <SelectItem key={instruction.id} value={instruction.id.toString()}>
                           <div className="flex items-center gap-2">
-                            <span>{project.name}</span>
-                            {(project.fee_type === FeeType.HOURLY || project.fee_type === FeeType.MIXED) && (
+                            <span>{instruction.name}</span>
+                            {(instruction.fee_type === FeeType.HOURLY || instruction.fee_type === FeeType.MIXED) && (
                               <span className="text-xs text-muted-foreground">(hourly)</span>
                             )}
                           </div>
@@ -450,7 +450,7 @@ export function JobTimeTrackingModal({
                   </Select>
                 </div>
 
-                {selectedProject && (
+                {selectedInstruction && (
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="timer">Timer</TabsTrigger>
@@ -474,7 +474,7 @@ export function JobTimeTrackingModal({
                       <Button
                         size="lg"
                         onClick={handleStartRecording}
-                        disabled={isStarting || !selectedProjectId}
+                        disabled={isStarting || !selectedInstructionId}
                         className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
                       >
                         <Circle className="h-4 w-4 fill-current" />
@@ -527,7 +527,7 @@ export function JobTimeTrackingModal({
 
                       <Button
                         onClick={handleManualSubmit}
-                        disabled={isLoggingManually || !selectedProjectId}
+                        disabled={isLoggingManually || !selectedInstructionId}
                         className="w-full gap-2"
                       >
                         <Clock className="h-4 w-4" />
@@ -542,7 +542,7 @@ export function JobTimeTrackingModal({
         )}
 
         {/* Step: Confirm Billing Change */}
-        {step === "confirm-billing" && selectedProject && (
+        {step === "confirm-billing" && selectedInstruction && (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -550,7 +550,7 @@ export function JobTimeTrackingModal({
                 Change Billing Type?
               </DialogTitle>
               <DialogDescription>
-                <span className="font-medium">{selectedProject.name}</span> is currently set to <span className="font-medium">{selectedProject.fee_type}</span> billing.
+                <span className="font-medium">{selectedInstruction.name}</span> is currently set to <span className="font-medium">{selectedInstruction.fee_type}</span> billing.
               </DialogDescription>
             </DialogHeader>
 
@@ -559,24 +559,24 @@ export function JobTimeTrackingModal({
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Time tracking requires hourly billing</AlertTitle>
                 <AlertDescription>
-                  To track time on this project, you need to change its billing type to hourly. Would you like to proceed?
+                  To track time on this instruction, you need to change its billing type to hourly. Would you like to proceed?
                 </AlertDescription>
               </Alert>
 
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setStep("select-project")}
+                  onClick={() => setStep("select-instruction")}
                   className="flex-1"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleConvertToHourly}
-                  disabled={isUpdatingProject}
+                  disabled={isUpdatingInstruction}
                   className="flex-1"
                 >
-                  {isUpdatingProject ? "Updating..." : "Change to Hourly"}
+                  {isUpdatingInstruction ? "Updating..." : "Change to Hourly"}
                 </Button>
               </div>
             </div>
@@ -595,7 +595,7 @@ export function JobTimeTrackingModal({
                 Recording Time
               </DialogTitle>
               <DialogDescription>
-                {selectedProject?.name || activeTimer?.project_name}
+                {selectedInstruction?.name || activeTimer?.instruction_name}
               </DialogDescription>
             </DialogHeader>
 

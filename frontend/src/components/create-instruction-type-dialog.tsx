@@ -25,13 +25,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { 
-  createProjectTypeMutation,
-  readProjectTypesOptions
+  createInstructionTypeMutation,
+  readInstructionTypesOptions
 } from "@/client/@tanstack/react-query.gen";
-import { FeeType, type ProjectTypeCreate } from "@/client/types.gen";
+import { FeeType, type InstructionTypeCreate } from "@/client/types.gen";
 import { toast } from "sonner";
 
-export function CreateProjectTypeDialog() {
+export function CreateInstructionTypeDialog() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   
@@ -49,16 +49,16 @@ export function CreateProjectTypeDialog() {
     setContingency(0);
   };
 
-  const { mutate: createProjectType, isPending } = useMutation({
-    ...createProjectTypeMutation(),
+  const { mutate: createInstructionType, isPending } = useMutation({
+    ...createInstructionTypeMutation(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: readProjectTypesOptions().queryKey });
+      queryClient.invalidateQueries({ queryKey: readInstructionTypesOptions().queryKey });
       setOpen(false);
       resetForm();
-      toast.success("Project type created");
+      toast.success("Instruction type created");
     },
     onError: () => {
-      toast.error("Failed to create project type");
+      toast.error("Failed to create instruction type");
     },
   });
 
@@ -70,7 +70,7 @@ export function CreateProjectTypeDialog() {
       return;
     }
 
-    const projectTypeData: ProjectTypeCreate = {
+    const instructionTypeData: InstructionTypeCreate = {
       name,
       description: description || null,
       rate,
@@ -79,8 +79,8 @@ export function CreateProjectTypeDialog() {
       default_template_file_id: null,
     };
 
-    createProjectType({
-      body: projectTypeData,
+    createInstructionType({
+      body: instructionTypeData,
     });
   }
 
@@ -89,14 +89,14 @@ export function CreateProjectTypeDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Create Project Type
+          Create Instruction Type
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Project Type</DialogTitle>
+          <DialogTitle>Create Instruction Type</DialogTitle>
           <DialogDescription>
-            Define a new project type with default settings for your organization.
+            Define a new instruction type with default settings for your organization.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -114,7 +114,7 @@ export function CreateProjectTypeDialog() {
             <Label htmlFor="description">Description</Label>
             <Textarea 
               id="description"
-              placeholder="Describe this project type..."
+              placeholder="Describe this instruction type..."
               className="resize-none"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -158,7 +158,7 @@ export function CreateProjectTypeDialog() {
               </SelectContent>
             </Select>
             <p className="text-sm text-muted-foreground">
-              This will be the default fee type for projects of this type.
+              This will be the default fee type for instructions of this type.
             </p>
           </div>
           <DialogFooter>

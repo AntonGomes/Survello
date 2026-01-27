@@ -6,6 +6,26 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health Check",
+        "description": "Health check endpoint that also tests database connectivity.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/register": {
       "post": {
         "tags": [
@@ -938,13 +958,13 @@
         }
       }
     },
-    "/projects/types": {
+    "/instructions/types": {
       "get": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Read Project Types",
-        "operationId": "readProjectTypes",
+        "summary": "Read Instruction Types",
+        "operationId": "readInstructionTypes",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -952,10 +972,10 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ProjectTypeRead"
+                    "$ref": "#/components/schemas/InstructionTypeRead"
                   },
                   "type": "array",
-                  "title": "Response Readprojecttypes"
+                  "title": "Response Readinstructiontypes"
                 }
               }
             }
@@ -964,15 +984,15 @@
       },
       "post": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Create Project Type",
-        "operationId": "createProjectType",
+        "summary": "Create Instruction Type",
+        "operationId": "createInstructionType",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProjectTypeCreate"
+                "$ref": "#/components/schemas/InstructionTypeCreate"
               }
             }
           },
@@ -984,7 +1004,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectTypeRead"
+                  "$ref": "#/components/schemas/InstructionTypeRead"
                 }
               }
             }
@@ -1002,13 +1022,13 @@
         }
       }
     },
-    "/projects/types/{type_id}": {
+    "/instructions/types/{type_id}": {
       "patch": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Update Project Type",
-        "operationId": "updateProjectType",
+        "summary": "Update Instruction Type",
+        "operationId": "updateInstructionType",
         "parameters": [
           {
             "name": "type_id",
@@ -1025,7 +1045,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProjectTypeUpdate"
+                "$ref": "#/components/schemas/InstructionTypeUpdate"
               }
             }
           }
@@ -1036,7 +1056,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectTypeRead"
+                  "$ref": "#/components/schemas/InstructionTypeRead"
                 }
               }
             }
@@ -1054,19 +1074,19 @@
         }
       }
     },
-    "/projects/": {
+    "/instructions/": {
       "post": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Create Project",
-        "operationId": "createProject",
+        "summary": "Create Instruction",
+        "operationId": "createInstruction",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProjectCreate"
+                "$ref": "#/components/schemas/InstructionCreate"
               }
             }
           }
@@ -1077,7 +1097,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectRead"
+                  "$ref": "#/components/schemas/InstructionRead"
                 }
               }
             }
@@ -1096,10 +1116,10 @@
       },
       "get": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Read Projects",
-        "operationId": "readProjects",
+        "summary": "Read Instructions",
+        "operationId": "readInstructions",
         "parameters": [
           {
             "name": "offset",
@@ -1147,9 +1167,9 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ProjectRead"
+                    "$ref": "#/components/schemas/InstructionRead"
                   },
-                  "title": "Response Readprojects"
+                  "title": "Response Readinstructions"
                 }
               }
             }
@@ -1167,21 +1187,21 @@
         }
       }
     },
-    "/projects/{project_id}": {
+    "/instructions/{instruction_id}": {
       "get": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Read Project",
-        "operationId": "readProject",
+        "summary": "Read Instruction",
+        "operationId": "readInstruction",
         "parameters": [
           {
-            "name": "project_id",
+            "name": "instruction_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
-              "title": "Project Id"
+              "title": "Instruction Id"
             }
           }
         ],
@@ -1191,7 +1211,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectReadDetail"
+                  "$ref": "#/components/schemas/InstructionReadDetail"
                 }
               }
             }
@@ -1210,18 +1230,18 @@
       },
       "patch": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Update Project",
-        "operationId": "updateProject",
+        "summary": "Update Instruction",
+        "operationId": "updateInstruction",
         "parameters": [
           {
-            "name": "project_id",
+            "name": "instruction_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
-              "title": "Project Id"
+              "title": "Instruction Id"
             }
           }
         ],
@@ -1230,7 +1250,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProjectUpdate"
+                "$ref": "#/components/schemas/InstructionUpdate"
               }
             }
           }
@@ -1241,7 +1261,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectRead"
+                  "$ref": "#/components/schemas/InstructionRead"
                 }
               }
             }
@@ -1260,18 +1280,18 @@
       },
       "delete": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Delete Project",
-        "operationId": "deleteProject",
+        "summary": "Delete Instruction",
+        "operationId": "deleteInstruction",
         "parameters": [
           {
-            "name": "project_id",
+            "name": "instruction_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
-              "title": "Project Id"
+              "title": "Instruction Id"
             }
           }
         ],
@@ -1292,22 +1312,22 @@
         }
       }
     },
-    "/projects/{project_id}/updates": {
+    "/instructions/{instruction_id}/updates": {
       "post": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Add Project Update",
-        "description": "Add a new update to the project's update feed.",
-        "operationId": "addProjectUpdate",
+        "summary": "Add Instruction Update",
+        "description": "Add a new update to the instruction's update feed.",
+        "operationId": "addInstructionUpdate",
         "parameters": [
           {
-            "name": "project_id",
+            "name": "instruction_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
-              "title": "Project Id"
+              "title": "Instruction Id"
             }
           }
         ],
@@ -1316,7 +1336,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProjectAddUpdate"
+                "$ref": "#/components/schemas/InstructionAddUpdate"
               }
             }
           }
@@ -1327,7 +1347,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectRead"
+                  "$ref": "#/components/schemas/InstructionRead"
                 }
               }
             }
@@ -1345,22 +1365,22 @@
         }
       }
     },
-    "/projects/{project_id}/updates/{update_id}": {
+    "/instructions/{instruction_id}/updates/{update_id}": {
       "delete": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Delete Project Update",
-        "description": "Remove an update from the project's update feed by its UUID.",
-        "operationId": "deleteProjectUpdate",
+        "summary": "Delete Instruction Update",
+        "description": "Remove an update from the instruction's update feed by its UUID.",
+        "operationId": "deleteInstructionUpdate",
         "parameters": [
           {
-            "name": "project_id",
+            "name": "instruction_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
-              "title": "Project Id"
+              "title": "Instruction Id"
             }
           },
           {
@@ -1379,7 +1399,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProjectRead"
+                  "$ref": "#/components/schemas/InstructionRead"
                 }
               }
             }
@@ -1397,22 +1417,22 @@
         }
       }
     },
-    "/projects/{project_id}/files": {
+    "/instructions/{instruction_id}/files": {
       "get": {
         "tags": [
-          "Projects"
+          "Instructions"
         ],
-        "summary": "Read Project Files",
-        "description": "Get all files attached to a project.",
-        "operationId": "readProjectFiles",
+        "summary": "Read Instruction Files",
+        "description": "Get all files attached to an instruction.",
+        "operationId": "readInstructionFiles",
         "parameters": [
           {
-            "name": "project_id",
+            "name": "instruction_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
-              "title": "Project Id"
+              "title": "Instruction Id"
             }
           }
         ],
@@ -1426,7 +1446,7 @@
                   "items": {
                     "$ref": "#/components/schemas/FileRead"
                   },
-                  "title": "Response Readprojectfiles"
+                  "title": "Response Readinstructionfiles"
                 }
               }
             }
@@ -1885,7 +1905,7 @@
           "Time Tracking"
         ],
         "summary": "Start Timer",
-        "description": "Start a new timer for a project. Stops any existing active timer.",
+        "description": "Start a new timer for an instruction. Stops any existing active timer.",
         "operationId": "startTimer",
         "requestBody": {
           "content": {
@@ -1927,7 +1947,7 @@
           "Time Tracking"
         ],
         "summary": "Stop Timer",
-        "description": "Stop the currently active timer and update project actual hours.",
+        "description": "Stop the currently active timer and update instruction actual hours.",
         "operationId": "stopTimer",
         "parameters": [
           {
@@ -2043,22 +2063,22 @@
         }
       }
     },
-    "/time/project/{project_id}": {
+    "/time/instruction/{instruction_id}": {
       "get": {
         "tags": [
           "Time Tracking"
         ],
-        "summary": "Get Project Time Entries",
-        "description": "Get all time entries for a specific project.",
-        "operationId": "getProjectTimeEntries",
+        "summary": "Get Instruction Time Entries",
+        "description": "Get all time entries for a specific instruction.",
+        "operationId": "getInstructionTimeEntries",
         "parameters": [
           {
-            "name": "project_id",
+            "name": "instruction_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
-              "title": "Project Id"
+              "title": "Instruction Id"
             }
           }
         ],
@@ -2072,7 +2092,7 @@
                   "items": {
                     "$ref": "#/components/schemas/TimeEntryRead"
                   },
-                  "title": "Response Getprojecttimeentries"
+                  "title": "Response Getinstructiontimeentries"
                 }
               }
             }
@@ -2881,7 +2901,7 @@
           "Surveys"
         ],
         "summary": "Read Surveys",
-        "description": "Retrieve surveys, optionally filtered by job or project.",
+        "description": "Retrieve surveys, optionally filtered by job or instruction.",
         "operationId": "readSurveys",
         "parameters": [
           {
@@ -2901,7 +2921,7 @@
             }
           },
           {
-            "name": "project_id",
+            "name": "instruction_id",
             "in": "query",
             "required": false,
             "schema": {
@@ -2913,7 +2933,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Project Id"
+              "title": "Instruction Id"
             }
           },
           {
@@ -3473,6 +3493,48 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/waitlist": {
+      "post": {
+        "tags": [
+          "Waitlist"
+        ],
+        "summary": "Join Waitlist",
+        "description": "Join the waitlist for early access.\nSends confirmation email to user and notification to admin.",
+        "operationId": "joinWaitlist",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaitlistCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaitlistRead"
+                }
               }
             }
           },
@@ -4239,7 +4301,7 @@
             ],
             "title": "Run Id"
           },
-          "project_id": {
+          "instruction_id": {
             "anyOf": [
               {
                 "type": "integer"
@@ -4248,7 +4310,7 @@
                 "type": "null"
               }
             ],
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "survey_id": {
             "anyOf": [
@@ -4411,7 +4473,7 @@
             ],
             "title": "Job Id"
           },
-          "project_id": {
+          "instruction_id": {
             "anyOf": [
               {
                 "type": "integer"
@@ -4420,7 +4482,7 @@
                 "type": "null"
               }
             ],
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "survey_id": {
             "anyOf": [
@@ -4512,7 +4574,7 @@
             ],
             "title": "Job Id"
           },
-          "project_id": {
+          "instruction_id": {
             "anyOf": [
               {
                 "type": "integer"
@@ -4521,7 +4583,7 @@
                 "type": "null"
               }
             ],
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "survey_id": {
             "anyOf": [
@@ -4550,6 +4612,1205 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "InstructionAddUpdate": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "time_entry_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Entry Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "InstructionAddUpdate",
+        "description": "Request body for adding an update to an instruction."
+      },
+      "InstructionCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours",
+            "default": 0.0
+          },
+          "actual_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Hours",
+            "default": 0.0
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage",
+            "default": 0.0
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount",
+            "default": 0.0
+          },
+          "final_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Settlement Amount",
+            "default": 0.0
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount",
+            "default": 0.0
+          },
+          "fee_type": {
+            "$ref": "#/components/schemas/FeeType"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InstructionStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
+          },
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          },
+          "instruction_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction Type Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "fee_type",
+          "job_id"
+        ],
+        "title": "InstructionCreate"
+      },
+      "InstructionMinimalRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "InstructionMinimalRead"
+      },
+      "InstructionRead": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours",
+            "default": 0.0
+          },
+          "actual_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Hours",
+            "default": 0.0
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage",
+            "default": 0.0
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount",
+            "default": 0.0
+          },
+          "final_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Settlement Amount",
+            "default": 0.0
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount",
+            "default": 0.0
+          },
+          "fee_type": {
+            "$ref": "#/components/schemas/FeeType"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InstructionStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "instruction_type_id": {
+            "type": "integer",
+            "title": "Instruction Type Id"
+          },
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "fee_type",
+          "id",
+          "instruction_type_id",
+          "job_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "InstructionRead"
+      },
+      "InstructionReadDetail": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours",
+            "default": 0.0
+          },
+          "actual_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Hours",
+            "default": 0.0
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage",
+            "default": 0.0
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount",
+            "default": 0.0
+          },
+          "final_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Settlement Amount",
+            "default": 0.0
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount",
+            "default": 0.0
+          },
+          "fee_type": {
+            "$ref": "#/components/schemas/FeeType"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InstructionStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "instruction_type_id": {
+            "type": "integer",
+            "title": "Instruction Type Id"
+          },
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "instruction_type": {
+            "$ref": "#/components/schemas/InstructionTypeRead"
+          },
+          "job": {
+            "$ref": "#/components/schemas/JobReadMinimal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "fee_type",
+          "id",
+          "instruction_type_id",
+          "job_id",
+          "created_at",
+          "updated_at",
+          "instruction_type",
+          "job"
+        ],
+        "title": "InstructionReadDetail"
+      },
+      "InstructionReadWithInstructionType": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours",
+            "default": 0.0
+          },
+          "actual_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Hours",
+            "default": 0.0
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage",
+            "default": 0.0
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount",
+            "default": 0.0
+          },
+          "final_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Settlement Amount",
+            "default": 0.0
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount",
+            "default": 0.0
+          },
+          "fee_type": {
+            "$ref": "#/components/schemas/FeeType"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InstructionStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "instruction_type_id": {
+            "type": "integer",
+            "title": "Instruction Type Id"
+          },
+          "job_id": {
+            "type": "integer",
+            "title": "Job Id"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "instruction_type": {
+            "$ref": "#/components/schemas/InstructionTypeRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "fee_type",
+          "id",
+          "instruction_type_id",
+          "job_id",
+          "created_at",
+          "updated_at",
+          "instruction_type"
+        ],
+        "title": "InstructionReadWithInstructionType"
+      },
+      "InstructionStatus": {
+        "type": "string",
+        "enum": [
+          "planned",
+          "active",
+          "completed",
+          "archived"
+        ],
+        "title": "InstructionStatus"
+      },
+      "InstructionTypeCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
+          "default_fee_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "fixed"
+          },
+          "default_contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Contingency Percentage",
+            "default": 0.0
+          },
+          "default_template_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Template File Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "InstructionTypeCreate"
+      },
+      "InstructionTypeRead": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "default": 0.0
+          },
+          "default_fee_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "fixed"
+          },
+          "default_contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Contingency Percentage",
+            "default": 0.0
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "default_template_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Template File Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "InstructionTypeRead"
+      },
+      "InstructionTypeUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "default_fee_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default_contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Contingency Percentage"
+          },
+          "default_template_file_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Template File Id"
+          }
+        },
+        "type": "object",
+        "title": "InstructionTypeUpdate"
+      },
+      "InstructionUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "forecasted_billable_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Billable Hours"
+          },
+          "actual_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Hours"
+          },
+          "contingency_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contingency Percentage"
+          },
+          "forecasted_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Settlement Amount"
+          },
+          "final_settlement_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Settlement Amount"
+          },
+          "forecasted_fee_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forecasted Fee Amount"
+          },
+          "fee_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FeeType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InstructionStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updates": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updates"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "lead_user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead User Id"
+          }
+        },
+        "type": "object",
+        "title": "InstructionUpdate"
       },
       "InvitationAccept": {
         "properties": {
@@ -4802,12 +6063,12 @@
             "format": "date-time",
             "title": "Updated At"
           },
-          "projects": {
+          "instructions": {
             "items": {
-              "$ref": "#/components/schemas/ProjectReadWithProjectType"
+              "$ref": "#/components/schemas/InstructionReadWithInstructionType"
             },
             "type": "array",
-            "title": "Projects",
+            "title": "Instructions",
             "default": []
           }
         },
@@ -4893,12 +6154,12 @@
             "format": "date-time",
             "title": "Updated At"
           },
-          "projects": {
+          "instructions": {
             "items": {
-              "$ref": "#/components/schemas/ProjectReadWithProjectType"
+              "$ref": "#/components/schemas/InstructionReadWithInstructionType"
             },
             "type": "array",
-            "title": "Projects"
+            "title": "Instructions"
           },
           "files": {
             "items": {
@@ -4917,7 +6178,7 @@
           "lead_user",
           "created_at",
           "updated_at",
-          "projects",
+          "instructions",
           "files"
         ],
         "title": "JobReadDetail"
@@ -5449,1205 +6710,6 @@
         "title": "OrgUserRead",
         "description": "User info for org management (admins viewing org members)"
       },
-      "ProjectAddUpdate": {
-        "properties": {
-          "text": {
-            "type": "string",
-            "title": "Text"
-          },
-          "time_entry_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Time Entry Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "title": "ProjectAddUpdate",
-        "description": "Request body for adding an update to a project."
-      },
-      "ProjectCreate": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours",
-            "default": 0.0
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours",
-            "default": 0.0
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage",
-            "default": 0.0
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount",
-            "default": 0.0
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount",
-            "default": 0.0
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount",
-            "default": 0.0
-          },
-          "fee_type": {
-            "$ref": "#/components/schemas/FeeType"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "updates": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updates"
-          },
-          "deadline": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deadline"
-          },
-          "lead_user_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead User Id"
-          },
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          },
-          "project_type_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Project Type Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "fee_type",
-          "job_id"
-        ],
-        "title": "ProjectCreate"
-      },
-      "ProjectMinimalRead": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name"
-        ],
-        "title": "ProjectMinimalRead"
-      },
-      "ProjectRead": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours",
-            "default": 0.0
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours",
-            "default": 0.0
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage",
-            "default": 0.0
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount",
-            "default": 0.0
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount",
-            "default": 0.0
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount",
-            "default": 0.0
-          },
-          "fee_type": {
-            "$ref": "#/components/schemas/FeeType"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "updates": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updates"
-          },
-          "deadline": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deadline"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "project_type_id": {
-            "type": "integer",
-            "title": "Project Type Id"
-          },
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          },
-          "lead_user_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead User Id"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "fee_type",
-          "id",
-          "project_type_id",
-          "job_id",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "ProjectRead"
-      },
-      "ProjectReadDetail": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours",
-            "default": 0.0
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours",
-            "default": 0.0
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage",
-            "default": 0.0
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount",
-            "default": 0.0
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount",
-            "default": 0.0
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount",
-            "default": 0.0
-          },
-          "fee_type": {
-            "$ref": "#/components/schemas/FeeType"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "updates": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updates"
-          },
-          "deadline": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deadline"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "project_type_id": {
-            "type": "integer",
-            "title": "Project Type Id"
-          },
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          },
-          "lead_user_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead User Id"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          },
-          "project_type": {
-            "$ref": "#/components/schemas/ProjectTypeRead"
-          },
-          "job": {
-            "$ref": "#/components/schemas/JobReadMinimal"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "fee_type",
-          "id",
-          "project_type_id",
-          "job_id",
-          "created_at",
-          "updated_at",
-          "project_type",
-          "job"
-        ],
-        "title": "ProjectReadDetail"
-      },
-      "ProjectReadWithProjectType": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours",
-            "default": 0.0
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours",
-            "default": 0.0
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage",
-            "default": 0.0
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount",
-            "default": 0.0
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount",
-            "default": 0.0
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount",
-            "default": 0.0
-          },
-          "fee_type": {
-            "$ref": "#/components/schemas/FeeType"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "updates": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updates"
-          },
-          "deadline": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deadline"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "project_type_id": {
-            "type": "integer",
-            "title": "Project Type Id"
-          },
-          "job_id": {
-            "type": "integer",
-            "title": "Job Id"
-          },
-          "lead_user_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead User Id"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          },
-          "project_type": {
-            "$ref": "#/components/schemas/ProjectTypeRead"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "fee_type",
-          "id",
-          "project_type_id",
-          "job_id",
-          "created_at",
-          "updated_at",
-          "project_type"
-        ],
-        "title": "ProjectReadWithProjectType"
-      },
-      "ProjectStatus": {
-        "type": "string",
-        "enum": [
-          "planned",
-          "active",
-          "completed",
-          "archived"
-        ],
-        "title": "ProjectStatus"
-      },
-      "ProjectTypeCreate": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "default_fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "fixed"
-          },
-          "default_contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Contingency Percentage",
-            "default": 0.0
-          },
-          "default_template_file_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Template File Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "title": "ProjectTypeCreate"
-      },
-      "ProjectTypeRead": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "default_fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "fixed"
-          },
-          "default_contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Contingency Percentage",
-            "default": 0.0
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "default_template_file_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Template File Id"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "id",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "ProjectTypeRead"
-      },
-      "ProjectTypeUpdate": {
-        "properties": {
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate"
-          },
-          "default_fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "default_contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Contingency Percentage"
-          },
-          "default_template_file_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Template File Id"
-          }
-        },
-        "type": "object",
-        "title": "ProjectTypeUpdate"
-      },
-      "ProjectUpdate": {
-        "properties": {
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate"
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours"
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours"
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage"
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount"
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount"
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount"
-          },
-          "fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ProjectStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "updates": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updates"
-          },
-          "deadline": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deadline"
-          },
-          "lead_user_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lead User Id"
-          }
-        },
-        "type": "object",
-        "title": "ProjectUpdate"
-      },
       "QuoteCreate": {
         "properties": {
           "name": {
@@ -6754,14 +6816,14 @@
             ],
             "title": "Notes"
           },
-          "project_type_id": {
+          "instruction_type_id": {
             "type": "integer",
-            "title": "Project Type Id"
+            "title": "Instruction Type Id"
           }
         },
         "type": "object",
         "required": [
-          "project_type_id"
+          "instruction_type_id"
         ],
         "title": "QuoteLineCreate"
       },
@@ -6797,20 +6859,20 @@
             "type": "integer",
             "title": "Quote Id"
           },
-          "project_type_id": {
+          "instruction_type_id": {
             "type": "integer",
-            "title": "Project Type Id"
+            "title": "Instruction Type Id"
           },
-          "project_type": {
-            "$ref": "#/components/schemas/ProjectTypeRead"
+          "instruction_type": {
+            "$ref": "#/components/schemas/InstructionTypeRead"
           }
         },
         "type": "object",
         "required": [
           "id",
           "quote_id",
-          "project_type_id",
-          "project_type"
+          "instruction_type_id",
+          "instruction_type"
         ],
         "title": "QuoteLineRead"
       },
@@ -7199,7 +7261,7 @@
             "type": "integer",
             "title": "Job Id"
           },
-          "project_id": {
+          "instruction_id": {
             "anyOf": [
               {
                 "type": "integer"
@@ -7208,7 +7270,7 @@
                 "type": "null"
               }
             ],
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "conducted_date": {
             "type": "string",
@@ -7379,7 +7441,7 @@
             "type": "integer",
             "title": "Job Id"
           },
-          "project_id": {
+          "instruction_id": {
             "anyOf": [
               {
                 "type": "integer"
@@ -7388,7 +7450,7 @@
                 "type": "null"
               }
             ],
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "conducted_by_user_id": {
             "anyOf": [
@@ -7411,10 +7473,10 @@
               }
             ]
           },
-          "project": {
+          "instruction": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ProjectMinimalRead"
+                "$ref": "#/components/schemas/InstructionMinimalRead"
               },
               {
                 "type": "null"
@@ -7508,7 +7570,7 @@
             ],
             "title": "Conducted Time"
           },
-          "project_id": {
+          "instruction_id": {
             "anyOf": [
               {
                 "type": "integer"
@@ -7517,7 +7579,7 @@
                 "type": "null"
               }
             ],
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "conducted_by_user_id": {
             "anyOf": [
@@ -7613,9 +7675,9 @@
       },
       "TimeEntryCreate": {
         "properties": {
-          "project_id": {
+          "instruction_id": {
             "type": "integer",
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "description": {
             "anyOf": [
@@ -7631,15 +7693,15 @@
         },
         "type": "object",
         "required": [
-          "project_id"
+          "instruction_id"
         ],
         "title": "TimeEntryCreate"
       },
       "TimeEntryManualCreate": {
         "properties": {
-          "project_id": {
+          "instruction_id": {
             "type": "integer",
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "duration_minutes": {
             "type": "integer",
@@ -7659,7 +7721,7 @@
         },
         "type": "object",
         "required": [
-          "project_id",
+          "instruction_id",
           "duration_minutes"
         ],
         "title": "TimeEntryManualCreate",
@@ -7667,9 +7729,9 @@
       },
       "TimeEntryOut": {
         "properties": {
-          "project_id": {
+          "instruction_id": {
             "type": "integer",
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "start_time": {
             "type": "string",
@@ -7729,9 +7791,9 @@
             "type": "integer",
             "title": "User Id"
           },
-          "project_name": {
+          "instruction_name": {
             "type": "string",
-            "title": "Project Name"
+            "title": "Instruction Name"
           },
           "user_name": {
             "anyOf": [
@@ -7747,18 +7809,18 @@
         },
         "type": "object",
         "required": [
-          "project_id",
+          "instruction_id",
           "id",
           "user_id",
-          "project_name"
+          "instruction_name"
         ],
         "title": "TimeEntryOut"
       },
       "TimeEntryRead": {
         "properties": {
-          "project_id": {
+          "instruction_id": {
             "type": "integer",
-            "title": "Project Id"
+            "title": "Instruction Id"
           },
           "start_time": {
             "type": "string",
@@ -7821,7 +7883,7 @@
         },
         "type": "object",
         "required": [
-          "project_id",
+          "instruction_id",
           "id",
           "user_id"
         ],
@@ -7998,6 +8060,93 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WaitlistCreate": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "WaitlistCreate",
+        "description": "Schema for creating a waitlist entry."
+      },
+      "WaitlistRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "name",
+          "company",
+          "created_at"
+        ],
+        "title": "WaitlistRead",
+        "description": "Schema for reading a waitlist entry."
       }
     }
   }

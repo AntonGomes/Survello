@@ -1,41 +1,41 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
-    from .project_model import Project
+    from .instruction_model import Instruction
     from .user_model import User
 
 
 class TimeEntryBase(SQLModel):
-    project_id: int = Field(foreign_key="projects.id")
+    instruction_id: int = Field(foreign_key="projects.id")
     start_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     end_time: datetime | None = None
     description: str | None = None
     duration_minutes: int | None = None  # Computed on stop, stored for reporting
-    update_id: str | None = None  # Links to the UUID of the update in project.updates
+    update_id: str | None = None  # Links to the UUID of the update in instruction.updates
 
 
 class TimeEntry(TimeEntryBase, table=True):
-    __tablename__ = "time_entries"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "time_entries"
 
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id")
 
     # Relationships
-    project: "Project" = Relationship()
+    instruction: "Instruction" = Relationship()
     user: "User" = Relationship()
 
 
 class TimeEntryCreate(SQLModel):
-    project_id: int
+    instruction_id: int
     description: str | None = None
 
 
 class TimeEntryManualCreate(SQLModel):
     """For manually logging time without using the timer."""
 
-    project_id: int
+    instruction_id: int
     duration_minutes: int
     description: str | None = None
 
@@ -46,5 +46,5 @@ class TimeEntryRead(TimeEntryBase):
 
 
 class TimeEntryOut(TimeEntryRead):
-    project_name: str
+    instruction_name: str
     user_name: str | None = None

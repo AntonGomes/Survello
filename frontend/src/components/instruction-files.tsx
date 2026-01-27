@@ -25,7 +25,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { PdfViewer } from "@/components/pdf-viewer"
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from "@/components/ui/shadcn-io/dropzone"
 import {
-  readProjectFilesOptions,
+  readInstructionFilesOptions,
   generateFileDownloadUrlOptions,
   createFileMutation,
   generateFileUploadUrlsMutation,
@@ -33,8 +33,8 @@ import {
 import type { FileRead } from "@/client/types.gen"
 import { toast } from "sonner"
 
-interface ProjectFilesProps {
-  projectId: number
+interface InstructionFilesProps {
+  instructionId: number
   orgId: number
 }
 
@@ -52,7 +52,7 @@ const formatFileSize = (bytes: number | null | undefined) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-export function ProjectFiles({ projectId, orgId }: ProjectFilesProps) {
+export function InstructionFiles({ instructionId, orgId }: InstructionFilesProps) {
   const queryClient = useQueryClient()
   const [selectedFile, setSelectedFile] = useState<FileRead | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -60,9 +60,9 @@ export function ProjectFiles({ projectId, orgId }: ProjectFilesProps) {
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
 
-  // Fetch project files
+  // Fetch instruction files
   const { data: files, isLoading } = useQuery({
-    ...readProjectFilesOptions({ path: { project_id: projectId } }),
+    ...readInstructionFilesOptions({ path: { instruction_id: instructionId } }),
   })
 
   // File upload mutations
@@ -74,7 +74,7 @@ export function ProjectFiles({ projectId, orgId }: ProjectFilesProps) {
     ...createFileMutation(),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: readProjectFilesOptions({ path: { project_id: projectId } }).queryKey,
+        queryKey: readInstructionFilesOptions({ path: { instruction_id: instructionId } }).queryKey,
       })
     },
   })
@@ -120,7 +120,7 @@ export function ProjectFiles({ projectId, orgId }: ProjectFilesProps) {
             size_bytes: file.size,
             storage_key: presign.storage_key,
             org_id: orgId,
-            project_id: projectId,
+            instruction_id: instructionId,
           },
         })
       }

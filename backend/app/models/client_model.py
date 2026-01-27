@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from pydantic import EmailStr
 
@@ -19,7 +19,7 @@ class ClientContactBase(SQLModel):
 
 
 class ClientContact(ClientContactBase, table=True):
-    __tablename__ = "client_contacts"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "client_contacts"
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -56,7 +56,7 @@ class ClientBase(SQLModel):
 
 
 class Client(ClientBase, table=True):
-    __tablename__ = "clients"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "clients"
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(

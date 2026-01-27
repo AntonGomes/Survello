@@ -3,13 +3,22 @@ from .client_model import Client, ClientContact
 from .file_model import File
 from .artefact_model import Artefact
 from .job_model import Job
-from .project_model import Project, ProjectType
+from .instruction_model import (
+    Instruction,
+    InstructionType,
+    InstructionStatus,
+    # Backwards compatibility aliases
+    Project,
+    ProjectType,
+    ProjectStatus,
+)
 from .run_model import Run, RunFileLink
 from .lead_model import Lead
 from .quote_model import Quote, QuoteLine
 from .survey_model import Survey, WeatherCondition, SurveySurveyorLink
 from .time_entry_model import TimeEntry
 from .update_model import UpdateItem, UpdateType
+from .waitlist_model import Waitlist
 
 __all__ = [
     "User",
@@ -20,8 +29,13 @@ __all__ = [
     "File",
     "Artefact",
     "Job",
+    "Instruction",
+    "InstructionType",
+    "InstructionStatus",
+    # Backwards compatibility aliases
     "Project",
     "ProjectType",
+    "ProjectStatus",
     "Run",
     "RunFileLink",
     "Lead",
@@ -33,4 +47,5 @@ __all__ = [
     "TimeEntry",
     "UpdateItem",
     "UpdateType",
+    "Waitlist",
 ]

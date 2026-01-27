@@ -115,13 +115,13 @@ interface FileWithPreview {
 
 interface CreateSurveyDialogProps {
   jobId: number;
-  projectId?: number;
+  instructionId?: number;
   trigger?: React.ReactNode;
 }
 
 export function CreateSurveyDialog({
   jobId,
-  projectId,
+  instructionId,
   trigger,
 }: CreateSurveyDialogProps) {
   const [open, setOpen] = useState(false);
@@ -329,7 +329,7 @@ export function CreateSurveyDialog({
       // 1. Create the survey first
       const surveyData: SurveyCreate = {
         job_id: jobId,
-        project_id: projectId || null,
+        instruction_id: instructionId || null,
         conducted_date: values.conducted_date,
         description: values.description || null,
         site_notes: values.site_notes || null,

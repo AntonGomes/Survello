@@ -267,13 +267,13 @@ export default function SurveyDetailPage({ params }: SurveyDetailPageProps) {
                 </div>
               )}
 
-              {/* Project */}
-              {survey.project && (
+              {/* Instruction */}
+              {survey.instruction && (
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Project</p>
-                    <p className="font-medium">{survey.project.name}</p>
+                    <p className="text-sm text-muted-foreground">Instruction</p>
+                    <p className="font-medium">{survey.instruction.name}</p>
                   </div>
                 </div>
               )}

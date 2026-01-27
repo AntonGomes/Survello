@@ -26,6 +26,14 @@ def register(user_in: UserRegister, response: Response, db: SessionDep):
     settings = get_settings()
     is_whitelisted = user_in.email in settings.test_email_whitelist
 
+    # Check registration whitelist (if configured)
+    if settings.registration_whitelist:
+        if user_in.email not in settings.registration_whitelist:
+            raise HTTPException(
+                status_code=403,
+                detail="Registration is currently by invitation only. Please join the waitlist.",
+            )
+
     # 1. Check for existing user
     existing_user = db.exec(select(User).where(User.email == user_in.email)).first()
     if existing_user:

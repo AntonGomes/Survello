@@ -1,10 +1,11 @@
+from typing import cast
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
 from pydantic import BaseModel
 from app.api.deps import DBDep, CurrentUserDep
 from app.models.job_model import Job, JobCreate, JobRead, JobUpdate, JobReadDetail
-from app.models.project_model import Project
+from app.models.instruction_model import Instruction
 from app.models.update_model import create_text_update
 
 router = APIRouter()
@@ -30,7 +31,7 @@ def create_job(
     db.add(job)
     db.commit()
     db.refresh(job)
-    return job  # pyright: ignore[reportReturnType]
+    return cast(JobRead, job)
 
 
 @router.get("/", response_model=list[JobRead], operation_id="readJobs")
@@ -70,7 +71,7 @@ def read_job(
             joinedload(Job.client),
             joinedload(Job.created_by_user),
             joinedload(Job.lead_user),
-            joinedload(Job.projects).joinedload(Project.project_type),
+            joinedload(Job.instructions).joinedload(Instruction.instruction_type),
             joinedload(Job.files),
         )
     )
@@ -79,7 +80,7 @@ def read_job(
 
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-    return job  # pyright: ignore[reportReturnType]
+    return cast(JobReadDetail, job)
 
 
 @router.patch("/{job_id}", response_model=JobRead, operation_id="updateJob")
@@ -100,7 +101,7 @@ def update_job(
     db.add(job)
     db.commit()
     db.refresh(job)
-    return job  # pyright: ignore[reportReturnType]
+    return cast(JobRead, job)
 
 
 @router.delete(
@@ -160,9 +161,10 @@ def add_job_update(
     )
 
     # Use unified UpdateItem structure
+    assert current_user.id is not None
     update_item = create_text_update(
         text=update_entry.text,
-        author_id=current_user.id,  # pyright: ignore[reportArgumentType]
+        author_id=current_user.id,
         author_name=current_user.name,
         author_initials=initials,
     )
@@ -175,4 +177,4 @@ def add_job_update(
     db.add(job)
     db.commit()
     db.refresh(job)
-    return job  # pyright: ignore[reportReturnType]
+    return cast(JobRead, job)

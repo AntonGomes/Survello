@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 
-import { updateProjectMutation, startTimerMutation, readProjectOptions, getCurrentTimerOptions } from "@/client/@tanstack/react-query.gen"
-import { FeeType, type ProjectRead } from "@/client/types.gen"
+import { updateInstructionMutation, startTimerMutation, readInstructionOptions, getCurrentTimerOptions } from "@/client/@tanstack/react-query.gen"
+import { FeeType, type InstructionRead } from "@/client/types.gen"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,24 +24,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-interface ProjectBillingCardProps {
-  project: ProjectRead
+interface InstructionBillingCardProps {
+  instruction: InstructionRead
 }
 
-export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
+export function InstructionBillingCard({ instruction }: InstructionBillingCardProps) {
   const queryClient = useQueryClient()
   
   // Local state for immediate feedback
-  const [actualHours, setActualHours] = useState(project.actual_hours || 0)
-  const [settlementAmount, setSettlementAmount] = useState(project.final_settlement_amount || 0)
+  const [actualHours, setActualHours] = useState(instruction.actual_hours || 0)
+  const [settlementAmount, setSettlementAmount] = useState(instruction.final_settlement_amount || 0)
   const [hasChanges, setHasChanges] = useState(false)
   const [showTimerAlert, setShowTimerAlert] = useState(false)
 
-  const { mutate: updateProject, isPending: isSaving } = useMutation({
-    ...updateProjectMutation(),
+  const { mutate: updateInstruction, isPending: isSaving } = useMutation({
+    ...updateInstructionMutation(),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: readProjectOptions({ path: { project_id: project.id } }).queryKey
+        queryKey: readInstructionOptions({ path: { instruction_id: instruction.id } }).queryKey
       })
       // toast.success("Billing information updated")
       setHasChanges(false)
@@ -64,8 +64,8 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
   })
 
   const handleSave = () => {
-    updateProject({
-        path: { project_id: project.id },
+    updateInstruction({
+        path: { instruction_id: instruction.id },
         body: {
             actual_hours: actualHours,
             final_settlement_amount: settlementAmount
@@ -73,13 +73,13 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
     })
   }
 
-  const isHourly = project.fee_type === FeeType.HOURLY || project.fee_type === FeeType.MIXED
-  const isContingency = (project.contingency_percentage ?? 0) > 0 || project.fee_type === FeeType.MIXED
+  const isHourly = instruction.fee_type === FeeType.HOURLY || instruction.fee_type === FeeType.MIXED
+  const isContingency = (instruction.contingency_percentage ?? 0) > 0 || instruction.fee_type === FeeType.MIXED
   
   // Calculations
-  const hourlyTotal = (actualHours || 0) * (project.rate || 0)
-  const contingencyTotal = ((settlementAmount || 0) * (project.contingency_percentage || 0)) / 100
-  const totalFee = (isHourly ? hourlyTotal : 0) + (isContingency ? contingencyTotal : 0) + (project.fee_type === FeeType.FIXED ? (project.rate || 0) : 0)
+  const hourlyTotal = (actualHours || 0) * (instruction.rate || 0)
+  const contingencyTotal = ((settlementAmount || 0) * (instruction.contingency_percentage || 0)) / 100
+  const totalFee = (isHourly ? hourlyTotal : 0) + (isContingency ? contingencyTotal : 0) + (instruction.fee_type === FeeType.FIXED ? (instruction.rate || 0) : 0)
 
   return (
     <Card>
@@ -89,9 +89,9 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
                     <DollarSign className="h-5 w-5 text-green-600" />
                     Billing & Fees
                 </CardTitle>
-                <CardDescription>Manage hours and project fees.</CardDescription>
+                <CardDescription>Manage hours and instruction fees.</CardDescription>
             </div>
-            <Badge variant="secondary" className="uppercase">{project.fee_type}</Badge>
+            <Badge variant="secondary" className="uppercase">{instruction.fee_type}</Badge>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
             
@@ -130,7 +130,7 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
                         <div className="space-y-2">
                             <Label>Rate</Label>
                             <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50">
-                                ${project.rate}/hr
+                                ${instruction.rate}/hr
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
                         <div className="space-y-2">
                             <Label>Percentage</Label>
                             <div className="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50">
-                                {project.contingency_percentage}%
+                                {instruction.contingency_percentage}%
                             </div>
                         </div>
                     </div>
@@ -180,10 +180,10 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
             )}
 
             {/* FIXED SECTION (Fallback) */}
-            {project.fee_type === FeeType.FIXED && !isContingency && (
+            {instruction.fee_type === FeeType.FIXED && !isContingency && (
                 <div className="flex justify-between items-center bg-muted/50 p-3 rounded-md">
                     <span className="text-sm">Fixed Fee:</span>
-                    <span className="font-bold font-mono">${project.rate?.toFixed(2)}</span>
+                    <span className="font-bold font-mono">${instruction.rate?.toFixed(2)}</span>
                 </div>
             )}
 
@@ -214,7 +214,7 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Start Recording Time?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will start a timer for <strong>{project.name}</strong>. 
+                            This will start a timer for <strong>{instruction.name}</strong>. 
                             Any other active timer will be stopped.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -223,7 +223,7 @@ export function ProjectBillingCard({ project }: ProjectBillingCardProps) {
                         <AlertDialogAction 
                             onClick={(e) => {
                                 e.preventDefault()
-                                startTimer({ body: { project_id: project.id } })
+                                startTimer({ body: { instruction_id: instruction.id } })
                             }}
                             className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
                         >

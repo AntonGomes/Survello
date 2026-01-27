@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, cast
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
@@ -18,7 +18,7 @@ from app.models.quote_model import (
 from app.models.lead_model import LeadStatus
 from app.models.client_model import Client, ClientContact
 from app.models.job_model import Job, JobStatus
-from app.models.project_model import Project, FeeType, ProjectStatus
+from app.models.instruction_model import Instruction, FeeType, InstructionStatus
 
 
 router = APIRouter()
@@ -69,7 +69,7 @@ def create_quote(
     for line_in in quote_in.lines:
         line = QuoteLine(
             quote_id=quote.id,
-            project_type_id=line_in.project_type_id,
+            instruction_type_id=line_in.instruction_type_id,
             estimated_fee=line_in.estimated_fee,
             notes=line_in.notes,
         )
@@ -83,16 +83,16 @@ def create_quote(
             select(Quote)
             .where(Quote.id == quote.id)
             .options(
-                joinedload(Quote.client),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lead),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lines).joinedload(QuoteLine.project_type),  # pyright: ignore[reportArgumentType]
+                joinedload(Quote.client),  # ty: ignore[arg-type]
+                joinedload(Quote.lead),  # ty: ignore[arg-type]
+                joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),  # ty: ignore[arg-type]
             )
         )
         .unique()
         .first()
     )
 
-    return result  # pyright: ignore[reportReturnType]
+    return cast(QuoteRead, result)
 
 
 @router.get("/", response_model=list[QuoteRead], operation_id="readQuotes")
@@ -109,9 +109,9 @@ def read_quotes(
         select(Quote)
         .where(Quote.org_id == current_user.org_id)
         .options(
-            joinedload(Quote.client),  # pyright: ignore[reportArgumentType]
-            joinedload(Quote.lead),  # pyright: ignore[reportArgumentType]
-            joinedload(Quote.lines).joinedload(QuoteLine.project_type),  # pyright: ignore[reportArgumentType]
+            joinedload(Quote.client),  # ty: ignore[arg-type]
+            joinedload(Quote.lead),  # ty: ignore[arg-type]
+            joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),  # ty: ignore[arg-type]
         )
     )
 
@@ -121,7 +121,7 @@ def read_quotes(
         query = query.where(Quote.client_id == client_id)
 
     quotes = db.exec(query.offset(offset).limit(limit)).unique().all()
-    return quotes  # pyright: ignore[reportReturnType]
+    return cast(list[QuoteRead], quotes)
 
 
 @router.get("/{quote_id}", response_model=QuoteRead, operation_id="readQuote")
@@ -136,9 +136,9 @@ def read_quote(
             select(Quote)
             .where(Quote.id == quote_id)
             .options(
-                joinedload(Quote.client),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lead),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lines).joinedload(QuoteLine.project_type),  # pyright: ignore[reportArgumentType]
+                joinedload(Quote.client),  # ty: ignore[arg-type]
+                joinedload(Quote.lead),  # ty: ignore[arg-type]
+                joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),  # ty: ignore[arg-type]
             )
         )
         .unique()
@@ -150,7 +150,7 @@ def read_quote(
     if quote.org_id != current_user.org_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    return quote  # pyright: ignore[reportReturnType]
+    return cast(QuoteRead, quote)
 
 
 @router.patch("/{quote_id}", response_model=QuoteRead, operation_id="updateQuote")
@@ -166,9 +166,9 @@ def update_quote(
             select(Quote)
             .where(Quote.id == quote_id)
             .options(
-                joinedload(Quote.client),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lead),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lines).joinedload(QuoteLine.project_type),  # pyright: ignore[reportArgumentType]
+                joinedload(Quote.client),  # ty: ignore[arg-type]
+                joinedload(Quote.lead),  # ty: ignore[arg-type]
+                joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),  # ty: ignore[arg-type]
             )
         )
         .unique()
@@ -186,7 +186,7 @@ def update_quote(
     db.add(quote)
     db.commit()
     db.refresh(quote)
-    return quote  # pyright: ignore[reportReturnType]
+    return cast(QuoteRead, quote)
 
 
 @router.delete(
@@ -234,7 +234,7 @@ def add_quote_line(
 
     line = QuoteLine(
         quote_id=quote_id,
-        project_type_id=line_in.project_type_id,
+        instruction_type_id=line_in.instruction_type_id,
         estimated_fee=line_in.estimated_fee,
         notes=line_in.notes,
     )
@@ -247,16 +247,16 @@ def add_quote_line(
             select(Quote)
             .where(Quote.id == quote_id)
             .options(
-                joinedload(Quote.client),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lead),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lines).joinedload(QuoteLine.project_type),  # pyright: ignore[reportArgumentType]
+                joinedload(Quote.client),  # ty: ignore[arg-type]
+                joinedload(Quote.lead),  # ty: ignore[arg-type]
+                joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),  # ty: ignore[arg-type]
             )
         )
         .unique()
         .first()
     )
 
-    return result  # pyright: ignore[reportReturnType]
+    return cast(QuoteRead, result)
 
 
 @router.post(
@@ -276,9 +276,9 @@ def add_quote_update(
             select(Quote)
             .where(Quote.id == quote_id)
             .options(
-                joinedload(Quote.client),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lead),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lines).joinedload(QuoteLine.project_type),  # pyright: ignore[reportArgumentType]
+                joinedload(Quote.client),  # ty: ignore[arg-type]
+                joinedload(Quote.lead),  # ty: ignore[arg-type]
+                joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),  # ty: ignore[arg-type]
             )
         )
         .unique()
@@ -304,7 +304,7 @@ def add_quote_update(
     db.add(quote)
     db.commit()
     db.refresh(quote)
-    return quote  # pyright: ignore[reportReturnType]
+    return cast(QuoteRead, quote)
 
 
 @router.post(
@@ -327,8 +327,8 @@ def convert_quote(
             select(Quote)
             .where(Quote.id == quote_id)
             .options(
-                joinedload(Quote.lead),  # pyright: ignore[reportArgumentType]
-                joinedload(Quote.lines).joinedload(QuoteLine.project_type),  # pyright: ignore[reportArgumentType]
+                joinedload(Quote.lead),  # ty: ignore[arg-type]
+                joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),  # ty: ignore[arg-type]
             )
         )
         .unique()
@@ -399,23 +399,23 @@ def convert_quote(
     db.flush()
     assert job.id is not None
 
-    # Create projects from quote lines
+    # Create instructions from quote lines
     for line in quote.lines:
-        project_type = line.project_type
-        project = Project(
+        instruction_type = line.instruction_type
+        instruction = Instruction(
             org_id=current_user.org_id,
-            name=project_type.name,
-            description=project_type.description or "",
-            rate=line.estimated_fee or project_type.rate or 0.0,
+            name=instruction_type.name,
+            description=instruction_type.description or "",
+            rate=line.estimated_fee or instruction_type.rate or 0.0,
             forecasted_fee_amount=line.estimated_fee,
-            fee_type=project_type.default_fee_type or FeeType.FIXED,
-            status=ProjectStatus.PLANNED,
-            contingency_percentage=project_type.default_contingency_percentage or 0.0,
+            fee_type=instruction_type.default_fee_type or FeeType.FIXED,
+            status=InstructionStatus.PLANNED,
+            contingency_percentage=instruction_type.default_contingency_percentage or 0.0,
             job_id=job.id,
-            project_type_id=project_type.id,  # pyright: ignore[reportArgumentType]
+            instruction_type_id=cast(int, instruction_type.id),
             created_by_user_id=current_user.id,
         )
-        db.add(project)
+        db.add(instruction)
 
     # Update quote
     quote.status = QuoteStatus.ACCEPTED

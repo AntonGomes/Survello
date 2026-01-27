@@ -12,7 +12,7 @@ from app.api.routes.runs import router as runs_router
 from app.api.routes.files import router as files_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.jobs import router as jobs_router
-from app.api.routes.projects import router as projects_router
+from app.api.routes.instructions import router as instructions_router
 from app.api.routes.users import router as users_router
 from app.api.routes.clients import router as clients_router
 from app.api.routes.time import router as time_router
@@ -21,6 +21,7 @@ from app.api.routes.quotes import router as quotes_router
 from app.api.routes.surveys import router as surveys_router
 from app.api.routes.invitations import router as invitations_router
 from app.api.routes.org import router as org_router
+from app.api.routes.waitlist import router as waitlist_router
 
 from app.core.db import init_db, engine
 
@@ -110,7 +111,7 @@ app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(runs_router, prefix="/runs", tags=["Runs"])
 app.include_router(files_router, prefix="/store", tags=["Storage"])
 app.include_router(jobs_router, prefix="/jobs", tags=["Jobs"])
-app.include_router(projects_router, prefix="/projects", tags=["Projects"])
+app.include_router(instructions_router, prefix="/instructions", tags=["Instructions"])
 app.include_router(users_router, prefix="/users", tags=["Users"])
 app.include_router(clients_router, prefix="/clients", tags=["Clients"])
 app.include_router(time_router, prefix="/time", tags=["Time Tracking"])
@@ -119,3 +120,4 @@ app.include_router(quotes_router, prefix="/quotes", tags=["Quotes"])
 app.include_router(surveys_router, prefix="/surveys", tags=["Surveys"])
 app.include_router(invitations_router, prefix="/invitations", tags=["Invitations"])
 app.include_router(org_router, prefix="/org", tags=["Organization"])
+app.include_router(waitlist_router, prefix="/waitlist", tags=["Waitlist"])

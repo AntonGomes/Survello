@@ -12,7 +12,7 @@ frontend payloads, including:
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-from app.models.project_model import ProjectType, FeeType, Project, ProjectStatus
+from app.models.instruction_model import InstructionType, FeeType, Instruction, InstructionStatus
 from app.models.job_model import Job, JobStatus
 from app.models.client_model import Client
 from app.models.time_entry_model import TimeEntry
@@ -22,7 +22,7 @@ def test_time_entries_start_stop_workflow(
     client: TestClient, session: Session, setup_data: dict
 ):
     """Test the complete timer workflow: start -> get current -> stop."""
-    # Setup: Create Client -> Job -> ProjectType -> Project
+    # Setup: Create Client -> Job -> InstructionType -> Project
     cli = Client(name="Time Test Client", org_id=setup_data["org_id"])
     session.add(cli)
     session.commit()
@@ -37,7 +37,7 @@ def test_time_entries_start_stop_workflow(
     )
     session.add(job)
 
-    pt = ProjectType(
+    pt = InstructionType(
         name="Time Test Type",
         org_id=setup_data["org_id"],
         description="For time tracking tests",
@@ -47,12 +47,12 @@ def test_time_entries_start_stop_workflow(
     session.refresh(job)
     session.refresh(pt)
 
-    project = Project(
-        name="Time Test Project",
+    project = Instruction(
+        name="Time Test Instruction",
         job_id=job.id,
-        project_type_id=pt.id,
+        instruction_type_id=pt.id,
         fee_type=FeeType.HOURLY,
-        status=ProjectStatus.ACTIVE,
+        status=InstructionStatus.ACTIVE,
         org_id=setup_data["org_id"],
         created_by_user_id=setup_data["user_id"],
     )
@@ -70,7 +70,7 @@ def test_time_entries_start_stop_workflow(
 
     # 2. Start timer with payload matching frontend format
     start_payload = {
-        "project_id": project.id,
+        "instruction_id": project.id,
         "description": "Working on initial implementation",
     }
     response = client.post("/time/start", json=start_payload)
@@ -79,8 +79,8 @@ def test_time_entries_start_stop_workflow(
 
     # Verify response structure matches TimeEntryOut
     assert start_data["id"] is not None
-    assert start_data["project_id"] == project.id
-    assert start_data["project_name"] == "Time Test Project"
+    assert start_data["instruction_id"] == project.id
+    assert start_data["instruction_name"] == "Time Test Instruction"
     assert start_data["user_id"] == setup_data["user_id"]
     assert start_data["end_time"] is None, "Timer should not be stopped yet"
     assert start_data["description"] == "Working on initial implementation"
@@ -138,7 +138,7 @@ def test_time_entries_manual_logging(
     )
     session.add(job)
 
-    pt = ProjectType(
+    pt = InstructionType(
         name="Manual Time Type",
         org_id=setup_data["org_id"],
         description="For manual time tests",
@@ -148,12 +148,12 @@ def test_time_entries_manual_logging(
     session.refresh(job)
     session.refresh(pt)
 
-    project = Project(
-        name="Manual Time Project",
+    project = Instruction(
+        name="Manual Time Instruction",
         job_id=job.id,
-        project_type_id=pt.id,
+        instruction_type_id=pt.id,
         fee_type=FeeType.FIXED,
-        status=ProjectStatus.ACTIVE,
+        status=InstructionStatus.ACTIVE,
         org_id=setup_data["org_id"],
         created_by_user_id=setup_data["user_id"],
     )
@@ -168,7 +168,7 @@ def test_time_entries_manual_logging(
 
     # Log 90 minutes of manual time
     manual_payload = {
-        "project_id": project.id,
+        "instruction_id": project.id,
         "duration_minutes": 90,
         "description": "Research and documentation",
     }
@@ -178,7 +178,7 @@ def test_time_entries_manual_logging(
 
     assert manual_data["duration_minutes"] == 90
     assert manual_data["description"] == "Research and documentation"
-    assert manual_data["project_name"] == "Manual Time Project"
+    assert manual_data["instruction_name"] == "Manual Time Instruction"
     # Manual entries have start_time == end_time
     assert manual_data["end_time"] is not None
 
@@ -197,7 +197,7 @@ def test_time_entries_project_not_found(
     client.cookies = {"session_token": setup_data["token"]}
 
     # Try to start timer with non-existent project
-    response = client.post("/time/start", json={"project_id": 99999})
+    response = client.post("/time/start", json={"instruction_id": 99999})
     assert response.status_code == 404
     assert "project not found" in response.json()["detail"].lower()
 
@@ -221,7 +221,7 @@ def test_time_entries_project_entries_list(
     )
     session.add(job)
 
-    pt = ProjectType(
+    pt = InstructionType(
         name="List Time Type",
         org_id=setup_data["org_id"],
         description="For list tests",
@@ -231,12 +231,12 @@ def test_time_entries_project_entries_list(
     session.refresh(job)
     session.refresh(pt)
 
-    project = Project(
+    project = Instruction(
         name="List Time Project",
         job_id=job.id,
-        project_type_id=pt.id,
+        instruction_type_id=pt.id,
         fee_type=FeeType.HOURLY,
-        status=ProjectStatus.ACTIVE,
+        status=InstructionStatus.ACTIVE,
         org_id=setup_data["org_id"],
         created_by_user_id=setup_data["user_id"],
     )
@@ -246,13 +246,13 @@ def test_time_entries_project_entries_list(
 
     # Create some time entries directly
     entry1 = TimeEntry(
-        project_id=project.id,
+        instruction_id=project.id,
         user_id=setup_data["user_id"],
         description="First entry",
         duration_minutes=30,
     )
     entry2 = TimeEntry(
-        project_id=project.id,
+        instruction_id=project.id,
         user_id=setup_data["user_id"],
         description="Second entry",
         duration_minutes=45,

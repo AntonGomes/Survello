@@ -40,6 +40,15 @@ exclude = ["prompts/*.py"]
 # overlap with the use of a formatter, like Black, but we can override this behavior by
 # explicitly adding the rule.
 
+[tool.ty.src]
+include = ["app", "tests"]
+exclude = ["migrations"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.13",
+]

@@ -114,13 +114,13 @@ class OpenAIService(BaseLLMService):
         stream = self.client.responses.create(
             model=self.MODEL,
             instructions=system,
-            input=[{"role": "user", "content": content}],  # pyright: ignore[reportArgumentType]
+            input=[{"role": "user", "content": content}],  # ty: ignore[arg-type]
             tools=[{"type": "code_interpreter", "container": container.container_id}],
             tool_choice="required",
             stream=True,
         )
 
-        for chunk in stream:  # pyright: ignore[reportUnknownVariableType]
+        for chunk in stream:  # ty: ignore[union-attr]
             chunk_any: Any = chunk
             event = getattr(chunk_any, "type", "")
 

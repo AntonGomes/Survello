@@ -13,7 +13,7 @@ class StorageService:
 
     def get_file_data(self, storage_key: str) -> bytes:
         obj = self.s3.client.get_object(Bucket=self.s3.bucket_name, Key=storage_key)
-        return obj["Body"].read()  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        return obj["Body"].read()  # ty: ignore[no-any-return]
 
     def upload_file(self, storage_key: str, data: bytes) -> None:
         self.s3.client.put_object(

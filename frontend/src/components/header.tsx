@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type HeaderProps = {
@@ -26,15 +26,12 @@ export function Header({ authenticated = false }: HeaderProps) {
               Survello
             </span>
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium opacity-90">
+          <div className="hidden md:flex items-center gap-10 text-sm font-medium opacity-90 px-8">
             <Link href="/about" className="hover:text-secondary transition">
               About
             </Link>
-            <Link href="/pricing" className="hover:text-secondary transition">
-              Pricing
-            </Link>
-            <Link href="/contact" className="hover:text-secondary transition">
-              Contact
+            <Link href="/#faq" className="hover:text-secondary transition">
+              FAQ
             </Link>
           </div>
         </div>
@@ -42,7 +39,7 @@ export function Header({ authenticated = false }: HeaderProps) {
         <div className="flex items-center gap-2">
           {!authenticated ? (
             <>
-              <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }))}>
+              <Link href="/login" className={cn(buttonVariants({ variant: "accent" }))}>
                 Log in
               </Link>
               <Link href="/register" className={cn(buttonVariants())}>

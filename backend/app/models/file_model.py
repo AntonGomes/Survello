@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, ClassVar
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
 from .run_model import RunFileLink
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from .user_model import User
     from .run_model import Run, RunFileLink
     from .job_model import Job
-    from .project_model import Project
+    from .instruction_model import Instruction
     from .survey_model import Survey
 
 
@@ -26,7 +26,7 @@ class FileBase(SQLModel):
 
 
 class File(FileBase, table=True):
-    __tablename__ = "files"  # pyright: ignore[reportAssignmentType]
+    __tablename__: ClassVar[str] = "files"
     id: int | None = Field(default=None, primary_key=True)
     storage_key: str = Field(max_length=1024, unique=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -39,8 +39,8 @@ class File(FileBase, table=True):
     survey_id: int | None = Field(
         default=None, foreign_key="surveys.id", ondelete="SET NULL"
     )
-    # New: link files directly to projects
-    project_id: int | None = Field(
+    # New: link files directly to instructions (formerly projects)
+    instruction_id: int | None = Field(
         default=None, foreign_key="projects.id", ondelete="SET NULL"
     )
     # New: link to PDF preview file (for docx/xlsx files)
@@ -54,7 +54,7 @@ class File(FileBase, table=True):
     runs: list["Run"] = Relationship(
         back_populates="context_files", link_model=RunFileLink
     )
-    project: Optional["Project"] = Relationship(back_populates="files")
+    instruction: Optional["Instruction"] = Relationship(back_populates="files")
     survey: Optional["Survey"] = Relationship(back_populates="files")
     # Self-referential for preview file
     preview_file: Optional["File"] = Relationship(
@@ -71,7 +71,7 @@ class FileCreate(FileBase):
     uploaded_by_user_id: int | None = None
     job_id: int | None = None
     run_id: int | None = None
-    project_id: int | None = None
+    instruction_id: int | None = None
     survey_id: int | None = None
     role: FileRole = FileRole.INPUT
 
@@ -91,7 +91,7 @@ class FileUpdate(SQLModel):
     role: FileRole | None = None
     preview_file_id: int | None = None
     job_id: int | None = None
-    project_id: int | None = None
+    instruction_id: int | None = None
     survey_id: int | None = None
 
 
@@ -103,6 +103,6 @@ class FileRead(FileBase):
     role: FileRole
     size_bytes: int | None = None
     job_id: int | None = None
-    project_id: int | None = None
+    instruction_id: int | None = None
     survey_id: int | None = None
     preview_file_id: int | None = None
