@@ -39,7 +39,7 @@ def test_jobs_workflow(client: TestClient, session: Session, setup_data: dict):
     assert response.status_code == 200
     detail_data = response.json()
     assert detail_data["id"] == job_data["id"]
-    assert "projects" in detail_data
-    assert isinstance(detail_data["projects"], list)
+    assert "instructions" in detail_data
+    assert isinstance(detail_data["instructions"], list)
     assert "files" in detail_data
     assert isinstance(detail_data["files"], list)

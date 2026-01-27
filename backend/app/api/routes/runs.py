@@ -40,10 +40,10 @@ def create_run(
     # Create the Run record
     extra_data = {"org_id": current_user.org_id, "created_by_user_id": current_user.id}
     db_run = Run.model_validate(run_in, update=extra_data)
-    
+
     # Assign context files directly - SQLModel handles the link table
     db_run.context_files = context_files
-    
+
     db.add(db_run)
     db.commit()
     db.refresh(db_run)

@@ -14,7 +14,10 @@ from app.models.instruction_model import (
     InstructionTypeUpdate,
     InstructionAddUpdate,
 )
-from app.models.update_model import create_text_update, create_instruction_created_update
+from app.models.update_model import (
+    create_text_update,
+    create_instruction_created_update,
+)
 from app.models.job_model import Job
 from app.models.job_read_minimal import JobReadMinimal
 from app.models.file_model import File, FileRead
@@ -29,7 +32,9 @@ router = APIRouter()
 
 
 @router.get(
-    "/types", response_model=list[InstructionTypeRead], operation_id="readInstructionTypes"
+    "/types",
+    response_model=list[InstructionTypeRead],
+    operation_id="readInstructionTypes",
 )
 def read_instruction_types(
     db: DBDep,
@@ -142,7 +147,9 @@ def read_instructions(
     if job_id:
         instructions = db.exec(
             select(Instruction)
-            .where(current_user.org_id == Instruction.org_id, Instruction.job_id == job_id)
+            .where(
+                current_user.org_id == Instruction.org_id, Instruction.job_id == job_id
+            )
             .offset(offset)
             .limit(limit)
         ).all()
@@ -157,7 +164,9 @@ def read_instructions(
 
 
 @router.get(
-    "/{instruction_id}", response_model=InstructionReadDetail, operation_id="readInstruction"
+    "/{instruction_id}",
+    response_model=InstructionReadDetail,
+    operation_id="readInstruction",
 )
 def read_instruction(
     instruction_id: int,
@@ -187,7 +196,11 @@ def read_instruction(
     return cast(InstructionReadDetail, instruction)
 
 
-@router.patch("/{instruction_id}", response_model=InstructionRead, operation_id="updateInstruction")
+@router.patch(
+    "/{instruction_id}",
+    response_model=InstructionRead,
+    operation_id="updateInstruction",
+)
 def update_instruction(
     instruction_id: int,
     instruction_in: InstructionUpdate,

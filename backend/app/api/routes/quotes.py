@@ -410,7 +410,8 @@ def convert_quote(
             forecasted_fee_amount=line.estimated_fee,
             fee_type=instruction_type.default_fee_type or FeeType.FIXED,
             status=InstructionStatus.PLANNED,
-            contingency_percentage=instruction_type.default_contingency_percentage or 0.0,
+            contingency_percentage=instruction_type.default_contingency_percentage
+            or 0.0,
             job_id=job.id,
             instruction_type_id=cast(int, instruction_type.id),
             created_by_user_id=current_user.id,

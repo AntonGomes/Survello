@@ -63,10 +63,10 @@ def test_instructions_workflow(client: TestClient, session: Session, setup_data:
     assert len(types_data) >= 1
     assert types_data[0]["name"] == "Test Type"
 
-    # 6. Read Project Detail
+    # 6. Read Instruction Detail
     response = client.get(f"/instructions/{project_data['id']}")
     assert response.status_code == 200
     detail = response.json()
     assert detail["id"] == project_data["id"]
-    assert detail["project_type"]["id"] == pt.id
+    assert detail["instruction_type"]["id"] == pt.id
     assert detail["job"]["id"] == job.id

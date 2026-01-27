@@ -13,7 +13,9 @@ class TimeEntryBase(SQLModel):
     end_time: datetime | None = None
     description: str | None = None
     duration_minutes: int | None = None  # Computed on stop, stored for reporting
-    update_id: str | None = None  # Links to the UUID of the update in instruction.updates
+    update_id: str | None = (
+        None  # Links to the UUID of the update in instruction.updates
+    )
 
 
 class TimeEntry(TimeEntryBase, table=True):

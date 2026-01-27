@@ -1,6 +1,7 @@
 """
 Waitlist API routes for early access signups.
 """
+
 from __future__ import annotations
 
 import logging

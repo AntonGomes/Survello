@@ -35,7 +35,9 @@ class QuoteLine(QuoteLineBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
     quote_id: int = Field(foreign_key="quotes.id", ondelete="CASCADE")
-    instruction_type_id: int = Field(foreign_key="project_types.id", ondelete="RESTRICT")
+    instruction_type_id: int = Field(
+        foreign_key="project_types.id", ondelete="RESTRICT"
+    )
 
     quote: "Quote" = Relationship(back_populates="lines")
     instruction_type: InstructionType = Relationship()

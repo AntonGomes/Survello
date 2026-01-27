@@ -46,8 +46,7 @@ def _build_survey_read(survey: Survey, db) -> SurveyRead:
 
     # Build surveyors list from the many-to-many relationship
     surveyors_list = [
-        SurveyorRead(id=cast(int, u.id), name=u.name)
-        for u in survey.surveyors
+        SurveyorRead(id=cast(int, u.id), name=u.name) for u in survey.surveyors
     ]
 
     survey_read = SurveyRead.model_validate(survey)

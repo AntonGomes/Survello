@@ -218,5 +218,7 @@ node_modules/
 .next/
 .env.local
 .env.cloud
+.env*
+*.env*
 
 deploy_backend.sh

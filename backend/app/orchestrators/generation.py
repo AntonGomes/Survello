@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import time
-from pathlib import Path
 
 import magic
 from sqlmodel import Session
@@ -65,7 +64,11 @@ def execute(
             if f.mime_type not in LLM_SUPPORTED_TYPES and f.preview_file:
                 preview = f.preview_file
                 url = storage.generate_presigned_url(
-                    "get_object", preview.storage_key, preview.mime_type, preview.file_name, inline=True
+                    "get_object",
+                    preview.storage_key,
+                    preview.mime_type,
+                    preview.file_name,
+                    inline=True,
                 )
                 llm_files.append(LLMFile(url=url, name=preview.file_name))
             else:

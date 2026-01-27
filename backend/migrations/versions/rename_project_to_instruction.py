@@ -18,7 +18,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "rename_project_to_instruction"
-down_revision = None  # Will be set by alembic
+down_revision = "398023069eb4"
 branch_labels = None
 depends_on = None
 

@@ -59,7 +59,9 @@ class Settings(BaseSettings):
     test_email_whitelist: list[str] = Field(default=[], alias="TEST_EMAIL_WHITELIST")
 
     # Registration whitelist - only these emails can register (empty = allow all)
-    registration_whitelist: list[str] = Field(default=[], alias="REGISTRATION_WHITELIST")
+    registration_whitelist: list[str] = Field(
+        default=[], alias="REGISTRATION_WHITELIST"
+    )
 
     # Admin notification email for waitlist signups
     admin_notification_email: str = Field(

@@ -193,13 +193,13 @@ def test_time_entries_manual_logging(
 def test_time_entries_project_not_found(
     client: TestClient, session: Session, setup_data: dict
 ):
-    """Test starting timer with non-existent project fails."""
+    """Test starting timer with non-existent instruction fails."""
     client.cookies = {"session_token": setup_data["token"]}
 
-    # Try to start timer with non-existent project
+    # Try to start timer with non-existent instruction
     response = client.post("/time/start", json={"instruction_id": 99999})
     assert response.status_code == 404
-    assert "project not found" in response.json()["detail"].lower()
+    assert "instruction not found" in response.json()["detail"].lower()
 
 
 def test_time_entries_project_entries_list(
@@ -264,8 +264,8 @@ def test_time_entries_project_entries_list(
     # Set auth cookie
     client.cookies = {"session_token": setup_data["token"]}
 
-    # Get project time entries
-    response = client.get(f"/time/project/{project.id}")
+    # Get instruction time entries
+    response = client.get(f"/time/instruction/{project.id}")
     assert response.status_code == 200, f"Failed to get entries: {response.text}"
     entries = response.json()
 
