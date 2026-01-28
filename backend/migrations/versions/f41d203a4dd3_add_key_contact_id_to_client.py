@@ -26,7 +26,9 @@ def upgrade() -> None:
     columns = [col["name"] for col in inspector.get_columns("clients")]
 
     if "key_contact_id" not in columns:
-        op.add_column("clients", sa.Column("key_contact_id", sa.Integer(), nullable=True))
+        op.add_column(
+            "clients", sa.Column("key_contact_id", sa.Integer(), nullable=True)
+        )
         op.create_foreign_key(
             "fk_clients_key_contact_id",
             "clients",

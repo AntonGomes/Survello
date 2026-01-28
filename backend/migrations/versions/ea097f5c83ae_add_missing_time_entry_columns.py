@@ -30,7 +30,9 @@ def upgrade() -> None:
             "time_entries", sa.Column("duration_minutes", sa.Integer(), nullable=True)
         )
     if "update_id" not in columns:
-        op.add_column("time_entries", sa.Column("update_id", sa.String(), nullable=True))
+        op.add_column(
+            "time_entries", sa.Column("update_id", sa.String(), nullable=True)
+        )
 
 
 def downgrade() -> None:

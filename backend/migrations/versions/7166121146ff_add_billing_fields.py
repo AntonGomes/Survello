@@ -23,7 +23,9 @@ def upgrade() -> None:
     """Upgrade schema."""
     conn = op.get_bind()
     inspector = sa.inspect(conn)
-    project_types_columns = [col["name"] for col in inspector.get_columns("project_types")]
+    project_types_columns = [
+        col["name"] for col in inspector.get_columns("project_types")
+    ]
     projects_columns = [col["name"] for col in inspector.get_columns("projects")]
 
     if "default_fee_type" not in project_types_columns:

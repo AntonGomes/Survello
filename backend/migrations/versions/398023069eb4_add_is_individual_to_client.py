@@ -40,7 +40,9 @@ def upgrade() -> None:
     if "email" not in columns:
         op.add_column("clients", sa.Column("email", sa.String(), nullable=True))
     if "phone" not in columns:
-        op.add_column("clients", sa.Column("phone", sa.String(length=64), nullable=True))
+        op.add_column(
+            "clients", sa.Column("phone", sa.String(length=64), nullable=True)
+        )
 
 
 def downgrade() -> None:

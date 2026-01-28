@@ -12,7 +12,12 @@ frontend payloads, including:
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-from app.models.instruction_model import InstructionType, FeeType, Instruction, InstructionStatus
+from app.models.instruction_model import (
+    InstructionType,
+    FeeType,
+    Instruction,
+    InstructionStatus,
+)
 from app.models.job_model import Job, JobStatus
 from app.models.client_model import Client
 from app.models.time_entry_model import TimeEntry

@@ -1,7 +1,7 @@
 """Rename project_id to instruction_id in related tables
 
 Revision ID: rename_project_to_instruction
-Revises: 
+Revises:
 Create Date: 2026-01-27
 
 This migration renames 'project_id' columns to 'instruction_id' in:
@@ -32,7 +32,7 @@ def upgrade() -> None:
         existing_type=sa.INTEGER(),
         existing_nullable=False,
     )
-    
+
     # Rename project_id to instruction_id in files
     op.alter_column(
         "files",
@@ -41,7 +41,7 @@ def upgrade() -> None:
         existing_type=sa.INTEGER(),
         existing_nullable=True,
     )
-    
+
     # Rename project_id to instruction_id in surveys
     op.alter_column(
         "surveys",
@@ -50,7 +50,7 @@ def upgrade() -> None:
         existing_type=sa.INTEGER(),
         existing_nullable=True,
     )
-    
+
     # Rename project_type_id to instruction_type_id in projects table
     op.alter_column(
         "projects",
@@ -59,7 +59,7 @@ def upgrade() -> None:
         existing_type=sa.INTEGER(),
         existing_nullable=False,
     )
-    
+
     # Rename project_type_id to instruction_type_id in quote_lines table
     op.alter_column(
         "quote_lines",
@@ -79,7 +79,7 @@ def downgrade() -> None:
         existing_type=sa.INTEGER(),
         existing_nullable=False,
     )
-    
+
     # Rename back instruction_id to project_id in files
     op.alter_column(
         "files",
@@ -88,7 +88,7 @@ def downgrade() -> None:
         existing_type=sa.INTEGER(),
         existing_nullable=True,
     )
-    
+
     # Rename back instruction_id to project_id in surveys
     op.alter_column(
         "surveys",
@@ -97,7 +97,7 @@ def downgrade() -> None:
         existing_type=sa.INTEGER(),
         existing_nullable=True,
     )
-    
+
     # Rename back instruction_type_id to project_type_id in projects table
     op.alter_column(
         "projects",
@@ -106,7 +106,7 @@ def downgrade() -> None:
         existing_type=sa.INTEGER(),
         existing_nullable=False,
     )
-    
+
     # Rename back instruction_type_id to project_type_id in quote_lines table
     op.alter_column(
         "quote_lines",
