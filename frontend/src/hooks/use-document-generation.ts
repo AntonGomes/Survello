@@ -79,7 +79,7 @@ export function useDocumentGeneration() {
       setLocalStatus("uploading");
       await uploadFilesToS3(
           uploads.map(u => u.file),
-          uploads.map(u => ({ put_url: u.put_url })),
+          uploads.map(u => ({ put_url: u.put_url, mime_type: u.mime_type })),
           setUploadProgress
       );
 

@@ -128,7 +128,7 @@ def generate_upload_urls(
     response: list[FilePresignResponse] = []
 
     for f in files:
-        storage_key = f"{user.org_id}/{user.id}/{f.client_id}-{f.file_name}-{uuid4()}"
+        storage_key = f"{user.org_id}/{user.id}/{uuid4()}-{f.file_name}"
 
         url = storage.generate_presigned_url(
             "put_object",
@@ -200,7 +200,7 @@ def create_files(
     extra_data = {"uploaded_by_user_id": user.id, "org_id": user.org_id}
     for file_in_item in files_in:
         if not storage.check_file_exists(file_in_item.storage_key):
-            raise HTTPException(400, "File verification failed. Upload not found.")
+            raise HTTPException(400, f"File verification failed. Upload not found. storage_key:{file_in_item.storage_key}")
         db_file = File.model_validate(file_in_item, update=extra_data)
         db.add(db_file)
         files.append(db_file)

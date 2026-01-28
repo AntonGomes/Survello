@@ -7,7 +7,7 @@ export interface UploadProgressEvent {
 
 export async function uploadFilesToS3(
   files: File[], 
-  presignedPuts: { put_url: string }[],
+  presignedPuts: { put_url: string; mime_type: string }[],
   onProgress?: (progress: number) => void
 ): Promise<void> {
   const totalFiles = files.length;
@@ -22,37 +22,48 @@ export async function uploadFilesToS3(
     }
   };
 
-  const uploadSingle = (file: File, putUrl: string) => {
+  const uploadSingle = (file: File, putUrl: string, mimeType: string) => {
     return new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       
       xhr.onload = () => {
+        console.log(`Upload response for ${file.name}:`, {
+          status: xhr.status,
+          statusText: xhr.statusText,
+          etag: xhr.getResponseHeader('ETag'),
+          allHeaders: xhr.getAllResponseHeaders(),
+          response: xhr.responseText
+        });
+        
         if (xhr.status >= 200 && xhr.status < 300) {
           completedFiles++;
           updateProgress();
           resolve();
+          console.log(`Successfully uploaded ${file.name}, url: ${putUrl.split('?')[0]}.`);
         } else {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
+          reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
         }
       };
 
-      xhr.onerror = () => reject(new Error("Network error during upload"));
+      xhr.onerror = () => {
+        console.error(`Network error uploading ${file.name}`);
+        reject(new Error("Network error during upload"));
+      };
       
       xhr.open("PUT", putUrl);
-      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      // Use the exact mime_type that was used to generate the presigned URL
+      // The Content-Type header is signed, so it MUST match exactly
+      xhr.setRequestHeader("Content-Type", mimeType);
+      console.log(`Uploading ${file.name} with Content-Type: ${mimeType} to ${putUrl.split('?')[0]}`);
       xhr.send(file);
     });
   };
 
-  // TODO: Upload by matching id of file to presigned url or some other way that 
-  // isn;t just iterating ove the array as this is risky
+  // Upload files in parallel, matching each file to its presigned URL by index
   const uploads = files.map((file, index) => {
-    // The presignedPuts array might include the template file at index 0, 
-    // so we need to be careful about matching.
-    // In the current logic, we usually pass [template, ...context] to both.
     const put = presignedPuts[index];
     if (!put) throw new Error(`No presigned URL found for file ${file.name}`);
-    return uploadSingle(file, put.put_url);
+    return uploadSingle(file, put.put_url, put.mime_type);
   });
 
   await Promise.all(uploads);

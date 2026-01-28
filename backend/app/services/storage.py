@@ -21,10 +21,15 @@ class StorageService:
         )
 
     def check_file_exists(self, storage_key: str) -> bool:
+        import logging
+        logger = logging.getLogger(__name__)
         try:
-            self.s3.client.head_object(Bucket=self.s3.bucket_name, Key=storage_key)
+            logger.info(f"Checking if file exists: bucket={self.s3.bucket_name}, key={storage_key}")
+            response = self.s3.client.head_object(Bucket=self.s3.bucket_name, Key=storage_key)
+            logger.info(f"File exists! ETag: {response.get('ETag')}, Size: {response.get('ContentLength')}")
             return True
-        except Exception:
+        except Exception as e:
+            logger.warning(f"File check failed for {storage_key}: {type(e).__name__}: {e}")
             return False
 
     def generate_presigned_url(
