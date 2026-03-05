@@ -1,12 +1,13 @@
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, ClassVar
+from datetime import UTC, datetime
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, AutoString
+from typing import TYPE_CHECKING, ClassVar
+
 from pydantic import EmailStr
+from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .job_model import Job
     from .file_model import File
+    from .job_model import Job
 
 
 # -----------------------------------------------------------------------------
@@ -29,7 +30,7 @@ class OrgBase(SQLModel):
 class Org(OrgBase, table=True):
     __tablename__: ClassVar[str] = "orgs"
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     users: list["User"] = Relationship(back_populates="org")
     jobs: list["Job"] = Relationship(back_populates="org")
@@ -58,7 +59,7 @@ class User(UserBase, table=True):
     __tablename__: ClassVar[str] = "users"
     id: int | None = Field(default=None, primary_key=True)
     password_hash: str = Field(default=None, max_length=255)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     role: UserRole = Field(default=UserRole.MEMBER, sa_type=AutoString, index=True)
 
     # Foreign Keys
@@ -111,7 +112,7 @@ class Session(SessionBase, table=True):
     __tablename__: ClassVar[str] = "sessions"
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id", ondelete="CASCADE", index=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     # Relationships
     user: User = Relationship(back_populates="sessions")
@@ -146,7 +147,7 @@ class Invitation(SQLModel, table=True):
     org_id: int = Field(foreign_key="orgs.id")
     invited_by_user_id: int = Field(foreign_key="users.id")
     role: UserRole = Field(default=UserRole.MEMBER, sa_type=AutoString)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     expires_at: datetime = Field(nullable=False)
 
     # Relationships

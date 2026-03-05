@@ -4,8 +4,7 @@ Waitlist model for capturing early access signups.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from pydantic import EmailStr
@@ -16,15 +15,15 @@ class WaitlistBase(SQLModel):
     """Base waitlist fields."""
 
     email: str = Field(index=True, unique=True)
-    name: Optional[str] = Field(default=None)
-    company: Optional[str] = Field(default=None)
+    name: str | None = Field(default=None)
+    company: str | None = Field(default=None)
 
 
 class Waitlist(WaitlistBase, table=True):
     """Database model for waitlist entries."""
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     notified: bool = Field(default=False)
 
 
@@ -32,8 +31,8 @@ class WaitlistCreate(SQLModel):
     """Schema for creating a waitlist entry."""
 
     email: EmailStr
-    name: Optional[str] = None
-    company: Optional[str] = None
+    name: str | None = None
+    company: str | None = None
 
 
 class WaitlistRead(SQLModel):
@@ -41,6 +40,6 @@ class WaitlistRead(SQLModel):
 
     id: UUID
     email: str
-    name: Optional[str]
-    company: Optional[str]
+    name: str | None
+    company: str | None
     created_at: datetime

@@ -1,39 +1,29 @@
-"""
-Tests for the time entries API endpoints.
-
-These tests verify the timer functionality works correctly with realistic
-frontend payloads, including:
-- Starting a timer
-- Getting current timer status
-- Stopping a timer
-- Manual time logging
-- Error cases (no active timer, timer already running, etc.)
-"""
+from http import HTTPStatus
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session
+
+from app.models.client_model import Client
 from app.models.instruction_model import (
-    InstructionType,
     Instruction,
     InstructionStatus,
+    InstructionType,
 )
 from app.models.job_model import Job, JobStatus
-from app.models.client_model import Client
 from app.models.time_entry_model import TimeEntry
 
 
-def test_time_entries_start_stop_workflow(
-    client: TestClient, session: Session, setup_data: dict
-):
-    """Test the complete timer workflow: start -> get current -> stop."""
-    # Setup: Create Client -> Job -> InstructionType -> Project
-    cli = Client(name="Time Test Client", org_id=setup_data["org_id"])
+def _create_instruction_for_time_test(
+    session: Session, setup_data: dict, prefix: str
+) -> Instruction:
+    """Create client, job, type, and instruction for time tests."""
+    cli = Client(name=f"{prefix} Client", org_id=setup_data["org_id"])
     session.add(cli)
     session.commit()
     session.refresh(cli)
 
     job = Job(
-        name="Time Test Job",
+        name=f"{prefix} Job",
         status=JobStatus.ACTIVE,
         org_id=setup_data["org_id"],
         created_by_user_id=setup_data["user_id"],
@@ -42,32 +32,40 @@ def test_time_entries_start_stop_workflow(
     session.add(job)
 
     pt = InstructionType(
-        name="Time Test Type",
+        name=f"{prefix} Type",
         org_id=setup_data["org_id"],
-        description="For time tracking tests",
+        description=f"For {prefix.lower()} tests",
     )
     session.add(pt)
     session.commit()
     session.refresh(job)
     session.refresh(pt)
 
-    project = Instruction(
+    instruction = Instruction(
         job_id=job.id,
         instruction_type_id=pt.id,
         status=InstructionStatus.ACTIVE,
         org_id=setup_data["org_id"],
         created_by_user_id=setup_data["user_id"],
     )
-    session.add(project)
+    session.add(instruction)
     session.commit()
-    session.refresh(project)
+    session.refresh(instruction)
+    return instruction
 
-    # Set auth cookie
+
+def test_time_entries_start_stop_workflow(
+    client: TestClient, session: Session, setup_data: dict
+):
+    """Test the complete timer workflow: start -> get current -> stop."""
+    project = _create_instruction_for_time_test(
+        session, setup_data, "Time Test"
+    )
     client.cookies = {"session_token": setup_data["token"]}
 
     # 1. Get current timer - should be None initially
     response = client.get("/time/current")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() is None, "Expected no active timer initially"
 
     # 2. Start timer with payload matching frontend format
@@ -76,7 +74,9 @@ def test_time_entries_start_stop_workflow(
         "description": "Working on initial implementation",
     }
     response = client.post("/time/start", json=start_payload)
-    assert response.status_code == 200, f"Failed to start timer: {response.text}"
+    assert response.status_code == HTTPStatus.OK, (
+        f"Failed to start timer: {response.text}"
+    )
     start_data = response.json()
 
     # Verify response structure matches TimeEntryOut
@@ -90,12 +90,14 @@ def test_time_entries_start_stop_workflow(
 
     # 3. Try to start another timer - should fail
     response = client.post("/time/start", json=start_payload)
-    assert response.status_code == 400, "Should not allow starting second timer"
+    assert response.status_code == HTTPStatus.BAD_REQUEST, (
+        "Should not allow starting second timer"
+    )
     assert "already running" in response.json()["detail"].lower()
 
     # 4. Get current timer - should return the active one
     response = client.get("/time/current")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     current_data = response.json()
     assert current_data is not None, "Expected active timer"
     assert current_data["id"] == start_data["id"]
@@ -103,7 +105,9 @@ def test_time_entries_start_stop_workflow(
 
     # 5. Stop the timer
     response = client.post("/time/stop")
-    assert response.status_code == 200, f"Failed to stop timer: {response.text}"
+    assert response.status_code == HTTPStatus.OK, (
+        f"Failed to stop timer: {response.text}"
+    )
     stop_data = response.json()
 
     assert stop_data["id"] == start_data["id"]
@@ -113,12 +117,14 @@ def test_time_entries_start_stop_workflow(
 
     # 6. Get current timer - should be None again
     response = client.get("/time/current")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() is None, "Expected no active timer after stop"
 
     # 7. Try to stop when no timer is running - should fail
     response = client.post("/time/stop")
-    assert response.status_code == 404, "Should fail when no timer to stop"
+    assert response.status_code == HTTPStatus.NOT_FOUND, (
+        "Should fail when no timer to stop"
+    )
     assert "no active timer" in response.json()["detail"].lower()
 
 
@@ -126,56 +132,24 @@ def test_time_entries_manual_logging(
     client: TestClient, session: Session, setup_data: dict
 ):
     """Test manual time logging without using the timer."""
-    # Setup: Create dependencies
-    cli = Client(name="Manual Time Client", org_id=setup_data["org_id"])
-    session.add(cli)
-    session.commit()
-    session.refresh(cli)
-
-    job = Job(
-        name="Manual Time Job",
-        status=JobStatus.ACTIVE,
-        org_id=setup_data["org_id"],
-        created_by_user_id=setup_data["user_id"],
-        client_id=cli.id,
+    project = _create_instruction_for_time_test(
+        session, setup_data, "Manual Time"
     )
-    session.add(job)
-
-    pt = InstructionType(
-        name="Manual Time Type",
-        org_id=setup_data["org_id"],
-        description="For manual time tests",
-    )
-    session.add(pt)
-    session.commit()
-    session.refresh(job)
-    session.refresh(pt)
-
-    project = Instruction(
-        job_id=job.id,
-        instruction_type_id=pt.id,
-        status=InstructionStatus.ACTIVE,
-        org_id=setup_data["org_id"],
-        created_by_user_id=setup_data["user_id"],
-    )
-    session.add(project)
-    session.commit()
-    session.refresh(project)
-
-    # Set auth cookie
     client.cookies = {"session_token": setup_data["token"]}
 
-    # Log 90 minutes of manual time
+    logged_minutes = 90
     manual_payload = {
         "instruction_id": project.id,
-        "duration_minutes": 90,
+        "duration_minutes": logged_minutes,
         "description": "Research and documentation",
     }
     response = client.post("/time/manual", json=manual_payload)
-    assert response.status_code == 200, f"Failed to log manual time: {response.text}"
+    assert response.status_code == HTTPStatus.OK, (
+        f"Failed to log manual time: {response.text}"
+    )
     manual_data = response.json()
 
-    assert manual_data["duration_minutes"] == 90
+    assert manual_data["duration_minutes"] == logged_minutes
     assert manual_data["description"] == "Research and documentation"
     # instruction_name now comes from instruction type
     assert manual_data["instruction_name"] == "Manual Time Type"
@@ -191,7 +165,7 @@ def test_time_entries_project_not_found(
 
     # Try to start timer with non-existent instruction
     response = client.post("/time/start", json={"instruction_id": 99999})
-    assert response.status_code == 404
+    assert response.status_code == HTTPStatus.NOT_FOUND
     assert "instruction not found" in response.json()["detail"].lower()
 
 
@@ -199,41 +173,9 @@ def test_time_entries_project_entries_list(
     client: TestClient, session: Session, setup_data: dict
 ):
     """Test getting time entries for a specific project."""
-    # Setup: Create dependencies
-    cli = Client(name="List Time Client", org_id=setup_data["org_id"])
-    session.add(cli)
-    session.commit()
-    session.refresh(cli)
-
-    job = Job(
-        name="List Time Job",
-        status=JobStatus.ACTIVE,
-        org_id=setup_data["org_id"],
-        created_by_user_id=setup_data["user_id"],
-        client_id=cli.id,
+    project = _create_instruction_for_time_test(
+        session, setup_data, "List Time"
     )
-    session.add(job)
-
-    pt = InstructionType(
-        name="List Time Type",
-        org_id=setup_data["org_id"],
-        description="For list tests",
-    )
-    session.add(pt)
-    session.commit()
-    session.refresh(job)
-    session.refresh(pt)
-
-    project = Instruction(
-        job_id=job.id,
-        instruction_type_id=pt.id,
-        status=InstructionStatus.ACTIVE,
-        org_id=setup_data["org_id"],
-        created_by_user_id=setup_data["user_id"],
-    )
-    session.add(project)
-    session.commit()
-    session.refresh(project)
 
     # Create some time entries directly
     entry1 = TimeEntry(
@@ -257,10 +199,13 @@ def test_time_entries_project_entries_list(
 
     # Get instruction time entries
     response = client.get(f"/time/instruction/{project.id}")
-    assert response.status_code == 200, f"Failed to get entries: {response.text}"
+    assert response.status_code == HTTPStatus.OK, (
+        f"Failed to get entries: {response.text}"
+    )
     entries = response.json()
 
-    assert len(entries) >= 2
+    expected_entry_count = 2
+    assert len(entries) >= expected_entry_count
     descriptions = [e["description"] for e in entries]
     assert "First entry" in descriptions
     assert "Second entry" in descriptions

@@ -1,9 +1,10 @@
 from typing import Any, cast
+
 from fastapi import APIRouter
 
-from app.api.deps import DBDep, CurrentUserDep
-from app.models.user_model import UserRead, UserUpdate
+from app.api.deps import CurrentUserDep, DBDep
 from app.core.security import hash_password
+from app.models.user_model import UserRead, UserUpdate
 
 router = APIRouter()
 

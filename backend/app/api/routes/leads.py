@@ -1,19 +1,19 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, cast
-from fastapi import APIRouter, HTTPException, status
-from sqlmodel import select
-from pydantic import BaseModel
 
-from app.api.deps import DBDep, CurrentUserDep
+from fastapi import APIRouter, HTTPException, status
+from pydantic import BaseModel
+from sqlmodel import select
+
+from app.api.deps import CurrentUserDep, DBDep
+from app.models.client_model import Client, ClientContact
 from app.models.lead_model import (
     Lead,
     LeadCreate,
     LeadRead,
-    LeadUpdate,
     LeadStatus,
+    LeadUpdate,
 )
-from app.models.client_model import Client, ClientContact
-
 
 router = APIRouter()
 
@@ -159,12 +159,12 @@ def add_lead_update(
         "text": update_entry.text,
         "user_id": current_user.id,
         "user_name": current_user.name,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }
 
     if lead.updates is None:
         lead.updates = []
-    lead.updates = [new_update] + lead.updates  # Prepend new update
+    lead.updates = [new_update, *lead.updates]
 
     db.add(lead)
     db.commit()

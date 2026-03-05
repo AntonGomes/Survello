@@ -25,14 +25,18 @@ class StorageService:
 
         logger = logging.getLogger(__name__)
         try:
+            bucket = self.s3.bucket_name
             logger.info(
-                f"Checking if file exists: bucket={self.s3.bucket_name}, key={storage_key}"
+                f"Checking if file exists: bucket={bucket},"
+                f" key={storage_key}"
             )
             response = self.s3.client.head_object(
-                Bucket=self.s3.bucket_name, Key=storage_key
+                Bucket=bucket, Key=storage_key
             )
+            etag = response.get("ETag")
+            size = response.get("ContentLength")
             logger.info(
-                f"File exists! ETag: {response.get('ETag')}, Size: {response.get('ContentLength')}"
+                f"File exists! ETag: {etag}, Size: {size}"
             )
             return True
         except Exception as e:
@@ -47,29 +51,29 @@ class StorageService:
         storage_key: str,
         mime_type: str,
         file_name: str,
-        expiration: int = 3600,
         inline: bool = False,
     ) -> str:
+        expiration = 3600
         params: dict[str, object] = {
             "Bucket": self.s3.bucket_name,
             "Key": storage_key,
         }
 
         if operation == "put_object":
-            # This sets metadata on the uploaded object (good to do)
             if mime_type:
                 params["ContentType"] = mime_type
             if inline:
-                params["ContentDisposition"] = f'inline; filename="{file_name}"'
+                params["ContentDisposition"] = (
+                    f'inline; filename="{file_name}"'
+                )
 
         elif operation == "get_object":
-            # These override response headers when viewing/downloading
             if mime_type:
                 params["ResponseContentType"] = mime_type
 
-            disposition_type = "inline" if inline else "attachment"
+            disposition = "inline" if inline else "attachment"
             params["ResponseContentDisposition"] = (
-                f'{disposition_type}; filename="{file_name}"'
+                f'{disposition}; filename="{file_name}"'
             )
 
         return self.s3.client.generate_presigned_url(

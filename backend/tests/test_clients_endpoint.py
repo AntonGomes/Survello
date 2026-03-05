@@ -1,5 +1,8 @@
+from http import HTTPStatus
+
 from fastapi.testclient import TestClient
 from sqlmodel import Session
+
 from app.models.client_model import Client
 
 
@@ -21,7 +24,7 @@ def test_clients_workflow(client: TestClient, session: Session, setup_data: dict
     }
 
     response = client.post("/clients/", json=client_payload)
-    assert response.status_code == 201, response.text
+    assert response.status_code == HTTPStatus.CREATED, response.text
     client_data = response.json()
     assert client_data["name"] == "Acme Corp"
 
