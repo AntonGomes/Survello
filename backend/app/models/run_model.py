@@ -54,6 +54,9 @@ class Run(RunBase, table=True):
     created_by_user_id: int = Field(foreign_key="users.id", ondelete="RESTRICT")
     job_id: int | None = Field(default=None, foreign_key="jobs.id", ondelete="SET NULL")
     template_file_id: int = Field(foreign_key="files.id", ondelete="RESTRICT")
+    instruction_type_id: int | None = Field(
+        default=None, foreign_key="project_types.id", ondelete="SET NULL"
+    )
 
     template_file: "File" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Run.template_file_id]"}
@@ -69,6 +72,7 @@ class RunCreate(SQLModel):
     job_id: int | None = None
     template_file_id: int
     context_file_ids: list[int]
+    instruction_type_id: int | None = None
 
 
 class RunRead(RunBase):
@@ -77,5 +81,6 @@ class RunRead(RunBase):
     org_id: int
     template_file_id: int
     job_id: int | None = None
+    instruction_type_id: int | None = None
     created_at: datetime
     updated_at: datetime

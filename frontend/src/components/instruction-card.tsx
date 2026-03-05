@@ -6,8 +6,6 @@ import { format, differenceInDays } from "date-fns"
 import {
   Calendar,
   Clock,
-  DollarSign,
-  ChevronDown,
   ChevronRight,
   Settings2,
   Timer,
@@ -36,7 +34,7 @@ import {
   readJobOptions,
   getInstructionTimeEntriesOptions,
 } from "@/client/@tanstack/react-query.gen"
-import { FeeType, InstructionStatus, UserRole, type InstructionReadWithInstructionType } from "@/client/types.gen"
+import { InstructionStatus, type InstructionReadWithInstructionType } from "@/client/types.gen"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
@@ -61,8 +59,10 @@ export function InstructionCard({ instruction, jobId, isAdmin, onRecordTime }: I
   const [editedDescription, setEditedDescription] = useState(instruction.description || "")
   const [deadlineCalendarOpen, setDeadlineCalendarOpen] = useState(false)
 
-  const isHourlyOrMixed = instruction.fee_type === FeeType.HOURLY || instruction.fee_type === FeeType.MIXED
   const currentStatus = instruction.status || "planned"
+  
+  // Get display name from instruction type
+  const displayName = instruction.instruction_type?.name || "Instruction"
   
   // Calculate deadline info
   const daysUntilDeadline = instruction.deadline 
@@ -70,16 +70,15 @@ export function InstructionCard({ instruction, jobId, isAdmin, onRecordTime }: I
     : null
   const isOverdue = daysUntilDeadline !== null && daysUntilDeadline < 0
 
-  // Hours info
-  const hoursUsed = instruction.actual_hours ?? 0
-  const hoursForecasted = instruction.forecasted_billable_hours ?? 0
-  const hoursPercent = hoursForecasted > 0 ? Math.min((hoursUsed / hoursForecasted) * 100, 100) : 0
-
   // Fetch time entries when expanded
   const { data: timeEntries = [] } = useQuery({
     ...getInstructionTimeEntriesOptions({ path: { instruction_id: instruction.id } }),
-    enabled: isExpanded && isHourlyOrMixed,
+    enabled: isExpanded,
   })
+
+  // Calculate total hours from time entries
+  const totalMinutes = timeEntries.reduce((sum, entry) => sum + (entry.duration_minutes || 0), 0)
+  const totalHours = totalMinutes / 60
 
   const { mutate: updateInstruction } = useMutation({
     ...updateInstructionMutation(),
@@ -123,17 +122,19 @@ export function InstructionCard({ instruction, jobId, isAdmin, onRecordTime }: I
   }
 
   return (
-    <Card className="overflow-hidden border-l-4 border-l-muted-foreground/20">
+    <Card className="overflow-hidden border-l-4 border-l-muted-foreground/20 transition-all duration-200 hover:shadow-md hover:border-primary/30">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1">
+              {instruction.instruction_number && (
+                <Badge variant="outline" className="text-xs font-mono shrink-0">
+                  {instruction.instruction_number}
+                </Badge>
+              )}
               <CardTitle className="text-lg font-medium truncate">
-                {instruction.name}
+                {displayName}
               </CardTitle>
-              <Badge variant="outline" className="shrink-0 text-xs font-normal">
-                {instruction.instruction_type?.name || "Instruction"}
-              </Badge>
             </div>
             
             {/* Inline-editable description */}
@@ -194,80 +195,59 @@ export function InstructionCard({ instruction, jobId, isAdmin, onRecordTime }: I
                   className={cn("gap-1 h-7 px-2 capitalize", statusStyles[currentStatus])}
                 >
                   {currentStatus}
-                  <ChevronDown className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {Object.values(InstructionStatus).map((status) => (
                   <DropdownMenuItem 
-                    key={status}
+                    key={status} 
                     onClick={() => handleStatusChange(status)}
-                    className={cn(currentStatus === status && "bg-muted")}
+                    className="capitalize"
                   >
-                    <div className={cn(
-                      "w-2 h-2 rounded-full mr-2",
-                      status === "planned" && "bg-slate-400",
-                      status === "active" && "bg-blue-500",
-                      status === "completed" && "bg-green-500",
-                      status === "archived" && "bg-gray-400",
-                    )} />
-                    <span className="capitalize">{status}</span>
+                    {status}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            {/* Edit button - admin only */}
-            {isAdmin && (
-              <EditInstructionDialog 
-                instruction={instruction} 
-                jobId={jobId}
-                trigger={
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <Settings2 className="h-4 w-4" />
-                  </Button>
-                }
-              />
-            )}
-            
-            {/* Record Time Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={() => onRecordTime(instruction.id)}
-            >
-              <Timer className="h-4 w-4" />
-            </Button>
+
+            {/* Settings/Edit Menu */}
+            <EditInstructionDialog 
+              instruction={instruction} 
+              jobId={jobId}
+              trigger={
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Settings2 className="h-4 w-4" />
+                </Button>
+              }
+            />
           </div>
         </div>
       </CardHeader>
-      
-      <CardContent className="pt-0 space-y-3">
-        {/* Info Row with inline editable deadline */}
+
+      <CardContent className="space-y-3 pt-0">
+        {/* Quick Stats Row */}
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-          {/* Deadline - inline editable */}
+          {/* Deadline */}
           <Popover open={deadlineCalendarOpen} onOpenChange={setDeadlineCalendarOpen}>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
+              <Button 
+                variant="ghost" 
+                size="sm" 
                 className={cn(
-                  "h-auto py-1 px-2 -ml-2 font-normal gap-1",
-                  isOverdue && "text-red-600",
-                  !instruction.deadline && "text-muted-foreground/60"
+                  "h-7 px-2 gap-1",
+                  isOverdue && "text-red-600"
                 )}
               >
                 <Calendar className="h-3.5 w-3.5" />
                 {instruction.deadline ? (
-                  <>
-                    <span>{format(new Date(instruction.deadline), "d MMM yyyy")}</span>
+                  <span>
+                    {format(new Date(instruction.deadline), "d MMM yyyy")}
                     {daysUntilDeadline !== null && (
-                      <span className="text-xs opacity-60">
+                      <span className="ml-1 text-xs">
                         ({isOverdue ? `${Math.abs(daysUntilDeadline)}d overdue` : `${daysUntilDeadline}d`})
                       </span>
                     )}
-                  </>
+                  </span>
                 ) : (
                   <span>Set deadline</span>
                 )}
@@ -295,82 +275,68 @@ export function InstructionCard({ instruction, jobId, isAdmin, onRecordTime }: I
             </PopoverContent>
           </Popover>
           
-          {/* Hours - for hourly instructions */}
-          {isHourlyOrMixed && (
+          {/* Record Time Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 gap-1"
+            onClick={() => onRecordTime(instruction.id)}
+          >
+            <Timer className="h-3.5 w-3.5" />
+            <span>Record Time</span>
+          </Button>
+
+          {/* Hours tracked */}
+          {totalMinutes > 0 && (
             <div className="flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
-              <span>{hoursUsed.toFixed(1)}h / {hoursForecasted}h</span>
-            </div>
-          )}
-          
-          {/* Rate - admin only */}
-          {isAdmin && isHourlyOrMixed && instruction.rate && instruction.rate > 0 && (
-            <div className="flex items-center gap-1">
-              <DollarSign className="h-3.5 w-3.5" />
-              <span>£{instruction.rate}/hr</span>
+              <span>{totalHours.toFixed(1)}h tracked</span>
             </div>
           )}
         </div>
-        
-        {/* Hours Progress Bar - for hourly instructions */}
-        {isHourlyOrMixed && hoursForecasted > 0 && (
-          <div className="space-y-1">
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div 
-                className={cn(
-                  "h-full rounded-full transition-all",
-                  hoursPercent >= 100 ? "bg-red-500" : "bg-primary"
-                )}
-                style={{ width: `${hoursPercent}%` }}
-              />
-            </div>
-          </div>
-        )}
 
         {/* Expandable Time Entries Section */}
-        {isHourlyOrMixed && (
-          <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 px-2 -ml-2 text-muted-foreground">
-                <ChevronRight className={cn(
-                  "h-3.5 w-3.5 mr-1 transition-transform",
-                  isExpanded && "rotate-90"
-                )} />
-                {timeEntries.length > 0 ? `${timeEntries.length} time entries` : "No time entries"}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="pt-2">
-              {timeEntries.length > 0 ? (
-                <div className="space-y-2 pl-4 border-l-2 border-muted">
-                  {timeEntries.slice(0, 5).map((entry) => (
-                    <div key={entry.id} className="text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">
-                          {entry.start_time ? format(new Date(entry.start_time), "d MMM yyyy, HH:mm") : "—"}
-                        </span>
-                        <span className="font-medium">
-                          {entry.duration_minutes ? `${Math.floor(entry.duration_minutes / 60)}h ${entry.duration_minutes % 60}m` : "In progress"}
-                        </span>
-                      </div>
-                      {entry.description && (
-                        <p className="text-muted-foreground text-xs mt-0.5">{entry.description}</p>
-                      )}
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-7 px-2 -ml-2 text-muted-foreground">
+              <ChevronRight className={cn(
+                "h-3.5 w-3.5 mr-1 transition-transform",
+                isExpanded && "rotate-90"
+              )} />
+              {timeEntries.length > 0 ? `${timeEntries.length} time entries` : "No time entries"}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-2">
+            {timeEntries.length > 0 ? (
+              <div className="space-y-2 pl-4 border-l-2 border-muted">
+                {timeEntries.slice(0, 5).map((entry) => (
+                  <div key={entry.id} className="text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">
+                        {entry.start_time ? format(new Date(entry.start_time), "d MMM yyyy, HH:mm") : "—"}
+                      </span>
+                      <span className="font-medium">
+                        {entry.duration_minutes ? `${Math.floor(entry.duration_minutes / 60)}h ${entry.duration_minutes % 60}m` : "In progress"}
+                      </span>
                     </div>
-                  ))}
-                  {timeEntries.length > 5 && (
-                    <p className="text-xs text-muted-foreground">
-                      +{timeEntries.length - 5} more entries
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground pl-4">
-                  No time has been recorded yet.
-                </p>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
-        )}
+                    {entry.description && (
+                      <p className="text-muted-foreground text-xs mt-0.5">{entry.description}</p>
+                    )}
+                  </div>
+                ))}
+                {timeEntries.length > 5 && (
+                  <p className="text-xs text-muted-foreground">
+                    +{timeEntries.length - 5} more entries
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground pl-4">
+                No time has been recorded yet.
+              </p>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   )

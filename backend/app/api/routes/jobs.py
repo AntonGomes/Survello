@@ -1,6 +1,6 @@
 from typing import cast
 from fastapi import APIRouter, HTTPException, status
-from sqlmodel import select
+from sqlmodel import select, func
 from sqlalchemy.orm import joinedload
 from pydantic import BaseModel
 from app.api.deps import DBDep, CurrentUserDep
@@ -9,6 +9,12 @@ from app.models.instruction_model import Instruction
 from app.models.update_model import create_text_update
 
 router = APIRouter()
+
+
+def generate_job_number(db, org_id: int) -> str:
+    """Generate a semantic job number (e.g., JOB-00042) for an org."""
+    count = db.exec(select(func.count(Job.id)).where(Job.org_id == org_id)).one()
+    return f"JOB-{(count + 1):05d}"
 
 
 class JobUpdateEntry(BaseModel):
@@ -26,7 +32,13 @@ def create_job(
     current_user: CurrentUserDep,
     db: DBDep,
 ) -> JobRead:
-    extra_data = {"org_id": current_user.org_id, "created_by_user_id": current_user.id}
+    # Generate semantic job number
+    job_number = generate_job_number(db, current_user.org_id)
+    extra_data = {
+        "org_id": current_user.org_id,
+        "created_by_user_id": current_user.id,
+        "job_number": job_number,
+    }
     job = Job.model_validate(job_in, update=extra_data)
     db.add(job)
     db.commit()
@@ -46,6 +58,7 @@ def read_jobs(
         .where(Job.org_id == current_user.org_id)  # Security Scope
         .options(
             joinedload(Job.client),
+            joinedload(Job.secondary_client),
             joinedload(Job.created_by_user),
             joinedload(Job.lead_user),
         )
@@ -69,6 +82,7 @@ def read_job(
         .where(Job.org_id == current_user.org_id)
         .options(
             joinedload(Job.client),
+            joinedload(Job.secondary_client),
             joinedload(Job.created_by_user),
             joinedload(Job.lead_user),
             joinedload(Job.instructions).joinedload(Instruction.instruction_type),

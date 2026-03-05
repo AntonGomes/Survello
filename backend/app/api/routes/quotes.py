@@ -18,7 +18,7 @@ from app.models.quote_model import (
 from app.models.lead_model import LeadStatus
 from app.models.client_model import Client, ClientContact
 from app.models.job_model import Job, JobStatus
-from app.models.instruction_model import Instruction, FeeType, InstructionStatus
+from app.models.instruction_model import Instruction, InstructionStatus
 
 
 router = APIRouter()
@@ -404,14 +404,8 @@ def convert_quote(
         instruction_type = line.instruction_type
         instruction = Instruction(
             org_id=current_user.org_id,
-            name=instruction_type.name,
             description=instruction_type.description or "",
-            rate=line.estimated_fee or instruction_type.rate or 0.0,
-            forecasted_fee_amount=line.estimated_fee,
-            fee_type=instruction_type.default_fee_type or FeeType.FIXED,
             status=InstructionStatus.PLANNED,
-            contingency_percentage=instruction_type.default_contingency_percentage
-            or 0.0,
             job_id=job.id,
             instruction_type_id=cast(int, instruction_type.id),
             created_by_user_id=current_user.id,

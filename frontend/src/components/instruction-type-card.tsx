@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderOpen, DollarSign, Percent, FileText, Pencil, Paperclip } from "lucide-react";
+import { FolderOpen, FileText, Pencil, Paperclip } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,23 +30,8 @@ export function InstructionTypeCard({ instructionType }: InstructionTypeCardProp
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Default Settings */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <DollarSign className="h-3.5 w-3.5" />
-            <span>Rate: £{instructionType.rate?.toFixed(2) ?? "0.00"}</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Percent className="h-3.5 w-3.5" />
-            <span>Contingency: {instructionType.default_contingency_percentage ?? 0}%</span>
-          </div>
-        </div>
-
-        {/* Fee Type Badge */}
+        {/* Template Status */}
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="capitalize">
-            {instructionType.default_fee_type?.replace("_", " ") ?? "Fixed"}
-          </Badge>
           {hasTemplate ? (
             <Badge variant="secondary" className="gap-1">
               <FileText className="h-3 w-3" />

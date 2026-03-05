@@ -31,11 +31,15 @@ class JobBase(SQLModel):
     # Unified updates feed - stores list of UpdateItem dicts
     # (see update_model.py for structure)
     updates: List[Any] | None = Field(default=None, sa_column=Column(JSON))
+    # Joint client support
+    is_joint: bool = Field(default=False)
 
 
 class Job(JobBase, table=True):
     __tablename__: ClassVar[str] = "jobs"
     id: int | None = Field(default=None, primary_key=True)
+    # Semantic job number (auto-generated per org, e.g., JOB-00042)
+    job_number: str | None = Field(default=None, max_length=32, index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
@@ -45,6 +49,10 @@ class Job(JobBase, table=True):
     # FKs
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
     client_id: int = Field(foreign_key="clients.id", ondelete="RESTRICT")
+    # Secondary client for joint instructions
+    secondary_client_id: int | None = Field(
+        default=None, foreign_key="clients.id", ondelete="SET NULL"
+    )
     created_by_user_id: int = Field(foreign_key="users.id", ondelete="RESTRICT")
     lead_user_id: int | None = Field(
         default=None, foreign_key="users.id", ondelete="SET NULL"
@@ -52,7 +60,13 @@ class Job(JobBase, table=True):
 
     # Relations
     org: Org = Relationship(back_populates="jobs")
-    client: Client = Relationship(back_populates="jobs")
+    client: Client = Relationship(
+        back_populates="jobs",
+        sa_relationship_kwargs={"foreign_keys": "[Job.client_id]"},
+    )
+    secondary_client: Client | None = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Job.secondary_client_id]"},
+    )
     created_by_user: User = Relationship(
         back_populates="created_jobs",
         sa_relationship_kwargs={"foreign_keys": "[Job.created_by_user_id]"},
@@ -67,6 +81,7 @@ class Job(JobBase, table=True):
 
 class JobCreate(JobBase):
     client_id: int
+    secondary_client_id: int | None = None
     lead_user_id: int | None = None
 
 
@@ -75,13 +90,17 @@ class JobUpdate(SQLModel):
     address: str | None = None
     status: JobStatus | None = None
     client_id: int | None = None
+    secondary_client_id: int | None = None
     lead_user_id: int | None = None
     updates: List[Any] | None = None
+    is_joint: bool | None = None
 
 
 class JobRead(JobBase):
     id: int
+    job_number: str | None = None
     client: ClientReadMinimal
+    secondary_client: ClientReadMinimal | None = None
     created_by_user: UserRead
     lead_user: UserRead | None
     created_at: datetime

@@ -45,6 +45,10 @@ export type Artefact = {
      * Preview File Id
      */
     preview_file_id?: number | null;
+    /**
+     * Instruction Type Id
+     */
+    instruction_type_id?: number | null;
 };
 
 /**
@@ -350,20 +354,6 @@ export type ConvertQuoteResponse = {
 };
 
 /**
- * FeeType
- */
-export const FeeType = {
-    FIXED: 'fixed',
-    HOURLY: 'hourly',
-    MIXED: 'mixed'
-} as const;
-
-/**
- * FeeType
- */
-export type FeeType = typeof FeeType[keyof typeof FeeType];
-
-/**
  * FileCreate
  */
 export type FileCreate = {
@@ -586,42 +576,9 @@ export type InstructionAddUpdate = {
  */
 export type InstructionCreate = {
     /**
-     * Name
-     */
-    name: string;
-    /**
      * Description
      */
     description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type: FeeType;
     status?: InstructionStatus | null;
     /**
      * Updates
@@ -666,42 +623,9 @@ export type InstructionMinimalRead = {
  */
 export type InstructionRead = {
     /**
-     * Name
-     */
-    name: string;
-    /**
      * Description
      */
     description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type: FeeType;
     status?: InstructionStatus | null;
     /**
      * Updates
@@ -717,6 +641,10 @@ export type InstructionRead = {
      * Id
      */
     id: number;
+    /**
+     * Instruction Number
+     */
+    instruction_number?: string | null;
     /**
      * Instruction Type Id
      */
@@ -744,42 +672,9 @@ export type InstructionRead = {
  */
 export type InstructionReadDetail = {
     /**
-     * Name
-     */
-    name: string;
-    /**
      * Description
      */
     description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type: FeeType;
     status?: InstructionStatus | null;
     /**
      * Updates
@@ -795,6 +690,10 @@ export type InstructionReadDetail = {
      * Id
      */
     id: number;
+    /**
+     * Instruction Number
+     */
+    instruction_number?: string | null;
     /**
      * Instruction Type Id
      */
@@ -824,42 +723,9 @@ export type InstructionReadDetail = {
  */
 export type InstructionReadWithInstructionType = {
     /**
-     * Name
-     */
-    name: string;
-    /**
      * Description
      */
     description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type: FeeType;
     status?: InstructionStatus | null;
     /**
      * Updates
@@ -875,6 +741,10 @@ export type InstructionReadWithInstructionType = {
      * Id
      */
     id: number;
+    /**
+     * Instruction Number
+     */
+    instruction_number?: string | null;
     /**
      * Instruction Type Id
      */
@@ -926,15 +796,6 @@ export type InstructionTypeCreate = {
      */
     description?: string | null;
     /**
-     * Rate
-     */
-    rate?: number | null;
-    default_fee_type?: FeeType | null;
-    /**
-     * Default Contingency Percentage
-     */
-    default_contingency_percentage?: number | null;
-    /**
      * Default Template File Id
      */
     default_template_file_id?: number | null;
@@ -952,15 +813,6 @@ export type InstructionTypeRead = {
      * Description
      */
     description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    default_fee_type?: FeeType | null;
-    /**
-     * Default Contingency Percentage
-     */
-    default_contingency_percentage?: number | null;
     /**
      * Id
      */
@@ -992,15 +844,6 @@ export type InstructionTypeUpdate = {
      */
     description?: string | null;
     /**
-     * Rate
-     */
-    rate?: number | null;
-    default_fee_type?: FeeType | null;
-    /**
-     * Default Contingency Percentage
-     */
-    default_contingency_percentage?: number | null;
-    /**
      * Default Template File Id
      */
     default_template_file_id?: number | null;
@@ -1011,42 +854,9 @@ export type InstructionTypeUpdate = {
  */
 export type InstructionUpdate = {
     /**
-     * Name
-     */
-    name?: string | null;
-    /**
      * Description
      */
     description?: string | null;
-    /**
-     * Rate
-     */
-    rate?: number | null;
-    /**
-     * Forecasted Billable Hours
-     */
-    forecasted_billable_hours?: number | null;
-    /**
-     * Actual Hours
-     */
-    actual_hours?: number | null;
-    /**
-     * Contingency Percentage
-     */
-    contingency_percentage?: number | null;
-    /**
-     * Forecasted Settlement Amount
-     */
-    forecasted_settlement_amount?: number | null;
-    /**
-     * Final Settlement Amount
-     */
-    final_settlement_amount?: number | null;
-    /**
-     * Forecasted Fee Amount
-     */
-    forecasted_fee_amount?: number | null;
-    fee_type?: FeeType | null;
     status?: InstructionStatus | null;
     /**
      * Updates
@@ -1173,9 +983,17 @@ export type JobCreate = {
      */
     updates?: Array<unknown> | null;
     /**
+     * Is Joint
+     */
+    is_joint?: boolean;
+    /**
      * Client Id
      */
     client_id: number;
+    /**
+     * Secondary Client Id
+     */
+    secondary_client_id?: number | null;
     /**
      * Lead User Id
      */
@@ -1200,10 +1018,19 @@ export type JobRead = {
      */
     updates?: Array<unknown> | null;
     /**
+     * Is Joint
+     */
+    is_joint?: boolean;
+    /**
      * Id
      */
     id: number;
+    /**
+     * Job Number
+     */
+    job_number?: string | null;
     client: ClientReadMinimal;
+    secondary_client?: ClientReadMinimal | null;
     created_by_user: UserRead;
     lead_user: UserRead | null;
     /**
@@ -1238,10 +1065,19 @@ export type JobReadDetail = {
      */
     updates?: Array<unknown> | null;
     /**
+     * Is Joint
+     */
+    is_joint?: boolean;
+    /**
      * Id
      */
     id: number;
+    /**
+     * Job Number
+     */
+    job_number?: string | null;
     client: ClientReadMinimal;
+    secondary_client?: ClientReadMinimal | null;
     created_by_user: UserRead;
     lead_user: UserRead | null;
     /**
@@ -1279,6 +1115,10 @@ export type JobReadMinimal = {
      * Updates
      */
     updates?: Array<unknown> | null;
+    /**
+     * Is Joint
+     */
+    is_joint?: boolean;
     /**
      * Id
      */
@@ -1326,6 +1166,10 @@ export type JobUpdate = {
      */
     client_id?: number | null;
     /**
+     * Secondary Client Id
+     */
+    secondary_client_id?: number | null;
+    /**
      * Lead User Id
      */
     lead_user_id?: number | null;
@@ -1333,6 +1177,10 @@ export type JobUpdate = {
      * Updates
      */
     updates?: Array<unknown> | null;
+    /**
+     * Is Joint
+     */
+    is_joint?: boolean | null;
 };
 
 /**
@@ -1755,6 +1603,10 @@ export type RunCreate = {
      * Context File Ids
      */
     context_file_ids: Array<number>;
+    /**
+     * Instruction Type Id
+     */
+    instruction_type_id?: number | null;
 };
 
 /**
@@ -1790,6 +1642,10 @@ export type RunRead = {
      * Job Id
      */
     job_id?: number | null;
+    /**
+     * Instruction Type Id
+     */
+    instruction_type_id?: number | null;
     /**
      * Created At
      */

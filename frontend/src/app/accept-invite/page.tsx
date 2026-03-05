@@ -176,7 +176,7 @@ function AcceptInviteContent() {
           
           <CardTitle>Join {invitation?.org_name}</CardTitle>
           <CardDescription>
-            <span className="font-medium">{invitation?.invited_by_name}</span> has invited you to join their organization. 
+            <span className="font-medium">{invitation?.invited_by_name}</span> has invited you to join their organisation. 
             Create your account to get started.
           </CardDescription>
         </CardHeader>

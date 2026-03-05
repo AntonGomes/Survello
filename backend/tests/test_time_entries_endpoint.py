@@ -14,7 +14,6 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 from app.models.instruction_model import (
     InstructionType,
-    FeeType,
     Instruction,
     InstructionStatus,
 )
@@ -53,10 +52,8 @@ def test_time_entries_start_stop_workflow(
     session.refresh(pt)
 
     project = Instruction(
-        name="Time Test Instruction",
         job_id=job.id,
         instruction_type_id=pt.id,
-        fee_type=FeeType.HOURLY,
         status=InstructionStatus.ACTIVE,
         org_id=setup_data["org_id"],
         created_by_user_id=setup_data["user_id"],
@@ -85,7 +82,8 @@ def test_time_entries_start_stop_workflow(
     # Verify response structure matches TimeEntryOut
     assert start_data["id"] is not None
     assert start_data["instruction_id"] == project.id
-    assert start_data["instruction_name"] == "Time Test Instruction"
+    # instruction_name now comes from instruction type
+    assert start_data["instruction_name"] == "Time Test Type"
     assert start_data["user_id"] == setup_data["user_id"]
     assert start_data["end_time"] is None, "Timer should not be stopped yet"
     assert start_data["description"] == "Working on initial implementation"
@@ -154,10 +152,8 @@ def test_time_entries_manual_logging(
     session.refresh(pt)
 
     project = Instruction(
-        name="Manual Time Instruction",
         job_id=job.id,
         instruction_type_id=pt.id,
-        fee_type=FeeType.FIXED,
         status=InstructionStatus.ACTIVE,
         org_id=setup_data["org_id"],
         created_by_user_id=setup_data["user_id"],
@@ -165,8 +161,6 @@ def test_time_entries_manual_logging(
     session.add(project)
     session.commit()
     session.refresh(project)
-
-    initial_actual_hours = project.actual_hours or 0
 
     # Set auth cookie
     client.cookies = {"session_token": setup_data["token"]}
@@ -183,16 +177,10 @@ def test_time_entries_manual_logging(
 
     assert manual_data["duration_minutes"] == 90
     assert manual_data["description"] == "Research and documentation"
-    assert manual_data["instruction_name"] == "Manual Time Instruction"
+    # instruction_name now comes from instruction type
+    assert manual_data["instruction_name"] == "Manual Time Type"
     # Manual entries have start_time == end_time
     assert manual_data["end_time"] is not None
-
-    # Verify project actual_hours was updated
-    session.refresh(project)
-    expected_hours = initial_actual_hours + (90 / 60.0)
-    assert project.actual_hours == expected_hours, (
-        f"Expected {expected_hours} hours, got {project.actual_hours}"
-    )
 
 
 def test_time_entries_project_not_found(
@@ -237,10 +225,8 @@ def test_time_entries_project_entries_list(
     session.refresh(pt)
 
     project = Instruction(
-        name="List Time Project",
         job_id=job.id,
         instruction_type_id=pt.id,
-        fee_type=FeeType.HOURLY,
         status=InstructionStatus.ACTIVE,
         org_id=setup_data["org_id"],
         created_by_user_id=setup_data["user_id"],

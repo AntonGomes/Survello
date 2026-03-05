@@ -1,5 +1,7 @@
 {
     "chat.tools.terminal.autoApprove": {
         "uv": true
-    }
+    },
+    // Disable Pylance type checking - use ty instead
+    "python.analysis.typeCheckingMode": "off"
 }

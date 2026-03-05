@@ -462,7 +462,7 @@ export default function JobDetailPage() {
                               {format(new Date(nextDeadlineInstruction.deadline!), "d MMM yyyy")}
                             </p>
                             <p className="text-xs text-muted-foreground truncate">
-                              {nextDeadlineInstruction.name}
+                              {nextDeadlineInstruction.instruction_type?.name || "Instruction"}
                             </p>
                           </div>
                         ) : (
@@ -769,7 +769,7 @@ export default function JobDetailPage() {
                       <div key={instruction.id} className="p-3">
                         <div className="flex items-center gap-2 text-sm">
                           <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{instruction.name}</span>
+                          <span className="font-medium">{instruction.instruction_type?.name || "Instruction"}</span>
                           <span className="text-muted-foreground text-xs">
                             (View in instruction)
                           </span>

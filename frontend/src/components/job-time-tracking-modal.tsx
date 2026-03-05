@@ -33,23 +33,22 @@ import {
   logTimeManuallyMutation,
   getCurrentTimerOptions,
   readJobOptions,
-  updateInstructionMutation,
   readOrgOptions,
 } from "@/client/@tanstack/react-query.gen"
-import { FeeType, type InstructionRead } from "@/client"
+import { type InstructionReadWithInstructionType } from "@/client"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 interface JobTimeTrackingModalProps {
   jobId: number
-  instructions: InstructionRead[]
+  instructions: InstructionReadWithInstructionType[]
   open: boolean
   onOpenChange: (open: boolean) => void
   onTimeLogged?: (instructionName: string, description: string, durationMinutes: number, collaboratorNames?: string[]) => void
   defaultInstructionId?: number
 }
 
-type ModalStep = "select-instruction" | "confirm-billing" | "recording" | "stopped-collaborators"
+type ModalStep = "select-instruction" | "recording" | "stopped-collaborators"
 
 export function JobTimeTrackingModal({
   jobId,
@@ -100,25 +99,6 @@ export function JobTimeTrackingModal({
     if (!selectedInstructionId) return null
     return instructions.find(p => p.id.toString() === selectedInstructionId)
   }, [selectedInstructionId, instructions])
-
-  const isHourlyOrMixed = selectedInstruction?.fee_type === FeeType.HOURLY || selectedInstruction?.fee_type === FeeType.MIXED
-
-  // Update instruction mutation for changing fee type
-  const { mutate: updateInstruction, isPending: isUpdatingInstruction } = useMutation({
-    ...updateInstructionMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: readJobOptions({ path: { job_id: jobId } }).queryKey,
-      })
-      toast.success("Instruction billing updated to hourly")
-      setStep("select-instruction")
-      // After updating, proceed with recording
-      handleStartRecordingConfirmed()
-    },
-    onError: () => {
-      toast.error("Failed to update instruction billing")
-    },
-  })
 
   // Start timer mutation
   const { mutate: startTimer, isPending: isStarting } = useMutation({
@@ -264,12 +244,6 @@ export function JobTimeTrackingModal({
       return
     }
 
-    // Check if project is hourly/mixed
-    if (!isHourlyOrMixed) {
-      setStep("confirm-billing")
-      return
-    }
-
     handleStartRecordingConfirmed()
   }
 
@@ -284,15 +258,6 @@ export function JobTimeTrackingModal({
     })
   }
 
-  const handleConvertToHourly = () => {
-    if (!selectedInstruction) return
-    
-    updateInstruction({
-      path: { instruction_id: selectedInstruction.id },
-      body: { fee_type: FeeType.HOURLY },
-    })
-  }
-
   const handleStopRecording = () => {
     stopTimer({
       query: { description: description || undefined },
@@ -302,12 +267,6 @@ export function JobTimeTrackingModal({
   const handleManualSubmit = () => {
     if (!selectedInstruction) {
       toast.error("Please select an instruction first")
-      return
-    }
-
-    // Check if instruction is hourly/mixed
-    if (!isHourlyOrMixed) {
-      setStep("confirm-billing")
       return
     }
 
@@ -329,8 +288,14 @@ export function JobTimeTrackingModal({
     })
   }
 
+  // Helper to get display name for instruction
+  const getInstructionDisplayName = (instruction: InstructionReadWithInstructionType | undefined | null) => {
+    if (!instruction) return "Instruction"
+    return instruction.instruction_type?.name || "Instruction"
+  }
+
   const handleFinishWithCollaborators = async () => {
-    const instructionName = instructions.find(p => p.id === stoppedInstructionId)?.name || "Instruction"
+    const instructionName = getInstructionDisplayName(instructions.find(p => p.id === stoppedInstructionId))
     
     // Log time for each collaborator
     if (selectedCollaborators.length > 0 && stoppedInstructionId) {
@@ -370,7 +335,7 @@ export function JobTimeTrackingModal({
   }
 
   const handleSkipCollaborators = () => {
-    const instructionName = instructions.find(p => p.id === stoppedInstructionId)?.name || "Instruction"
+    const instructionName = getInstructionDisplayName(instructions.find(p => p.id === stoppedInstructionId))
     
     toast.success(`Logged ${stoppedDuration} minutes`)
     
@@ -439,10 +404,7 @@ export function JobTimeTrackingModal({
                       {instructions.map((instruction) => (
                         <SelectItem key={instruction.id} value={instruction.id.toString()}>
                           <div className="flex items-center gap-2">
-                            <span>{instruction.name}</span>
-                            {(instruction.fee_type === FeeType.HOURLY || instruction.fee_type === FeeType.MIXED) && (
-                              <span className="text-xs text-muted-foreground">(hourly)</span>
-                            )}
+                            <span>{getInstructionDisplayName(instruction)}</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -541,48 +503,6 @@ export function JobTimeTrackingModal({
           </>
         )}
 
-        {/* Step: Confirm Billing Change */}
-        {step === "confirm-billing" && selectedInstruction && (
-          <>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
-                Change Billing Type?
-              </DialogTitle>
-              <DialogDescription>
-                <span className="font-medium">{selectedInstruction.name}</span> is currently set to <span className="font-medium">{selectedInstruction.fee_type}</span> billing.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="py-4 space-y-4">
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Time tracking requires hourly billing</AlertTitle>
-                <AlertDescription>
-                  To track time on this instruction, you need to change its billing type to hourly. Would you like to proceed?
-                </AlertDescription>
-              </Alert>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setStep("select-instruction")}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleConvertToHourly}
-                  disabled={isUpdatingInstruction}
-                  className="flex-1"
-                >
-                  {isUpdatingInstruction ? "Updating..." : "Change to Hourly"}
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
-
         {/* Step: Recording */}
         {step === "recording" && (
           <>
@@ -595,7 +515,7 @@ export function JobTimeTrackingModal({
                 Recording Time
               </DialogTitle>
               <DialogDescription>
-                {selectedInstruction?.name || activeTimer?.instruction_name}
+                {getInstructionDisplayName(selectedInstruction) || activeTimer?.instruction_name}
               </DialogDescription>
             </DialogHeader>
 

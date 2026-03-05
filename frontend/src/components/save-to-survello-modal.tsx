@@ -182,7 +182,7 @@ export function SaveToSurvelloModal({
                 <SelectContent>
                   {instructions.map((instruction) => (
                     <SelectItem key={instruction.id} value={instruction.id.toString()}>
-                      {instruction.name}
+                      {instruction.instruction_type?.name || "Instruction"}
                     </SelectItem>
                   ))}
                 </SelectContent>

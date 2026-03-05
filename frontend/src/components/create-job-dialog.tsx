@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Loader2, Check, X } from "lucide-react";
+import { Plus, Loader2, Check, X, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,6 +37,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useAuth } from "@/context/auth-context";
 import { InlineCreateClient } from "@/components/inline-create-client";
 import { 
@@ -47,19 +51,18 @@ import {
   readClientOptions,
   readInstructionTypesOptions,
 } from "@/client/@tanstack/react-query.gen";
-import { JobStatus, InstructionStatus, FeeType, type JobCreate, type InstructionCreate } from "@/client/types.gen";
+import { JobStatus, InstructionStatus, type JobCreate, type InstructionCreate } from "@/client/types.gen";
 
 const formSchema = z.object({
   // Job fields
-  name: z.string().min(2, "Job name must be at least 2 characters"),
+  name: z.string().min(2, "Job reference must be at least 2 characters"),
   client_id: z.string().min(1, "Please select a client"),
+  is_joint: z.boolean(),
+  secondary_client_id: z.string().optional(),
   address: z.string().optional(),
   status: z.nativeEnum(JobStatus),
   // Instruction fields
-  instruction_name: z.string().min(2, "Instruction name must be at least 2 characters"),
   instruction_type_id: z.string().min(1, "Please select an instruction type"),
-  fee_type: z.nativeEnum(FeeType),
-  rate: z.number().min(0).optional(),
 });
 
 interface CreateJobDialogProps {
@@ -70,6 +73,7 @@ interface CreateJobDialogProps {
 export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogProps) {
   const [open, setOpen] = useState(false);
   const [isCreatingClient, setIsCreatingClient] = useState(false);
+  const [isCreatingSecondaryClient, setIsCreatingSecondaryClient] = useState(false);
   const [isCreatingType, setIsCreatingType] = useState(false);
   const [newTypeName, setNewTypeName] = useState("");
   const { user } = useAuth();
@@ -77,7 +81,7 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
 
   const { data: clients, isLoading: isLoadingClients } = useQuery({
     ...readClientsOptions(),
-    enabled: !initialClientId,
+    enabled: open, // Always load clients when dialog is open
   });
 
   const { data: instructionTypes, isLoading: isLoadingTypes } = useQuery({
@@ -89,12 +93,11 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
     defaultValues: {
       name: "",
       client_id: initialClientId ? initialClientId.toString() : "",
+      is_joint: false,
+      secondary_client_id: "",
       address: "",
       status: JobStatus.PLANNED,
-      instruction_name: "",
       instruction_type_id: "",
-      fee_type: FeeType.FIXED,
-      rate: 0,
     },
   });
 
@@ -126,6 +129,10 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
       const jobData: JobCreate = {
         name: values.name,
         client_id: parseInt(values.client_id),
+        is_joint: values.is_joint,
+        secondary_client_id: values.is_joint && values.secondary_client_id 
+          ? parseInt(values.secondary_client_id) 
+          : null,
         address: values.address || null,
         status: values.status as JobStatus,
       };
@@ -134,15 +141,10 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
 
       // Then create the instruction
       const instructionData: InstructionCreate = {
-        name: values.instruction_name,
         description: "",
         job_id: newJob.id,
         instruction_type_id: parseInt(values.instruction_type_id),
-        fee_type: values.fee_type,
         status: InstructionStatus.PLANNED,
-        rate: values.rate,
-        contingency_percentage: 0,
-        forecasted_billable_hours: 0,
       };
 
       await createInstruction({ body: instructionData });
@@ -174,7 +176,6 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
       body: {
         name: newTypeName,
         description: null,
-        rate: 0,
       },
     });
   };
@@ -195,7 +196,7 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
           <DialogDescription>
             {initialClientId 
               ? "Create a new job with its first instruction for this client." 
-              : "Create a new job with its first instruction."}
+              : "Create a new job with its first instruction. A job number will be automatically assigned."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -209,10 +210,16 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Name</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>Job Reference</FormLabel>
+                      <InfoTooltip content="A short, descriptive name for this job. Example: 'Smith Residence Survey' or 'Oak Street Development'" />
+                    </div>
                     <FormControl>
-                      <Input placeholder="Site Survey - 123 Main St" {...field} />
+                      <Input placeholder="e.g. Smith Residence Survey" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      This helps identify the job. A unique job number will be generated automatically.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -224,7 +231,10 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
                   name="client_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Client</FormLabel>
+                      <div className="flex items-center gap-2">
+                        <FormLabel>Instructing Client</FormLabel>
+                        <InfoTooltip content="The primary client who is instructing this work. For joint instructions, you can add a secondary client below." />
+                      </div>
                       {isCreatingClient ? (
                         <InlineCreateClient
                           onCreated={(clientId) => {
@@ -279,6 +289,96 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
                 />
               )}
 
+              {/* Joint Instruction Toggle */}
+              <FormField
+                control={form.control}
+                name="is_joint"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <FormLabel className="text-sm font-medium">Joint Instruction</FormLabel>
+                      </div>
+                      <FormDescription className="text-xs">
+                        Enable if this job involves two clients (e.g., buyer and seller, trustees)
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {/* Secondary Client Selector (shown when is_joint is true) */}
+              {form.watch("is_joint") && (
+                <FormField
+                  control={form.control}
+                  name="secondary_client_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-2">
+                        <FormLabel>Secondary Client</FormLabel>
+                        <InfoTooltip content="The second party in a joint instruction, such as a co-owner, buyer, or trustee." />
+                      </div>
+                      {isCreatingSecondaryClient ? (
+                        <InlineCreateClient
+                          onCreated={(clientId) => {
+                            field.onChange(clientId.toString());
+                            setIsCreatingSecondaryClient(false);
+                          }}
+                          onCancel={() => setIsCreatingSecondaryClient(false)}
+                        />
+                      ) : (
+                        <Select 
+                          onValueChange={(val) => {
+                            if (val === "_new") {
+                              setIsCreatingSecondaryClient(true);
+                            } else {
+                              field.onChange(val);
+                            }
+                          }} 
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select secondary client" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {isLoadingClients ? (
+                              <div className="flex items-center justify-center p-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              </div>
+                            ) : (
+                              <>
+                                {clients?.filter(c => c.id.toString() !== form.watch("client_id")).map((client) => (
+                                  <SelectItem key={client.id} value={client.id.toString()}>
+                                    {client.name}
+                                  </SelectItem>
+                                ))}
+                                <SelectSeparator />
+                                <SelectItem value="_new" className="text-primary font-medium">
+                                  <div className="flex items-center gap-2">
+                                    <Plus className="h-4 w-4" />
+                                    Create New Client...
+                                  </div>
+                                </SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -311,10 +411,13 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Site Address (Optional)</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <FormLabel>Site Address</FormLabel>
+                      <InfoTooltip content="The physical address where the survey or work will take place. This can be different from the client's address." />
+                    </div>
                     <FormControl>
                       <Textarea 
-                        placeholder="Enter the site address for this job..." 
+                        placeholder="Enter the full site address...&#10;e.g. 123 Main Street&#10;London&#10;SW1A 1AA" 
                         className="resize-none"
                         rows={2}
                         {...field} 
@@ -334,162 +437,93 @@ export function CreateJobDialog({ initialClientId, trigger }: CreateJobDialogPro
               
               <FormField
                 control={form.control}
-                name="instruction_name"
+                name="instruction_type_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Instruction Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Topographical Survey" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="instruction_type_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Instruction Type</FormLabel>
-                      {isCreatingType ? (
-                        <div className="flex gap-2">
-                          <Input 
-                            value={newTypeName} 
-                            onChange={(e) => setNewTypeName(e.target.value)}
-                            placeholder="New Type Name"
-                            className="h-10"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                handleCreateType();
-                              }
-                              if (e.key === "Escape") {
-                                setIsCreatingType(false);
-                                setNewTypeName("");
-                              }
-                            }}
-                          />
-                          <Button 
-                            type="button" 
-                            size="icon" 
-                            onClick={handleCreateType}
-                            disabled={isCreatingTypePending || !newTypeName.trim()}
-                          >
-                            {isCreatingTypePending ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Check className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <Button 
-                            type="button" 
-                            size="icon" 
-                            variant="ghost"
-                            onClick={() => {
+                    <FormLabel>Instruction Type</FormLabel>
+                    {isCreatingType ? (
+                      <div className="flex gap-2">
+                        <Input 
+                          value={newTypeName} 
+                          onChange={(e) => setNewTypeName(e.target.value)}
+                          placeholder="New Type Name"
+                          className="h-10"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleCreateType();
+                            }
+                            if (e.key === "Escape") {
                               setIsCreatingType(false);
                               setNewTypeName("");
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Select 
-                          onValueChange={(val) => {
-                            if (val === "_new") {
-                              setIsCreatingType(true);
-                            } else {
-                              field.onChange(val);
-                              // Auto-fill defaults from selected type
-                              const type = instructionTypes?.find(t => t.id.toString() === val);
-                              if (type) {
-                                if (type.default_fee_type) form.setValue("fee_type", type.default_fee_type);
-                                if (type.rate) form.setValue("rate", type.rate);
-                              }
                             }
-                          }} 
-                          value={field.value}
+                          }}
+                        />
+                        <Button 
+                          type="button" 
+                          size="icon" 
+                          onClick={handleCreateType}
+                          disabled={isCreatingTypePending || !newTypeName.trim()}
                         >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={isLoadingTypes ? "Loading..." : "Select Type"} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {isLoadingTypes ? (
-                              <div className="flex items-center justify-center p-2">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              </div>
-                            ) : (
-                              <>
-                                {instructionTypes?.map((type) => (
-                                  <SelectItem key={type.id} value={type.id.toString()}>
-                                    {type.name}
-                                  </SelectItem>
-                                ))}
-                                <SelectSeparator />
-                                <SelectItem value="_new" className="text-primary font-medium">
-                                  <div className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4" />
-                                    Create New Type...
-                                  </div>
-                                </SelectItem>
-                              </>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="fee_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fee Type</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                          {isCreatingTypePending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button 
+                          type="button" 
+                          size="icon" 
+                          variant="ghost"
+                          onClick={() => {
+                            setIsCreatingType(false);
+                            setNewTypeName("");
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Select 
+                        onValueChange={(val) => {
+                          if (val === "_new") {
+                            setIsCreatingType(true);
+                          } else {
+                            field.onChange(val);
+                          }
+                        }} 
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select Fee Type" />
+                            <SelectValue placeholder={isLoadingTypes ? "Loading..." : "Select Type"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.values(FeeType).map((type) => (
-                            <SelectItem key={type} value={type} className="capitalize">
-                              {type}
-                            </SelectItem>
-                          ))}
+                          {isLoadingTypes ? (
+                            <div className="flex items-center justify-center p-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            </div>
+                          ) : (
+                            <>
+                              {instructionTypes?.map((type) => (
+                                <SelectItem key={type.id} value={type.id.toString()}>
+                                  {type.name}
+                                </SelectItem>
+                              ))}
+                              <SelectSeparator />
+                              <SelectItem value="_new" className="text-primary font-medium">
+                                <div className="flex items-center gap-2">
+                                  <Plus className="h-4 w-4" />
+                                  Create New Type...
+                                </div>
+                              </SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Rate / Fee Amount (£)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        step="0.01" 
-                        placeholder="0.00"
-                        {...field} 
-                        onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                        value={field.value || ""}
-                      />
-                    </FormControl>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

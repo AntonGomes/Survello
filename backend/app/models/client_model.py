@@ -77,7 +77,10 @@ class Client(ClientBase, table=True):
             "foreign_keys": "[ClientContact.client_id]",
         },
     )
-    jobs: list["Job"] = Relationship(back_populates="client")
+    jobs: list["Job"] = Relationship(
+        back_populates="client",
+        sa_relationship_kwargs={"foreign_keys": "[Job.client_id]"},
+    )
 
 
 class ClientCreate(ClientBase):

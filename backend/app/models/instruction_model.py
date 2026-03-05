@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List, Any, ClassVar
 from enum import Enum
 from sqlmodel import SQLModel, Field, Relationship, AutoString
-from sqlalchemy import JSON, Column, Enum as SAEnum
+from sqlalchemy import JSON, Column
 
 # Import unified UpdateItem for type hints and re-export for backwards compatibility
 from .update_model import UpdateItem as InstructionUpdateItem  # noqa: F401
@@ -42,25 +42,7 @@ class FeeType(str, Enum):
 
 
 class InstructionBase(SQLModel):
-    name: str = Field(max_length=255)
     description: str | None = Field(default=None, sa_type=AutoString)
-    rate: float | None = 0.0
-    forecasted_billable_hours: float | None = 0.0
-    actual_hours: float | None = 0.0
-    contingency_percentage: float | None = 0.0
-    forecasted_settlement_amount: float | None = 0.0
-    final_settlement_amount: float | None = 0.0
-    forecasted_fee_amount: float | None = 0.0
-    fee_type: FeeType = Field(
-        sa_column=Column(
-            SAEnum(
-                FeeType,
-                values_callable=lambda x: [e.value for e in x],
-                name="feetype",
-                create_type=False,
-            )
-        )
-    )
     status: InstructionStatus | None = Field(default=None, sa_type=AutoString)
     # Unified updates feed - stores list of InstructionUpdateItem dicts
     updates: List[dict[str, Any]] | None = Field(default=None, sa_column=Column(JSON))
@@ -71,6 +53,8 @@ class Instruction(InstructionBase, table=True):
     # Keep same table name for backwards compatibility with existing data
     __tablename__: ClassVar[str] = "projects"
     id: int | None = Field(default=None, primary_key=True)
+    # Semantic instruction number (auto-generated per org, e.g., INS-00042)
+    instruction_number: str | None = Field(default=None, max_length=32, index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
@@ -111,16 +95,7 @@ ProjectCreate = InstructionCreate
 
 
 class InstructionUpdate(SQLModel):
-    name: str | None = None
     description: str | None = None
-    rate: float | None = None
-    forecasted_billable_hours: float | None = None
-    actual_hours: float | None = None
-    contingency_percentage: float | None = None
-    forecasted_settlement_amount: float | None = None
-    final_settlement_amount: float | None = None
-    forecasted_fee_amount: float | None = None
-    fee_type: FeeType | None = None
     status: InstructionStatus | None = None
     updates: List[dict[str, Any]] | None = None
     deadline: datetime | None = None
@@ -144,6 +119,7 @@ ProjectAddUpdate = InstructionAddUpdate
 
 class InstructionRead(InstructionBase):
     id: int
+    instruction_number: str | None = None
     instruction_type_id: int
     job_id: int
     lead_user_id: int | None = None
@@ -163,20 +139,6 @@ ProjectRead = InstructionRead
 class InstructionTypeBase(SQLModel):
     name: str = Field(max_length=255)
     description: str | None = None
-    rate: float | None = 0.0
-    default_fee_type: FeeType | None = Field(
-        default=FeeType.FIXED,
-        sa_column=Column(
-            SAEnum(
-                FeeType,
-                values_callable=lambda x: [e.value for e in x],
-                name="feetype",
-                create_type=False,
-            ),
-            nullable=True,
-        ),
-    )
-    default_contingency_percentage: float | None = 0.0
 
 
 class InstructionType(InstructionTypeBase, table=True):
@@ -223,9 +185,6 @@ ProjectTypeCreate = InstructionTypeCreate
 class InstructionTypeUpdate(SQLModel):
     name: str | None = None
     description: str | None = None
-    rate: float | None = None
-    default_fee_type: FeeType | None = None
-    default_contingency_percentage: float | None = None
     default_template_file_id: int | None = None
 
 

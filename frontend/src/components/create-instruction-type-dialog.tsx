@@ -14,13 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -28,7 +21,7 @@ import {
   createInstructionTypeMutation,
   readInstructionTypesOptions
 } from "@/client/@tanstack/react-query.gen";
-import { FeeType, type InstructionTypeCreate } from "@/client/types.gen";
+import { type InstructionTypeCreate } from "@/client/types.gen";
 import { toast } from "sonner";
 
 export function CreateInstructionTypeDialog() {
@@ -37,16 +30,10 @@ export function CreateInstructionTypeDialog() {
   
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [rate, setRate] = useState(0);
-  const [feeType, setFeeType] = useState<FeeType>(FeeType.FIXED);
-  const [contingency, setContingency] = useState(0);
 
   const resetForm = () => {
     setName("");
     setDescription("");
-    setRate(0);
-    setFeeType(FeeType.FIXED);
-    setContingency(0);
   };
 
   const { mutate: createInstructionType, isPending } = useMutation({
@@ -73,9 +60,6 @@ export function CreateInstructionTypeDialog() {
     const instructionTypeData: InstructionTypeCreate = {
       name,
       description: description || null,
-      rate,
-      default_fee_type: feeType,
-      default_contingency_percentage: contingency,
       default_template_file_id: null,
     };
 
@@ -96,7 +80,7 @@ export function CreateInstructionTypeDialog() {
         <DialogHeader>
           <DialogTitle>Create Instruction Type</DialogTitle>
           <DialogDescription>
-            Define a new instruction type with default settings for your organization.
+            Define a new instruction type for your organization. This categorizes the types of work you do.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,7 +88,7 @@ export function CreateInstructionTypeDialog() {
             <Label htmlFor="name">Name</Label>
             <Input 
               id="name"
-              placeholder="e.g. Building Survey" 
+              placeholder="e.g. Building Survey, Dilaps Report" 
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -119,47 +103,6 @@ export function CreateInstructionTypeDialog() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="rate">Default Rate (£/hr)</Label>
-              <Input 
-                id="rate"
-                type="number" 
-                step="0.01" 
-                min="0" 
-                value={rate}
-                onChange={(e) => setRate(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="contingency">Contingency (%)</Label>
-              <Input 
-                id="contingency"
-                type="number" 
-                step="1" 
-                min="0" 
-                max="100" 
-                value={contingency}
-                onChange={(e) => setContingency(parseFloat(e.target.value) || 0)}
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="feeType">Default Fee Type</Label>
-            <Select value={feeType} onValueChange={(v) => setFeeType(v as FeeType)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select fee type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={FeeType.FIXED}>Fixed</SelectItem>
-                <SelectItem value={FeeType.HOURLY}>Hourly</SelectItem>
-                <SelectItem value={FeeType.MIXED}>Mixed</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-muted-foreground">
-              This will be the default fee type for instructions of this type.
-            </p>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

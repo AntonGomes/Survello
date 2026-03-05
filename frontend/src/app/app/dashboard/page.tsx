@@ -113,7 +113,8 @@ export default function DashboardPage() {
     if (!jobs) return { thisWeek: 0, totalInstructions: 0 }
     
     const allInstructions = jobs.flatMap(j => j.instructions || [])
-    const totalHours = allInstructions.reduce((sum, p) => sum + (p.actual_hours || 0), 0)
+    // Note: actual_hours removed - would need to calculate from time entries
+    const totalHours = 0
     
     return {
       thisWeek: totalHours, // For now, showing total - backend would need time entries query for proper weekly stats

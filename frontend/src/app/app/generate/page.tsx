@@ -14,6 +14,7 @@ import { FeatureHeader } from "@/components/feature-header";
 import { SaveToSurvelloModal } from "@/components/save-to-survello-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { readJobOptions } from "@/client/@tanstack/react-query.gen";
 import { useAuth } from "@/context/auth-context";
 
@@ -95,31 +96,49 @@ export default function GeneratePage() {
 
           {/* Upload Section - Context files required, template required */}
           <div className="grid md:grid-cols-2 gap-6">
-            <UploadCard
-              title="Context Files"
-              icon={<ImageIcon className="w-5 h-5 text-accent" />}
-              hint="Required"
-              required
-              files={contextFiles}
-              onDrop={(files) => {
-                setContextFiles((prev) => {
-                  const newFiles = files.filter(
-                    (file) => !prev.some((p) => p.name === file.name)
-                  );
-                  return [...prev, ...newFiles];
-                });
-              }}
-              maxFiles={100}
-            />
-            <UploadCard
-              title="Template File"
-              icon={<FileText className="w-5 h-5 text-accent" />}
-              hint="Required"
-              required
-              files={templateFile ? [templateFile] : []}
-              onDrop={(files) => setTemplateFile(files[0] || null)}
-              maxFiles={1}
-            />
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium">Context Files</span>
+                <InfoTooltip 
+                  content="Upload photos, notes, survey data, or any documents that provide context for your report. These will be analyzed to generate content." 
+                  side="right"
+                />
+              </div>
+              <UploadCard
+                title="Context Files"
+                icon={<ImageIcon className="w-5 h-5 text-accent" />}
+                hint="Required"
+                required
+                files={contextFiles}
+                onDrop={(files) => {
+                  setContextFiles((prev) => {
+                    const newFiles = files.filter(
+                      (file) => !prev.some((p) => p.name === file.name)
+                    );
+                    return [...prev, ...newFiles];
+                  });
+                }}
+                maxFiles={100}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium">Template File</span>
+                <InfoTooltip 
+                  content="Upload a Word document (.docx) template. The AI will fill in placeholders and generate content based on your context files." 
+                  side="right"
+                />
+              </div>
+              <UploadCard
+                title="Template File"
+                icon={<FileText className="w-5 h-5 text-accent" />}
+                hint="Required"
+                required
+                files={templateFile ? [templateFile] : []}
+                onDrop={(files) => setTemplateFile(files[0] || null)}
+                maxFiles={1}
+              />
+            </div>
           </div>
 
           {/* Helper text */}

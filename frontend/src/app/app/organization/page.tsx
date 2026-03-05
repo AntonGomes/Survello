@@ -164,7 +164,7 @@ export default function OrganizationPage() {
 
   return (
     <div className="space-y-6 h-full flex flex-col max-w-4xl">
-      <FeatureHeader title="Organization">
+      <FeatureHeader title="Organisation">
         {isAdmin && (
           <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
             <DialogTrigger asChild>
@@ -214,7 +214,7 @@ export default function OrganizationPage() {
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground">
-                      Admins can manage users and organization settings.
+                      Admins can manage users and organisation settings.
                     </p>
                   </div>
                 </div>
@@ -327,7 +327,7 @@ export default function OrganizationPage() {
                               onClick={() => removeUser({ path: { user_id: member.id } })}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Remove from organization
+                              Remove from organisation
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

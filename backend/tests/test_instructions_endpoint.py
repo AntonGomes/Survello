@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-from app.models.instruction_model import InstructionType, FeeType
+from app.models.instruction_model import InstructionType
 from app.models.job_model import Job, JobStatus
 from app.models.client_model import Client
 
@@ -36,18 +36,16 @@ def test_instructions_workflow(client: TestClient, session: Session, setup_data:
     client.cookies = {"session_token": setup_data["token"]}
 
     project_payload = {
-        "name": "Test Instruction",
         "description": "A description",
         "job_id": job.id,
         "instruction_type_id": pt.id,
-        "fee_type": FeeType.HOURLY,
         "status": "planned",
     }
 
     response = client.post("/instructions/", json=project_payload)
     assert response.status_code == 201, response.text
     project_data = response.json()
-    assert project_data["name"] == "Test Instruction"
+    assert project_data["description"] == "A description"
 
     # 4. List Projects
     response = client.get("/instructions/")

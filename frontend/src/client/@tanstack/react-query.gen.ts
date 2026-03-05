@@ -1016,7 +1016,7 @@ export const startTimerMutation = (options?: Partial<Options<StartTimerData>>): 
 /**
  * Stop Timer
  *
- * Stop the currently active timer and update instruction actual hours.
+ * Stop the currently active timer.
  */
 export const stopTimerMutation = (options?: Partial<Options<StopTimerData>>): UseMutationOptions<StopTimerResponse, StopTimerError, Options<StopTimerData>> => {
     const mutationOptions: UseMutationOptions<StopTimerResponse, StopTimerError, Options<StopTimerData>> = {

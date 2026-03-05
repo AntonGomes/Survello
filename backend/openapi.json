@@ -1947,7 +1947,7 @@
           "Time Tracking"
         ],
         "summary": "Stop Timer",
-        "description": "Stop the currently active timer and update instruction actual hours.",
+        "description": "Stop the currently active timer.",
         "operationId": "stopTimer",
         "parameters": [
           {
@@ -3624,6 +3624,17 @@
               }
             ],
             "title": "Preview File Id"
+          },
+          "instruction_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction Type Id"
           }
         },
         "type": "object",
@@ -4228,15 +4239,6 @@
         ],
         "title": "ConvertQuoteResponse"
       },
-      "FeeType": {
-        "type": "string",
-        "enum": [
-          "fixed",
-          "hourly",
-          "mixed"
-        ],
-        "title": "FeeType"
-      },
       "FileCreate": {
         "properties": {
           "file_name": {
@@ -4640,11 +4642,6 @@
       },
       "InstructionCreate": {
         "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
           "description": {
             "anyOf": [
               {
@@ -4655,93 +4652,6 @@
               }
             ],
             "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours",
-            "default": 0.0
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours",
-            "default": 0.0
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage",
-            "default": 0.0
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount",
-            "default": 0.0
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount",
-            "default": 0.0
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount",
-            "default": 0.0
-          },
-          "fee_type": {
-            "$ref": "#/components/schemas/FeeType"
           },
           "status": {
             "anyOf": [
@@ -4809,8 +4719,6 @@
         },
         "type": "object",
         "required": [
-          "name",
-          "fee_type",
           "job_id"
         ],
         "title": "InstructionCreate"
@@ -4835,11 +4743,6 @@
       },
       "InstructionRead": {
         "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
           "description": {
             "anyOf": [
               {
@@ -4850,93 +4753,6 @@
               }
             ],
             "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours",
-            "default": 0.0
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours",
-            "default": 0.0
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage",
-            "default": 0.0
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount",
-            "default": 0.0
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount",
-            "default": 0.0
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount",
-            "default": 0.0
-          },
-          "fee_type": {
-            "$ref": "#/components/schemas/FeeType"
           },
           "status": {
             "anyOf": [
@@ -4978,6 +4794,17 @@
           "id": {
             "type": "integer",
             "title": "Id"
+          },
+          "instruction_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction Number"
           },
           "instruction_type_id": {
             "type": "integer",
@@ -5011,8 +4838,6 @@
         },
         "type": "object",
         "required": [
-          "name",
-          "fee_type",
           "id",
           "instruction_type_id",
           "job_id",
@@ -5023,11 +4848,6 @@
       },
       "InstructionReadDetail": {
         "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
           "description": {
             "anyOf": [
               {
@@ -5038,93 +4858,6 @@
               }
             ],
             "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours",
-            "default": 0.0
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours",
-            "default": 0.0
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage",
-            "default": 0.0
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount",
-            "default": 0.0
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount",
-            "default": 0.0
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount",
-            "default": 0.0
-          },
-          "fee_type": {
-            "$ref": "#/components/schemas/FeeType"
           },
           "status": {
             "anyOf": [
@@ -5166,6 +4899,17 @@
           "id": {
             "type": "integer",
             "title": "Id"
+          },
+          "instruction_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction Number"
           },
           "instruction_type_id": {
             "type": "integer",
@@ -5205,8 +4949,6 @@
         },
         "type": "object",
         "required": [
-          "name",
-          "fee_type",
           "id",
           "instruction_type_id",
           "job_id",
@@ -5219,11 +4961,6 @@
       },
       "InstructionReadWithInstructionType": {
         "properties": {
-          "name": {
-            "type": "string",
-            "maxLength": 255,
-            "title": "Name"
-          },
           "description": {
             "anyOf": [
               {
@@ -5234,93 +4971,6 @@
               }
             ],
             "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours",
-            "default": 0.0
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours",
-            "default": 0.0
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage",
-            "default": 0.0
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount",
-            "default": 0.0
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount",
-            "default": 0.0
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount",
-            "default": 0.0
-          },
-          "fee_type": {
-            "$ref": "#/components/schemas/FeeType"
           },
           "status": {
             "anyOf": [
@@ -5363,6 +5013,17 @@
             "type": "integer",
             "title": "Id"
           },
+          "instruction_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction Number"
+          },
           "instruction_type_id": {
             "type": "integer",
             "title": "Instruction Type Id"
@@ -5398,8 +5059,6 @@
         },
         "type": "object",
         "required": [
-          "name",
-          "fee_type",
           "id",
           "instruction_type_id",
           "job_id",
@@ -5437,41 +5096,6 @@
             ],
             "title": "Description"
           },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "default_fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "fixed"
-          },
-          "default_contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Contingency Percentage",
-            "default": 0.0
-          },
           "default_template_file_id": {
             "anyOf": [
               {
@@ -5507,41 +5131,6 @@
               }
             ],
             "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate",
-            "default": 0.0
-          },
-          "default_fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "fixed"
-          },
-          "default_contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Contingency Percentage",
-            "default": 0.0
           },
           "id": {
             "type": "integer",
@@ -5602,38 +5191,6 @@
             ],
             "title": "Description"
           },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate"
-          },
-          "default_fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "default_contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Default Contingency Percentage"
-          },
           "default_template_file_id": {
             "anyOf": [
               {
@@ -5651,17 +5208,6 @@
       },
       "InstructionUpdate": {
         "properties": {
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
           "description": {
             "anyOf": [
               {
@@ -5672,93 +5218,6 @@
               }
             ],
             "title": "Description"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate"
-          },
-          "forecasted_billable_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Billable Hours"
-          },
-          "actual_hours": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Hours"
-          },
-          "contingency_percentage": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contingency Percentage"
-          },
-          "forecasted_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Settlement Amount"
-          },
-          "final_settlement_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final Settlement Amount"
-          },
-          "forecasted_fee_amount": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Forecasted Fee Amount"
-          },
-          "fee_type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/FeeType"
-              },
-              {
-                "type": "null"
-              }
-            ]
           },
           "status": {
             "anyOf": [
@@ -5970,9 +5429,25 @@
             ],
             "title": "Updates"
           },
+          "is_joint": {
+            "type": "boolean",
+            "title": "Is Joint",
+            "default": false
+          },
           "client_id": {
             "type": "integer",
             "title": "Client Id"
+          },
+          "secondary_client_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secondary Client Id"
           },
           "lead_user_id": {
             "anyOf": [
@@ -6033,12 +5508,38 @@
             ],
             "title": "Updates"
           },
+          "is_joint": {
+            "type": "boolean",
+            "title": "Is Joint",
+            "default": false
+          },
           "id": {
             "type": "integer",
             "title": "Id"
           },
+          "job_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Number"
+          },
           "client": {
             "$ref": "#/components/schemas/ClientReadMinimal"
+          },
+          "secondary_client": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClientReadMinimal"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "created_by_user": {
             "$ref": "#/components/schemas/UserRead"
@@ -6124,12 +5625,38 @@
             ],
             "title": "Updates"
           },
+          "is_joint": {
+            "type": "boolean",
+            "title": "Is Joint",
+            "default": false
+          },
           "id": {
             "type": "integer",
             "title": "Id"
           },
+          "job_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Number"
+          },
           "client": {
             "$ref": "#/components/schemas/ClientReadMinimal"
+          },
+          "secondary_client": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClientReadMinimal"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "created_by_user": {
             "$ref": "#/components/schemas/UserRead"
@@ -6223,6 +5750,11 @@
             ],
             "title": "Updates"
           },
+          "is_joint": {
+            "type": "boolean",
+            "title": "Is Joint",
+            "default": false
+          },
           "id": {
             "type": "integer",
             "title": "Id"
@@ -6302,6 +5834,17 @@
             ],
             "title": "Client Id"
           },
+          "secondary_client_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secondary Client Id"
+          },
           "lead_user_id": {
             "anyOf": [
               {
@@ -6324,6 +5867,17 @@
               }
             ],
             "title": "Updates"
+          },
+          "is_joint": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Joint"
           }
         },
         "type": "object",
@@ -7152,6 +6706,17 @@
             },
             "type": "array",
             "title": "Context File Ids"
+          },
+          "instruction_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction Type Id"
           }
         },
         "type": "object",
@@ -7219,6 +6784,17 @@
               }
             ],
             "title": "Job Id"
+          },
+          "instruction_type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction Type Id"
           },
           "created_at": {
             "type": "string",

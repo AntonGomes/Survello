@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import {
   Loader2,
   Camera,
@@ -138,6 +139,7 @@ export function CreateSurveyDialog({
 
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   // Fetch org users for surveyor selection
   const { data: orgData } = useQuery({
@@ -400,6 +402,9 @@ export function CreateSurveyDialog({
       setImageFiles([]);
       setOtherFiles([]);
       setSiteNotesFile(null);
+
+      // Navigate to the new survey's detail page
+      router.push(`/app/surveys/${survey.id}`);
     } catch (error) {
       console.error("Failed to create survey:", error);
     } finally {

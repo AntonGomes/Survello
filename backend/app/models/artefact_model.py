@@ -32,6 +32,9 @@ class Artefact(ArtefactBase, table=True):
     preview_file_id: int | None = Field(
         default=None, foreign_key="files.id", ondelete="SET NULL"
     )
+    instruction_type_id: int | None = Field(
+        default=None, foreign_key="project_types.id", ondelete="SET NULL"
+    )
 
     file: File = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Artefact.file_id]"}
@@ -48,3 +51,4 @@ class ArtefactCreate(ArtefactBase):
     preview_file_id: int
     org_id: int
     job_id: int | None = None
+    instruction_type_id: int | None = None

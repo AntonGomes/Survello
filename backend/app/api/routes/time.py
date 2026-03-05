@@ -10,9 +10,18 @@ from app.models.time_entry_model import (
     TimeEntryOut,
     TimeEntryRead,
 )
-from app.models.instruction_model import Instruction
+from app.models.instruction_model import Instruction, InstructionType
 
 router = APIRouter()
+
+
+def get_instruction_display_name(instruction: Instruction, db: DBDep) -> str:
+    """Get display name from instruction type."""
+    if instruction.instruction_type_id:
+        instruction_type = db.get(InstructionType, instruction.instruction_type_id)
+        if instruction_type:
+            return instruction_type.name
+    return "Unknown"
 
 
 @router.post("/start", response_model=TimeEntryOut, operation_id="startTimer")
@@ -54,7 +63,7 @@ def start_timer(
 
     return TimeEntryOut(
         **entry.model_dump(),
-        instruction_name=instruction.name,
+        instruction_name=get_instruction_display_name(instruction, db),
         user_name=current_user.name,
     )
 
@@ -65,7 +74,7 @@ def stop_timer(
     db: DBDep,
     description: str | None = None,
 ):
-    """Stop the currently active timer and update instruction actual hours."""
+    """Stop the currently active timer."""
     active_entry = db.exec(
         select(TimeEntry)
         .where(TimeEntry.user_id == current_user.id)
@@ -83,25 +92,25 @@ def stop_timer(
     duration = now - active_entry.start_time.replace(tzinfo=timezone.utc)
     minutes = max(1, int(duration.total_seconds() / 60))  # Minimum 1 minute
     active_entry.duration_minutes = minutes
-    hours_to_add = minutes / 60.0
 
     # Update description if provided
     if description:
         active_entry.description = description
 
-    # Update Instruction actual_hours
+    # Get instruction for display name
     instruction = db.get(Instruction, active_entry.instruction_id)
-    if instruction:
-        instruction.actual_hours = (instruction.actual_hours or 0) + hours_to_add
-        db.add(instruction)
 
     db.add(active_entry)
     db.commit()
     db.refresh(active_entry)
 
+    instruction_name = "Unknown"
+    if instruction:
+        instruction_name = get_instruction_display_name(instruction, db)
+
     return TimeEntryOut(
         **active_entry.model_dump(),
-        instruction_name=instruction.name if instruction else "Unknown",
+        instruction_name=instruction_name,
         user_name=current_user.name,
     )
 
@@ -131,18 +140,12 @@ def log_time_manually(
         duration_minutes=entry_in.duration_minutes,
     )
     db.add(entry)
-
-    # Update Instruction actual_hours
-    hours_to_add = entry_in.duration_minutes / 60.0
-    instruction.actual_hours = (instruction.actual_hours or 0) + hours_to_add
-    db.add(instruction)
-
     db.commit()
     db.refresh(entry)
 
     return TimeEntryOut(
         **entry.model_dump(),
-        instruction_name=instruction.name,
+        instruction_name=get_instruction_display_name(instruction, db),
         user_name=current_user.name,
     )
 
@@ -171,9 +174,13 @@ def get_current_timer(
     duration = now - active_entry.start_time.replace(tzinfo=timezone.utc)
     minutes = int(duration.total_seconds() / 60)
 
+    instruction_name = "Unknown"
+    if instruction:
+        instruction_name = get_instruction_display_name(instruction, db)
+
     return TimeEntryOut(
         **active_entry.model_dump(exclude={"duration_minutes"}),
-        instruction_name=instruction.name if instruction else "Unknown",
+        instruction_name=instruction_name,
         user_name=current_user.name,
         duration_minutes=minutes,
     )

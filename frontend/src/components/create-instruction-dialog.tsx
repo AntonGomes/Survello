@@ -49,16 +49,12 @@ import {
   readInstructionTypesOptions,
   readJobOptions
 } from "@/client/@tanstack/react-query.gen";
-import { InstructionStatus, FeeType, type InstructionCreate } from "@/client/types.gen";
+import { InstructionStatus, type InstructionCreate } from "@/client/types.gen";
 
 const formSchema = z.object({
-  name: z.string().min(2, "Instruction name must be at least 2 characters"),
   description: z.string().optional().or(z.literal("")),
   instruction_type_id: z.string().min(1, "Please select an instruction type"),
-  fee_type: z.nativeEnum(FeeType),
   status: z.nativeEnum(InstructionStatus),
-  rate: z.number().min(0).optional(),
-  contingency_percentage: z.number().min(0).max(100).optional(),
   deadline: z.date().optional(),
 });
 
@@ -81,20 +77,12 @@ export function CreateInstructionDialog({ jobId, trigger }: CreateInstructionDia
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
       description: "",
       instruction_type_id: "",
-      fee_type: FeeType.FIXED,
       status: InstructionStatus.PLANNED,
-      rate: 0,
-      contingency_percentage: 0,
       deadline: undefined,
     },
   });
-
-  // Watch for instruction type selection to autofill values
-  const selectedTypeId = form.watch("instruction_type_id");
-  const selectedType = instructionTypes?.find(t => t.id.toString() === selectedTypeId);
 
   const { mutate: createInstruction, isPending } = useMutation({
     ...createInstructionMutation(),
@@ -120,15 +108,10 @@ export function CreateInstructionDialog({ jobId, trigger }: CreateInstructionDia
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const instructionData: InstructionCreate = {
-      name: values.name,
       description: values.description || "",
       job_id: jobId,
       instruction_type_id: parseInt(values.instruction_type_id),
-      fee_type: values.fee_type,
       status: values.status,
-      rate: values.rate,
-      contingency_percentage: values.contingency_percentage,
-      forecasted_billable_hours: 0,
       deadline: values.deadline?.toISOString() ?? null,
     };
 
@@ -143,7 +126,6 @@ export function CreateInstructionDialog({ jobId, trigger }: CreateInstructionDia
         body: {
             name: newTypeName,
             description: null,
-            rate: 0
         }
       });
   };
@@ -168,20 +150,6 @@ export function CreateInstructionDialog({ jobId, trigger }: CreateInstructionDia
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instruction Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Topographical Survey" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -232,13 +200,6 @@ export function CreateInstructionDialog({ jobId, trigger }: CreateInstructionDia
                                     setIsCreatingType(true);
                                 } else {
                                     field.onChange(val);
-                                    // Auto-fill defaults from selected type
-                                    const type = instructionTypes?.find(t => t.id.toString() === val);
-                                    if (type) {
-                                        if (type.default_fee_type) form.setValue("fee_type", type.default_fee_type);
-                                        if (type.rate) form.setValue("rate", type.rate);
-                                        if (type.default_contingency_percentage) form.setValue("contingency_percentage", type.default_contingency_percentage);
-                                    }
                                 }
                             }} 
                             value={field.value}
@@ -356,80 +317,6 @@ export function CreateInstructionDialog({ jobId, trigger }: CreateInstructionDia
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="fee_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fee Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Fee Type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Object.values(FeeType).map((type) => (
-                          <SelectItem key={type} value={type} className="capitalize">
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="rate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Rate / Fee Amount</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min="0" 
-                            step="0.01" 
-                            placeholder="0.00"
-                            {...field} 
-                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                            value={field.value || ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="contingency_percentage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Contingency %</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min="0" 
-                            max="100"
-                            step="0.01" 
-                            placeholder="0%"
-                            {...field} 
-                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                            value={field.value || ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-              </div>
-            </div>
 
             <FormField
               control={form.control}

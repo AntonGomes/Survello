@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Settings2, CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 
@@ -26,7 +26,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
@@ -46,19 +45,13 @@ import { cn } from "@/lib/utils"
 import { 
   updateInstructionMutation, 
   readJobOptions,
-  readInstructionTypesOptions,
 } from "@/client/@tanstack/react-query.gen"
-import { FeeType, InstructionStatus, type InstructionReadWithInstructionType } from "@/client/types.gen"
+import { InstructionStatus, type InstructionReadWithInstructionType } from "@/client/types.gen"
 import { toast } from "sonner"
 
 const formSchema = z.object({
-  name: z.string().min(2, "Instruction name must be at least 2 characters"),
   description: z.string().optional().or(z.literal("")),
   status: z.nativeEnum(InstructionStatus),
-  fee_type: z.nativeEnum(FeeType),
-  rate: z.number().min(0).optional(),
-  forecasted_billable_hours: z.number().min(0).optional(),
-  contingency_percentage: z.number().min(0).max(100).optional(),
   deadline: z.date().optional().nullable(),
 })
 
@@ -72,20 +65,11 @@ export function EditInstructionDialog({ instruction, jobId, trigger }: EditInstr
   const [open, setOpen] = useState(false)
   const queryClient = useQueryClient()
 
-  const { data: instructionTypes } = useQuery({
-    ...readInstructionTypesOptions(),
-  })
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: instruction.name,
       description: instruction.description || "",
       status: instruction.status || InstructionStatus.PLANNED,
-      fee_type: instruction.fee_type || FeeType.FIXED,
-      rate: instruction.rate || 0,
-      forecasted_billable_hours: instruction.forecasted_billable_hours || 0,
-      contingency_percentage: instruction.contingency_percentage || 0,
       deadline: instruction.deadline ? new Date(instruction.deadline) : null,
     },
   })
@@ -94,13 +78,8 @@ export function EditInstructionDialog({ instruction, jobId, trigger }: EditInstr
   useEffect(() => {
     if (open) {
       form.reset({
-        name: instruction.name,
         description: instruction.description || "",
         status: instruction.status || InstructionStatus.PLANNED,
-        fee_type: instruction.fee_type || FeeType.FIXED,
-        rate: instruction.rate || 0,
-        forecasted_billable_hours: instruction.forecasted_billable_hours || 0,
-        contingency_percentage: instruction.contingency_percentage || 0,
         deadline: instruction.deadline ? new Date(instruction.deadline) : null,
       })
     }
@@ -124,21 +103,15 @@ export function EditInstructionDialog({ instruction, jobId, trigger }: EditInstr
     updateInstruction({
       path: { instruction_id: instruction.id },
       body: {
-        name: values.name,
         description: values.description || null,
         status: values.status,
-        fee_type: values.fee_type,
-        rate: values.rate,
-        forecasted_billable_hours: values.forecasted_billable_hours,
-        contingency_percentage: values.contingency_percentage,
         deadline: values.deadline ? format(values.deadline, "yyyy-MM-dd") : null,
       },
     })
   }
 
-  const showRateField = form.watch("fee_type") === FeeType.HOURLY || form.watch("fee_type") === FeeType.MIXED
-  const showHoursField = form.watch("fee_type") === FeeType.HOURLY || form.watch("fee_type") === FeeType.MIXED
-  const showContingency = form.watch("fee_type") === FeeType.MIXED
+  // Get display name from instruction type
+  const displayName = instruction.instruction_type?.name || "Instruction"
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -151,29 +124,14 @@ export function EditInstructionDialog({ instruction, jobId, trigger }: EditInstr
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Instruction</DialogTitle>
+          <DialogTitle>Edit {displayName}</DialogTitle>
           <DialogDescription>
-            Update instruction details. {instruction.instruction_type?.name && `Type: ${instruction.instruction_type.name}`}
+            Update instruction details
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instruction Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Description */}
             <FormField
               control={form.control}
@@ -201,18 +159,20 @@ export function EditInstructionDialog({ instruction, jobId, trigger }: EditInstr
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(InstructionStatus).map((status) => (
-                          <SelectItem key={status} value={status} className="capitalize">
-                            {status}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value={InstructionStatus.PLANNED}>Planned</SelectItem>
+                        <SelectItem value={InstructionStatus.ACTIVE}>Active</SelectItem>
+                        <SelectItem value={InstructionStatus.COMPLETED}>Completed</SelectItem>
+                        <SelectItem value={InstructionStatus.ARCHIVED}>Archived</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -233,12 +193,16 @@ export function EditInstructionDialog({ instruction, jobId, trigger }: EditInstr
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full justify-start text-left font-normal",
+                              "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? format(field.value, "d MMM yyyy") : "Set deadline"}
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -256,98 +220,6 @@ export function EditInstructionDialog({ instruction, jobId, trigger }: EditInstr
                 )}
               />
             </div>
-
-            {/* Fee Type */}
-            <FormField
-              control={form.control}
-              name="fee_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fee Type</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value={FeeType.FIXED}>Fixed Fee</SelectItem>
-                      <SelectItem value={FeeType.HOURLY}>Hourly</SelectItem>
-                      <SelectItem value={FeeType.MIXED}>Mixed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {(showRateField || showHoursField) && (
-              <div className="grid grid-cols-2 gap-4">
-                {showRateField && (
-                  <FormField
-                    control={form.control}
-                    name="rate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Hourly Rate (£)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.01"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                {showHoursField && (
-                  <FormField
-                    control={form.control}
-                    name="forecasted_billable_hours"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Forecasted Hours</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.5"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-            )}
-
-            {showContingency && (
-              <FormField
-                control={form.control}
-                name="contingency_percentage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contingency (%)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="1"
-                        max="100"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>

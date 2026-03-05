@@ -433,7 +433,7 @@ export const startTimer = <ThrowOnError extends boolean = false>(options: Option
 /**
  * Stop Timer
  *
- * Stop the currently active timer and update instruction actual hours.
+ * Stop the currently active timer.
  */
 export const stopTimer = <ThrowOnError extends boolean = false>(options?: Options<StopTimerData, ThrowOnError>) => (options?.client ?? client).post<StopTimerResponses, StopTimerErrors, ThrowOnError>({ url: '/time/stop', ...options });
 
