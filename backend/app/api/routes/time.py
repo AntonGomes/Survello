@@ -1,8 +1,11 @@
+from datetime import UTC, datetime
 from typing import cast
-from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException
-from sqlmodel import select, desc
-from app.api.deps import DBDep, CurrentUserDep
+from sqlmodel import desc, select
+
+from app.api.deps import CurrentUserDep, DBDep
+from app.models.instruction_model import Instruction, InstructionType
 from app.models.time_entry_model import (
     TimeEntry,
     TimeEntryCreate,
@@ -10,7 +13,6 @@ from app.models.time_entry_model import (
     TimeEntryOut,
     TimeEntryRead,
 )
-from app.models.instruction_model import Instruction, InstructionType
 
 router = APIRouter()
 
@@ -54,7 +56,7 @@ def start_timer(
     entry = TimeEntry(
         instruction_id=entry_in.instruction_id,
         user_id=current_user.id,
-        start_time=datetime.now(timezone.utc),
+        start_time=datetime.now(UTC),
         description=entry_in.description,
     )
     db.add(entry)
@@ -85,11 +87,11 @@ def stop_timer(
         raise HTTPException(status_code=404, detail="No active timer found")
 
     # Update end time
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     active_entry.end_time = now
 
     # Calculate duration and store it
-    duration = now - active_entry.start_time.replace(tzinfo=timezone.utc)
+    duration = now - active_entry.start_time.replace(tzinfo=UTC)
     minutes = max(1, int(duration.total_seconds() / 60))  # Minimum 1 minute
     active_entry.duration_minutes = minutes
 
@@ -130,7 +132,7 @@ def log_time_manually(
         raise HTTPException(status_code=403, detail="Not authorized")
 
     # Create entry with start and end time based on duration
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     entry = TimeEntry(
         instruction_id=entry_in.instruction_id,
         user_id=current_user.id,
@@ -170,8 +172,8 @@ def get_current_timer(
     instruction = db.get(Instruction, active_entry.instruction_id)
 
     # Calc current duration on the fly for display
-    now = datetime.now(timezone.utc)
-    duration = now - active_entry.start_time.replace(tzinfo=timezone.utc)
+    now = datetime.now(UTC)
+    duration = now - active_entry.start_time.replace(tzinfo=UTC)
     minutes = int(duration.total_seconds() / 60)
 
     instruction_name = "Unknown"

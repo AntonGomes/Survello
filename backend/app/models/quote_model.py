@@ -1,13 +1,13 @@
-from datetime import datetime, date, timezone
-from typing import TYPE_CHECKING, List, Any, ClassVar
+from datetime import UTC, date, datetime
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, AutoString
+from typing import TYPE_CHECKING, Any, ClassVar
+
 from sqlalchemy import JSON, Column
+from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 from .client_model import Client, ClientReadMinimal
-from .lead_model import Lead, LeadReadMinimal
 from .instruction_model import InstructionType, InstructionTypeRead
-
+from .lead_model import Lead, LeadReadMinimal
 
 if TYPE_CHECKING:
     pass
@@ -70,13 +70,13 @@ class QuoteBase(SQLModel):
 class Quote(QuoteBase, table=True):
     __tablename__: ClassVar[str] = "quotes"
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        default_factory=lambda: datetime.now(UTC),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(UTC)},
     )
     # JSON array of updates: [{text: str, user_id: int, created_at: str}]
-    updates: List[Any] | None = Field(default=None, sa_column=Column(JSON))
+    updates: list[Any] | None = Field(default=None, sa_column=Column(JSON))
 
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
     # Either client_id or lead_id should be set, not both
@@ -125,7 +125,7 @@ class QuoteRead(QuoteBase):
     converted_job_id: int | None = None
     created_at: datetime
     updated_at: datetime
-    updates: List[Any] | None = None
+    updates: list[Any] | None = None
     client: ClientReadMinimal | None = None
     lead: LeadReadMinimal | None = None
     lines: list[QuoteLineRead] = []

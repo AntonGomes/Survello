@@ -1,26 +1,28 @@
 from typing import cast
-from fastapi import APIRouter, HTTPException, status, Query
-from sqlmodel import select, func
+
+from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy.orm import joinedload
-from app.api.deps import DBDep, CurrentUserDep
+from sqlmodel import func, select
+
+from app.api.deps import CurrentUserDep, DBDep
+from app.models.file_model import File, FileRead
 from app.models.instruction_model import (
     Instruction,
+    InstructionAddUpdate,
     InstructionCreate,
     InstructionRead,
-    InstructionUpdate,
     InstructionType,
     InstructionTypeCreate,
     InstructionTypeRead,
     InstructionTypeUpdate,
-    InstructionAddUpdate,
-)
-from app.models.update_model import (
-    create_text_update,
-    create_instruction_created_update,
+    InstructionUpdate,
 )
 from app.models.job_model import Job
 from app.models.job_read_minimal import JobReadMinimal
-from app.models.file_model import File, FileRead
+from app.models.update_model import (
+    create_instruction_created_update,
+    create_text_update,
+)
 
 
 def generate_instruction_number(db, org_id: int) -> str:
@@ -149,7 +151,7 @@ def create_instruction(
         )
         if job.updates is None:
             job.updates = []
-        job.updates = [update_item.model_dump(mode="json")] + job.updates
+        job.updates = [update_item.model_dump(mode="json"), *job.updates]
         db.add(job)
         db.commit()
 
@@ -257,7 +259,6 @@ def delete_instruction(
         raise HTTPException(status_code=403, detail="Not authorized")
     db.delete(instruction)
     db.commit()
-    return
 
 
 # -----------------------------------------------------------------------------

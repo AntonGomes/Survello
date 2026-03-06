@@ -17,6 +17,11 @@ from app.models.waitlist_model import Waitlist, WaitlistCreate, WaitlistRead
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+EMAIL_FONT_FAMILY = (
+    "-apple-system, BlinkMacSystemFont,"
+    " 'Segoe UI', Roboto, sans-serif"
+)
+
 
 def send_waitlist_confirmation_email(to_email: str, name: str | None) -> bool:
     """Send confirmation email to the user who joined the waitlist."""
@@ -25,17 +30,25 @@ def send_waitlist_confirmation_email(to_email: str, name: str | None) -> bool:
 
     greeting = f"Hi {name}" if name else "Hello"
 
+    font = EMAIL_FONT_FAMILY
     html_body = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }}
+            body {{ font-family: {font}; line-height: 1.6; color: #333; }}
             .container {{ max-width: 600px; margin: 0 auto; padding: 40px 20px; }}
             .header {{ text-align: center; margin-bottom: 40px; }}
-            .logo {{ font-size: 28px; font-style: italic; font-weight: 500; color: #154c7a; }}
-            .content {{ background: #f8fafc; border-radius: 12px; padding: 32px; margin-bottom: 24px; border-left: 4px solid #53a255; }}
+            .logo {{
+                font-size: 28px; font-style: italic;
+                font-weight: 500; color: #154c7a;
+            }}
+            .content {{
+                background: #f8fafc; border-radius: 12px;
+                padding: 32px; margin-bottom: 24px;
+                border-left: 4px solid #53a255;
+            }}
             .footer {{ text-align: center; color: #64748b; font-size: 14px; }}
             .highlight {{ color: #53a255; font-weight: 600; }}
         </style>
@@ -46,14 +59,30 @@ def send_waitlist_confirmation_email(to_email: str, name: str | None) -> bool:
                 <div class="logo">Survello</div>
             </div>
             <div class="content">
-                <h2 style="margin-top: 0; color: #154c7a;">{greeting},</h2>
-                <p>Thank you for joining the Survello waitlist. We're building something special for surveyors and property professionals who value efficiency and simplicity.</p>
-                <p>You're now on the list to be among the first to experience <span class="highlight">AI-powered document generation</span> that turns your site notes into professional schedules in minutes, not hours.</p>
+                <h2 style="margin-top: 0; color: #154c7a;">
+                    {greeting},
+                </h2>
+                <p>
+                    Thank you for joining the Survello waitlist.
+                    We're building something special for surveyors
+                    and property professionals who value efficiency
+                    and simplicity.
+                </p>
+                <p>
+                    You're now on the list to be among the first to
+                    experience <span class="highlight">AI-powered
+                    document generation</span> that turns your site
+                    notes into professional schedules in minutes,
+                    not hours.
+                </p>
                 <p>We'll be in touch soon with early access details.</p>
-                <p style="margin-top: 24px;">Best regards,<br><strong>The Survello Team</strong></p>
+                <p style="margin-top: 24px;">
+                    Best regards,<br>
+                    <strong>The Survello Team</strong>
+                </p>
             </div>
             <div class="footer">
-                <p>© Survello – Surveying, simplified.</p>
+                <p>&copy; Survello &ndash; Surveying, simplified.</p>
             </div>
         </div>
     </body>
@@ -82,17 +111,27 @@ def send_admin_notification_email(
     settings = get_settings()
     resend.api_key = settings.resend_api_key
 
+    font = EMAIL_FONT_FAMILY
+    display_name = name or "Not provided"
+    display_company = company or "Not provided"
     html_body = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }}
+            body {{ font-family: {font}; line-height: 1.6; color: #333; }}
             .container {{ max-width: 600px; margin: 0 auto; padding: 40px 20px; }}
             .header {{ text-align: center; margin-bottom: 40px; }}
-            .logo {{ font-size: 28px; font-style: italic; font-weight: 500; color: #154c7a; }}
-            .content {{ background: #f8fafc; border-radius: 12px; padding: 32px; margin-bottom: 24px; border-left: 4px solid #efcc57; }}
+            .logo {{
+                font-size: 28px; font-style: italic;
+                font-weight: 500; color: #154c7a;
+            }}
+            .content {{
+                background: #f8fafc; border-radius: 12px;
+                padding: 32px; margin-bottom: 24px;
+                border-left: 4px solid #efcc57;
+            }}
             .detail {{ margin: 8px 0; }}
             .label {{ font-weight: 600; color: #154c7a; }}
         </style>
@@ -103,15 +142,20 @@ def send_admin_notification_email(
                 <div class="logo">Survello</div>
             </div>
             <div class="content">
-                <h2 style="margin-top: 0; color: #154c7a;">New Waitlist Signup 🎉</h2>
+                <h2 style="margin-top: 0; color: #154c7a;">
+                    New Waitlist Signup
+                </h2>
                 <div class="detail">
-                    <span class="label">Email:</span> {user_email}
+                    <span class="label">Email:</span>
+                    {user_email}
                 </div>
                 <div class="detail">
-                    <span class="label">Name:</span> {name or "Not provided"}
+                    <span class="label">Name:</span>
+                    {display_name}
                 </div>
                 <div class="detail">
-                    <span class="label">Company:</span> {company or "Not provided"}
+                    <span class="label">Company:</span>
+                    {display_company}
                 </div>
             </div>
         </div>

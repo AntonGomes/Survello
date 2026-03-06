@@ -1,7 +1,8 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, ClassVar
-from sqlmodel import SQLModel, Field, Relationship, AutoString
+
 from pydantic import EmailStr
+from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .job_model import Job
@@ -21,7 +22,7 @@ class ClientContactBase(SQLModel):
 class ClientContact(ClientContactBase, table=True):
     __tablename__: ClassVar[str] = "client_contacts"
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
     client_id: int = Field(foreign_key="clients.id", ondelete="CASCADE")
@@ -58,10 +59,10 @@ class ClientBase(SQLModel):
 class Client(ClientBase, table=True):
     __tablename__: ClassVar[str] = "clients"
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        default_factory=lambda: datetime.now(UTC),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(UTC)},
     )
 
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")

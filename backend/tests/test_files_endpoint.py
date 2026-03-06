@@ -1,5 +1,8 @@
+from http import HTTPStatus
+
 from fastapi.testclient import TestClient
 from sqlmodel import Session
+
 from app.models.file_model import File
 
 
@@ -10,11 +13,15 @@ def test_files_workflow(
     # Ensure mock storage returns a URL
     mock_storage.generate_presigned_url.return_value = "https://s3.example.com/upload"
 
+    docx_mime = (
+        "application/vnd.openxmlformats-officedocument"
+        ".wordprocessingml.document"
+    )
     presign_payload = [
         {
             "client_id": "temp-123",
             "file_name": "test.docx",
-            "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "mime_type": docx_mime,
             "size_bytes": 1024,
         }
     ]
@@ -23,7 +30,7 @@ def test_files_workflow(
     client.cookies = {"session_token": setup_data["token"]}
 
     response = client.post("/store/presign", json=presign_payload)
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     presign_data = response.json()
     assert len(presign_data) == 1
     assert presign_data[0]["put_url"] == "https://s3.example.com/upload"
@@ -32,14 +39,14 @@ def test_files_workflow(
     create_payload = {
         "file_name": "test.docx",
         "storage_key": presign_data[0]["storage_key"],
-        "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "mime_type": docx_mime,
         "size_bytes": 1024,
         "role": "template",
         "org_id": setup_data["org_id"],
     }
 
     response = client.post("/store/single", json=create_payload)
-    assert response.status_code == 201
+    assert response.status_code == HTTPStatus.CREATED
     file_data = response.json()
     assert file_data["file_name"] == "test.docx"
     assert file_data["id"] is not None

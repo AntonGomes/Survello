@@ -1,7 +1,10 @@
+from http import HTTPStatus
+
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-from app.models.user_model import User
+
 from app.core.security import hash_password
+from app.models.user_model import User
 
 
 def test_auth_workflow(client: TestClient, session: Session, setup_data: dict):
@@ -24,15 +27,16 @@ def test_auth_workflow(client: TestClient, session: Session, setup_data: dict):
     login_payload = {"email": "login@example.com", "password": password}
 
     response = client.post("/auth/login", json=login_payload)
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
     # Check Cookie
     assert "session_token" in response.cookies
     token = response.cookies["session_token"]
-    assert len(token) > 10
+    min_token_length = 10
+    assert len(token) > min_token_length
 
     # 3. Use token to get me (verify it works)
     client.cookies = {"session_token": token}
     response = client.get("/users/me")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json()["email"] == "login@example.com"

@@ -1,11 +1,13 @@
 from typing import cast
+
 from fastapi import APIRouter, HTTPException, status
-from sqlmodel import select, func
-from sqlalchemy.orm import joinedload
 from pydantic import BaseModel
-from app.api.deps import DBDep, CurrentUserDep
-from app.models.job_model import Job, JobCreate, JobRead, JobUpdate, JobReadDetail
+from sqlalchemy.orm import joinedload
+from sqlmodel import func, select
+
+from app.api.deps import CurrentUserDep, DBDep
 from app.models.instruction_model import Instruction
+from app.models.job_model import Job, JobCreate, JobRead, JobReadDetail, JobUpdate
 from app.models.update_model import create_text_update
 
 router = APIRouter()
@@ -134,7 +136,6 @@ def delete_job(
 
     db.delete(job)
     db.commit()
-    return
 
 
 @router.post(
@@ -186,7 +187,7 @@ def add_job_update(
     if job.updates is None:
         job.updates = []
     # Prepend new update (newest first)
-    job.updates = [update_item.model_dump(mode="json")] + job.updates
+    job.updates = [update_item.model_dump(mode="json"), *job.updates]
 
     db.add(job)
     db.commit()

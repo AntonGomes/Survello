@@ -1,10 +1,11 @@
+import logging
 from typing import cast
 from uuid import uuid4
-import logging
+
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
-from app.api.deps import StorageDep, CurrentUserDep, DBDep
+from app.api.deps import CurrentUserDep, DBDep, StorageDep
 from app.models.file_model import (
     File,
     FileCreate,
@@ -16,7 +17,7 @@ from app.models.file_model import (
 )
 from app.models.job_model import Job
 from app.models.update_model import create_file_upload_update
-from app.utils.conversion import to_pdf, ConversionError, DOCX_MIME, XLSX_MIME
+from app.utils.conversion import DOCX_MIME, XLSX_MIME, ConversionError, to_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ def _add_file_upload_update_to_job(
 
     if job.updates is None:
         job.updates = []
-    job.updates = [update_item.model_dump(mode="json")] + job.updates
+    job.updates = [update_item.model_dump(mode="json"), *job.updates]
     db.add(job)
     db.commit()
 
@@ -202,7 +203,8 @@ def create_files(
         if not storage.check_file_exists(file_in_item.storage_key):
             raise HTTPException(
                 400,
-                f"File verification failed. Upload not found. storage_key:{file_in_item.storage_key}",
+                "File verification failed. Upload not found."
+                f" storage_key:{file_in_item.storage_key}",
             )
         db_file = File.model_validate(file_in_item, update=extra_data)
         db.add(db_file)

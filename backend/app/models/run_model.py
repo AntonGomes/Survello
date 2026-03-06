@@ -1,12 +1,13 @@
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, ClassVar
+from datetime import UTC, datetime
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, AutoString
+from typing import TYPE_CHECKING, ClassVar
+
 from sqlalchemy import JSON, Column
+from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .file_model import File
     from .artefact_model import Artefact
+    from .file_model import File
 
 
 class RunStatus(str, Enum):
@@ -44,10 +45,10 @@ class RunBase(SQLModel):
 class Run(RunBase, table=True):
     __tablename__: ClassVar[str] = "runs"
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        default_factory=lambda: datetime.now(UTC),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(UTC)},
     )
 
     org_id: int = Field(default=None, foreign_key="orgs.id", ondelete="CASCADE")

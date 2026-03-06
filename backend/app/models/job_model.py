@@ -1,12 +1,14 @@
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, List, Any, ClassVar
+from datetime import UTC, datetime
 from enum import Enum
-from app.models.client_model import ClientReadMinimal, Client
-from app.models.user_model import UserRead, User, Org
-from app.models.instruction_model import Instruction, InstructionReadWithInstructionType
-from app.models.file_model import FileRead, File
-from sqlmodel import SQLModel, Field, Relationship, AutoString
+from typing import TYPE_CHECKING, Any, ClassVar
+
 from sqlalchemy import JSON, Column
+from sqlmodel import AutoString, Field, Relationship, SQLModel
+
+from app.models.client_model import Client, ClientReadMinimal
+from app.models.file_model import File, FileRead
+from app.models.instruction_model import Instruction, InstructionReadWithInstructionType
+from app.models.user_model import Org, User, UserRead
 
 if TYPE_CHECKING:
     from .survey_model import Survey
@@ -30,7 +32,7 @@ class JobBase(SQLModel):
     status: JobStatus | None = Field(default=None, sa_type=AutoString)
     # Unified updates feed - stores list of UpdateItem dicts
     # (see update_model.py for structure)
-    updates: List[Any] | None = Field(default=None, sa_column=Column(JSON))
+    updates: list[Any] | None = Field(default=None, sa_column=Column(JSON))
     # Joint client support
     is_joint: bool = Field(default=False)
 
@@ -40,10 +42,10 @@ class Job(JobBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     # Semantic job number (auto-generated per org, e.g., JOB-00042)
     job_number: str | None = Field(default=None, max_length=32, index=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        default_factory=lambda: datetime.now(UTC),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(UTC)},
     )
 
     # FKs
@@ -92,7 +94,7 @@ class JobUpdate(SQLModel):
     client_id: int | None = None
     secondary_client_id: int | None = None
     lead_user_id: int | None = None
-    updates: List[Any] | None = None
+    updates: list[Any] | None = None
     is_joint: bool | None = None
 
 
@@ -105,7 +107,7 @@ class JobRead(JobBase):
     lead_user: UserRead | None
     created_at: datetime
     updated_at: datetime
-    updates: List[Any] | None = None
+    updates: list[Any] | None = None
     instructions: list["InstructionReadWithInstructionType"] = []
 
 

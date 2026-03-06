@@ -1,4 +1,5 @@
-from sqlmodel import create_engine, SQLModel, Session
+from sqlmodel import Session, SQLModel, create_engine
+
 from app.core.settings import get_settings
 
 settings = get_settings()

@@ -87,7 +87,7 @@ class Settings(BaseSettings):
         return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     # BaseSettings automatically reads from .env and os.environ
     return Settings()  # ty: ignore[call-arg]
