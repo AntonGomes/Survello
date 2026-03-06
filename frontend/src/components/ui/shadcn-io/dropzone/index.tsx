@@ -16,13 +16,15 @@ type DropzoneContextType = {
   maxFiles?: DropzoneOptions['maxFiles'];
 };
 
+const BYTES_PER_KB = 1024;
+
 const renderBytes = (bytes: number) => {
   const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
   let size = bytes;
   let unitIndex = 0;
 
-  while (size >= 1024 && unitIndex < units.length - 1) {
-    size /= 1024;
+  while (size >= BYTES_PER_KB && unitIndex < units.length - 1) {
+    size /= BYTES_PER_KB;
     unitIndex++;
   }
 
@@ -44,60 +46,39 @@ export type DropzoneProps = Omit<DropzoneOptions, 'onDrop'> & {
   children?: ReactNode;
 };
 
-export const Dropzone = ({
-  accept,
-  maxFiles = 1,
-  maxSize,
-  minSize,
-  onDrop,
-  onError,
-  disabled,
-  src,
-  className,
-  children,
-  ...props
-}: DropzoneProps) => {
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+function useDropzoneSetup({ accept, maxFiles, maxSize, minSize, onDrop, onError, disabled, ...props }: Omit<DropzoneProps, 'src' | 'className' | 'children'>) {
+  return useDropzone({
     ...(accept ? { accept } : {}),
     ...(maxFiles !== undefined ? { maxFiles } : {}),
     ...(maxSize !== undefined ? { maxSize } : {}),
     ...(minSize !== undefined ? { minSize } : {}),
     onError,
     disabled,
-    onDrop: (acceptedFiles, fileRejections, event) => {
+    onDrop: (...[acceptedFiles, fileRejections, event]) => {
       if (fileRejections.length > 0) {
-        const message = fileRejections.at(0)?.errors.at(0)?.message;
-        onError?.(new Error(message));
+        onError?.(new Error(fileRejections.at(0)?.errors.at(0)?.message));
         return;
       }
-
       onDrop?.(acceptedFiles, fileRejections, event);
     },
     ...props,
   });
+}
+
+export const Dropzone = ({ src, className, children, maxFiles = 1, disabled, ...rest }: DropzoneProps) => {
+  const { getRootProps, getInputProps, isDragActive } = useDropzoneSetup({ ...rest, maxFiles, disabled });
+  const contextValue = {
+    ...(src ? { src } : {}),
+    ...(rest.accept ? { accept: rest.accept } : {}),
+    ...(rest.maxSize ? { maxSize: rest.maxSize } : {}),
+    ...(rest.minSize ? { minSize: rest.minSize } : {}),
+    maxFiles,
+  };
 
   return (
-    <DropzoneContext.Provider
-      key={JSON.stringify(src)}
-      value={{ 
-        ...(src ? { src } : {}),
-        ...(accept ? { accept } : {}),
-        ...(maxSize ? { maxSize } : {}),
-        ...(minSize ? { minSize } : {}),
-        maxFiles 
-      }}
-    >
-      <Button
-        className={cn(
-          'relative h-auto w-full flex-col overflow-hidden p-8',
-          isDragActive && 'outline-none ring-1 ring-ring',
-          className
-        )}
-        disabled={disabled}
-        type="button"
-        variant="outline"
-        {...getRootProps()}
-      >
+    <DropzoneContext.Provider key={JSON.stringify(src)} value={contextValue}>
+      <Button className={cn('relative h-auto w-full flex-col overflow-hidden p-8', isDragActive && 'outline-none ring-1 ring-ring', className)}
+        disabled={disabled} type="button" variant="outline" {...getRootProps()}>
         <input {...getInputProps()} disabled={disabled} />
         {children}
       </Button>

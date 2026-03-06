@@ -10,18 +10,22 @@ import {
 } from "@/client/@tanstack/react-query.gen";
 import { Button } from "@/components/ui/button";
 
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MS_PER_MINUTE = MS_PER_SECOND * SECONDS_PER_MINUTE;
+
 export function GlobalTimer() {
   const queryClient = useQueryClient();
   const { data: activeEntry, isLoading } = useQuery({
     ...getCurrentTimerOptions(),
-    refetchInterval: 1000 * 60, // Poll every minute to stay roughly in sync if needed, though mostly relying on initial load/invalidation
+    refetchInterval: MS_PER_MINUTE,
   });
 
   const { mutate: stopTimer, isPending } = useMutation({
     ...stopTimerMutation(),
     onSuccess: (data) => {
         queryClient.invalidateQueries({ queryKey: getCurrentTimerOptions().queryKey });
-        // Also invalidate the instruction to show updated hours if we are on that page
+        
         if (data.instruction_id) {
              queryClient.invalidateQueries({
                 queryKey: readInstructionOptions({ path: { instruction_id: data.instruction_id } }).queryKey
@@ -30,7 +34,7 @@ export function GlobalTimer() {
     },
   });
 
-  if (isLoading) return null; // Don't show anything while initial loading
+  if (isLoading) return null; 
   if (!activeEntry) return null;
 
   return (

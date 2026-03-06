@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Upload } from "lucide-react";
-import { Dropzone, DropzoneContent, DropzoneEmptyState } from "@/components/ui/shadcn-io/dropzone";
+import { Dropzone, DropzoneContent } from "@/components/ui/shadcn-io/dropzone";
 
 type Props = {
   title: string;
