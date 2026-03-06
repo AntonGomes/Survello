@@ -1,19 +1,9 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
 
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { JobRead } from "@/client"
@@ -91,7 +81,7 @@ export const columns: ColumnDef<JobRead>[] = [
         </Badge>
       )
     },
-    filterFn: (row, id, value) => {
+    filterFn: (...[row, id, value]) => {
       return value.includes(row.getValue(id))
     },
   },

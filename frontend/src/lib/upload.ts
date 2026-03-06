@@ -1,3 +1,6 @@
+const PERCENT_MULTIPLIER = 100;
+const HTTP_OK_MIN = 200;
+const HTTP_OK_MAX = 300;
 
 export interface UploadProgressEvent {
   loaded: number;
@@ -5,27 +8,33 @@ export interface UploadProgressEvent {
   fileIndex: number;
 }
 
-export async function uploadFilesToS3(
-  files: File[], 
-  presignedPuts: { put_url: string; mime_type: string }[],
-  onProgress?: (progress: number) => void
-): Promise<void> {
+interface UploadFilesToS3Options {
+  files: File[];
+  presignedPuts: { put_url: string; mime_type: string }[];
+  onProgress?: (progress: number) => void;
+}
+
+export async function uploadFilesToS3({
+  files,
+  presignedPuts,
+  onProgress,
+}: UploadFilesToS3Options): Promise<void> {
   const totalFiles = files.length;
   let completedFiles = 0;
 
-  // Simple progress tracker: (completed / total) * 100
-  // For more granular progress, we'd need to track bytes per file
+  
+  
   const updateProgress = () => {
     if (onProgress) {
-      const percent = Math.round((completedFiles / totalFiles) * 100);
+      const percent = Math.round((completedFiles / totalFiles) * PERCENT_MULTIPLIER);
       onProgress(percent);
     }
   };
 
-  const uploadSingle = (file: File, putUrl: string, mimeType: string) => {
+  const uploadSingle = ({ file, putUrl, mimeType }: { file: File; putUrl: string; mimeType: string }) => {
     return new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      
+
       xhr.onload = () => {
         console.log(`Upload response for ${file.name}:`, {
           status: xhr.status,
@@ -34,8 +43,8 @@ export async function uploadFilesToS3(
           allHeaders: xhr.getAllResponseHeaders(),
           response: xhr.responseText
         });
-        
-        if (xhr.status >= 200 && xhr.status < 300) {
+
+        if (xhr.status >= HTTP_OK_MIN && xhr.status < HTTP_OK_MAX) {
           completedFiles++;
           updateProgress();
           resolve();
@@ -49,21 +58,21 @@ export async function uploadFilesToS3(
         console.error(`Network error uploading ${file.name}`);
         reject(new Error("Network error during upload"));
       };
-      
+
       xhr.open("PUT", putUrl);
-      // Use the exact mime_type that was used to generate the presigned URL
-      // The Content-Type header is signed, so it MUST match exactly
+
+
       xhr.setRequestHeader("Content-Type", mimeType);
       console.log(`Uploading ${file.name} with Content-Type: ${mimeType} to ${putUrl.split('?')[0]}`);
       xhr.send(file);
     });
   };
 
-  // Upload files in parallel, matching each file to its presigned URL by index
+
   const uploads = files.map((file, index) => {
     const put = presignedPuts[index];
     if (!put) throw new Error(`No presigned URL found for file ${file.name}`);
-    return uploadSingle(file, put.put_url, put.mime_type);
+    return uploadSingle({ file, putUrl: put.put_url, mimeType: put.mime_type });
   });
 
   await Promise.all(uploads);

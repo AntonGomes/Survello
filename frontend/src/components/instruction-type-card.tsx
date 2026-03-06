@@ -30,7 +30,7 @@ export function InstructionTypeCard({ instructionType }: InstructionTypeCardProp
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Template Status */}
+        {}
         <div className="flex items-center gap-2">
           {hasTemplate ? (
             <Badge variant="secondary" className="gap-1">
@@ -45,7 +45,7 @@ export function InstructionTypeCard({ instructionType }: InstructionTypeCardProp
           )}
         </div>
 
-        {/* Actions */}
+        {}
         <div className="flex gap-2 pt-2">
           <Button variant="outline" size="sm" className="flex-1">
             <Pencil className="h-3.5 w-3.5 mr-1.5" />
