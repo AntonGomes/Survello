@@ -26,18 +26,11 @@ class StorageService:
         logger = logging.getLogger(__name__)
         try:
             bucket = self.s3.bucket_name
-            logger.info(
-                f"Checking if file exists: bucket={bucket},"
-                f" key={storage_key}"
-            )
-            response = self.s3.client.head_object(
-                Bucket=bucket, Key=storage_key
-            )
+            logger.info(f"Checking if file exists: bucket={bucket}, key={storage_key}")
+            response = self.s3.client.head_object(Bucket=bucket, Key=storage_key)
             etag = response.get("ETag")
             size = response.get("ContentLength")
-            logger.info(
-                f"File exists! ETag: {etag}, Size: {size}"
-            )
+            logger.info(f"File exists! ETag: {etag}, Size: {size}")
             return True
         except Exception as e:
             logger.warning(
@@ -63,9 +56,7 @@ class StorageService:
             if mime_type:
                 params["ContentType"] = mime_type
             if inline:
-                params["ContentDisposition"] = (
-                    f'inline; filename="{file_name}"'
-                )
+                params["ContentDisposition"] = f'inline; filename="{file_name}"'
 
         elif operation == "get_object":
             if mime_type:

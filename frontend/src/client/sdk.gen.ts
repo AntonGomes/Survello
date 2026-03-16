@@ -66,7 +66,7 @@ export const readRuns = <ThrowOnError extends boolean = false>(options?: Options
 /**
  * Create Run
  *
- * Create a new document generation run and start the orchestrator in the background.
+ * Start a document generation run in the background.
  */
 export const createRun = <ThrowOnError extends boolean = false>(options: Options<CreateRunData, ThrowOnError>) => (options.client ?? client).post<CreateRunResponses, CreateRunErrors, ThrowOnError>({
     url: '/runs/',

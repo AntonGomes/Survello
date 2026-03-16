@@ -21,8 +21,8 @@ from app.models.user_model import (
 
 router = APIRouter()
 
-COOKIE_SAMESITE_SECURE = "none"
-COOKIE_SAMESITE_INSECURE = "lax"
+SAMESITE_SECURE = "none"
+SAMESITE_INSECURE = "lax"
 
 
 @router.post("/register", response_model=UserRead, operation_id="registerUser")
@@ -82,7 +82,7 @@ def register(user_in: UserRegister, response: Response, db: SessionDep):
     db.commit()
 
     # 6. Set Cookie
-    samesite = COOKIE_SAMESITE_SECURE if settings.secure_cookies else COOKIE_SAMESITE_INSECURE
+    samesite = SAMESITE_SECURE if settings.secure_cookies else SAMESITE_INSECURE
     response.set_cookie(
         key="session_token",
         value=token,
@@ -118,7 +118,7 @@ def login(login_data: UserLogin, response: Response, db: SessionDep):
 
     # 4. Set Cookie
     settings = get_settings()
-    samesite = COOKIE_SAMESITE_SECURE if settings.secure_cookies else COOKIE_SAMESITE_INSECURE
+    samesite = SAMESITE_SECURE if settings.secure_cookies else SAMESITE_INSECURE
     response.set_cookie(
         key="session_token",
         value=token,

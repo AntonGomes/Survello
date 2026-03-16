@@ -158,17 +158,9 @@ def read_surveys(
     if filters.job_id:
         query = query.where(Survey.job_id == filters.job_id)
     if filters.instruction_id:
-        query = query.where(
-            Survey.instruction_id == filters.instruction_id
-        )
+        query = query.where(Survey.instruction_id == filters.instruction_id)
 
-    surveys = (
-        db.exec(
-            query.offset(filters.offset).limit(filters.limit)
-        )
-        .unique()
-        .all()
-    )
+    surveys = db.exec(query.offset(filters.offset).limit(filters.limit)).unique().all()
 
     return [_build_survey_read(survey, db) for survey in surveys]
 

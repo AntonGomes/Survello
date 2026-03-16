@@ -17,10 +17,7 @@ from app.models.waitlist_model import Waitlist, WaitlistCreate, WaitlistRead
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-EMAIL_FONT_FAMILY = (
-    "-apple-system, BlinkMacSystemFont,"
-    " 'Segoe UI', Roboto, sans-serif"
-)
+EMAIL_FONT_FAMILY = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
 
 
 def send_waitlist_confirmation_email(to_email: str, name: str | None) -> bool:

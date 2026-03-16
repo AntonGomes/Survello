@@ -90,13 +90,9 @@ def execute(
 
         template_bytes = storage.get_file_data(template.storage_key)
         summary = to_summary(template_bytes, template.mime_type)
-        llm_files = _prepare_context_files(
-            run, context_files, storage, db
-        )
+        llm_files = _prepare_context_files(run, context_files, storage, db)
 
-        container = llm.upload_template(
-            template_bytes, template.file_name, str(run.id)
-        )
+        container = llm.upload_template(template_bytes, template.file_name, str(run.id))
         run.upload_progress = 100
 
         logger.info(f"[run={run.id}] Generating document")
@@ -110,10 +106,7 @@ def execute(
         )
         system = prompt.format(template_string=summary)
         file_id = container.container_file_id
-        user = (
-            f"Template file: {file_id}."
-            " Process with provided context."
-        )
+        user = f"Template file: {file_id}. Process with provided context."
 
         gen = llm.generate(container, llm_files, system, user)
         for msg in gen:
@@ -125,17 +118,14 @@ def execute(
         db.commit()
 
         artefact_bytes = llm.download(container)
-        artefact = _create_artefact(
-            db, storage, run, artefact_bytes, version
-        )
+        artefact = _create_artefact(db, storage, run, artefact_bytes, version)
 
         run.status = RunStatus.COMPLETED
         db.commit()
 
         elapsed = time.time() - start
         logger.info(
-            f"[run={run.id}] Complete in {elapsed:.1f}s,"
-            f" artefact={artefact.id}"
+            f"[run={run.id}] Complete in {elapsed:.1f}s, artefact={artefact.id}"
         )
 
     except Exception as e:
