@@ -17,6 +17,9 @@ from sqlmodel import select
 
 router = APIRouter()
 
+COOKIE_SAMESITE_SECURE = "none"
+COOKIE_SAMESITE_INSECURE = "lax"
+
 
 @router.post("/register", response_model=UserRead, operation_id="registerUser")
 def register(user_in: UserRegister, response: Response, db: SessionDep):
@@ -72,12 +75,13 @@ def register(user_in: UserRegister, response: Response, db: SessionDep):
     db.commit()
 
     # 6. Set Cookie
+    samesite = COOKIE_SAMESITE_SECURE if settings.secure_cookies else COOKIE_SAMESITE_INSECURE
     response.set_cookie(
         key="session_token",
         value=token,
         httponly=True,
-        secure=True,
-        samesite="none",  # Required for cross-origin cookies
+        secure=settings.secure_cookies,
+        samesite=samesite,
         expires=expires,
     )
 
@@ -106,12 +110,14 @@ def login(login_data: UserLogin, response: Response, db: SessionDep):
     db.commit()
 
     # 4. Set Cookie
+    settings = get_settings()
+    samesite = COOKIE_SAMESITE_SECURE if settings.secure_cookies else COOKIE_SAMESITE_INSECURE
     response.set_cookie(
         key="session_token",
         value=token,
         httponly=True,
-        secure=True,
-        samesite="none",  # Required for cross-origin cookies
+        secure=settings.secure_cookies,
+        samesite=samesite,
         expires=expires,
     )
 

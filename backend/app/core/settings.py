@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     # Frontend URL (for email links)
     frontend_url: str = Field(default="http://localhost:3000", alias="FRONTEND_URL")
 
+    # Cookie security: set to True in production (HTTPS), False for local HTTP dev
+    secure_cookies: bool = Field(default=False, alias="SECURE_COOKIES")
+
     # Invitation settings
     invitation_expire_days: int = Field(default=7, alias="INVITATION_EXPIRE_DAYS")
 
