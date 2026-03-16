@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, List, Any, ClassVar
+from datetime import UTC, datetime
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, AutoString
-from sqlalchemy import JSON, Column
+from typing import TYPE_CHECKING, Any, ClassVar
 
+from sqlalchemy import JSON, Column
+from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .quote_model import Quote
@@ -34,13 +34,13 @@ class LeadBase(SQLModel):
 class Lead(LeadBase, table=True):
     __tablename__: ClassVar[str] = "leads"
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        default_factory=lambda: datetime.now(UTC),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(UTC)},
     )
     # JSON array of updates: [{text: str, user_id: int, created_at: str}]
-    updates: List[Any] | None = Field(default=None, sa_column=Column(JSON))
+    updates: list[Any] | None = Field(default=None, sa_column=Column(JSON))
 
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
 
@@ -71,7 +71,7 @@ class LeadRead(LeadBase):
     org_id: int
     created_at: datetime
     updated_at: datetime
-    updates: List[Any] | None = None
+    updates: list[Any] | None = None
     converted_client_id: int | None = None
 
 

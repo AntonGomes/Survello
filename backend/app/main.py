@@ -8,22 +8,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlmodel import text
 
-from app.api.routes.runs import router as runs_router
-from app.api.routes.files import router as files_router
 from app.api.routes.auth import router as auth_router
-from app.api.routes.jobs import router as jobs_router
-from app.api.routes.instructions import router as instructions_router
-from app.api.routes.users import router as users_router
 from app.api.routes.clients import router as clients_router
-from app.api.routes.time import router as time_router
-from app.api.routes.leads import router as leads_router
-from app.api.routes.quotes import router as quotes_router
-from app.api.routes.surveys import router as surveys_router
+from app.api.routes.files import router as files_router
+from app.api.routes.instructions import router as instructions_router
 from app.api.routes.invitations import router as invitations_router
+from app.api.routes.jobs import router as jobs_router
+from app.api.routes.leads import router as leads_router
 from app.api.routes.org import router as org_router
+from app.api.routes.quotes import router as quotes_router
+from app.api.routes.runs import router as runs_router
+from app.api.routes.surveys import router as surveys_router
+from app.api.routes.time import router as time_router
+from app.api.routes.users import router as users_router
 from app.api.routes.waitlist import router as waitlist_router
-
-from app.core.db import init_db, engine
+from app.core.db import engine, init_db
 from app.core.settings import get_settings
 
 logging.basicConfig(

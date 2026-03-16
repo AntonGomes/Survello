@@ -5,9 +5,8 @@ This module provides a shared UpdateItem structure that can be used by both
 jobs and projects, enabling consistent update tracking across entities.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Optional
 from uuid import uuid4
 
 from pydantic import BaseModel
@@ -40,21 +39,21 @@ class UpdateItem(BaseModel):
 
     # Author info (denormalized for display performance)
     author_id: int
-    author_name: Optional[str] = None
-    author_initials: Optional[str] = None
+    author_name: str | None = None
+    author_initials: str | None = None
 
     # Timestamp
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     # Optional links to related entities
-    time_entry_id: Optional[int] = None  # Links to a time entry
-    project_id: Optional[int] = None  # Links to a project (for job updates)
-    survey_id: Optional[int] = None  # Links to a survey
-    file_count: Optional[int] = None  # Number of files uploaded (for file_upload type)
+    time_entry_id: int | None = None  # Links to a time entry
+    project_id: int | None = None  # Links to a project (for job updates)
+    survey_id: int | None = None  # Links to a survey
+    file_count: int | None = None  # Number of files uploaded (for file_upload type)
 
     # Source tracking for job-level aggregation
-    source_project_id: Optional[int] = None  # If this update came from a child project
-    source_project_name: Optional[str] = None  # Name of source project for display
+    source_project_id: int | None = None  # If this update came from a child project
+    source_project_name: str | None = None  # Name of source project for display
 
 
 def create_text_update(
@@ -118,7 +117,7 @@ def create_project_created_update(
     author_name: str | None = None,
     author_initials: str | None = None,
 ) -> UpdateItem:
-    """Create a system update for project/instruction creation. Deprecated: use create_instruction_created_update."""
+    """Deprecated: use create_instruction_created_update."""
     return create_instruction_created_update(
         instruction_name=project_name,
         instruction_id=project_id,

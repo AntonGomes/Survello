@@ -31,7 +31,7 @@ dependencies = [
 
 [tool.ruff]
 indent-width = 4
-exclude = ["prompts/*.py"]
+exclude = ["app/prompts/*.py"]
 
 
 [tool.ty.src]
@@ -72,3 +72,6 @@ max-complexity = 10
 [tool.ruff.lint.pylint]
 max-args = 5
 max-statements = 50
+
+[tool.ruff.lint.per-file-ignores]
+"tests/conftest.py" = ["E402"]

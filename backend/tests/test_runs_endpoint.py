@@ -1,6 +1,9 @@
+from http import HTTPStatus
 from unittest.mock import MagicMock, patch
+
 from fastapi.testclient import TestClient
 from sqlmodel import Session
+
 from app.models.run_model import Run
 
 
@@ -31,7 +34,7 @@ def test_create_run_endpoint(
         response = client.post("/runs/", json=payload)
 
     # Assert
-    assert response.status_code == 200, f"Response: {response.text}"
+    assert response.status_code == HTTPStatus.OK, f"Response: {response.text}"
     data = response.json()
     assert data["template_file_id"] == setup_data["template_id"]
     assert data["org_id"] == setup_data["org_id"]

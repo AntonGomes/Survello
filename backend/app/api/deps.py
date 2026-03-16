@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from typing import Annotated, Generator, TypeAlias
+from collections.abc import Generator
+from typing import Annotated, TypeAlias
 
-from fastapi import Depends, HTTPException, status, Request
-from sqlmodel import Session, select
+from fastapi import Depends, HTTPException, Request, status
 from openai import OpenAI
+from sqlmodel import Session, select
 
 from app.core.db import engine
-from app.core.settings import get_settings
 from app.core.s3 import S3Client
-
-from app.models.user_model import User, Session as UserSession
-
-from app.services.storage import StorageService
+from app.core.settings import get_settings
+from app.models.user_model import Session as UserSession
+from app.models.user_model import User
 from app.services.llm import BaseLLMService, OpenAIService
+from app.services.storage import StorageService
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -27,7 +27,9 @@ def get_openai_client() -> OpenAI:
     return OpenAI(api_key=settings.openai_api_key)
 
 
-def get_llm_service(client: OpenAI = Depends(get_openai_client)) -> BaseLLMService:
+def get_llm_service(
+    client: Annotated[OpenAI, Depends(get_openai_client)],
+) -> BaseLLMService:
     """Get LLM service. Swap implementation here to change providers."""
     settings = get_settings()
     if settings.use_mock_llm:
@@ -50,11 +52,15 @@ def get_s3_client() -> S3Client:
     )
 
 
-def get_storage_service(s3_client: S3Client = Depends(get_s3_client)) -> StorageService:
+def get_storage_service(
+    s3_client: Annotated[S3Client, Depends(get_s3_client)],
+) -> StorageService:
     return StorageService(s3_client)
 
 
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+def get_current_user(
+    request: Request, db: Annotated[Session, Depends(get_db)]
+) -> User:
     """Authenticate user from session cookie."""
     token = request.cookies.get("session_token")
     if not token:
@@ -69,9 +75,24 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     return session.user
 
 
-# Type aliases
+class GenerationServices:
+    def __init__(self, storage: StorageService, llm: BaseLLMService):
+        self.storage = storage
+        self.llm = llm
+
+
+def get_generation_services(
+    storage: Annotated[StorageService, Depends(get_storage_service)],
+    llm: Annotated[BaseLLMService, Depends(get_llm_service)],
+) -> GenerationServices:
+    return GenerationServices(storage, llm)
+
+
 CurrentUserDep: TypeAlias = Annotated[User, Depends(get_current_user)]
 LLMDep: TypeAlias = Annotated[BaseLLMService, Depends(get_llm_service)]
 StorageDep: TypeAlias = Annotated[StorageService, Depends(get_storage_service)]
 DBDep: TypeAlias = Annotated[Session, Depends(get_db)]
 SessionDep: TypeAlias = Annotated[Session, Depends(get_db)]
+GenServicesDep: TypeAlias = Annotated[
+    GenerationServices, Depends(get_generation_services)
+]

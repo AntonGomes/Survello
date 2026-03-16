@@ -1,13 +1,16 @@
-from datetime import datetime, date as date_type, time as time_type, timezone
-from typing import TYPE_CHECKING, Optional, ClassVar
+from datetime import UTC, datetime
+from datetime import date as date_type
+from datetime import time as time_type
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, AutoString
+from typing import TYPE_CHECKING, ClassVar, Optional
+
+from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .job_model import Job
-    from .instruction_model import Instruction
-    from .user_model import User
     from .file_model import File
+    from .instruction_model import Instruction
+    from .job_model import Job
+    from .user_model import User
 
 
 # -----------------------------------------------------------------------------
@@ -16,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class SurveySurveyorLink(SQLModel, table=True):
-    """Link table for many-to-many relationship between surveys and surveyors (users)."""
+    """Link table for surveys-to-surveyors many-to-many."""
 
     __tablename__: ClassVar[str] = "survey_surveyor_links"
     survey_id: int | None = Field(
@@ -83,10 +86,10 @@ class Survey(SurveyBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
     # When the survey data was uploaded/created in the system
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        default_factory=lambda: datetime.now(UTC),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(UTC)},
     )
 
     # Foreign keys

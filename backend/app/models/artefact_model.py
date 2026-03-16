@@ -1,8 +1,10 @@
 from __future__ import annotations
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, AutoString
 from typing import TYPE_CHECKING, ClassVar
+
+from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .file_model import File
@@ -23,7 +25,7 @@ class ArtefactBase(SQLModel):
 class Artefact(ArtefactBase, table=True):
     __tablename__: ClassVar[str] = "artefacts"
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     org_id: int = Field(default=None, foreign_key="orgs.id", ondelete="CASCADE")
     job_id: int | None = Field(default=None, foreign_key="jobs.id", ondelete="SET NULL")

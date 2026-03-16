@@ -1,6 +1,7 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, ClassVar
-from sqlmodel import SQLModel, Field, Relationship
+
+from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .instruction_model import Instruction
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
 
 class TimeEntryBase(SQLModel):
     instruction_id: int = Field(foreign_key="projects.id")
-    start_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    start_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
     end_time: datetime | None = None
     description: str | None = None
     duration_minutes: int | None = None  # Computed on stop, stored for reporting

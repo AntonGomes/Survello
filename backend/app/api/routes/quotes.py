@@ -1,27 +1,34 @@
-from datetime import datetime, timezone
-from typing import Any, cast
-from fastapi import APIRouter, HTTPException, status
-from sqlmodel import select
-from sqlalchemy.orm import joinedload
-from pydantic import BaseModel
+from datetime import UTC, datetime
+from typing import Annotated, Any, cast
 
-from app.api.deps import DBDep, CurrentUserDep
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
+from sqlalchemy.orm import joinedload
+from sqlmodel import select
+
+from app.api.deps import CurrentUserDep, DBDep
+from app.models.client_model import Client, ClientContact
+from app.models.instruction_model import Instruction, InstructionStatus
+from app.models.job_model import Job, JobStatus
+from app.models.lead_model import LeadStatus
 from app.models.quote_model import (
     Quote,
-    QuoteLine,
     QuoteCreate,
+    QuoteLine,
     QuoteLineCreate,
     QuoteRead,
-    QuoteUpdate,
     QuoteStatus,
+    QuoteUpdate,
 )
-from app.models.lead_model import LeadStatus
-from app.models.client_model import Client, ClientContact
-from app.models.job_model import Job, JobStatus
-from app.models.instruction_model import Instruction, InstructionStatus
-
 
 router = APIRouter()
+
+
+class QuoteFilters(BaseModel):
+    offset: int = 0
+    limit: int = 100
+    status: QuoteStatus | None = None
+    client_id: int | None = None
 
 
 class QuoteUpdateEntry(BaseModel):
@@ -99,28 +106,33 @@ def create_quote(
 def read_quotes(
     current_user: CurrentUserDep,
     db: DBDep,
-    offset: int = 0,
-    limit: int = 100,
-    status: QuoteStatus | None = None,
-    client_id: int | None = None,
+    filters: Annotated[QuoteFilters, Depends()],
 ) -> list[QuoteRead]:
     """Retrieve quotes, optionally filtered by status or client."""
     query = (
         select(Quote)
         .where(Quote.org_id == current_user.org_id)
         .options(
-            joinedload(Quote.client),  # ty: ignore[arg-type]
-            joinedload(Quote.lead),  # ty: ignore[arg-type]
-            joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),  # ty: ignore[arg-type]
+            joinedload(Quote.client),
+            joinedload(Quote.lead),
+            joinedload(Quote.lines).joinedload(
+                QuoteLine.instruction_type
+            ),
         )
     )
 
-    if status:
-        query = query.where(Quote.status == status)
-    if client_id:
-        query = query.where(Quote.client_id == client_id)
+    if filters.status:
+        query = query.where(Quote.status == filters.status)
+    if filters.client_id:
+        query = query.where(Quote.client_id == filters.client_id)
 
-    quotes = db.exec(query.offset(offset).limit(limit)).unique().all()
+    quotes = (
+        db.exec(
+            query.offset(filters.offset).limit(filters.limit)
+        )
+        .unique()
+        .all()
+    )
     return cast(list[QuoteRead], quotes)
 
 
@@ -294,12 +306,12 @@ def add_quote_update(
         "text": update_entry.text,
         "user_id": current_user.id,
         "user_name": current_user.name,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }
 
     if quote.updates is None:
         quote.updates = []
-    quote.updates = [new_update] + quote.updates
+    quote.updates = [new_update, *quote.updates]
 
     db.add(quote)
     db.commit()
