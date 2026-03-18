@@ -25,7 +25,7 @@ class VisionProvider(ABC):
     @abstractmethod
     def analyze_section(
         self,
-        image_urls: list[str],
+        image_data_list: list[bytes],
         system_prompt: str,
         context: str,
     ) -> SectionAnalysis:
@@ -34,7 +34,7 @@ class VisionProvider(ABC):
     @abstractmethod
     def name_sections(
         self,
-        representative_image_urls: list[str],
+        representative_images: list[bytes],
     ) -> list[str]:
         raise NotImplementedError
 

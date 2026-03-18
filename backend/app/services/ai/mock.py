@@ -58,11 +58,11 @@ EMBEDDING_DIM = 256
 class MockVisionProvider(VisionProvider):
     def analyze_section(
         self,
-        image_urls: list[str],
+        image_data_list: list[bytes],
         system_prompt: str,
         context: str,
     ) -> SectionAnalysis:
-        logger.info(f"MOCK: analyzing {len(image_urls)} images")
+        logger.info(f"MOCK: analyzing {len(image_data_list)} images")
         selected = random.sample(MOCK_ITEMS, k=min(len(MOCK_ITEMS), 2))
         return SectionAnalysis(
             items=selected,
@@ -71,9 +71,9 @@ class MockVisionProvider(VisionProvider):
 
     def name_sections(
         self,
-        representative_image_urls: list[str],
+        representative_images: list[bytes],
     ) -> list[str]:
-        count = len(representative_image_urls)
+        count = len(representative_images)
         logger.info(f"MOCK: naming {count} sections")
         return MOCK_SECTION_NAMES[:count]
 

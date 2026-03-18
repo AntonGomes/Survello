@@ -26,25 +26,28 @@ SECTION_NAMING_PROMPT = (
 )
 
 
+def _image_parts(image_data_list: list[bytes]) -> list[types.Part]:
+    return [
+        types.Part.from_bytes(data=img, mime_type="image/jpeg")
+        for img in image_data_list
+    ]
+
+
 class GeminiVisionProvider(VisionProvider):
     def __init__(self, api_key: str) -> None:
         self.client = genai.Client(api_key=api_key)
 
     def analyze_section(
         self,
-        image_urls: list[str],
+        image_data_list: list[bytes],
         system_prompt: str,
         context: str,
     ) -> SectionAnalysis:
-        logger.info(f"Gemini: analyzing {len(image_urls)} images")
+        logger.info(
+            f"Gemini: analyzing {len(image_data_list)} images"
+        )
 
-        contents: list = []
-        for url in image_urls:
-            contents.append(
-                types.Part.from_uri(
-                    file_uri=url, mime_type="image/jpeg"
-                )
-            )
+        contents: list = _image_parts(image_data_list)
         contents.append(context)
 
         response = self.client.models.generate_content(
@@ -66,23 +69,15 @@ class GeminiVisionProvider(VisionProvider):
 
     def name_sections(
         self,
-        representative_image_urls: list[str],
+        representative_images: list[bytes],
     ) -> list[str]:
         logger.info(
-            f"Gemini: naming {len(representative_image_urls)} sections"
+            f"Gemini: naming {len(representative_images)} sections"
         )
-
-        contents: list = []
-        for url in representative_image_urls:
-            contents.append(
-                types.Part.from_uri(
-                    file_uri=url, mime_type="image/jpeg"
-                )
-            )
 
         response = self.client.models.generate_content(
             model=VISION_MODEL,
-            contents=contents,
+            contents=_image_parts(representative_images),
             config=types.GenerateContentConfig(
                 system_instruction=SECTION_NAMING_PROMPT,
                 response_mime_type="application/json",

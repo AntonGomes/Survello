@@ -109,10 +109,8 @@ def _analyze_single_section(
     ctx: SectionAnalysisContext,
     db: Session,
 ) -> str:
-    image_urls = [
-        ctx.storage.generate_presigned_url(
-            "get_object", f.storage_key, f.mime_type, f.file_name
-        )
+    image_data = [
+        ctx.storage.get_file_data(f.storage_key)
         for f in section_files
     ]
 
@@ -122,8 +120,8 @@ def _analyze_single_section(
         few_shot_examples=ctx.few_shot,
     )
 
-    context_msg = f"Section: {section.name} ({len(image_urls)} images)"
-    result = ctx.vision.analyze_section(image_urls, prompt, context_msg)
+    context_msg = f"Section: {section.name} ({len(image_data)} images)"
+    result = ctx.vision.analyze_section(image_data, prompt, context_msg)
 
     for idx, item in enumerate(result.items):
         unit = UNIT_MAP.get(item.unit, DilapsUnit.SUM)

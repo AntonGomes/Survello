@@ -139,13 +139,10 @@ def name_sections(
     vision_provider: VisionProvider,
     storage: StorageService,
 ) -> list[str]:
-    representative_urls: list[str] = []
+    representative_images: list[bytes] = []
     for section in sections:
         mid = len(section) // 2
         f = section[mid]
-        url = storage.generate_presigned_url(
-            "get_object", f.storage_key, f.mime_type, f.file_name
-        )
-        representative_urls.append(url)
+        representative_images.append(storage.get_file_data(f.storage_key))
 
-    return vision_provider.name_sections(representative_urls)
+    return vision_provider.name_sections(representative_images)
