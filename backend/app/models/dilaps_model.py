@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 from datetime import UTC, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from sqlmodel import AutoString, Field, Relationship, SQLModel
 
@@ -72,8 +70,8 @@ class DilapsRun(DilapsRunBase, table=True):
         default=None, foreign_key="jobs.id", ondelete="SET NULL"
     )
 
-    run: Run = Relationship()
-    sections: list[DilapsSection] = Relationship(
+    run: "Run" = Relationship()
+    sections: list["DilapsSection"] = Relationship(
         back_populates="dilaps_run",
         sa_relationship_kwargs={"order_by": "DilapsSection.sort_order"},
     )
@@ -111,12 +109,12 @@ class DilapsSection(DilapsSectionBase, table=True):
         foreign_key="dilaps_runs.id", ondelete="CASCADE"
     )
 
-    dilaps_run: DilapsRun = Relationship(back_populates="sections")
-    items: list[DilapsItem] = Relationship(
+    dilaps_run: "DilapsRun" = Relationship(back_populates="sections")
+    items: list["DilapsItem"] = Relationship(
         back_populates="section",
         sa_relationship_kwargs={"order_by": "DilapsItem.sort_order"},
     )
-    files: list[File] = Relationship(link_model=DilapsSectionFileLink)
+    files: list["File"] = Relationship(link_model=DilapsSectionFileLink)
 
 
 class DilapsSectionRead(DilapsSectionBase):
@@ -150,7 +148,7 @@ class DilapsItem(DilapsItemBase, table=True):
         foreign_key="dilaps_sections.id", ondelete="CASCADE"
     )
 
-    section: DilapsSection = Relationship(back_populates="items")
+    section: "DilapsSection" = Relationship(back_populates="items")
 
 
 class DilapsItemCreate(SQLModel):
