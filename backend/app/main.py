@@ -54,6 +54,11 @@ PRODUCTION_ORIGINS = [
 ]
 
 
+def _is_local_dev() -> bool:
+    settings = get_settings()
+    return "localhost" in settings.frontend_url
+
+
 def _build_allowed_origins() -> list[str]:
     settings = get_settings()
     origins = list(PRODUCTION_ORIGINS)
@@ -63,6 +68,7 @@ def _build_allowed_origins() -> list[str]:
     return origins
 
 
+LOCAL_DEV_ORIGIN_REGEX = r"^http://localhost:\d+$"
 origins = _build_allowed_origins()
 
 app = FastAPI(
@@ -76,6 +82,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=LOCAL_DEV_ORIGIN_REGEX if _is_local_dev() else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
