@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from sqlmodel import text
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.dilaps import router as dilaps_router
 from app.api.routes.clients import router as clients_router
 from app.api.routes.files import router as files_router
 from app.api.routes.instructions import router as instructions_router
@@ -130,3 +131,4 @@ app.include_router(surveys_router, prefix="/surveys", tags=["Surveys"])
 app.include_router(invitations_router, prefix="/invitations", tags=["Invitations"])
 app.include_router(org_router, prefix="/org", tags=["Organization"])
 app.include_router(waitlist_router, prefix="/waitlist", tags=["Waitlist"])
+app.include_router(dilaps_router, prefix="/dilaps", tags=["Dilaps"])

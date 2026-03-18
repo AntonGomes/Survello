@@ -1,0 +1,57 @@
+[
+  {
+    "section_name": "Kitchen",
+    "items": [
+      {
+        "lease_clause": "Three",
+        "want_of_repair": "Vinyl flooring is worn, lifting at edges and stained.",
+        "remedy": "Remove existing vinyl flooring and replace with new to match existing.",
+        "unit": "m\u00b2",
+        "quantity": 8.0,
+        "rate": 35.0,
+        "cost": 280.0
+      },
+      {
+        "lease_clause": "Four",
+        "want_of_repair": "Walls are soiled and due for redecoration.",
+        "remedy": "Clean down and redecorate walls with 2 coats of emulsion paint.",
+        "unit": "m\u00b2",
+        "quantity": 24.0,
+        "rate": 9.0,
+        "cost": 216.0
+      },
+      {
+        "lease_clause": "Three",
+        "want_of_repair": "Kitchen units are damaged, doors hanging off hinges.",
+        "remedy": "Repair all kitchen units, replace damaged doors and rehang. Leave in good working order.",
+        "unit": "Sum",
+        "quantity": null,
+        "rate": null,
+        "cost": 500.0
+      }
+    ]
+  },
+  {
+    "section_name": "Front Elevation",
+    "items": [
+      {
+        "lease_clause": "Three",
+        "want_of_repair": "Pointing to brickwork has deteriorated and is missing in areas.",
+        "remedy": "Rake out loose and missing pointing and repoint with mortar to match existing.",
+        "unit": "m\u00b2",
+        "quantity": 15.0,
+        "rate": 80.0,
+        "cost": 1200.0
+      },
+      {
+        "lease_clause": "Three, Four",
+        "want_of_repair": "Cast iron downpipe is corroded and leaking at joints.",
+        "remedy": "Clean down, repair joints and redecorate with rust inhibitor, undercoat and gloss.",
+        "unit": "m",
+        "quantity": 6.0,
+        "rate": 25.0,
+        "cost": 150.0
+      }
+    ]
+  }
+]

@@ -1,76 +1,116 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { Sparkles, Download, Upload } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { MapPin } from "lucide-react";
 
-import { DocumentViewerWithChat } from "@/components/document-viewer-with-chat";
 import { ErrorAlert } from "@/components/error-alert";
-import { JobStatusPanel } from "@/components/job-status-panel";
-import { useDocumentGeneration } from "@/hooks/use-document-generation";
 import { FeatureHeader } from "@/components/feature-header";
-import { SaveToSurvelloModal } from "@/components/save-to-survello-modal";
-import { Button } from "@/components/ui/button";
-import { readJobOptions } from "@/client/@tanstack/react-query.gen";
+import { DilapsStatusPanel } from "@/app/app/generate/status-panel";
+import {
+  DilapsUploadGrid,
+  LinkedJobBanner,
+} from "@/app/app/generate/upload-section";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useDilapsGeneration } from "@/hooks/use-dilaps-generation";
 import { useAuth } from "@/context/auth-context";
-import { LinkedJobBanner, UploadGrid } from "./upload-section";
+
+type UploadFiles = {
+  leaseFile: File | null;
+  leaseDocFiles: File[];
+  siteNoteFiles: File[];
+  surveyImageFiles: File[];
+  miscFiles: File[];
+};
+
+const EMPTY_UPLOAD_FILES: UploadFiles = {
+  leaseFile: null,
+  leaseDocFiles: [],
+  siteNoteFiles: [],
+  surveyImageFiles: [],
+  miscFiles: [],
+};
+
+function useJobIdFromParams() {
+  const searchParams = useSearchParams();
+  const param = searchParams.get("jobId");
+  return param ? parseInt(param) : undefined;
+}
 
 export default function GeneratePage() {
-  const searchParams = useSearchParams();
-  const jobIdParam = searchParams.get("jobId");
-  const jobId = jobIdParam ? parseInt(jobIdParam) : undefined;
-
+  const jobId = useJobIdFromParams();
+  const router = useRouter();
   const { user } = useAuth();
-  const [contextFiles, setContextFiles] = useState<File[]>([]);
-  const [templateFile, setTemplateFile] = useState<File | null>(null);
-  const [showSaveModal, setShowSaveModal] = useState(false);
 
-  const { data: linkedJob } = useQuery({ ...readJobOptions({ path: { job_id: jobId! } }), enabled: !!jobId });
-  const docGen = useDocumentGeneration();
+  const [files, setFiles] = useState<UploadFiles>(EMPTY_UPLOAD_FILES);
+  const [propertyAddress, setPropertyAddress] = useState("");
+
+  const generation = useDilapsGeneration();
 
   const canStart = useMemo(
-    () => Boolean(templateFile) && contextFiles.length > 0 && !["presigning", "uploading", "generating"].includes(docGen.status),
-    [docGen.status, templateFile, contextFiles.length],
+    () =>
+      Boolean(files.leaseFile) &&
+      files.surveyImageFiles.length > 0 &&
+      propertyAddress.trim().length > 0 &&
+      !generation.isActive,
+    [files.leaseFile, files.surveyImageFiles.length, propertyAddress, generation.isActive],
   );
 
-  const downloadPath = useMemo(() => docGen.downloadUrl || "", [docGen.downloadUrl]);
-  const handleStartNew = () => { docGen.reset(); setContextFiles([]); setTemplateFile(null); };
-  const handleContextDrop = (files: File[]) => {
-    setContextFiles((prev) => { const newFiles = files.filter((file) => !prev.some((p) => p.name === file.name)); return [...prev, ...newFiles]; });
+  const handleStart = () => {
+    generation.start({
+      ...files,
+      propertyAddress,
+      jobId,
+      orgId: user?.org_id ?? 0,
+    });
   };
+
+  if (generation.isCompleted && generation.dilapsId) {
+    router.push(`/app/generate/review?dilapsId=${generation.dilapsId}`);
+  }
 
   return (
     <>
-      <FeatureHeader title="Document Generator" badge={linkedJob ? `Job: ${linkedJob.name}` : null} />
-      {!docGen.isCompleted && !downloadPath && (
+      <FeatureHeader
+        title="Generate Dilaps"
+        badge={jobId ? `Job #${jobId}` : null}
+      />
+
+      {!generation.isCompleted && (
         <div className="px-8 pb-8 space-y-6">
-          {linkedJob && <LinkedJobBanner name={linkedJob.name} clientName={linkedJob.client?.name} address={linkedJob.address} />}
-          <UploadGrid contextFiles={contextFiles} templateFile={templateFile} onContextDrop={handleContextDrop} onTemplateDrop={(files) => setTemplateFile(files[0] || null)} />
-          <div className="text-center text-sm text-muted-foreground"><p>Upload context files (photos, notes, documents) and a template to generate your report.</p></div>
+          {jobId && <LinkedJobBanner jobId={jobId} />}
+
+          <div className="space-y-2">
+            <Label htmlFor="property-address" className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              Property Address
+            </Label>
+            <Input
+              id="property-address"
+              placeholder="Enter the property address"
+              value={propertyAddress}
+              onChange={(e) => setPropertyAddress(e.target.value)}
+              disabled={generation.isActive}
+            />
+          </div>
+
+          <DilapsUploadGrid files={files} onUpdate={setFiles} />
         </div>
       )}
-      {docGen.error && <ErrorAlert message={docGen.error} />}
-      {!docGen.isCompleted && <JobStatusPanel canStart={canStart} status={docGen.status} uploadProgress={docGen.uploadProgress} onStart={() => docGen.start({ templateFile, contextFiles, jobId, orgId: user?.org_id ?? 0 })} updates={docGen.updates} />}
-      {docGen.isCompleted && downloadPath && docGen.previewUrl && (
-        <CompletedActions downloadPath={downloadPath} previewUrl={docGen.previewUrl} onSave={() => setShowSaveModal(true)} onStartNew={handleStartNew} />
-      )}
-      <SaveToSurvelloModal open={showSaveModal} onOpenChange={setShowSaveModal} runId={docGen.runId} initialJobId={jobId} />
-    </>
-  );
-}
 
-function CompletedActions({ downloadPath, previewUrl, onSave, onStartNew }: {
-  downloadPath: string; previewUrl: string; onSave: () => void; onStartNew: () => void
-}) {
-  return (
-    <div className="px-8 pb-8 space-y-6">
-      <DocumentViewerWithChat previewUrl={previewUrl} />
-      <div className="flex items-center justify-center gap-4">
-        <a href={downloadPath} download><Button size="lg" className="gap-2"><Download className="h-4 w-4" />Download Document</Button></a>
-        <Button variant="outline" size="lg" className="gap-2" onClick={onSave}><Upload className="h-4 w-4" />Save to Survello</Button>
-        <Button variant="ghost" size="lg" className="gap-2" onClick={onStartNew}><Sparkles className="h-4 w-4" />Generate Another</Button>
-      </div>
-    </div>
+      {generation.error && <ErrorAlert message={generation.error} />}
+
+      {!generation.isCompleted && (
+        <DilapsStatusPanel
+          canStart={canStart}
+          status={generation.status}
+          subStatus={generation.subStatus}
+          uploadProgress={generation.uploadProgress}
+          progressPct={generation.progressPct}
+          onStart={handleStart}
+        />
+      )}
+    </>
   );
 }

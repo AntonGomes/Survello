@@ -12,6 +12,7 @@ from app.core.s3 import S3Client
 from app.core.settings import get_settings
 from app.models.user_model import Session as UserSession
 from app.models.user_model import User
+from app.services.ai.provider import EmbeddingProvider, VisionProvider
 from app.services.llm import BaseLLMService, OpenAIService
 from app.services.storage import StorageService
 
@@ -86,11 +87,62 @@ def get_generation_services(
     return GenerationServices(storage, llm)
 
 
+def get_vision_provider() -> VisionProvider:
+    settings = get_settings()
+    if settings.use_mock_llm:
+        from app.services.ai.mock import MockVisionProvider
+
+        return MockVisionProvider()
+
+    from app.services.ai.gemini import GeminiVisionProvider
+
+    return GeminiVisionProvider(api_key=settings.gemini_api_key or "")
+
+
+def get_embedding_provider() -> EmbeddingProvider:
+    settings = get_settings()
+    if settings.use_mock_llm:
+        from app.services.ai.mock import MockEmbeddingProvider
+
+        return MockEmbeddingProvider()
+
+    from app.services.ai.gemini import GeminiEmbeddingProvider
+
+    return GeminiEmbeddingProvider(api_key=settings.gemini_api_key or "")
+
+
+class DilapsServices:
+    def __init__(
+        self,
+        storage: StorageService,
+        vision: VisionProvider,
+        embedding: EmbeddingProvider,
+    ):
+        self.storage = storage
+        self.vision = vision
+        self.embedding = embedding
+
+
+def get_dilaps_services(
+    storage: Annotated[StorageService, Depends(get_storage_service)],
+    vision: Annotated[VisionProvider, Depends(get_vision_provider)],
+    embedding: Annotated[EmbeddingProvider, Depends(get_embedding_provider)],
+) -> DilapsServices:
+    return DilapsServices(storage, vision, embedding)
+
+
 CurrentUserDep: TypeAlias = Annotated[User, Depends(get_current_user)]
 LLMDep: TypeAlias = Annotated[BaseLLMService, Depends(get_llm_service)]
 StorageDep: TypeAlias = Annotated[StorageService, Depends(get_storage_service)]
+VisionDep: TypeAlias = Annotated[VisionProvider, Depends(get_vision_provider)]
+EmbeddingDep: TypeAlias = Annotated[
+    EmbeddingProvider, Depends(get_embedding_provider)
+]
 DBDep: TypeAlias = Annotated[Session, Depends(get_db)]
 SessionDep: TypeAlias = Annotated[Session, Depends(get_db)]
 GenServicesDep: TypeAlias = Annotated[
     GenerationServices, Depends(get_generation_services)
+]
+DilapsServicesDep: TypeAlias = Annotated[
+    DilapsServices, Depends(get_dilaps_services)
 ]
