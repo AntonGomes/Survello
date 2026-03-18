@@ -16,6 +16,7 @@ from app.models.dilaps_model import (
 )
 from app.models.file_model import File
 from app.prompts.dilaps_analysis import DILAPS_SECTION_ANALYSIS_PROMPT
+from app.services.ai.gemini import GeminiVisionProvider
 from app.services.ai.provider import EmbeddingProvider, VisionProvider
 from app.services.image_sectioning import (
     compute_embeddings,
@@ -227,3 +228,7 @@ def execute(
         dilaps_run.error_message = str(e)
         db.commit()
         raise
+
+    finally:
+        if isinstance(vision, GeminiVisionProvider):
+            vision.file_manager.cleanup()

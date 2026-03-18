@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 
 from google import genai
@@ -26,16 +27,44 @@ SECTION_NAMING_PROMPT = (
 )
 
 
-def _image_parts(image_data_list: list[bytes]) -> list[types.Part]:
-    return [
-        types.Part.from_bytes(data=img, mime_type="image/jpeg")
-        for img in image_data_list
-    ]
+class GeminiFileManager:
+    def __init__(self, client: genai.Client) -> None:
+        self.client = client
+        self._uploaded: dict[int, genai.types.File] = {}
+
+    def upload(self, image_data: bytes, index: int) -> genai.types.File:
+        if index in self._uploaded:
+            return self._uploaded[index]
+
+        buf = io.BytesIO(image_data)
+        uploaded = self.client.files.upload(
+            file=buf,
+            config={"mime_type": "image/jpeg"},
+        )
+        self._uploaded[index] = uploaded
+        return uploaded
+
+    def upload_batch(
+        self, image_data_list: list[bytes],
+    ) -> list[genai.types.File]:
+        return [
+            self.upload(data, i)
+            for i, data in enumerate(image_data_list)
+        ]
+
+    def cleanup(self) -> None:
+        for uploaded in self._uploaded.values():
+            try:
+                self.client.files.delete(name=uploaded.name)
+            except Exception as e:
+                logger.debug(f"File cleanup failed: {e}")
+        self._uploaded.clear()
 
 
 class GeminiVisionProvider(VisionProvider):
     def __init__(self, api_key: str) -> None:
         self.client = genai.Client(api_key=api_key)
+        self.file_manager = GeminiFileManager(self.client)
 
     def analyze_section(
         self,
@@ -47,8 +76,8 @@ class GeminiVisionProvider(VisionProvider):
             f"Gemini: analyzing {len(image_data_list)} images"
         )
 
-        contents: list = _image_parts(image_data_list)
-        contents.append(context)
+        files = self.file_manager.upload_batch(image_data_list)
+        contents: list = [*files, context]
 
         response = self.client.models.generate_content(
             model=VISION_MODEL,
@@ -75,9 +104,11 @@ class GeminiVisionProvider(VisionProvider):
             f"Gemini: naming {len(representative_images)} sections"
         )
 
+        files = self.file_manager.upload_batch(representative_images)
+
         response = self.client.models.generate_content(
             model=VISION_MODEL,
-            contents=_image_parts(representative_images),
+            contents=list(files),
             config=types.GenerateContentConfig(
                 system_instruction=SECTION_NAMING_PROMPT,
                 response_mime_type="application/json",
