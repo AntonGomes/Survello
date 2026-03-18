@@ -33,20 +33,6 @@ dependencies = [
 indent-width = 4
 exclude = ["app/prompts/*.py"]
 
-
-[tool.ty.src]
-include = ["app", "tests"]
-exclude = ["migrations"]
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-testpaths = ["tests"]
-
-[dependency-groups]
-dev = [
-    "ty>=0.0.13",
-]
-
 [tool.ruff.lint]
 select = [
     "E",      # pycodestyle errors
@@ -75,3 +61,16 @@ max-statements = 50
 
 [tool.ruff.lint.per-file-ignores]
 "tests/conftest.py" = ["E402"]
+
+[tool.ty.src]
+include = ["app", "tests"]
+exclude = ["migrations"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.13",
+]

@@ -1,150 +1,48 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 import { useParams } from "next/navigation"
-import { 
-  Building2, 
-  MapPin, 
-  FileText, 
-  Briefcase, 
-  Files,
-  Clock,
-  Camera,
-  Calendar,
-  User,
-  FolderOpen,
-  Image as ImageIcon,
-  ChevronRight,
-  Plus,
-  Sparkles,
-  Timer,
-} from "lucide-react"
+import { Building2, MapPin, Briefcase, Files, Camera, Sparkles } from "lucide-react"
 import Link from "next/link"
-import { format } from "date-fns"
-import { Label, Pie, PieChart } from "recharts"
 
-import { readJobOptions, readSurveysOptions, addJobUpdateMutation, getCurrentTimerOptions } from "@/client/@tanstack/react-query.gen"
-import { UserRole } from "@/client"
+import { UserRole, type JobReadDetail } from "@/client"
 import { FeatureHeader } from "@/components/feature-header"
-import { CreateInstructionDialog } from "@/components/create-instruction-dialog"
-import { CreateSurveyDialog } from "@/components/create-survey-dialog"
-import { UpdateFeed } from "@/components/update-feed"
-import { InstructionCard } from "@/components/instruction-card"
 import { JobTimeTrackingModal } from "@/components/job-time-tracking-modal"
 import { Spinner } from "@/components/ui/spinner"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { useAuth } from "@/context/auth-context"
-import { toast } from "sonner"
-import { cn } from "@/lib/utils"
+import type { UpdateItem } from "@/components/update-feed"
 
-// Chart config for instruction status donut chart
-const statusChartConfig = {
-  count: {
-    label: "Instructions",
-  },
-  planned: {
-    label: "Planned",
-    color: "hsl(215 16% 47%)", // slate-400
-  },
-  active: {
-    label: "Active",
-    color: "hsl(217 91% 60%)", // blue-500
-  },
-  completed: {
-    label: "Completed",
-    color: "hsl(142 71% 45%)", // green-500
-  },
-  archived: {
-    label: "Archived",
-    color: "hsl(220 9% 46%)", // gray-500
-  },
-} satisfies ChartConfig
+import { useJobQueries, useJobUpdates, useJobComputedData, useTimeLogging } from "./use-job-detail"
+import { OverviewTab } from "./job-overview-tab"
+import { InstructionsTab } from "./job-instructions-tab"
+import { SurveysTab } from "./job-surveys-tab"
+import { FilesTab } from "./job-files-tab"
+import { DocGenTab } from "./job-docgen-tab"
 
-// Donut chart component for instruction status
-function StatusPieChart({ 
-  data
-}: { 
-  data: { status: string; count: number; fill: string }[]
+function JobHeaderMeta({ job }: {
+  job: { status?: string | null; client: { id: number; name: string }; address?: string | null }
 }) {
-  const total = useMemo(() => {
-    return data.reduce((sum, d) => sum + d.count, 0)
-  }, [data])
-  
-  // Filter out zero-count statuses
-  const chartData = data.filter(d => d.count > 0)
-  
-  if (total === 0) {
-    return (
-      <div className="flex items-center justify-center h-[100px] w-[100px] rounded-full bg-muted mx-auto">
-        <span className="text-xs text-muted-foreground">No instructions</span>
-      </div>
-    )
-  }
-
   return (
-    <ChartContainer
-      config={statusChartConfig}
-      className="mx-auto aspect-square h-[100px]"
-    >
-      <PieChart>
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent hideLabel />}
-        />
-        <Pie
-          data={chartData}
-          dataKey="count"
-          nameKey="status"
-          innerRadius={30}
-          outerRadius={45}
-          strokeWidth={2}
-        >
-          <Label
-            content={({ viewBox }) => {
-              if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                return (
-                  <text
-                    x={viewBox.cx}
-                    y={viewBox.cy}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                  >
-                    <tspan
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                      className="fill-foreground text-xl font-bold"
-                    >
-                      {total}
-                    </tspan>
-                    <tspan
-                      x={viewBox.cx}
-                      y={(viewBox.cy || 0) + 14}
-                      className="fill-muted-foreground text-[10px]"
-                    >
-                      total
-                    </tspan>
-                  </text>
-                )
-              }
-            }}
-          />
-        </Pie>
-      </PieChart>
-    </ChartContainer>
+    <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2">
+      <Badge variant="outline" className="capitalize">{job.status ?? "planned"}</Badge>
+      <Separator orientation="vertical" className="h-4" />
+      <div className="flex items-center gap-1.5">
+        <Building2 className="h-4 w-4" />
+        <Link href={`/app/clients/${job.client.id}`} className="hover:underline">{job.client.name}</Link>
+      </div>
+      {job.address && (
+        <>
+          <Separator orientation="vertical" className="h-4" />
+          <div className="flex items-center gap-1.5">
+            <MapPin className="h-4 w-4" />
+            <span>{job.address}</span>
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 
@@ -152,761 +50,152 @@ export default function JobDetailPage() {
   const params = useParams<{ id: string }>()
   const jobId = parseInt(params.id)
   const { user } = useAuth()
-  const queryClient = useQueryClient()
+
   const [activeTab, setActiveTab] = useState("overview")
-  const [expandedSurveys, setExpandedSurveys] = useState<Set<number>>(new Set())
-  const [instructionStatusFilter, setInstructionStatusFilter] = useState<string>("all")
   const [isTimeModalOpen, setIsTimeModalOpen] = useState(false)
-  const [selectedInstructionIdForTime, setSelectedInstructionIdForTime] = useState<number | undefined>(undefined)
-  
-  // Helper to open time modal with optional instruction pre-selected
+  const [selectedInstructionId, setSelectedInstructionId] = useState<number | undefined>(undefined)
+
+  const queries = useJobQueries(jobId)
+  const updates = useJobUpdates(jobId)
+  const computed = useJobComputedData({
+    instructions: queries.job?.instructions,
+    surveys: queries.surveys as SurveyComputeInput[] | undefined,
+  })
+  const handleTimeLogged = useTimeLogging(updates.handleAddUpdate)
+
   const openTimeModal = (instructionId?: number) => {
-    setSelectedInstructionIdForTime(instructionId)
+    setSelectedInstructionId(instructionId)
     setIsTimeModalOpen(true)
   }
-  
-  const { data: job, isLoading, error } = useQuery({
-    ...readJobOptions({ path: { job_id: jobId } })
-  })
 
-  // Check if there's an active timer for this job
-  const { data: activeTimer } = useQuery({
-    ...getCurrentTimerOptions(),
-    refetchInterval: 1000 * 60, // Poll every minute
-  })
-
-  const hasActiveTimerForJob = activeTimer && job?.instructions?.some(p => p.id === activeTimer.instruction_id)
-
-  const { data: surveys, isLoading: isLoadingSurveys } = useQuery({
-    ...readSurveysOptions({ query: { job_id: jobId } }),
-    enabled: !!jobId,
-  })
-
-  const { mutate: addUpdate, isPending: isAddingUpdate } = useMutation({
-    ...addJobUpdateMutation(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: readJobOptions({ path: { job_id: jobId } }).queryKey,
-      })
-      toast.success("Update added")
-    },
-    onError: () => {
-      toast.error("Failed to add update")
-    },
-  })
-
-  // Compute instruction status breakdown for pie chart
-  const instructionStatusData = useMemo(() => {
-    if (!job?.instructions) return []
-    const counts: Record<string, number> = {
-      planned: 0,
-      active: 0,
-      completed: 0,
-      archived: 0,
-    }
-    job.instructions.forEach(p => {
-      const status = p.status || 'planned'
-      counts[status] = (counts[status] || 0) + 1
-    })
-    return Object.entries(counts).map(([status, count]) => ({
-      status,
-      count,
-      fill: `var(--color-${status})`,
-    }))
-  }, [job?.instructions])
-
-  // Compute total images from surveys
-  const totalSurveyImages = useMemo(() => {
-    if (!surveys) return 0
-    return surveys.reduce((sum, s) => sum + (s.photo_count || 0), 0)
-  }, [surveys])
-
-  // Find most recent survey
-  const mostRecentSurvey = useMemo(() => {
-    if (!surveys || surveys.length === 0) return null
-    return [...surveys].sort((a, b) => 
-      new Date(b.conducted_date).getTime() - new Date(a.conducted_date).getTime()
-    )[0]
-  }, [surveys])
-
-  // Find next deadline (instruction with nearest deadline in future)
-  const nextDeadlineInstruction = useMemo(() => {
-    if (!job?.instructions) return null
-    const now = new Date()
-    const instructionsWithDeadlines = job.instructions
-      .filter(p => p.deadline && new Date(p.deadline) > now)
-      .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
-    return instructionsWithDeadlines[0] || null
-  }, [job?.instructions])
-
-  const handleAddUpdate = (text: string) => {
-    if (!user) return
-    addUpdate({
-      path: { job_id: jobId },
-      body: { text },
-    })
+  if (queries.isLoading) {
+    return <div className="flex items-center justify-center p-8 h-full"><Spinner className="h-8 w-8" /></div>
   }
 
-  const handleAddUpdateAsync = async (text: string) => {
-    handleAddUpdate(text)
+  if (queries.error || !queries.job) {
+    return <div className="p-8 text-center text-muted-foreground">Job not found</div>
   }
 
-  const toggleSurveyExpanded = (surveyId: number) => {
-    setExpandedSurveys(prev => {
-      const next = new Set(prev)
-      if (next.has(surveyId)) {
-        next.delete(surveyId)
-      } else {
-        next.add(surveyId)
-      }
-      return next
-    })
-  }
+  const job = queries.job
 
-  // Filter instructions by status
-  const filteredInstructions = useMemo(() => {
-    if (!job?.instructions) return []
-    if (instructionStatusFilter === "all") return job.instructions
-    return job.instructions.filter(p => (p.status || "planned") === instructionStatusFilter)
-  }, [job?.instructions, instructionStatusFilter])
+  return (
+    <JobDetailLayout
+      job={job} surveys={queries.surveys} isLoadingSurveys={queries.isLoadingSurveys}
+      activeTab={activeTab} onTabChange={setActiveTab} computed={computed}
+      hasActiveTimer={!!queries.activeTimer && !!job.instructions?.some(p => p.id === queries.activeTimer?.instruction_id)}
+      isAdmin={user?.role === UserRole.ADMIN} openTimeModal={openTimeModal}
+      updates={updates} currentUserId={user?.id ?? 0}
+      isTimeModalOpen={isTimeModalOpen} setIsTimeModalOpen={setIsTimeModalOpen}
+      handleTimeLogged={handleTimeLogged} selectedInstructionId={selectedInstructionId}
+    />
+  )
+}
 
-  // Handle time logged from modal - adds to job updates
-  const handleTimeLogged = (
-    instructionName: string, 
-    description: string, 
-    durationMinutes: number, 
-    collaboratorNames?: string[]
-  ) => {
-    const hours = Math.floor(durationMinutes / 60)
-    const mins = durationMinutes % 60
-    const timeText = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
-    let updateText = description 
-      ? `**Time logged on ${instructionName}: ${timeText}** — ${description}`
-      : `**Time logged on ${instructionName}: ${timeText}**`
-    
-    if (collaboratorNames && collaboratorNames.length > 0) {
-      updateText += ` (with ${collaboratorNames.join(", ")})`
-    }
-    
-    handleAddUpdate(updateText)
-  }
+type SurveyComputeInput = { photo_count?: number | null; conducted_date?: string; conducted_by_user?: { name: string } | null }
 
-  const isAdmin = user?.role === UserRole.ADMIN
+interface JobDetailLayoutProps {
+  job: JobReadDetail
+  surveys: unknown[] | undefined
+  isLoadingSurveys: boolean
+  activeTab: string
+  onTabChange: (tab: string) => void
+  computed: ReturnType<typeof useJobComputedData>
+  hasActiveTimer: boolean
+  isAdmin: boolean
+  openTimeModal: (id?: number) => void
+  updates: ReturnType<typeof useJobUpdates>
+  currentUserId: number
+  isTimeModalOpen: boolean
+  setIsTimeModalOpen: (open: boolean) => void
+  handleTimeLogged: (opts: { instructionName: string; description: string; durationMinutes: number; collaboratorNames?: string[] }) => void
+  selectedInstructionId: number | undefined
+}
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8 h-full">
-        <Spinner className="h-8 w-8" />
-      </div>
-    )
-  }
-
-  if (error || !job) {
-    return (
-      <div className="p-8 text-center text-muted-foreground">
-        Job not found
-      </div>
-    )
-  }
-
-  const timelineUpdates = (job.updates || []) as import("@/components/update-feed").UpdateItem[]
+function JobDetailLayout(props: JobDetailLayoutProps) {
+  const job = props.job
+  const timelineUpdates = (job.updates ?? []) as UpdateItem[]
+  const surveyArray = (props.surveys ?? []) as Array<{ photo_count?: number }>
+  const photoCount = surveyArray.reduce((sum, s) => sum + (s.photo_count ?? 0), 0)
 
   return (
     <div className="flex flex-col gap-6">
-      <FeatureHeader
-        title={job.name}
-        breadcrumbs={[
-            { label: "Jobs", href: "/app/jobs" },
-            { label: job.name }
-        ]}
-      >
-        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-2">
-            <Badge variant="outline" className="capitalize">
-                {job.status}
-            </Badge>
-            <Separator orientation="vertical" className="h-4" />
-            <div className="flex items-center gap-1.5">
-                <Building2 className="h-4 w-4" />
-                <Link href={`/app/clients/${job.client.id}`} className="hover:underline">
-                  {job.client.name}
-                </Link>
-            </div>
-            {job.address && (
-                <>
-                    <Separator orientation="vertical" className="h-4" />
-                    <div className="flex items-center gap-1.5">
-                        <MapPin className="h-4 w-4" />
-                        <span>{job.address}</span>
-                    </div>
-                </>
-            )}
-        </div>
+      <FeatureHeader title={job.name} breadcrumbs={[{ label: "Jobs", href: "/app/jobs" }, { label: job.name }]}>
+        <JobHeaderMeta job={job} />
       </FeatureHeader>
-
       <div className="px-8 pb-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full justify-start mb-6">
-            <TabsTrigger value="overview" className="gap-2">
-              <Building2 className="h-4 w-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="instructions" className="gap-2">
-              <Briefcase className="h-4 w-4" />
-              Instructions
-            </TabsTrigger>
-            <TabsTrigger value="surveys" className="gap-2">
-              <Camera className="h-4 w-4" />
-              Surveys
-            </TabsTrigger>
-            <TabsTrigger value="files" className="gap-2">
-              <Files className="h-4 w-4" />
-              Files
-            </TabsTrigger>
-            <TabsTrigger value="docgen" className="gap-2">
-              <Sparkles className="h-4 w-4" />
-              DocGen
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Overview Cards Grid - Full Width */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Hero Card - Job Details */}
-              <Card className="lg:col-span-1">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-medium">Job Details</CardTitle>
-                    <Badge variant="outline" className="capitalize">
-                      {job.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Client */}
-                  <div className="flex items-start gap-3">
-                    <Building2 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-muted-foreground mb-0.5">Client</p>
-                      <Link 
-                        href={`/app/clients/${job.client.id}`}
-                        className="text-sm font-medium text-primary hover:underline truncate block"
-                      >
-                        {job.client.name}
-                      </Link>
-                    </div>
-                  </div>
-                  
-                  {/* Address */}
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground mb-0.5">Address</p>
-                      <p className="text-sm font-medium">
-                        {job.address || <span className="text-muted-foreground italic font-normal">Not set</span>}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Created Date */}
-                  <div className="flex items-start gap-3">
-                    <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground mb-0.5">Created</p>
-                      <p className="text-sm font-medium">
-                        {format(new Date(job.created_at), "d MMM yyyy")}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Instructions Status Card with Pie Chart & Next Deadline */}
-              <Card className="lg:col-span-1">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-medium">Instructions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <StatusPieChart data={instructionStatusData} />
-                    <div className="space-y-1 flex-1">
-                      {instructionStatusData.filter(d => d.count > 0).map(d => {
-                        const config = statusChartConfig[d.status as keyof typeof statusChartConfig]
-                        const color = config && 'color' in config ? config.color : undefined
-                        return (
-                          <div key={d.status} className="flex items-center gap-2 text-sm">
-                            <div 
-                              className="w-2 h-2 rounded-full shrink-0" 
-                              style={{ backgroundColor: color }} 
-                            />
-                            <span className="text-muted-foreground capitalize">{d.status}</span>
-                            <span className="font-medium">{d.count}</span>
-                          </div>
-                        )
-                      })}
-                      {instructionStatusData.every(d => d.count === 0) && (
-                        <p className="text-sm text-muted-foreground italic">No instructions yet</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Next Deadline */}
-                  <div className="pt-3 border-t">
-                    <div className="flex items-start gap-3">
-                      <Clock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-muted-foreground mb-0.5">Next Deadline</p>
-                        {nextDeadlineInstruction ? (
-                          <div>
-                            <p className="text-sm font-medium">
-                              {format(new Date(nextDeadlineInstruction.deadline!), "d MMM yyyy")}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {nextDeadlineInstruction.instruction_type?.name || "Instruction"}
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground italic">No upcoming deadlines</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Surveys & Images Card */}
-              <Card className="lg:col-span-1">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-medium">Surveys</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Survey Count */}
-                    <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <Camera className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                      <p className="text-2xl font-bold">{surveys?.length || 0}</p>
-                      <p className="text-xs text-muted-foreground">Surveys</p>
-                    </div>
-                    
-                    {/* Image Count */}
-                    <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <ImageIcon className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-                      <p className="text-2xl font-bold">{totalSurveyImages}</p>
-                      <p className="text-xs text-muted-foreground">Photos</p>
-                    </div>
-                  </div>
-                  
-                  {/* Most Recent Survey */}
-                  {mostRecentSurvey && (
-                    <div className="pt-3 border-t">
-                      <div className="flex items-start gap-3">
-                        <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs text-muted-foreground mb-0.5">Most Recent Survey</p>
-                          <p className="text-sm font-medium">
-                            {format(new Date(mostRecentSurvey.conducted_date), "d MMM yyyy")}
-                          </p>
-                          {mostRecentSurvey.conducted_by_user && (
-                            <p className="text-xs text-muted-foreground">
-                              by {mostRecentSurvey.conducted_by_user.name}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Two Column Layout: Left (Quick Actions) | Right (Updates) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Quick Actions */}
-              <div className="lg:col-span-2">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* Record Time Button */}
-                  <Button
-                    onClick={() => openTimeModal()}
-                    variant="outline"
-                    size="lg"
-                    className={cn(
-                      "h-auto py-4 flex-col gap-2 transition-all border-2",
-                      hasActiveTimerForJob
-                        ? "bg-red-50 hover:bg-red-100 text-red-700 border-red-300"
-                        : "bg-red-50/50 hover:bg-red-100 text-red-600 border-red-300"
-                    )}
-                  >
-                    {hasActiveTimerForJob ? (
-                      <>
-                        <div className="relative flex h-5 w-5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-5 w-5 bg-red-500"></span>
-                        </div>
-                        <span className="text-sm font-medium">Recording...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Timer className="h-5 w-5" />
-                        <span className="text-sm font-medium">Record Time</span>
-                      </>
-                    )}
-                  </Button>
-
-                  {/* Create Instruction Button */}
-                  <CreateInstructionDialog 
-                    jobId={job.id} 
-                    trigger={
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="h-auto py-4 flex-col gap-2 w-full"
-                      >
-                        <Briefcase className="h-5 w-5" />
-                        <span className="text-sm font-medium">New Instruction</span>
-                      </Button>
-                    }
-                  />
-
-                  {/* Create Survey Button */}
-                  <CreateSurveyDialog 
-                    jobId={job.id} 
-                    trigger={
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="h-auto py-4 flex-col gap-2 w-full"
-                      >
-                        <Camera className="h-5 w-5" />
-                        <span className="text-sm font-medium">New Survey</span>
-                      </Button>
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Right Column - Updates */}
-              <div className="lg:col-span-1">
-                <UpdateFeed
-                  updates={timelineUpdates}
-                  currentUserId={user?.id ?? 0}
-                  onAddUpdate={handleAddUpdateAsync}
-                  isLoading={isAddingUpdate}
-                  showDeleteButton={false}
-                  maxInitialItems={10}
-                />
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Instructions Tab */}
-          <TabsContent value="instructions" className="space-y-4">
-            {/* Instructions List Header with Status Filter */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h3 className="text-lg font-semibold">All Instructions</h3>
-                <Select value={instructionStatusFilter} onValueChange={setInstructionStatusFilter}>
-                  <SelectTrigger className="w-[140px] h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="planned">Planned</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="archived">Archived</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <CreateInstructionDialog jobId={job.id} />
-            </div>
-
-            {/* Scrollable Instructions List - max height on desktop, natural scroll on mobile */}
-            {filteredInstructions.length > 0 ? (
-              <div className="space-y-4 lg:max-h-[calc(100vh-280px)] lg:overflow-y-auto lg:pr-2">
-                {filteredInstructions.map((instruction) => (
-                  <InstructionCard
-                    key={instruction.id}
-                    instruction={instruction}
-                    jobId={job.id}
-                    isAdmin={isAdmin}
-                    onRecordTime={openTimeModal}
-                  />
-                ))}
-              </div>
-            ) : job.instructions && job.instructions.length > 0 ? (
-              <div className="rounded-lg border border-dashed p-8 text-center">
-                <p className="text-sm text-muted-foreground">
-                  No instructions match the selected filter.
-                </p>
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed p-12 text-center">
-                <Briefcase className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="font-medium mb-1">No instructions yet</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Create your first instruction for this job.
-                </p>
-                <CreateInstructionDialog jobId={job.id} />
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Surveys Tab */}
-          <TabsContent value="surveys" className="space-y-4">
-            {/* Surveys List Header */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">All Surveys</h2>
-              <CreateSurveyDialog jobId={job.id} />
-            </div>
-
-            {/* Scrollable Surveys List - max height on desktop, natural scroll on mobile */}
-            {isLoadingSurveys ? (
-              <div className="flex justify-center py-12">
-                <Spinner className="h-8 w-8" />
-              </div>
-            ) : surveys && surveys.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:max-h-[calc(100vh-240px)] lg:overflow-y-auto lg:pr-2">
-                {surveys.map((survey) => (
-                  <Link key={survey.id} href={`/app/surveys/${survey.id}`}>
-                    <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <CardTitle className="text-base font-medium">
-                              {format(new Date(survey.conducted_date), "EEEE, d MMMM yyyy")}
-                            </CardTitle>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {survey.photo_count !== undefined && survey.photo_count > 0 && (
-                              <Badge variant="secondary">
-                                {survey.photo_count} photos
-                              </Badge>
-                            )}
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        </div>
-                        {survey.instruction && (
-                          <Badge variant="outline" className="w-fit mt-1">
-                            {survey.instruction.name}
-                          </Badge>
-                        )}
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        {(survey.site_notes || survey.notes) && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {survey.site_notes || survey.notes}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          {(survey.conducted_by_user || survey.surveyor) && (
-                            <div className="flex items-center gap-1">
-                              <User className="h-3.5 w-3.5" />
-                              <span>{survey.conducted_by_user?.name || survey.surveyor?.name}</span>
-                            </div>
-                          )}
-                          {survey.weather && (
-                            <span>{survey.weather}</span>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed p-12 text-center">
-                <Camera className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="font-medium mb-1">No surveys yet</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Record your first site survey.
-                </p>
-                <CreateSurveyDialog jobId={job.id} />
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Files Tab */}
-          <TabsContent value="files" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Files</h2>
-              <Button size="sm" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add File
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Job Files */}
-              {job.files && job.files.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Job Files</h3>
-                  <div className="rounded-md border">
-                    <div className="divide-y">
-                      {job.files.map((file) => (
-                        <div key={file.id} className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors">
-                          <FileText className="h-4 w-4 text-primary shrink-0" />
-                          <span className="flex-1 truncate text-sm font-medium">{file.file_name}</span>
-                          <Badge variant="outline" className="font-mono text-[10px] uppercase">
-                            {file.role}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground tabular-nums">
-                            {file.size_bytes ? `${(file.size_bytes / 1024).toFixed(1)} KB` : "—"}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Instruction Files */}
-              {job.instructions && job.instructions.some(p => p.id) && (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Instruction Files</h3>
-                  <div className="rounded-md border divide-y">
-                    {job.instructions.map((instruction) => (
-                      <div key={instruction.id} className="p-3">
-                        <div className="flex items-center gap-2 text-sm">
-                          <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{instruction.instruction_type?.name || "Instruction"}</span>
-                          <span className="text-muted-foreground text-xs">
-                            (View in instruction)
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Survey Images (as accordion folders) */}
-              {surveys && surveys.some(s => (s.photo_count || 0) > 0) && (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Survey Photos</h3>
-                  <div className="rounded-md border divide-y">
-                    {surveys.filter(s => (s.photo_count || 0) > 0).map((survey) => (
-                      <Collapsible
-                        key={survey.id}
-                        open={expandedSurveys.has(survey.id)}
-                        onOpenChange={() => toggleSurveyExpanded(survey.id)}
-                      >
-                        <CollapsibleTrigger className="flex items-center gap-3 p-3 w-full hover:bg-muted/50 transition-colors">
-                          <ChevronRight 
-                            className={cn(
-                              "h-4 w-4 text-muted-foreground transition-transform",
-                              expandedSurveys.has(survey.id) && "rotate-90"
-                            )} 
-                          />
-                          <ImageIcon className="h-4 w-4 text-amber-500" />
-                          <span className="flex-1 text-left text-sm font-medium">
-                            Survey - {format(new Date(survey.conducted_date), "d MMM yyyy")}
-                          </span>
-                          <Badge variant="secondary" className="text-xs">
-                            {survey.photo_count} photos
-                          </Badge>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="px-10 pb-3 text-sm text-muted-foreground">
-                            <p>Photos will be displayed here once loaded.</p>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Empty State */}
-              {(!job.files || job.files.length === 0) && 
-               (!surveys || surveys.every(s => (s.photo_count || 0) === 0)) && (
-                <div className="rounded-lg border border-dashed p-12 text-center">
-                  <Files className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                  <h3 className="font-medium mb-1">No files yet</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Upload files to this job.
-                  </p>
-                  <Button size="sm" className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add File
-                  </Button>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* DocGen Tab */}
-          <TabsContent value="docgen" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" />
-                  AI Document Generation
-                </CardTitle>
-                <CardDescription>
-                  Generate professional reports and documentation using AI
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex flex-col items-center justify-center p-8 rounded-lg border border-dashed">
-                  <Sparkles className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                  <h3 className="font-medium mb-2">Generate Documents with AI</h3>
-                  <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">
-                    Create professional reports by uploading context files (photos, notes) and a template. 
-                    The AI will generate a completed document for you.
-                  </p>
-                  <Link href={`/app/generate?jobId=${job.id}`}>
-                    <Button size="lg" className="gap-2">
-                      <Sparkles className="h-4 w-4" />
-                      Open Document Generator
-                    </Button>
-                  </Link>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-lg border bg-muted/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Camera className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Survey Photos</span>
-                    </div>
-                    <p className="text-2xl font-bold">
-                      {surveys?.reduce((sum, s) => sum + (s.photo_count || 0), 0) || 0}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Available for context</p>
-                  </div>
-                  <div className="p-4 rounded-lg border bg-muted/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Files className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Job Files</span>
-                    </div>
-                    <p className="text-2xl font-bold">{job.files?.length || 0}</p>
-                    <p className="text-xs text-muted-foreground">Available for context</p>
-                  </div>
-                  <div className="p-4 rounded-lg border bg-muted/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Briefcase className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Instructions</span>
-                    </div>
-                    <p className="text-2xl font-bold">{job.instructions?.length || 0}</p>
-                    <p className="text-xs text-muted-foreground">For attaching outputs</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <JobDetailTabs
+          activeTab={props.activeTab} onTabChange={props.onTabChange} job={job} surveys={props.surveys}
+          isLoadingSurveys={props.isLoadingSurveys} computed={props.computed} hasActiveTimer={props.hasActiveTimer}
+          isAdmin={props.isAdmin} openTimeModal={props.openTimeModal} timelineUpdates={timelineUpdates}
+          currentUserId={props.currentUserId} onAddUpdate={props.updates.handleAddUpdateAsync}
+          isAddingUpdate={props.updates.isAddingUpdate} photoCount={photoCount}
+        />
       </div>
-
-      {/* Job Time Tracking Modal */}
       <JobTimeTrackingModal
-        open={isTimeModalOpen}
-        onOpenChange={setIsTimeModalOpen}
-        jobId={job.id}
-        instructions={job.instructions || []}
-        onTimeLogged={handleTimeLogged}
-        defaultInstructionId={selectedInstructionIdForTime}
+        open={props.isTimeModalOpen} onOpenChange={props.setIsTimeModalOpen} jobId={job.id}
+        instructions={job.instructions} onTimeLogged={props.handleTimeLogged}
+        defaultInstructionId={props.selectedInstructionId}
       />
     </div>
   )
 }
+
+interface JobDetailTabsProps {
+  activeTab: string
+  onTabChange: (tab: string) => void
+  job: JobReadDetail
+  surveys: unknown[] | undefined
+  isLoadingSurveys: boolean
+  computed: ReturnType<typeof useJobComputedData>
+  hasActiveTimer: boolean
+  isAdmin: boolean
+  openTimeModal: (id?: number) => void
+  timelineUpdates: UpdateItem[]
+  currentUserId: number
+  onAddUpdate: (text: string) => Promise<void>
+  isAddingUpdate: boolean
+  photoCount: number
+}
+
+function OverviewTabWrapper(props: JobDetailTabsProps) {
+  return (
+    <OverviewTab job={props.job as OverviewTabJobType} instructionStatusData={props.computed.instructionStatusData}
+      nextDeadlineInstruction={props.computed.nextDeadlineInstruction as NextDeadlineType} surveyCount={props.surveys?.length ?? 0}
+      totalSurveyImages={props.computed.totalSurveyImages} mostRecentSurvey={props.computed.mostRecentSurvey as MostRecentSurveyType}
+      hasActiveTimer={props.hasActiveTimer} onOpenTimeModal={() => props.openTimeModal()} timelineUpdates={props.timelineUpdates}
+      currentUserId={props.currentUserId} onAddUpdate={props.onAddUpdate} isAddingUpdate={props.isAddingUpdate} />
+  )
+}
+
+function JobDetailTabs(props: JobDetailTabsProps) {
+  return (
+    <Tabs value={props.activeTab} onValueChange={props.onTabChange} className="w-full">
+      <TabsList className="w-full justify-start mb-6">
+        <TabsTrigger value="overview" className="gap-2"><Building2 className="h-4 w-4" />Overview</TabsTrigger>
+        <TabsTrigger value="instructions" className="gap-2"><Briefcase className="h-4 w-4" />Instructions</TabsTrigger>
+        <TabsTrigger value="surveys" className="gap-2"><Camera className="h-4 w-4" />Surveys</TabsTrigger>
+        <TabsTrigger value="files" className="gap-2"><Files className="h-4 w-4" />Files</TabsTrigger>
+        <TabsTrigger value="docgen" className="gap-2"><Sparkles className="h-4 w-4" />DocGen</TabsTrigger>
+      </TabsList>
+      <TabsContent value="overview"><OverviewTabWrapper {...props} /></TabsContent>
+      <TabsContent value="instructions" className="space-y-4"><InstructionsTab jobId={props.job.id} instructions={props.job.instructions} onRecordTime={props.openTimeModal} /></TabsContent>
+      <TabsContent value="surveys" className="space-y-4"><SurveysTab jobId={props.job.id} surveys={props.surveys as SurveyType[]} isLoading={props.isLoadingSurveys} /></TabsContent>
+      <TabsContent value="files" className="space-y-4"><FilesTab files={props.job.files as FileType[]} instructions={props.job.instructions as InstructionFileType[]} surveys={(props.surveys ?? []) as SurveyFileType[]} /></TabsContent>
+      <TabsContent value="docgen" className="space-y-6"><DocGenTab jobId={props.job.id} photoCount={props.photoCount} fileCount={props.job.files.length} instructionCount={props.job.instructions.length} /></TabsContent>
+    </Tabs>
+  )
+}
+
+type OverviewTabJobType = {
+  id: number; status?: string | null; client: { id: number; name: string }
+  address?: string | null; created_at: string; updates?: unknown[] | null
+}
+type NextDeadlineType = { deadline?: string | null; instruction_type?: { name?: string } | null } | null
+type MostRecentSurveyType = { conducted_date?: string; conducted_by_user?: { name: string } | null } | null | undefined
+type SurveyType = {
+  id: number; conducted_date: string; photo_count?: number; instruction?: { name: string }
+  site_notes?: string; notes?: string; conducted_by_user?: { name: string }; surveyor?: { name: string }; weather?: string
+}
+type FileType = { id: number; file_name: string; role?: string; size_bytes?: number }
+type InstructionFileType = { id: number; instruction_type?: { name?: string } }
+type SurveyFileType = { id: number; conducted_date: string; photo_count?: number }

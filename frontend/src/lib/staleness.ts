@@ -1,25 +1,22 @@
-/**
- * Staleness indicator utility for leads and quotes.
- * Color codes items based on time since last update.
- */
 
-// Hardcoded thresholds for alpha (days)
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const MS_PER_DAY = MS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
+
 const AMBER_THRESHOLD_DAYS = 7;
 const RED_THRESHOLD_DAYS = 14;
 
-/**
- * Calculate days since a given date
- */
+
 export function daysSince(date: Date | string): number {
   const then = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
   const diffMs = now.getTime() - then.getTime();
-  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.floor(diffMs / MS_PER_DAY);
 }
 
-/**
- * Get the staleness status based on updated_at date
- */
+
 export function getStalenessStatus(
   updatedAt: Date | string
 ): "fresh" | "stale" | "critical" {
@@ -34,9 +31,7 @@ export function getStalenessStatus(
   return "fresh";
 }
 
-/**
- * Get Tailwind background class for row highlighting based on staleness
- */
+
 export function getStalenessRowClass(updatedAt: Date | string): string {
   const status = getStalenessStatus(updatedAt);
 
@@ -50,9 +45,7 @@ export function getStalenessRowClass(updatedAt: Date | string): string {
   }
 }
 
-/**
- * Get Tailwind border class for card highlighting based on staleness
- */
+
 export function getStalenessBorderClass(updatedAt: Date | string): string {
   const status = getStalenessStatus(updatedAt);
 
@@ -66,9 +59,7 @@ export function getStalenessBorderClass(updatedAt: Date | string): string {
   }
 }
 
-/**
- * Get human-readable staleness text
- */
+
 export function getStalenessText(updatedAt: Date | string): string {
   const days = daysSince(updatedAt);
 
@@ -81,9 +72,7 @@ export function getStalenessText(updatedAt: Date | string): string {
   return `${days} days ago`;
 }
 
-/**
- * Get badge variant based on staleness
- */
+
 export function getStalenessBadgeVariant(
   updatedAt: Date | string
 ): "default" | "secondary" | "destructive" | "outline" {

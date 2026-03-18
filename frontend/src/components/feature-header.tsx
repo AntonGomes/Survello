@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
 import { Fragment } from "react";
 import { GlobalTimer } from "@/components/global-timer";
