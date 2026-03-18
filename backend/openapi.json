@@ -160,7 +160,7 @@
           "Runs"
         ],
         "summary": "Create Run",
-        "description": "Create a new document generation run and start the orchestrator in the background.",
+        "description": "Start a document generation run in the background.",
         "operationId": "createRun",
         "requestBody": {
           "required": true,

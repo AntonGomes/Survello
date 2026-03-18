@@ -39,9 +39,7 @@ def create_run(
     db.refresh(db_run)
 
     if db_run.id:
-        background_tasks.add_task(
-            execute, db_run, db, services.storage, services.llm
-        )
+        background_tasks.add_task(execute, db_run, db, services.storage, services.llm)
 
     return db_run
 
@@ -52,9 +50,7 @@ def _fetch_context_files(db: DBDep, file_ids: list[int]) -> list[File]:
     for file_id in file_ids:
         file = db.get(File, file_id)
         if not file:
-            raise HTTPException(
-                status_code=404, detail=f"File {file_id} not found"
-            )
+            raise HTTPException(status_code=404, detail=f"File {file_id} not found")
         files.append(file)
     return files
 

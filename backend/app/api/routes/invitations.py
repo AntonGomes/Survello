@@ -65,8 +65,7 @@ def create_invitation(
         org_id=current_user.org_id,
         invited_by_user_id=current_user.id,
         role=invite_in.role,
-        expires_at=datetime.now(UTC)
-        + timedelta(days=settings.invitation_expire_days),
+        expires_at=datetime.now(UTC) + timedelta(days=settings.invitation_expire_days),
     )
     db.add(invitation)
     db.commit()

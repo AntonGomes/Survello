@@ -193,7 +193,7 @@ export const readRunsInfiniteOptions = (options?: Options<ReadRunsData>) => infi
 /**
  * Create Run
  *
- * Create a new document generation run and start the orchestrator in the background.
+ * Start a document generation run in the background.
  */
 export const createRunMutation = (options?: Partial<Options<CreateRunData>>): UseMutationOptions<CreateRunResponse, CreateRunError, Options<CreateRunData>> => {
     const mutationOptions: UseMutationOptions<CreateRunResponse, CreateRunError, Options<CreateRunData>> = {

@@ -115,9 +115,7 @@ def read_quotes(
         .options(
             joinedload(Quote.client),
             joinedload(Quote.lead),
-            joinedload(Quote.lines).joinedload(
-                QuoteLine.instruction_type
-            ),
+            joinedload(Quote.lines).joinedload(QuoteLine.instruction_type),
         )
     )
 
@@ -126,13 +124,7 @@ def read_quotes(
     if filters.client_id:
         query = query.where(Quote.client_id == filters.client_id)
 
-    quotes = (
-        db.exec(
-            query.offset(filters.offset).limit(filters.limit)
-        )
-        .unique()
-        .all()
-    )
+    quotes = db.exec(query.offset(filters.offset).limit(filters.limit)).unique().all()
     return cast(list[QuoteRead], quotes)
 
 

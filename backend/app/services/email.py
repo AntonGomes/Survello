@@ -6,10 +6,7 @@ from app.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
-EMAIL_FONT_FAMILY = (
-    "-apple-system, BlinkMacSystemFont,"
-    " 'Segoe UI', Roboto, sans-serif"
-)
+EMAIL_FONT_FAMILY = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
 
 
 def send_invitation_email(

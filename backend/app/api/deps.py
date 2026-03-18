@@ -58,9 +58,7 @@ def get_storage_service(
     return StorageService(s3_client)
 
 
-def get_current_user(
-    request: Request, db: Annotated[Session, Depends(get_db)]
-) -> User:
+def get_current_user(request: Request, db: Annotated[Session, Depends(get_db)]) -> User:
     """Authenticate user from session cookie."""
     token = request.cookies.get("session_token")
     if not token:

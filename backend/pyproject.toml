@@ -47,10 +47,6 @@ dev = [
     "ty>=0.0.13",
 ]
 
-# ── Ruff AI Guardrails ────────────────────────────────────────────
-# Equivalent to eslint-config-ai-guardrails for Python projects.
-# Enforces concise, self-documenting code.
-
 [tool.ruff.lint]
 select = [
     "E",      # pycodestyle errors

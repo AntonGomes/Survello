@@ -132,9 +132,7 @@ class OpenAIService(BaseLLMService):
                 yield str(getattr(chunk_any, "text", ""))
 
             elif event == "response.code_interpreter_call_code.done":
-                yield from self._extract_comments(
-                    str(getattr(chunk_any, "code", ""))
-                )
+                yield from self._extract_comments(str(getattr(chunk_any, "code", "")))
 
             elif event == "error":
                 raise RuntimeError(str(getattr(chunk_any, "error", "LLM error")))
