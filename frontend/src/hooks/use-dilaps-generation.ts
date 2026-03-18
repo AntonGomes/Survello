@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   generateFileUploadUrlsMutation,
@@ -143,17 +143,19 @@ export function useDilapsGeneration() {
     },
   });
 
-  if (dilapsRun?.status && localStatus === "generating") {
+  useEffect(() => {
+    if (!dilapsRun?.status || localStatus !== "generating") return;
+
     if (dilapsRun.status === "completed") {
       setLocalStatus("completed");
       setSubStatus("completed");
     } else if (dilapsRun.status === "error") {
       setLocalStatus("error");
       setSubStatus("error");
-    } else {
+    } else if (dilapsRun.status !== subStatus) {
       setSubStatus(dilapsRun.status);
     }
-  }
+  }, [dilapsRun?.status, localStatus, subStatus]);
 
   const reset = useCallback(() => {
     setDilapsId(null);
