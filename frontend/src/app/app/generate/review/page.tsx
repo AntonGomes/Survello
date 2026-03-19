@@ -45,7 +45,7 @@ function ReviewContent() {
           )}
         </div>
       </div>
-      <ExportPanel totalItems={totalItems} totalCost={totalCost} />
+      <ExportPanel totalItems={totalItems} totalCost={totalCost} dilapsId={dilapsId} />
     </div>
   )
 }
