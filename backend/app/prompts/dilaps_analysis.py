@@ -19,12 +19,7 @@ DILAPS_SECTION_ANALYSIS_PROMPT = (
     "3. Prescribe the remedy in professional language\n"
     "4. Estimate the unit (Sum, m, m², No), "
     "quantity, rate, and cost\n\n"
-    "Common lease clauses:\n"
-    "- Three: Repair obligations (structural, fabric)\n"
-    "- Four: Decoration obligations (painting)\n"
-    "- Five: Cleaning obligations (windows, glazing)\n"
-    "- Seven: Reinstatement (tenant alterations)\n"
-    "- Eight: Statutory compliance (asbestos, electrical)\n\n"
+    "{lease_clauses}\n\n"
     "Cost estimation guidelines:\n"
     '- Use "Sum" for lump-sum items\n'
     "- Use rates appropriate for UK construction\n"

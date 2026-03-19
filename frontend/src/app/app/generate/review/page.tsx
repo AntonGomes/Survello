@@ -24,7 +24,7 @@ function ReviewContent() {
   const {
     sections, activeSectionId, activeSection,
     mergeSelection, canMerge, totalItems, totalCost,
-    loading, error, dispatch, setActiveSection,
+    leaseClauses, loading, error, dispatch, setActiveSection,
   } = useDilapsReview(dilapsId)
 
   if (!dilapsId) {
@@ -60,7 +60,7 @@ function ReviewContent() {
         />
         <div className="flex-1 overflow-auto">
           {activeSection ? (
-            <SectionEditor section={activeSection} dispatch={dispatch} />
+            <SectionEditor section={activeSection} dispatch={dispatch} leaseClauses={leaseClauses} />
           ) : (
             <EmptyState />
           )}

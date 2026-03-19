@@ -1,6 +1,6 @@
 import { useReducer, useCallback, useEffect, useState } from "react"
 import { reviewReducer } from "./dilaps-review-reducer"
-import { readDilapsSections } from "@/client/sdk.gen"
+import { readDilapsSections, readDilapsRun } from "@/client/sdk.gen"
 import type { ReviewState, DilapsSection, DilapsItem, UnitType } from "./dilaps-review-types"
 import type { SectionWithItems, DilapsItemRead } from "@/client/types.gen"
 
@@ -49,18 +49,25 @@ export function useDilapsReview(dilapsId: number | null) {
   const [state, dispatch] = useReducer(reviewReducer, INITIAL_STATE)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [leaseClauses, setLeaseClauses] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (!dilapsId) return
     setLoading(true)
     setError(null)
-    readDilapsSections({
-      path: { dilaps_id: dilapsId },
-      throwOnError: true,
-    })
-      .then((response) => {
-        const sections = response.data.map(mapSection)
-        dispatch({ type: "SET_SECTIONS", sections })
+    Promise.all([
+      readDilapsSections({
+        path: { dilaps_id: dilapsId },
+        throwOnError: true,
+      }),
+      readDilapsRun({
+        path: { dilaps_id: dilapsId },
+        throwOnError: true,
+      }),
+    ])
+      .then(([sectionsRes, runRes]) => {
+        dispatch({ type: "SET_SECTIONS", sections: sectionsRes.data.map(mapSection) })
+        setLeaseClauses(runRes.data.lease_clauses ?? {})
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : "Failed to load sections")
@@ -95,6 +102,7 @@ export function useDilapsReview(dilapsId: number | null) {
     canMerge,
     totalItems,
     totalCost,
+    leaseClauses,
     loading,
     error,
     dispatch,
