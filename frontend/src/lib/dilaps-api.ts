@@ -17,11 +17,16 @@ export type DilapsRunCreate = {
 
 export type DilapsRunRead = {
   id: number;
+  property_address: string;
   status: DilapsSubStatus;
   progress_pct: number;
   total_sections: number;
   current_section: number;
   status_message: string | null;
+  error_message: string | null;
+  job_id: number | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type DilapsFileSet = {
@@ -31,6 +36,14 @@ export type DilapsFileSet = {
   surveyImageFiles: File[];
   miscFiles: File[];
 };
+
+export async function listDilapsRuns() {
+  const res = await fetch(`${API_BASE}/dilaps/`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to list dilaps runs");
+  return (await res.json()) as DilapsRunRead[];
+}
 
 export async function createDilapsRun(body: DilapsRunCreate) {
   const res = await fetch(`${API_BASE}/dilaps/`, {
