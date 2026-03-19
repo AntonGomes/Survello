@@ -171,8 +171,7 @@ def _run_merge_pass(
     if merged_indices:
         sections = [s for i, s in enumerate(sections) if i not in merged_indices]
         logger.info(
-            f"Merged {len(merged_indices)} singletons "
-            f"at threshold {threshold:.2f}"
+            f"Merged {len(merged_indices)} singletons at threshold {threshold:.2f}"
         )
     return sections
 
