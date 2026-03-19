@@ -3,55 +3,55 @@
 import { useState } from "react"
 import { Download, Loader2, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useMutation } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { exportDilapsMutation } from "@/client/@tanstack/react-query.gen"
 
 type ExportPanelProps = {
+  dilapsId: number | null
   totalItems: number
   totalCost: number
-  dilapsId: number | null
 }
 
 function formatCurrency(value: number): string {
   return `\u00A3${value.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`
 }
 
+async function downloadExport(dilapsId: number) {
+  const response = await fetch(`/py-api/dilaps/${dilapsId}/export`, {
+    method: "POST",
+    credentials: "include",
+  })
+  if (!response.ok) {
+    throw new Error(`Export failed: ${response.status} ${response.statusText}`)
+  }
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement("a")
+  anchor.href = url
+  anchor.download = `dilaps_${dilapsId}.xlsx`
+  anchor.click()
+  URL.revokeObjectURL(url)
+}
+
 export function ExportPanel({ totalItems, totalCost, dilapsId }: ExportPanelProps) {
   const router = useRouter()
+  const [isExporting, setIsExporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const exportMutation = useMutation({
-    ...exportDilapsMutation(),
-    onSuccess: (data) => {
-      const blob = data instanceof Blob
-        ? data
-        : new Blob([data as BlobPart], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = "dilaps-schedule.xlsx"
-      link.click()
-      URL.revokeObjectURL(url)
-      setError(null)
-    },
-    onError: (err) => {
-      setError("Export failed")
-    },
-  })
-
-  function handleExport() {
+  async function handleExport() {
     if (!dilapsId) {
       setError("No dilaps ID found — cannot export")
       return
     }
+    setIsExporting(true)
     setError(null)
-    exportMutation.mutate({
-      path: { dilaps_id: dilapsId },
-    })
+    try {
+      await downloadExport(dilapsId)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Export failed")
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   return (
@@ -76,8 +76,8 @@ export function ExportPanel({ totalItems, totalCost, dilapsId }: ExportPanelProp
             <Plus className="h-4 w-4 mr-1" />
             Start New
           </Button>
-          <Button onClick={handleExport} disabled={exportMutation.isPending}>
-            {exportMutation.isPending ? (
+          <Button onClick={handleExport} disabled={isExporting || !dilapsId}>
+            {isExporting ? (
               <Loader2 className="h-4 w-4 mr-1 animate-spin" />
             ) : (
               <Download className="h-4 w-4 mr-1" />
