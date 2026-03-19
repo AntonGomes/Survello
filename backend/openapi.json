@@ -5443,6 +5443,11 @@
           "storage_key": {
             "type": "string",
             "title": "Storage Key"
+          },
+          "already_exists": {
+            "type": "boolean",
+            "title": "Already Exists",
+            "default": false
           }
         },
         "type": "object",

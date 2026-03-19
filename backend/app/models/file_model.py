@@ -86,6 +86,7 @@ class FilePresignResponse(FileBase):
     client_id: str
     put_url: str
     storage_key: str
+    already_exists: bool = False
 
 
 class FileUpdate(SQLModel):

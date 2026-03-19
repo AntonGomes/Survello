@@ -114,7 +114,6 @@ class MockVisionProvider(VisionProvider):
         logger.info(f"MOCK: extracting clauses from {len(document_parts)} documents")
         return MOCK_LEASE_CLAUSES
 
-
 class MockEmbeddingProvider(EmbeddingProvider):
     def embed_images(
         self,

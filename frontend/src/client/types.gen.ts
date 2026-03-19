@@ -742,6 +742,10 @@ export type FilePresignResponse = {
      * Storage Key
      */
     storage_key: string;
+    /**
+     * Already Exists
+     */
+    already_exists?: boolean;
 };
 
 /**
