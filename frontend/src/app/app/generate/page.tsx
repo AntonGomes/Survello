@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 
@@ -66,9 +66,11 @@ export default function GeneratePage() {
     });
   };
 
-  if (generation.isCompleted && generation.dilapsId) {
-    router.push(`/app/generate/review?dilapsId=${generation.dilapsId}`);
-  }
+  useEffect(() => {
+    if (generation.isCompleted && generation.dilapsId) {
+      router.push(`/app/generate/review?dilapsId=${generation.dilapsId}`);
+    }
+  }, [generation.isCompleted, generation.dilapsId, router]);
 
   return (
     <>
