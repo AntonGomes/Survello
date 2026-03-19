@@ -56,11 +56,23 @@ EMBEDDING_DIM = 256
 
 
 MOCK_LEASE_CLAUSES = {
-    "Three": "The tenant shall keep the interior of the premises in good and tenantable repair and condition.",
-    "Four": "The tenant shall decorate the interior in a good and workmanlike manner in every third year.",
-    "Five": "The tenant shall keep all windows and glazing clean and in good condition.",
-    "Seven": "The tenant shall reinstate any alterations made during the term.",
-    "Eight": "The tenant shall comply with all statutory requirements including asbestos and electrical regulations.",
+    "Three": (
+        "The tenant shall keep the interior of the premises"
+        " in good and tenantable repair and condition."
+    ),
+    "Four": (
+        "The tenant shall decorate the interior in a good"
+        " and workmanlike manner in every third year."
+    ),
+    "Five": (
+        "The tenant shall keep all windows and glazing clean and in good condition."
+    ),
+    "Seven": ("The tenant shall reinstate any alterations made during the term."),
+    "Eight": (
+        "The tenant shall comply with all statutory"
+        " requirements including asbestos and"
+        " electrical regulations."
+    ),
 }
 
 
@@ -91,7 +103,8 @@ class MockVisionProvider(VisionProvider):
         representative_images: list[bytes],
         section_names: list[str],
     ) -> list[list[int]]:
-        logger.info(f"MOCK: suggesting merges for {len(representative_images)} sections")
+        count = len(representative_images)
+        logger.info(f"MOCK: suggesting merges for {count} sections")
         return []
 
     def extract_lease_clauses(

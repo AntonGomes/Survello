@@ -158,14 +158,12 @@ class GeminiVisionProvider(VisionProvider):
             logger.info(f"LLM suggested {len(valid)} merge groups: {valid}")
         return valid
 
-
     def extract_lease_clauses(
         self,
         document_parts: list[tuple[bytes, str]],
     ) -> dict[str, str]:
         logger.info(
-            f"Gemini: extracting lease clauses from "
-            f"{len(document_parts)} documents"
+            f"Gemini: extracting lease clauses from {len(document_parts)} documents"
         )
 
         parts = [

@@ -247,15 +247,11 @@ def execute(
             55,
             message="Reading lease clauses...",
         )
-        dilaps_run.lease_clauses = _extract_lease_clauses(
-            documents, storage, vision
-        )
+        dilaps_run.lease_clauses = _extract_lease_clauses(documents, storage, vision)
         db.commit()
 
         lease_context = _build_lease_context(dilaps_run)
-        clauses_text = _format_lease_clauses(
-            dilaps_run.lease_clauses or {}
-        )
+        clauses_text = _format_lease_clauses(dilaps_run.lease_clauses or {})
         ctx = SectionAnalysisContext(
             lease_context=lease_context,
             lease_clauses_text=clauses_text,
