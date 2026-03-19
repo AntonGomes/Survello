@@ -11,7 +11,7 @@ import { exportDilapsMutation } from "@/client/@tanstack/react-query.gen"
 type ExportPanelProps = {
   totalItems: number
   totalCost: number
-  dilapsId: string | null
+  dilapsId: number | null
 }
 
 function formatCurrency(value: number): string {
@@ -50,7 +50,7 @@ export function ExportPanel({ totalItems, totalCost, dilapsId }: ExportPanelProp
     }
     setError(null)
     exportMutation.mutate({
-      path: { dilaps_id: Number(dilapsId) },
+      path: { dilaps_id: dilapsId },
     })
   }
 
