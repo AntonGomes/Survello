@@ -13,7 +13,8 @@ from app.utils.similarity import centroid, cosine_similarity
 SIMILARITY_THRESHOLD = 0.75
 SINGLETON_MERGE_START = 0.55
 SINGLETON_MERGE_STEP = 0.05
-ADJACENT_MERGE_THRESHOLD = 0.80
+ADJACENT_MERGE_THRESHOLD = 0.88
+BREAK_WINDOW_SIZE = 5
 IMAGE_MIME_PREFIXES = ("image/jpeg", "image/png", "image/webp")
 MAX_NAMING_BATCH = 10
 NAMING_RETRIES = 2
@@ -110,13 +111,26 @@ def _order_by_timestamp(
     return files
 
 
+def _window_centroid(
+    section: list[File],
+    emb_map: dict[int, list[float]],
+) -> list[float]:
+    tail = section[-BREAK_WINDOW_SIZE:]
+    vecs = [emb_map[f.id] for f in tail if f.id in emb_map]
+    return centroid(vecs) if vecs else []
+
+
 def _should_break_section(
-    prev_emb: list[float],
+    section: list[File],
     curr_emb: list[float],
+    emb_map: dict[int, list[float]],
 ) -> bool:
-    if not prev_emb or not curr_emb:
+    if not curr_emb:
         return False
-    return cosine_similarity(prev_emb, curr_emb) < SIMILARITY_THRESHOLD
+    window_c = _window_centroid(section, emb_map)
+    if not window_c:
+        return False
+    return cosine_similarity(window_c, curr_emb) < SIMILARITY_THRESHOLD
 
 
 def _section_centroid(
@@ -245,10 +259,9 @@ def section_images(
     sections: list[list[File]] = [[ordered[0]]]
 
     for i in range(1, len(ordered)):
-        prev_emb = emb_map.get(ordered[i - 1].id or 0, [])
         curr_emb = emb_map.get(ordered[i].id or 0, [])
 
-        if _should_break_section(prev_emb, curr_emb):
+        if _should_break_section(sections[-1], curr_emb, emb_map):
             sections.append([])
         sections[-1].append(ordered[i])
 
