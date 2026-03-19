@@ -18,16 +18,16 @@ function EmptyState() {
 
 function ReviewContent() {
   const searchParams = useSearchParams()
-  const dilapsId = searchParams.get("dilapsId")
-  const parsedId = dilapsId ? Number(dilapsId) : null
+  const dilapsIdParam = searchParams.get("dilapsId")
+  const dilapsId = dilapsIdParam ? Number(dilapsIdParam) : null
 
   const {
     sections, activeSectionId, activeSection,
     mergeSelection, canMerge, totalItems, totalCost,
     loading, error, dispatch, setActiveSection,
-  } = useDilapsReview(parsedId)
+  } = useDilapsReview(dilapsId)
 
-  if (!parsedId) {
+  if (!dilapsId) {
     return (
       <div className="flex-1 flex items-center justify-center text-muted-foreground">
         <p>No dilaps ID provided.</p>
@@ -66,7 +66,7 @@ function ReviewContent() {
           )}
         </div>
       </div>
-      <ExportPanel totalItems={totalItems} totalCost={totalCost} />
+      <ExportPanel totalItems={totalItems} totalCost={totalCost} dilapsId={dilapsId} />
     </div>
   )
 }

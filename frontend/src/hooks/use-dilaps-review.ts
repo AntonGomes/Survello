@@ -1,8 +1,8 @@
 import { useReducer, useCallback, useEffect, useState } from "react"
 import { reviewReducer } from "./dilaps-review-reducer"
 import { readDilapsSections } from "@/client/sdk.gen"
-import type { ReviewState, DilapsSection, DilapsItem } from "./dilaps-review-types"
-import type { SectionWithItems } from "@/client/types.gen"
+import type { ReviewState, DilapsSection, DilapsItem, UnitType } from "./dilaps-review-types"
+import type { SectionWithItems, DilapsItemRead } from "@/client/types.gen"
 
 export type { DilapsItem, DilapsSection, UnitType, ReviewAction } from "./dilaps-review-types"
 
@@ -12,24 +12,36 @@ const INITIAL_STATE: ReviewState = {
   mergeSelection: [],
 }
 
-function mapApiSection(s: SectionWithItems): DilapsSection {
+function parseNumeric(value: string | null | undefined): number | null {
+  if (value === null || value === undefined) return null
+  const parsed = Number(value)
+  return Number.isNaN(parsed) ? null : parsed
+}
+
+function mapItem(item: DilapsItemRead): DilapsItem {
+  const quantity = parseNumeric(item.quantity)
+  const rate = parseNumeric(item.rate)
   return {
-    id: s.id,
-    name: s.name,
-    sortOrder: s.sort_order ?? 0,
-    imageFileIds: (s.image_files ?? []).map((f) => f.id),
-    items: (s.items ?? []).map((item): DilapsItem => ({
-      id: item.id,
-      itemNumber: item.item_number,
-      leaseClause: item.lease_clause,
-      wantOfRepair: item.want_of_repair,
-      remedy: item.remedy,
-      unit: item.unit as DilapsItem["unit"],
-      quantity: item.quantity ? Number(item.quantity) : null,
-      rate: item.rate ? Number(item.rate) : null,
-      cost: item.cost ? Number(item.cost) : null,
-      sortOrder: item.sort_order ?? 0,
-    })),
+    id: item.id,
+    itemNumber: item.item_number,
+    leaseClause: item.lease_clause,
+    wantOfRepair: item.want_of_repair,
+    remedy: item.remedy,
+    unit: item.unit as UnitType,
+    quantity,
+    rate,
+    cost: quantity !== null && rate !== null ? quantity * rate : parseNumeric(item.cost),
+    sortOrder: item.sort_order ?? 0,
+  }
+}
+
+function mapSection(section: SectionWithItems): DilapsSection {
+  return {
+    id: section.id,
+    name: section.name,
+    sortOrder: section.sort_order ?? 0,
+    imageFileIds: (section.image_files ?? []).map((f) => f.id),
+    items: (section.items ?? []).map(mapItem),
   }
 }
 
@@ -47,7 +59,7 @@ export function useDilapsReview(dilapsId: number | null) {
       throwOnError: true,
     })
       .then((response) => {
-        const sections = response.data.map(mapApiSection)
+        const sections = response.data.map(mapSection)
         dispatch({ type: "SET_SECTIONS", sections })
       })
       .catch((err) => {
