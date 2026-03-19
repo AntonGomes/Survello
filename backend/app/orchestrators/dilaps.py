@@ -178,24 +178,36 @@ def execute(
         )
 
         _update_status(
-            dilaps_run, db, DilapsStatus.EMBEDDING, 10,
+            dilaps_run,
+            db,
+            DilapsStatus.EMBEDDING,
+            10,
             message="Reading and understanding your survey images...",
         )
         embeddings = compute_embeddings(images, storage, embedding, db)
         _update_status(
-            dilaps_run, db, DilapsStatus.EMBEDDING, 30,
+            dilaps_run,
+            db,
+            DilapsStatus.EMBEDDING,
+            30,
             message="Finished processing your images",
         )
 
         _update_status(
-            dilaps_run, db, DilapsStatus.SECTIONING, 40,
+            dilaps_run,
+            db,
+            DilapsStatus.SECTIONING,
+            40,
             message="Grouping photos by area of the property...",
         )
         image_groups = section_images(images, embeddings, storage)
         section_names = name_sections(image_groups, vision, storage)
         sections = _create_section_records(dilaps_run, image_groups, section_names, db)
         _update_status(
-            dilaps_run, db, DilapsStatus.SECTIONING, 50,
+            dilaps_run,
+            db,
+            DilapsStatus.SECTIONING,
+            50,
             message=f"Identified {len(sections)} areas of the property",
         )
         dilaps_run.total_sections = len(sections)
@@ -217,7 +229,10 @@ def execute(
             progress = 50 + int(45 * (idx / max(total_sections, 1)))
             dilaps_run.current_section = idx + 1
             _update_status(
-                dilaps_run, db, DilapsStatus.ANALYZING, progress,
+                dilaps_run,
+                db,
+                DilapsStatus.ANALYZING,
+                progress,
                 message=f"Inspecting {section.name} ({idx + 1} of {total_sections})...",
             )
 
@@ -232,7 +247,10 @@ def execute(
         _renumber_items(dilaps_run, db)
         dilaps_run.current_section = total_sections
         _update_status(
-            dilaps_run, db, DilapsStatus.COMPLETED, 100,
+            dilaps_run,
+            db,
+            DilapsStatus.COMPLETED,
+            100,
             message="Your dilaps report is ready",
         )
 
