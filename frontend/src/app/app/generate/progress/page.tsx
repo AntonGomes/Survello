@@ -1,12 +1,14 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 
 import { FeatureHeader } from "@/components/feature-header";
 import { ErrorAlert } from "@/components/error-alert";
+import { Button } from "@/components/ui/button";
 import { DilapsLoadingScreen } from "@/app/app/generate/loading-screen";
 import { readDilapsRun } from "@/lib/dilaps-api";
 import type { DilapsSubStatus } from "@/lib/dilaps-api";
@@ -53,6 +55,11 @@ function ProgressContent() {
     }
   }, [dilapsRun?.status, dilapsId, router]);
 
+  const breadcrumbs = [
+    { label: "Dilaps Reports", href: "/app/generate?tab=reports" },
+    { label: dilapsRun?.property_address ?? "In Progress" },
+  ];
+
   if (!dilapsId) {
     return (
       <div className="flex-1 flex items-center justify-center text-muted-foreground">
@@ -64,8 +71,30 @@ function ProgressContent() {
   if (error) {
     return (
       <>
-        <FeatureHeader title="Generate Dilaps" />
+        <FeatureHeader title="Dilaps Reports" breadcrumbs={breadcrumbs} />
         <ErrorAlert message={error.message} />
+      </>
+    );
+  }
+
+  if (dilapsRun?.status === "error") {
+    return (
+      <>
+        <FeatureHeader title="Dilaps Reports" breadcrumbs={breadcrumbs} />
+        <div className="px-8 space-y-4">
+          <ErrorAlert message={dilapsRun.error_message ?? "Run failed"} />
+          <div className="flex gap-3">
+            <Link href="/app/generate">
+              <Button variant="accent">
+                <Plus className="h-4 w-4 mr-2" />
+                Start New Report
+              </Button>
+            </Link>
+            <Link href="/app/generate?tab=reports">
+              <Button variant="outline">Back to Reports</Button>
+            </Link>
+          </div>
+        </div>
       </>
     );
   }
@@ -74,21 +103,16 @@ function ProgressContent() {
     ? mapBackendToFrontendStatus(dilapsRun.status)
     : { status: "generating" as DilapsStatus, subStatus: "embedding" as DilapsSubStatus };
 
-  if (dilapsRun?.status === "error") {
-    return (
-      <>
-        <FeatureHeader title="Generate Dilaps" />
-        <ErrorAlert message={dilapsRun.error_message ?? "Run failed"} />
-      </>
-    );
-  }
-
   return (
     <>
-      <FeatureHeader
-        title="Generate Dilaps"
-        badge={dilapsRun?.property_address ?? null}
-      />
+      <FeatureHeader title="Dilaps Reports" breadcrumbs={breadcrumbs}>
+        <Link href="/app/generate">
+          <Button variant="outline" size="sm">
+            <Plus className="h-4 w-4 mr-1" />
+            New Report
+          </Button>
+        </Link>
+      </FeatureHeader>
       <DilapsLoadingScreen
         status={mapped.status}
         subStatus={mapped.subStatus}
