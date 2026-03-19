@@ -22,8 +22,10 @@ MAX_IMAGES_PER_EMBED = 6
 SECTION_NAMING_PROMPT = (
     "You are a building surveyor. For each image, provide a short "
     "name for the area shown (e.g. 'Kitchen', 'Front Elevation', "
-    "'Roof', 'Bathroom', 'Office 3'). Return a JSON array of "
-    "strings, one per image, in the same order provided."
+    "'Roof', 'Bathroom', 'Office 3'). You MUST return a JSON array "
+    "of strings with EXACTLY one name per image, in the same order "
+    "provided. Never skip an image — if unclear, use a best guess "
+    "like 'Room' or 'Exterior'."
 )
 
 
@@ -96,11 +98,14 @@ class GeminiVisionProvider(VisionProvider):
     ) -> list[str]:
         logger.info(f"Gemini: naming {len(representative_images)} sections")
 
-        files = self.file_manager.upload_batch(representative_images)
+        inline_parts = [
+            types.Part.from_bytes(data=img, mime_type="image/jpeg")
+            for img in representative_images
+        ]
 
         response = self.client.models.generate_content(
             model=VISION_MODEL,
-            contents=list(files),
+            contents=[types.Content(parts=inline_parts)],
             config=types.GenerateContentConfig(
                 system_instruction=SECTION_NAMING_PROMPT,
                 response_mime_type="application/json",
