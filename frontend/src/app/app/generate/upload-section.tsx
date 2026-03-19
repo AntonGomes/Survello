@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
   StickyNote,
   FolderOpen,
+  Upload,
   Check,
   X,
   Plus,
@@ -97,6 +98,143 @@ function SectionHeading({
   );
 }
 
+function DropWell({
+  icon: Icon,
+  label,
+  badge,
+  isDragActive,
+  className,
+  rootProps,
+  inputProps,
+}: {
+  icon: React.ElementType;
+  label: string;
+  badge?: React.ReactNode;
+  isDragActive: boolean;
+  className?: string;
+  rootProps: ReturnType<ReturnType<typeof useDropzone>["getRootProps"]>;
+  inputProps: ReturnType<ReturnType<typeof useDropzone>["getInputProps"]>;
+}) {
+  return (
+    <div
+      {...rootProps}
+      className={cn(
+        "flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-8 cursor-pointer transition-all",
+        "bg-muted/30 hover:bg-muted/60 hover:border-primary/40",
+        isDragActive && "border-primary bg-primary/10",
+        className,
+      )}
+    >
+      <input {...inputProps} />
+      <div className={cn(
+        "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+        isDragActive ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground",
+      )}>
+        {isDragActive ? <Upload className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+      </div>
+      <span className={cn(
+        "text-sm",
+        isDragActive ? "text-primary font-medium" : "text-muted-foreground",
+      )}>
+        {isDragActive ? "Drop here" : label}
+      </span>
+      {!isDragActive && badge}
+    </div>
+  );
+}
+
+function SecondaryDropWell({
+  icon: Icon,
+  label,
+  badge,
+  isDragActive,
+  rootProps,
+  inputProps,
+}: {
+  icon: React.ElementType;
+  label: string;
+  badge?: React.ReactNode;
+  isDragActive: boolean;
+  rootProps: ReturnType<ReturnType<typeof useDropzone>["getRootProps"]>;
+  inputProps: ReturnType<ReturnType<typeof useDropzone>["getInputProps"]>;
+}) {
+  return (
+    <div
+      {...rootProps}
+      className={cn(
+        "flex flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-5 cursor-pointer transition-all",
+        "bg-muted/20 hover:bg-muted/40 hover:border-primary/30",
+        isDragActive && "border-primary bg-primary/10",
+      )}
+    >
+      <input {...inputProps} />
+      <div className={cn(
+        "flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+        isDragActive ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground",
+      )}>
+        {isDragActive ? <Upload className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+      </div>
+      <span className={cn(
+        "text-xs text-center",
+        isDragActive ? "text-primary font-medium" : "text-muted-foreground",
+      )}>
+        {isDragActive ? "Drop here" : label}
+      </span>
+      {!isDragActive && badge}
+    </div>
+  );
+}
+
+function FilledRow({
+  fileName,
+  onRemove,
+}: {
+  fileName: string;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-md bg-accent/8 border border-accent/20 px-3 py-2">
+      <Check className="h-3.5 w-3.5 text-accent shrink-0" />
+      <span className="text-sm truncate flex-1">{fileName}</span>
+      <button
+        type="button"
+        onClick={onRemove}
+        className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
+function FileCountRow({
+  count,
+  label,
+  rootProps,
+  inputProps,
+}: {
+  count: number;
+  label: string;
+  rootProps: ReturnType<ReturnType<typeof useDropzone>["getRootProps"]>;
+  inputProps: ReturnType<ReturnType<typeof useDropzone>["getInputProps"]>;
+}) {
+  return (
+    <div
+      {...rootProps}
+      className="flex items-center gap-2 rounded-md bg-accent/8 border border-accent/20 px-3 py-2 cursor-pointer hover:bg-accent/15 transition-colors"
+    >
+      <input {...inputProps} />
+      <Check className="h-3.5 w-3.5 text-accent shrink-0" />
+      <span className="text-sm flex-1">
+        {count} {label}
+      </span>
+      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+        <Plus className="h-3 w-3" /> Add more
+      </span>
+    </div>
+  );
+}
+
 function LeaseSection({
   leaseFile,
   leaseDocFiles,
@@ -124,7 +262,7 @@ function LeaseSection({
   });
 
   return (
-    <Card className="py-5">
+    <Card className={cn("py-5", disabled && "opacity-50 pointer-events-none")}>
       <CardContent>
         <SectionHeading
           icon={FileText}
@@ -133,73 +271,47 @@ function LeaseSection({
         />
 
         <div className="space-y-2">
-          <div
-            {...leaseDropzone.getRootProps()}
-            className={cn(
-              "flex items-center gap-3 rounded-lg border-2 border-dashed px-4 py-3.5 cursor-pointer transition-all",
-              leaseFile
-                ? "border-accent/40 bg-accent/5"
-                : "border-border hover:border-accent/40",
-              leaseDropzone.isDragActive && "border-accent bg-accent/10",
-              disabled && "opacity-50 pointer-events-none",
-            )}
-          >
-            <input {...leaseDropzone.getInputProps()} />
-            {leaseFile ? (
-              <>
-                <Check className="h-4 w-4 text-accent shrink-0" />
-                <span className="text-sm truncate flex-1">{leaseFile.name}</span>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); onLeaseChange(null); }}
-                  className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </>
-            ) : (
-              <>
-                <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-sm text-muted-foreground flex-1">
-                  {leaseDropzone.isDragActive ? "Drop lease PDF here" : "Drop or click to add the lease PDF"}
-                </span>
-                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 shrink-0">
+          {leaseFile ? (
+            <FilledRow
+              fileName={leaseFile.name}
+              onRemove={() => onLeaseChange(null)}
+            />
+          ) : (
+            <DropWell
+              icon={FileText}
+              label="Lease PDF"
+              badge={
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
                   Required
                 </Badge>
-              </>
-            )}
-          </div>
+              }
+              isDragActive={leaseDropzone.isDragActive}
+              rootProps={leaseDropzone.getRootProps()}
+              inputProps={leaseDropzone.getInputProps()}
+            />
+          )}
 
-          <div
-            {...refsDropzone.getRootProps()}
-            className={cn(
-              "flex items-center gap-3 rounded-lg border border-dashed px-4 py-3 cursor-pointer transition-all",
-              leaseDocFiles.length > 0
-                ? "border-accent/30 bg-accent/5"
-                : "border-border hover:border-accent/30",
-              refsDropzone.isDragActive && "border-accent bg-accent/10",
-              disabled && "opacity-50 pointer-events-none",
-            )}
-          >
-            <input {...refsDropzone.getInputProps()} />
-            <Files className="h-4 w-4 text-muted-foreground shrink-0" />
-            <div className="flex-1 min-w-0">
-              <span className="text-sm text-muted-foreground">
-                {refsDropzone.isDragActive
-                  ? "Drop files here"
-                  : "Schedules, annexes, or documents referenced in the lease"}
-              </span>
-            </div>
-            {leaseDocFiles.length > 0 ? (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
-                {leaseDocFiles.length} file{leaseDocFiles.length !== 1 ? "s" : ""}
-              </Badge>
-            ) : (
-              <Badge className="text-[10px] px-1.5 py-0 shrink-0 bg-amber-500/15 text-amber-600 border-amber-500/30">
-                Recommended
-              </Badge>
-            )}
-          </div>
+          {leaseDocFiles.length > 0 ? (
+            <FileCountRow
+              count={leaseDocFiles.length}
+              label={`referenced document${leaseDocFiles.length !== 1 ? "s" : ""}`}
+              rootProps={refsDropzone.getRootProps()}
+              inputProps={refsDropzone.getInputProps()}
+            />
+          ) : (
+            <SecondaryDropWell
+              icon={Files}
+              label="Schedules, annexes, or referenced documents"
+              badge={
+                <Badge className="text-[10px] px-1.5 py-0 bg-amber-500/15 text-amber-600 border-amber-500/30">
+                  Recommended
+                </Badge>
+              }
+              isDragActive={refsDropzone.isDragActive}
+              rootProps={refsDropzone.getRootProps()}
+              inputProps={refsDropzone.getInputProps()}
+            />
+          )}
         </div>
       </CardContent>
     </Card>
@@ -243,7 +355,7 @@ function SurveySection({
   const overflow = surveyFiles.length - THUMBNAIL_DISPLAY_LIMIT;
 
   return (
-    <Card className="py-5">
+    <Card className={cn("py-5", disabled && "opacity-50 pointer-events-none")}>
       <CardContent>
         <SectionHeading
           icon={ImageIcon}
@@ -252,9 +364,9 @@ function SurveySection({
         />
 
         <div className="space-y-2">
-          <div className="rounded-lg border-2 border-dashed overflow-hidden transition-all">
-            {surveyFiles.length > 0 && (
-              <div className="px-4 py-3 border-b border-border/50">
+          {surveyFiles.length > 0 ? (
+            <div className="rounded-lg border border-accent/20 overflow-hidden">
+              <div className="px-3 py-3 bg-accent/5">
                 <div className="flex flex-wrap gap-2">
                   {thumbnails.map((t) => (
                     <img
@@ -271,69 +383,54 @@ function SurveySection({
                   )}
                 </div>
               </div>
-            )}
-            <div
-              {...imagesDropzone.getRootProps()}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3.5 cursor-pointer transition-all",
-                surveyFiles.length > 0
-                  ? "border-accent/40 bg-accent/5"
-                  : "border-border hover:border-accent/40",
-                imagesDropzone.isDragActive && "bg-accent/10",
-                disabled && "opacity-50 pointer-events-none",
-              )}
-            >
-              <input {...imagesDropzone.getInputProps()} />
-              {surveyFiles.length > 0 ? (
-                <>
-                  <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-muted-foreground flex-1">Add more images</span>
-                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
-                    {surveyFiles.length} image{surveyFiles.length !== 1 ? "s" : ""}
-                  </Badge>
-                </>
-              ) : (
-                <>
-                  <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-muted-foreground flex-1">
-                    {imagesDropzone.isDragActive ? "Drop images here" : "Drop or click to add survey photos"}
-                  </span>
-                  <Badge variant="destructive" className="text-[10px] px-1.5 py-0 shrink-0">
-                    Required
-                  </Badge>
-                </>
-              )}
+              <div
+                {...imagesDropzone.getRootProps()}
+                className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors border-t border-accent/10"
+              >
+                <input {...imagesDropzone.getInputProps()} />
+                <Plus className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground flex-1">Add more photos</span>
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                  {surveyFiles.length} image{surveyFiles.length !== 1 ? "s" : ""}
+                </Badge>
+              </div>
             </div>
-          </div>
+          ) : (
+            <DropWell
+              icon={ImageIcon}
+              label="Survey photos"
+              badge={
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                  Required
+                </Badge>
+              }
+              isDragActive={imagesDropzone.isDragActive}
+              rootProps={imagesDropzone.getRootProps()}
+              inputProps={imagesDropzone.getInputProps()}
+            />
+          )}
 
-          <div
-            {...notesDropzone.getRootProps()}
-            className={cn(
-              "flex items-center gap-3 rounded-lg border border-dashed px-4 py-3 cursor-pointer transition-all",
-              siteNoteFiles.length > 0
-                ? "border-accent/30 bg-accent/5"
-                : "border-border hover:border-accent/30",
-              notesDropzone.isDragActive && "border-accent bg-accent/10",
-              disabled && "opacity-50 pointer-events-none",
-            )}
-          >
-            <input {...notesDropzone.getInputProps()} />
-            <StickyNote className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-sm text-muted-foreground flex-1">
-              {notesDropzone.isDragActive
-                ? "Drop files here"
-                : "Site notes or observations from the survey"}
-            </span>
-            {siteNoteFiles.length > 0 ? (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
-                {siteNoteFiles.length} file{siteNoteFiles.length !== 1 ? "s" : ""}
-              </Badge>
-            ) : (
-              <Badge className="text-[10px] px-1.5 py-0 shrink-0 bg-amber-500/15 text-amber-600 border-amber-500/30">
-                Recommended
-              </Badge>
-            )}
-          </div>
+          {siteNoteFiles.length > 0 ? (
+            <FileCountRow
+              count={siteNoteFiles.length}
+              label={`site note${siteNoteFiles.length !== 1 ? "s" : ""}`}
+              rootProps={notesDropzone.getRootProps()}
+              inputProps={notesDropzone.getInputProps()}
+            />
+          ) : (
+            <SecondaryDropWell
+              icon={StickyNote}
+              label="Site notes or survey observations"
+              badge={
+                <Badge className="text-[10px] px-1.5 py-0 bg-amber-500/15 text-amber-600 border-amber-500/30">
+                  Recommended
+                </Badge>
+              }
+              isDragActive={notesDropzone.isDragActive}
+              rootProps={notesDropzone.getRootProps()}
+              inputProps={notesDropzone.getInputProps()}
+            />
+          )}
         </div>
       </CardContent>
     </Card>
@@ -355,28 +452,32 @@ function MiscDropzone({
     onDrop,
   });
 
+  if (files.length > 0) {
+    return (
+      <FileCountRow
+        count={files.length}
+        label={`other document${files.length !== 1 ? "s" : ""}`}
+        rootProps={getRootProps()}
+        inputProps={getInputProps()}
+      />
+    );
+  }
+
   return (
     <div
       {...getRootProps()}
       className={cn(
-        "flex items-center gap-3 rounded-lg border border-dashed px-4 py-3 cursor-pointer transition-all",
-        files.length > 0
-          ? "border-accent/30 bg-accent/5"
-          : "border-border hover:border-border-foreground/20",
-        isDragActive && "border-accent bg-accent/10",
+        "flex items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-3 cursor-pointer transition-all",
+        "text-muted-foreground hover:bg-muted/30 hover:border-primary/20",
+        isDragActive && "border-primary bg-primary/10 text-primary",
         disabled && "opacity-50 pointer-events-none",
       )}
     >
       <input {...getInputProps()} />
-      <FolderOpen className="h-4 w-4 text-muted-foreground shrink-0" />
-      <span className="text-sm text-muted-foreground flex-1">
-        {isDragActive ? "Drop files here" : "Any other relevant documents"}
+      <FolderOpen className="h-4 w-4" />
+      <span className="text-sm">
+        {isDragActive ? "Drop here" : "Other documents"}
       </span>
-      {files.length > 0 && (
-        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
-          {files.length} file{files.length !== 1 ? "s" : ""}
-        </Badge>
-      )}
     </div>
   );
 }

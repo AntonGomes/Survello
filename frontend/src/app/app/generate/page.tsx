@@ -291,6 +291,13 @@ function NewReportTab() {
     <div className="space-y-6">
       {runs && <ActiveRunsBanner runs={runs} />}
 
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight">New Dilaps Report</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Upload the lease and survey photos to generate a schedule of dilapidations.
+        </p>
+      </div>
+
       {jobId && <LinkedJobBanner jobId={jobId} />}
 
       <div className="space-y-2">
