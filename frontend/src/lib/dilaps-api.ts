@@ -19,6 +19,9 @@ export type DilapsRunRead = {
   id: number;
   status: DilapsSubStatus;
   progress_pct: number;
+  total_sections: number;
+  current_section: number;
+  status_message: string | null;
 };
 
 export type DilapsFileSet = {

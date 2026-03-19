@@ -2,15 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { MapPin } from "lucide-react";
+import { MapPin, Sparkles } from "lucide-react";
 
 import { ErrorAlert } from "@/components/error-alert";
 import { FeatureHeader } from "@/components/feature-header";
-import { DilapsStatusPanel } from "@/app/app/generate/status-panel";
+import { DilapsLoadingScreen } from "@/app/app/generate/loading-screen";
 import {
   DilapsUploadGrid,
   LinkedJobBanner,
 } from "@/app/app/generate/upload-section";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDilapsGeneration } from "@/hooks/use-dilaps-generation";
@@ -72,6 +73,27 @@ export default function GeneratePage() {
     }
   }, [generation.isCompleted, generation.dilapsId, router]);
 
+  if (generation.isActive) {
+    return (
+      <>
+        <FeatureHeader
+          title="Generate Dilaps"
+          badge={jobId ? `Job #${jobId}` : null}
+        />
+        {generation.error && <ErrorAlert message={generation.error} />}
+        <DilapsLoadingScreen
+          status={generation.status}
+          subStatus={generation.subStatus}
+          uploadProgress={generation.uploadProgress}
+          progressPct={generation.progressPct}
+          totalSections={generation.totalSections}
+          currentSection={generation.currentSection}
+          statusMessage={generation.statusMessage}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <FeatureHeader
@@ -98,21 +120,23 @@ export default function GeneratePage() {
           </div>
 
           <DilapsUploadGrid files={files} onUpdate={setFiles} disabled={generation.isActive} />
+
+          <div className="flex justify-center pt-2">
+            <Button
+              onClick={handleStart}
+              disabled={!canStart}
+              size="lg"
+              variant="accent"
+              className="px-8 py-6 text-lg rounded-xl hover:shadow-lg transition-all disabled:opacity-50 border border-accent/30 shadow-[0_14px_38px_-18px_rgba(83,162,85,0.45)]"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Generate Dilaps
+            </Button>
+          </div>
         </div>
       )}
 
       {generation.error && <ErrorAlert message={generation.error} />}
-
-      {!generation.isCompleted && (
-        <DilapsStatusPanel
-          canStart={canStart}
-          status={generation.status}
-          subStatus={generation.subStatus}
-          uploadProgress={generation.uploadProgress}
-          progressPct={generation.progressPct}
-          onStart={handleStart}
-        />
-      )}
     </>
   );
 }

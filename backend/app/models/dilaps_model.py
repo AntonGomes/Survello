@@ -47,6 +47,9 @@ class DilapsRunBase(SQLModel):
     lease_summary: str | None = None
     status: DilapsStatus = Field(default=DilapsStatus.IDLE, sa_type=AutoString)
     progress_pct: int = Field(default=0)
+    total_sections: int = Field(default=0)
+    current_section: int = Field(default=0)
+    status_message: str | None = None
     error_message: str | None = None
 
 
