@@ -42,17 +42,11 @@ def _update_status(
     status: DilapsStatus,
     progress: int,
     message: str | None = None,
-    total_sections: int | None = None,
-    current_section: int | None = None,
 ) -> None:
     dilaps_run.status = status
     dilaps_run.progress_pct = progress
     if message is not None:
         dilaps_run.status_message = message
-    if total_sections is not None:
-        dilaps_run.total_sections = total_sections
-    if current_section is not None:
-        dilaps_run.current_section = current_section
     db.commit()
 
 
@@ -203,8 +197,9 @@ def execute(
         _update_status(
             dilaps_run, db, DilapsStatus.SECTIONING, 50,
             message=f"Identified {len(sections)} areas of the property",
-            total_sections=len(sections),
         )
+        dilaps_run.total_sections = len(sections)
+        db.commit()
 
         lease_context = _build_lease_context(documents, storage, dilaps_run)
         ctx = SectionAnalysisContext(
@@ -220,10 +215,10 @@ def execute(
             zip(sections, image_groups, strict=True)
         ):
             progress = 50 + int(45 * (idx / max(total_sections, 1)))
+            dilaps_run.current_section = idx + 1
             _update_status(
                 dilaps_run, db, DilapsStatus.ANALYZING, progress,
                 message=f"Inspecting {section.name} ({idx + 1} of {total_sections})...",
-                current_section=idx + 1,
             )
 
             memory_update = _analyze_single_section(
@@ -235,10 +230,10 @@ def execute(
             ctx.running_memory += f"\n{section.name}: {memory_update}"
 
         _renumber_items(dilaps_run, db)
+        dilaps_run.current_section = total_sections
         _update_status(
             dilaps_run, db, DilapsStatus.COMPLETED, 100,
             message="Your dilaps report is ready",
-            current_section=total_sections,
         )
 
         elapsed = time.time() - start
