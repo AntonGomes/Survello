@@ -8,6 +8,8 @@ from google.genai import types
 
 from app.core.logging import logger
 
+from app.prompts.dilaps_analysis import DILAPS_SECTION_MERGE_PROMPT
+
 from .provider import (
     AnalysisItem,
     EmbeddingProvider,
@@ -114,6 +116,43 @@ class GeminiVisionProvider(VisionProvider):
         )
 
         return json.loads(response.text)
+
+    def suggest_merges(
+        self,
+        representative_images: list[bytes],
+        section_names: list[str],
+    ) -> list[list[int]]:
+        logger.info(
+            f"Gemini: suggesting merges for {len(representative_images)} sections"
+        )
+
+        parts: list[types.Part] = []
+        for idx, (img, name) in enumerate(
+            zip(representative_images, section_names, strict=True)
+        ):
+            parts.append(types.Part.from_text(text=f"[Section {idx}: {name}]"))
+            parts.append(types.Part.from_bytes(data=img, mime_type="image/jpeg"))
+
+        response = self.client.models.generate_content(
+            model=VISION_MODEL,
+            contents=[types.Content(parts=parts)],
+            config=types.GenerateContentConfig(
+                system_instruction=DILAPS_SECTION_MERGE_PROMPT,
+                response_mime_type="application/json",
+                temperature=0.1,
+            ),
+        )
+
+        raw = json.loads(response.text)
+        groups = raw.get("merge_groups", [])
+        valid = [
+            g for g in groups
+            if isinstance(g, list) and len(g) >= 2
+            and all(isinstance(i, int) for i in g)
+        ]
+        if valid:
+            logger.info(f"LLM suggested {len(valid)} merge groups: {valid}")
+        return valid
 
 
 def _embed_batch(

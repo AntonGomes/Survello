@@ -38,6 +38,14 @@ class VisionProvider(ABC):
     ) -> list[str]:
         raise NotImplementedError
 
+    @abstractmethod
+    def suggest_merges(
+        self,
+        representative_images: list[bytes],
+        section_names: list[str],
+    ) -> list[list[int]]:
+        raise NotImplementedError
+
 
 class EmbeddingProvider(ABC):
     @abstractmethod

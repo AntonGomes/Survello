@@ -21,6 +21,7 @@ from app.services.ai.provider import EmbeddingProvider, VisionProvider
 from app.services.image_sectioning import (
     compute_embeddings,
     is_image_file,
+    merge_sections_by_llm,
     name_sections,
     section_images,
 )
@@ -181,6 +182,9 @@ def execute(
         _update_status(dilaps_run, db, DilapsStatus.SECTIONING, 40)
         image_groups = section_images(images, embeddings, storage)
         section_names = name_sections(image_groups, vision, storage)
+        image_groups, section_names = merge_sections_by_llm(
+            image_groups, section_names, vision, storage
+        )
         sections = _create_section_records(dilaps_run, image_groups, section_names, db)
         _update_status(dilaps_run, db, DilapsStatus.SECTIONING, 50)
 
