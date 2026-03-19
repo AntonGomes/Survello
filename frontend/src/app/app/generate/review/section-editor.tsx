@@ -117,9 +117,11 @@ function ImageThumbnail({ fileId, url, onClick }: {
 function ImageGrid({ section }: { section: DilapsSection }) {
   const { urls, loading } = useImageUrls(section.imageFileIds)
 
-  const lightboxImages = section.imageFileIds
-    .filter((id) => urls[id])
-    .map((id) => ({ id, url: urls[id], alt: `Survey image ${id}` }))
+  const lightboxImages = section.imageFileIds.reduce<Array<{ id: number; url: string; alt: string }>>((acc, id) => {
+    const url = urls[id]
+    if (url) acc.push({ id, url, alt: `Survey image ${id}` })
+    return acc
+  }, [])
   const lightbox = useLightbox(lightboxImages)
 
   const handleClick = useCallback((fileId: number) => {
