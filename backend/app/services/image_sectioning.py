@@ -13,9 +13,11 @@ from app.utils.similarity import centroid, cosine_similarity
 SIMILARITY_THRESHOLD = 0.75
 SINGLETON_MERGE_START = 0.55
 SINGLETON_MERGE_STEP = 0.05
+ADJACENT_MERGE_THRESHOLD = 0.80
 IMAGE_MIME_PREFIXES = ("image/jpeg", "image/png", "image/webp")
 MAX_NAMING_BATCH = 10
 NAMING_RETRIES = 2
+MIN_MERGE_GROUP_SIZE = 2
 
 
 def is_image_file(f: File) -> bool:
@@ -196,6 +198,39 @@ def _merge_singletons(
     return sections
 
 
+def _merge_similar_adjacent(
+    sections: list[list[File]],
+    emb_map: dict[int, list[float]],
+) -> list[list[File]]:
+    if len(sections) <= 1:
+        return sections
+
+    pre_count = len(sections)
+    changed = True
+    while changed:
+        changed = False
+        merged: list[list[File]] = [sections[0]]
+        for i in range(1, len(sections)):
+            prev_centroid = _section_centroid(merged[-1], emb_map)
+            curr_centroid = _section_centroid(sections[i], emb_map)
+            if prev_centroid and curr_centroid:
+                sim = cosine_similarity(prev_centroid, curr_centroid)
+                if sim >= ADJACENT_MERGE_THRESHOLD:
+                    merged[-1].extend(sections[i])
+                    changed = True
+                    continue
+            merged.append(sections[i])
+        sections = merged
+
+    merged_count = pre_count - len(sections)
+    if merged_count:
+        logger.info(
+            f"Merged {merged_count} adjacent sections "
+            f"at threshold {ADJACENT_MERGE_THRESHOLD:.2f}"
+        )
+    return sections
+
+
 def section_images(
     files: list[File],
     embeddings: list[ImageEmbedding],
@@ -219,6 +254,7 @@ def section_images(
 
     pre_merge = len(sections)
     sections = _merge_singletons(sections, emb_map)
+    sections = _merge_similar_adjacent(sections, emb_map)
 
     logger.info(
         f"Sectioned {len(ordered)} images into {len(sections)} groups "
@@ -271,3 +307,89 @@ def name_sections(
             all_names.append(f"Section {i + 1}")
 
     return all_names[:expected]
+
+
+def _apply_llm_merges(
+    merge_groups: list[list[int]],
+    sections: list[list[File]],
+    names: list[str],
+) -> tuple[list[list[File]], list[str]]:
+    absorbed: set[int] = set()
+    for group in merge_groups:
+        valid = [i for i in group if 0 <= i < len(sections) and i not in absorbed]
+        if len(valid) < MIN_MERGE_GROUP_SIZE:
+            continue
+        target = valid[0]
+        for src in valid[1:]:
+            sections[target].extend(sections[src])
+            absorbed.add(src)
+        names[target] = names[valid[0]]
+
+    new_sections = [s for i, s in enumerate(sections) if i not in absorbed]
+    new_names = [n for i, n in enumerate(names) if i not in absorbed]
+    return new_sections, new_names
+
+
+LLM_MERGE_WINDOW = 15
+LLM_MERGE_OVERLAP = 5
+MAX_LLM_MERGE_ROUNDS = 3
+
+
+def _llm_merge_pass(
+    sections: list[list[File]],
+    names: list[str],
+    vision_provider: VisionProvider,
+    storage: StorageService,
+) -> tuple[list[list[File]], list[str], int]:
+    total_merged = 0
+    start = 0
+    step = LLM_MERGE_WINDOW - LLM_MERGE_OVERLAP
+
+    while start < len(sections):
+        end = min(start + LLM_MERGE_WINDOW, len(sections))
+        window_images = [
+            storage.get_file_data(s[len(s) // 2].storage_key)
+            for s in sections[start:end]
+        ]
+        window_names = names[start:end]
+
+        merge_groups = vision_provider.suggest_merges(window_images, window_names)
+        if merge_groups:
+            absolute_groups = [[idx + start for idx in group] for group in merge_groups]
+            pre = len(sections)
+            sections, names = _apply_llm_merges(absolute_groups, sections, names)
+            merged_in_window = pre - len(sections)
+            total_merged += merged_in_window
+            start = max(0, end - merged_in_window - LLM_MERGE_OVERLAP)
+        else:
+            start += step
+
+    return sections, names, total_merged
+
+
+def merge_sections_by_llm(
+    sections: list[list[File]],
+    names: list[str],
+    vision_provider: VisionProvider,
+    storage: StorageService,
+) -> tuple[list[list[File]], list[str]]:
+    if len(sections) <= 1:
+        return sections, names
+
+    pre_count = len(sections)
+
+    for round_num in range(MAX_LLM_MERGE_ROUNDS):
+        sections, names, merged = _llm_merge_pass(
+            sections, names, vision_provider, storage
+        )
+        if merged == 0:
+            break
+        logger.info(
+            f"LLM merge round {round_num + 1}: "
+            f"combined {merged} sections ({len(sections)} remaining)"
+        )
+
+    total_merged = pre_count - len(sections)
+    if total_merged:
+        logger.info(f"LLM merge pass combined {total_merged} sections total")
+    return sections, names

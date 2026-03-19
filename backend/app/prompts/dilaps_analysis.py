@@ -48,6 +48,29 @@ DILAPS_SECTION_ANALYSIS_PROMPT = (
     "}}"
 )
 
+DILAPS_SECTION_MERGE_PROMPT = (
+    "You are a building surveyor reviewing a dilapidations photo survey "
+    "that has been split into sections. Each numbered image represents "
+    "one section, shown with its current name.\n\n"
+    "Some sections actually show the SAME room or area and should be "
+    "merged. This happens when a surveyor takes photos of the same "
+    "space from different angles, or when similar parts of a room "
+    "(e.g. floor vs walls) were split into separate sections.\n\n"
+    "## Instructions\n"
+    "Look at the images and names carefully. Identify groups of "
+    "sections that show the SAME physical space and should be merged.\n\n"
+    "Only merge sections that clearly depict the same room or area. "
+    "Do NOT merge sections just because they have similar finishes "
+    "or features — they must be the same physical location.\n\n"
+    "## Output Format\n"
+    "Return a JSON object:\n"
+    '{{ "merge_groups": [[0, 3], [1, 4, 5]] }}\n\n'
+    "Each inner array lists section indices (0-based) that should be "
+    "merged together. Omit sections that should stay separate. "
+    "Return an empty array if no merges are needed:\n"
+    '{{ "merge_groups": [] }}'
+)
+
 DILAPS_SECTION_NAMING_PROMPT = (
     "You are a building surveyor. For each image, "
     "identify the area or room and provide a concise name.\n\n"
