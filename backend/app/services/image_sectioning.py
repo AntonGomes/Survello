@@ -157,4 +157,15 @@ def name_sections(
         f = section[mid]
         representative_images.append(storage.get_file_data(f.storage_key))
 
-    return vision_provider.name_sections(representative_images)
+    names = vision_provider.name_sections(representative_images)
+    expected = len(sections)
+
+    if len(names) < expected:
+        logger.warning(
+            f"LLM returned {len(names)} names for {expected} sections, "
+            "padding with defaults"
+        )
+        for i in range(len(names), expected):
+            names.append(f"Section {i + 1}")
+
+    return names[:expected]
