@@ -156,7 +156,7 @@ export function DilapsLoadingScreen({
         </div>
 
         <p className="text-center text-xs text-muted-foreground/60">
-          You can leave this page open — we&apos;ll redirect you when it&apos;s ready
+          You can navigate away — check back anytime from the Reports tab
         </p>
       </div>
     </div>
