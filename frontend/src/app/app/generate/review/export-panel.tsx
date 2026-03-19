@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 
 type ExportPanelProps = {
-  dilapsId: number
+  dilapsId: number | null
   totalItems: number
   totalCost: number
 }
@@ -33,14 +33,22 @@ async function downloadExport(dilapsId: number) {
   URL.revokeObjectURL(url)
 }
 
-export function ExportPanel({ dilapsId, totalItems, totalCost }: ExportPanelProps) {
+export function ExportPanel({ totalItems, totalCost, dilapsId }: ExportPanelProps) {
   const router = useRouter()
   const [isExporting, setIsExporting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleExport() {
+    if (!dilapsId) {
+      setError("No dilaps ID found — cannot export")
+      return
+    }
     setIsExporting(true)
+    setError(null)
     try {
       await downloadExport(dilapsId)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Export failed")
     } finally {
       setIsExporting(false)
     }
@@ -59,6 +67,9 @@ export function ExportPanel({ dilapsId, totalItems, totalCost }: ExportPanelProp
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Cost</p>
             <p className="text-lg font-semibold">{formatCurrency(totalCost)}</p>
           </div>
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" onClick={() => router.push("/app/generate")}>

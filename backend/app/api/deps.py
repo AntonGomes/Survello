@@ -89,7 +89,7 @@ def get_generation_services(
 
 def get_vision_provider() -> VisionProvider:
     settings = get_settings()
-    if settings.use_mock_llm:
+    if settings.use_mock_llm or settings.mock_dilaps_vision:
         from app.services.ai.mock import MockVisionProvider
 
         return MockVisionProvider()
@@ -101,7 +101,7 @@ def get_vision_provider() -> VisionProvider:
 
 def get_embedding_provider() -> EmbeddingProvider:
     settings = get_settings()
-    if settings.use_mock_llm:
+    if settings.use_mock_llm or settings.mock_dilaps_embedding:
         from app.services.ai.mock import MockEmbeddingProvider
 
         return MockEmbeddingProvider()
