@@ -16,6 +16,7 @@ from app.models.dilaps_model import (
 )
 from app.models.file_model import File
 from app.prompts.dilaps_analysis import DILAPS_SECTION_ANALYSIS_PROMPT
+from app.utils.conversion import LLM_SUPPORTED_TYPES, to_pdf
 from app.services.ai.gemini import GeminiVisionProvider
 from app.services.ai.provider import EmbeddingProvider, VisionProvider
 from app.services.image_sectioning import (
@@ -66,10 +67,15 @@ def _extract_lease_clauses(
 ) -> dict[str, str]:
     if not documents:
         return {}
-    document_parts = [
-        (storage.get_file_data(f.storage_key), f.mime_type or "application/pdf")
-        for f in documents
-    ]
+    document_parts: list[tuple[bytes, str]] = []
+    for f in documents:
+        data = storage.get_file_data(f.storage_key)
+        mime = f.mime_type or "application/pdf"
+        if mime not in LLM_SUPPORTED_TYPES:
+            logger.info(f"Converting {f.name} ({mime}) to PDF for LLM")
+            data = to_pdf(data)
+            mime = "application/pdf"
+        document_parts.append((data, mime))
     return vision.extract_lease_clauses(document_parts)
 
 

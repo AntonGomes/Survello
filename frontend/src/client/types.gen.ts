@@ -4764,6 +4764,42 @@ export type JoinWaitlistResponses = {
 
 export type JoinWaitlistResponse = JoinWaitlistResponses[keyof JoinWaitlistResponses];
 
+export type ListDilapsRunsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/dilaps/';
+};
+
+export type ListDilapsRunsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListDilapsRunsError = ListDilapsRunsErrors[keyof ListDilapsRunsErrors];
+
+export type ListDilapsRunsResponses = {
+    /**
+     * Response Listdilapsruns
+     *
+     * Successful Response
+     */
+    200: Array<DilapsRunRead>;
+};
+
+export type ListDilapsRunsResponse = ListDilapsRunsResponses[keyof ListDilapsRunsResponses];
+
 export type CreateDilapsRunData = {
     body: DilapsRunCreate;
     path?: never;
