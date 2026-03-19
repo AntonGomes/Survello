@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         arbitrary_types_allowed=True,
-        env_file=".env",
+        env_file=(".env", ".env.local"),
         extra="ignore",
         env_parse_none_str="null",
     )
@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     # Feature Flags / Mocks
     use_mock_llm: bool = Field(default=False, alias="USE_MOCK_LLM")
     use_mock_storage: bool = Field(default=False, alias="USE_MOCK_STORAGE")
+    mock_dilaps_vision: bool = Field(default=False, alias="MOCK_DILAPS_VISION")
+    mock_dilaps_embedding: bool = Field(default=False, alias="MOCK_DILAPS_EMBEDDING")
 
     # Email / Resend Settings
     resend_api_key: str | None = Field(default=None, alias="RESEND_API_KEY")
