@@ -518,6 +518,18 @@ export type DilapsRunRead = {
      */
     progress_pct?: number;
     /**
+     * Total Sections
+     */
+    total_sections?: number;
+    /**
+     * Current Section
+     */
+    current_section?: number;
+    /**
+     * Status Message
+     */
+    status_message?: string | null;
+    /**
      * Error Message
      */
     error_message?: string | null;

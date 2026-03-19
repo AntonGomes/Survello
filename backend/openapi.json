@@ -5075,6 +5075,27 @@
             "title": "Progress Pct",
             "default": 0
           },
+          "total_sections": {
+            "type": "integer",
+            "title": "Total Sections",
+            "default": 0
+          },
+          "current_section": {
+            "type": "integer",
+            "title": "Current Section",
+            "default": 0
+          },
+          "status_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Message"
+          },
           "error_message": {
             "anyOf": [
               {
