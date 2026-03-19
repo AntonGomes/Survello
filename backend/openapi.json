@@ -344,7 +344,7 @@
           "Storage"
         ],
         "summary": "Generate Upload Urls",
-        "description": "Generate presigned PUT URLs. Does NOT create DB records yet.",
+        "description": "Generate presigned PUT URLs. Does NOT create DB records yet.\nReuses existing storage keys for files that match by name, type, and size.",
         "operationId": "generateFileUploadUrls",
         "requestBody": {
           "content": {
@@ -3550,6 +3550,483 @@
           }
         }
       }
+    },
+    "/dilaps/": {
+      "post": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Create Dilaps Run",
+        "operationId": "createDilapsRun",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DilapsRunCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DilapsRunRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dilaps/{dilaps_id}": {
+      "get": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Read Dilaps Run",
+        "operationId": "readDilapsRun",
+        "parameters": [
+          {
+            "name": "dilaps_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Dilaps Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DilapsRunRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dilaps/{dilaps_id}/sections": {
+      "get": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Read Dilaps Sections",
+        "operationId": "readDilapsSections",
+        "parameters": [
+          {
+            "name": "dilaps_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Dilaps Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SectionWithItems"
+                  },
+                  "title": "Response Readdilapssections"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dilaps/sections/{section_id}": {
+      "patch": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Update Dilaps Section",
+        "operationId": "updateDilapsSection",
+        "parameters": [
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Section Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DilapsSectionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DilapsSectionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dilaps/items/{item_id}": {
+      "patch": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Update Dilaps Item",
+        "operationId": "updateDilapsItem",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DilapsItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DilapsItemRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Delete Dilaps Item",
+        "operationId": "deleteDilapsItem",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Deletedilapsitem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dilaps/sections/{section_id}/items": {
+      "post": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Create Dilaps Item",
+        "operationId": "createDilapsItem",
+        "parameters": [
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Section Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DilapsItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DilapsItemRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dilaps/{dilaps_id}/merge-sections": {
+      "post": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Merge Sections",
+        "operationId": "mergeDilapsSections",
+        "parameters": [
+          {
+            "name": "dilaps_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Dilaps Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeSectionsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DilapsSectionRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dilaps/sections/{section_id}/split": {
+      "post": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Split Section",
+        "operationId": "splitDilapsSection",
+        "parameters": [
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Section Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SplitSectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DilapsSectionRead"
+                  },
+                  "title": "Response Splitdilapssection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dilaps/{dilaps_id}/export": {
+      "post": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "Export Dilaps Xlsx",
+        "operationId": "exportDilaps",
+        "parameters": [
+          {
+            "name": "dilaps_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Dilaps Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4238,6 +4715,528 @@
           "job_id"
         ],
         "title": "ConvertQuoteResponse"
+      },
+      "DilapsItemCreate": {
+        "properties": {
+          "item_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Number"
+          },
+          "lease_clause": {
+            "type": "string",
+            "title": "Lease Clause"
+          },
+          "want_of_repair": {
+            "type": "string",
+            "title": "Want Of Repair"
+          },
+          "remedy": {
+            "type": "string",
+            "title": "Remedy"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/DilapsUnit",
+            "default": "Sum"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lease_clause",
+          "want_of_repair",
+          "remedy"
+        ],
+        "title": "DilapsItemCreate"
+      },
+      "DilapsItemRead": {
+        "properties": {
+          "item_number": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Item Number"
+          },
+          "lease_clause": {
+            "type": "string",
+            "maxLength": 256,
+            "title": "Lease Clause"
+          },
+          "want_of_repair": {
+            "type": "string",
+            "title": "Want Of Repair"
+          },
+          "remedy": {
+            "type": "string",
+            "title": "Remedy"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/DilapsUnit"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "section_id": {
+            "type": "integer",
+            "title": "Section Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_number",
+          "lease_clause",
+          "want_of_repair",
+          "remedy",
+          "unit",
+          "id",
+          "section_id"
+        ],
+        "title": "DilapsItemRead"
+      },
+      "DilapsItemUpdate": {
+        "properties": {
+          "item_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Number"
+          },
+          "lease_clause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Clause"
+          },
+          "want_of_repair": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Want Of Repair"
+          },
+          "remedy": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remedy"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DilapsUnit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          }
+        },
+        "type": "object",
+        "title": "DilapsItemUpdate"
+      },
+      "DilapsRunCreate": {
+        "properties": {
+          "property_address": {
+            "type": "string",
+            "title": "Property Address"
+          },
+          "lease_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Summary"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "template_file_id": {
+            "type": "integer",
+            "title": "Template File Id"
+          },
+          "context_file_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Context File Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "property_address",
+          "template_file_id",
+          "context_file_ids"
+        ],
+        "title": "DilapsRunCreate"
+      },
+      "DilapsRunRead": {
+        "properties": {
+          "property_address": {
+            "type": "string",
+            "maxLength": 1024,
+            "title": "Property Address"
+          },
+          "lease_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Summary"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DilapsStatus",
+            "default": "idle"
+          },
+          "progress_pct": {
+            "type": "integer",
+            "title": "Progress Pct",
+            "default": 0
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "run_id": {
+            "type": "integer",
+            "title": "Run Id"
+          },
+          "org_id": {
+            "type": "integer",
+            "title": "Org Id"
+          },
+          "created_by_user_id": {
+            "type": "integer",
+            "title": "Created By User Id"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "property_address",
+          "id",
+          "run_id",
+          "org_id",
+          "created_by_user_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DilapsRunRead"
+      },
+      "DilapsSectionRead": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 256,
+            "title": "Name"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "sheet_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 31
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheet Name"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "dilaps_run_id": {
+            "type": "integer",
+            "title": "Dilaps Run Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "dilaps_run_id"
+        ],
+        "title": "DilapsSectionRead"
+      },
+      "DilapsSectionUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          },
+          "sheet_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheet Name"
+          }
+        },
+        "type": "object",
+        "title": "DilapsSectionUpdate"
+      },
+      "DilapsStatus": {
+        "type": "string",
+        "enum": [
+          "idle",
+          "embedding",
+          "sectioning",
+          "analyzing",
+          "completed",
+          "error"
+        ],
+        "title": "DilapsStatus"
+      },
+      "DilapsUnit": {
+        "type": "string",
+        "enum": [
+          "Sum",
+          "m",
+          "m\u00b2",
+          "No"
+        ],
+        "title": "DilapsUnit"
       },
       "FileCreate": {
         "properties": {
@@ -6197,6 +7196,57 @@
         ],
         "title": "LeadUpdateEntry"
       },
+      "MergeSectionsBody": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          },
+          "sheet_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheet Name"
+          },
+          "source_id": {
+            "type": "integer",
+            "title": "Source Id"
+          },
+          "target_id": {
+            "type": "integer",
+            "title": "Target Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_id",
+          "target_id"
+        ],
+        "title": "MergeSectionsBody"
+      },
       "OrgReadWithUsers": {
         "properties": {
           "name": {
@@ -6830,6 +7880,107 @@
           "error"
         ],
         "title": "RunStatus"
+      },
+      "SectionWithItems": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 256,
+            "title": "Name"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "sheet_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 31
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheet Name"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "dilaps_run_id": {
+            "type": "integer",
+            "title": "Dilaps Run Id"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DilapsItemRead"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "image_files": {
+            "items": {
+              "$ref": "#/components/schemas/FileRead"
+            },
+            "type": "array",
+            "title": "Image Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "dilaps_run_id"
+        ],
+        "title": "SectionWithItems"
+      },
+      "SplitSectionBody": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          },
+          "sheet_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sheet Name"
+          },
+          "split_at_image_index": {
+            "type": "integer",
+            "title": "Split At Image Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "split_at_image_index"
+        ],
+        "title": "SplitSectionBody"
       },
       "SurveyCreate": {
         "properties": {

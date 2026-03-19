@@ -354,6 +354,280 @@ export type ConvertQuoteResponse = {
 };
 
 /**
+ * DilapsItemCreate
+ */
+export type DilapsItemCreate = {
+    /**
+     * Item Number
+     */
+    item_number?: string | null;
+    /**
+     * Lease Clause
+     */
+    lease_clause: string;
+    /**
+     * Want Of Repair
+     */
+    want_of_repair: string;
+    /**
+     * Remedy
+     */
+    remedy: string;
+    unit?: DilapsUnit;
+    /**
+     * Quantity
+     */
+    quantity?: number | string | null;
+    /**
+     * Rate
+     */
+    rate?: number | string | null;
+    /**
+     * Cost
+     */
+    cost?: number | string | null;
+};
+
+/**
+ * DilapsItemRead
+ */
+export type DilapsItemRead = {
+    /**
+     * Item Number
+     */
+    item_number: string;
+    /**
+     * Lease Clause
+     */
+    lease_clause: string;
+    /**
+     * Want Of Repair
+     */
+    want_of_repair: string;
+    /**
+     * Remedy
+     */
+    remedy: string;
+    unit: DilapsUnit;
+    /**
+     * Quantity
+     */
+    quantity?: string | null;
+    /**
+     * Rate
+     */
+    rate?: string | null;
+    /**
+     * Cost
+     */
+    cost?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Section Id
+     */
+    section_id: number;
+};
+
+/**
+ * DilapsItemUpdate
+ */
+export type DilapsItemUpdate = {
+    /**
+     * Item Number
+     */
+    item_number?: string | null;
+    /**
+     * Lease Clause
+     */
+    lease_clause?: string | null;
+    /**
+     * Want Of Repair
+     */
+    want_of_repair?: string | null;
+    /**
+     * Remedy
+     */
+    remedy?: string | null;
+    unit?: DilapsUnit | null;
+    /**
+     * Quantity
+     */
+    quantity?: number | string | null;
+    /**
+     * Rate
+     */
+    rate?: number | string | null;
+    /**
+     * Cost
+     */
+    cost?: number | string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number | null;
+};
+
+/**
+ * DilapsRunCreate
+ */
+export type DilapsRunCreate = {
+    /**
+     * Property Address
+     */
+    property_address: string;
+    /**
+     * Lease Summary
+     */
+    lease_summary?: string | null;
+    /**
+     * Job Id
+     */
+    job_id?: number | null;
+    /**
+     * Template File Id
+     */
+    template_file_id: number;
+    /**
+     * Context File Ids
+     */
+    context_file_ids: Array<number>;
+};
+
+/**
+ * DilapsRunRead
+ */
+export type DilapsRunRead = {
+    /**
+     * Property Address
+     */
+    property_address: string;
+    /**
+     * Lease Summary
+     */
+    lease_summary?: string | null;
+    status?: DilapsStatus;
+    /**
+     * Progress Pct
+     */
+    progress_pct?: number;
+    /**
+     * Error Message
+     */
+    error_message?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Run Id
+     */
+    run_id: number;
+    /**
+     * Org Id
+     */
+    org_id: number;
+    /**
+     * Created By User Id
+     */
+    created_by_user_id: number;
+    /**
+     * Job Id
+     */
+    job_id?: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * DilapsSectionRead
+ */
+export type DilapsSectionRead = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    /**
+     * Sheet Name
+     */
+    sheet_name?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Dilaps Run Id
+     */
+    dilaps_run_id: number;
+};
+
+/**
+ * DilapsSectionUpdate
+ */
+export type DilapsSectionUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number | null;
+    /**
+     * Sheet Name
+     */
+    sheet_name?: string | null;
+};
+
+/**
+ * DilapsStatus
+ */
+export const DilapsStatus = {
+    IDLE: 'idle',
+    EMBEDDING: 'embedding',
+    SECTIONING: 'sectioning',
+    ANALYZING: 'analyzing',
+    COMPLETED: 'completed',
+    ERROR: 'error'
+} as const;
+
+/**
+ * DilapsStatus
+ */
+export type DilapsStatus = typeof DilapsStatus[keyof typeof DilapsStatus];
+
+/**
+ * DilapsUnit
+ */
+export const DilapsUnit = {
+    SUM: 'Sum',
+    M: 'm',
+    'M²': 'm²',
+    NO: 'No'
+} as const;
+
+/**
+ * DilapsUnit
+ */
+export type DilapsUnit = typeof DilapsUnit[keyof typeof DilapsUnit];
+
+/**
  * FileCreate
  */
 export type FileCreate = {
@@ -1344,6 +1618,32 @@ export type LeadUpdateEntry = {
 };
 
 /**
+ * MergeSectionsBody
+ */
+export type MergeSectionsBody = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number | null;
+    /**
+     * Sheet Name
+     */
+    sheet_name?: string | null;
+    /**
+     * Source Id
+     */
+    source_id: number;
+    /**
+     * Target Id
+     */
+    target_id: number;
+};
+
+/**
  * OrgReadWithUsers
  */
 export type OrgReadWithUsers = {
@@ -1673,6 +1973,62 @@ export const RunStatus = {
  * RunStatus
  */
 export type RunStatus = typeof RunStatus[keyof typeof RunStatus];
+
+/**
+ * SectionWithItems
+ */
+export type SectionWithItems = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    /**
+     * Sheet Name
+     */
+    sheet_name?: string | null;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Dilaps Run Id
+     */
+    dilaps_run_id: number;
+    /**
+     * Items
+     */
+    items?: Array<DilapsItemRead>;
+    /**
+     * Image Files
+     */
+    image_files?: Array<FileRead>;
+};
+
+/**
+ * SplitSectionBody
+ */
+export type SplitSectionBody = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number | null;
+    /**
+     * Sheet Name
+     */
+    sheet_name?: string | null;
+    /**
+     * Split At Image Index
+     */
+    split_at_image_index: number;
+};
 
 /**
  * SurveyCreate
@@ -4385,3 +4741,304 @@ export type JoinWaitlistResponses = {
 };
 
 export type JoinWaitlistResponse = JoinWaitlistResponses[keyof JoinWaitlistResponses];
+
+export type CreateDilapsRunData = {
+    body: DilapsRunCreate;
+    path?: never;
+    query?: never;
+    url: '/dilaps/';
+};
+
+export type CreateDilapsRunErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateDilapsRunError = CreateDilapsRunErrors[keyof CreateDilapsRunErrors];
+
+export type CreateDilapsRunResponses = {
+    /**
+     * Successful Response
+     */
+    200: DilapsRunRead;
+};
+
+export type CreateDilapsRunResponse = CreateDilapsRunResponses[keyof CreateDilapsRunResponses];
+
+export type ReadDilapsRunData = {
+    body?: never;
+    path: {
+        /**
+         * Dilaps Id
+         */
+        dilaps_id: number;
+    };
+    query?: never;
+    url: '/dilaps/{dilaps_id}';
+};
+
+export type ReadDilapsRunErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadDilapsRunError = ReadDilapsRunErrors[keyof ReadDilapsRunErrors];
+
+export type ReadDilapsRunResponses = {
+    /**
+     * Successful Response
+     */
+    200: DilapsRunRead;
+};
+
+export type ReadDilapsRunResponse = ReadDilapsRunResponses[keyof ReadDilapsRunResponses];
+
+export type ReadDilapsSectionsData = {
+    body?: never;
+    path: {
+        /**
+         * Dilaps Id
+         */
+        dilaps_id: number;
+    };
+    query?: never;
+    url: '/dilaps/{dilaps_id}/sections';
+};
+
+export type ReadDilapsSectionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadDilapsSectionsError = ReadDilapsSectionsErrors[keyof ReadDilapsSectionsErrors];
+
+export type ReadDilapsSectionsResponses = {
+    /**
+     * Response Readdilapssections
+     *
+     * Successful Response
+     */
+    200: Array<SectionWithItems>;
+};
+
+export type ReadDilapsSectionsResponse = ReadDilapsSectionsResponses[keyof ReadDilapsSectionsResponses];
+
+export type UpdateDilapsSectionData = {
+    body: DilapsSectionUpdate;
+    path: {
+        /**
+         * Section Id
+         */
+        section_id: number;
+    };
+    query?: never;
+    url: '/dilaps/sections/{section_id}';
+};
+
+export type UpdateDilapsSectionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateDilapsSectionError = UpdateDilapsSectionErrors[keyof UpdateDilapsSectionErrors];
+
+export type UpdateDilapsSectionResponses = {
+    /**
+     * Successful Response
+     */
+    200: DilapsSectionRead;
+};
+
+export type UpdateDilapsSectionResponse = UpdateDilapsSectionResponses[keyof UpdateDilapsSectionResponses];
+
+export type DeleteDilapsItemData = {
+    body?: never;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/dilaps/items/{item_id}';
+};
+
+export type DeleteDilapsItemErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteDilapsItemError = DeleteDilapsItemErrors[keyof DeleteDilapsItemErrors];
+
+export type DeleteDilapsItemResponses = {
+    /**
+     * Response Deletedilapsitem
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type DeleteDilapsItemResponse = DeleteDilapsItemResponses[keyof DeleteDilapsItemResponses];
+
+export type UpdateDilapsItemData = {
+    body: DilapsItemUpdate;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/dilaps/items/{item_id}';
+};
+
+export type UpdateDilapsItemErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateDilapsItemError = UpdateDilapsItemErrors[keyof UpdateDilapsItemErrors];
+
+export type UpdateDilapsItemResponses = {
+    /**
+     * Successful Response
+     */
+    200: DilapsItemRead;
+};
+
+export type UpdateDilapsItemResponse = UpdateDilapsItemResponses[keyof UpdateDilapsItemResponses];
+
+export type CreateDilapsItemData = {
+    body: DilapsItemCreate;
+    path: {
+        /**
+         * Section Id
+         */
+        section_id: number;
+    };
+    query?: never;
+    url: '/dilaps/sections/{section_id}/items';
+};
+
+export type CreateDilapsItemErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateDilapsItemError = CreateDilapsItemErrors[keyof CreateDilapsItemErrors];
+
+export type CreateDilapsItemResponses = {
+    /**
+     * Successful Response
+     */
+    200: DilapsItemRead;
+};
+
+export type CreateDilapsItemResponse = CreateDilapsItemResponses[keyof CreateDilapsItemResponses];
+
+export type MergeDilapsSectionsData = {
+    body: MergeSectionsBody;
+    path: {
+        /**
+         * Dilaps Id
+         */
+        dilaps_id: number;
+    };
+    query?: never;
+    url: '/dilaps/{dilaps_id}/merge-sections';
+};
+
+export type MergeDilapsSectionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MergeDilapsSectionsError = MergeDilapsSectionsErrors[keyof MergeDilapsSectionsErrors];
+
+export type MergeDilapsSectionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: DilapsSectionRead;
+};
+
+export type MergeDilapsSectionsResponse = MergeDilapsSectionsResponses[keyof MergeDilapsSectionsResponses];
+
+export type SplitDilapsSectionData = {
+    body: SplitSectionBody;
+    path: {
+        /**
+         * Section Id
+         */
+        section_id: number;
+    };
+    query?: never;
+    url: '/dilaps/sections/{section_id}/split';
+};
+
+export type SplitDilapsSectionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SplitDilapsSectionError = SplitDilapsSectionErrors[keyof SplitDilapsSectionErrors];
+
+export type SplitDilapsSectionResponses = {
+    /**
+     * Response Splitdilapssection
+     *
+     * Successful Response
+     */
+    200: Array<DilapsSectionRead>;
+};
+
+export type SplitDilapsSectionResponse = SplitDilapsSectionResponses[keyof SplitDilapsSectionResponses];
+
+export type ExportDilapsData = {
+    body?: never;
+    path: {
+        /**
+         * Dilaps Id
+         */
+        dilaps_id: number;
+    };
+    query?: never;
+    url: '/dilaps/{dilaps_id}/export';
+};
+
+export type ExportDilapsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportDilapsError = ExportDilapsErrors[keyof ExportDilapsErrors];
+
+export type ExportDilapsResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};

@@ -10,6 +10,7 @@ from sqlmodel import text
 
 from app.api.routes.auth import router as auth_router
 from app.api.routes.clients import router as clients_router
+from app.api.routes.dilaps import router as dilaps_router
 from app.api.routes.files import router as files_router
 from app.api.routes.instructions import router as instructions_router
 from app.api.routes.invitations import router as invitations_router
@@ -53,6 +54,11 @@ PRODUCTION_ORIGINS = [
 ]
 
 
+def _is_local_dev() -> bool:
+    settings = get_settings()
+    return "localhost" in settings.frontend_url
+
+
 def _build_allowed_origins() -> list[str]:
     settings = get_settings()
     origins = list(PRODUCTION_ORIGINS)
@@ -62,6 +68,7 @@ def _build_allowed_origins() -> list[str]:
     return origins
 
 
+LOCAL_DEV_ORIGIN_REGEX = r"^http://localhost:\d+$"
 origins = _build_allowed_origins()
 
 app = FastAPI(
@@ -75,6 +82,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=LOCAL_DEV_ORIGIN_REGEX if _is_local_dev() else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -130,3 +138,4 @@ app.include_router(surveys_router, prefix="/surveys", tags=["Surveys"])
 app.include_router(invitations_router, prefix="/invitations", tags=["Invitations"])
 app.include_router(org_router, prefix="/org", tags=["Organization"])
 app.include_router(waitlist_router, prefix="/waitlist", tags=["Waitlist"])
+app.include_router(dilaps_router, prefix="/dilaps", tags=["Dilaps"])

@@ -30,7 +30,7 @@ export function GenerateDocButton({ collapsed, onNavigate }: { collapsed: boolea
       onClick={onNavigate}
     >
       <Plus className="h-5 w-5" strokeWidth={3} />
-      <span className={cn(collapsed ? "lg:hidden" : "block")}>Generate Document</span>
+      <span className={cn(collapsed ? "lg:hidden" : "block")}>Generate Dilaps</span>
     </Link>
   );
 }

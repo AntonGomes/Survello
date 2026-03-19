@@ -112,6 +112,23 @@ def _maybe_generate_preview(
         logger.error(f"Unexpected error generating preview for file {db_file.id}: {e}")
 
 
+def _find_existing_file(
+    db: DBDep,
+    org_id: int,
+    file_name: str,
+    mime_type: str,
+    size_bytes: int | None,
+) -> File | None:
+    stmt = select(File).where(
+        File.org_id == org_id,
+        File.file_name == file_name,
+        File.mime_type == mime_type,
+    )
+    if size_bytes is not None:
+        stmt = stmt.where(File.size_bytes == size_bytes)
+    return db.exec(stmt).first()
+
+
 @router.post(
     "/presign",
     response_model=list[FilePresignResponse],
@@ -122,14 +139,27 @@ def generate_upload_urls(
     files: list[FilePresignRequest],
     storage: StorageDep,
     user: CurrentUserDep,
+    db: DBDep,
 ) -> list[FilePresignResponse]:
     """
     Generate presigned PUT URLs. Does NOT create DB records yet.
+    Reuses existing storage keys for files that match by name, type, and size.
     """
     response: list[FilePresignResponse] = []
 
     for f in files:
-        storage_key = f"{user.org_id}/{user.id}/{uuid4()}-{f.file_name}"
+        existing = _find_existing_file(
+            db,
+            user.org_id,
+            f.file_name,
+            f.mime_type,
+            f.size_bytes,
+        )
+
+        if existing and storage.check_file_exists(existing.storage_key):
+            storage_key = existing.storage_key
+        else:
+            storage_key = f"{user.org_id}/{user.id}/{uuid4()}-{f.file_name}"
 
         url = storage.generate_presigned_url(
             "put_object",
@@ -200,6 +230,16 @@ def create_files(
     files: list[File] = []
     extra_data = {"uploaded_by_user_id": user.id, "org_id": user.org_id}
     for file_in_item in files_in:
+        existing = db.exec(
+            select(File).where(
+                File.storage_key == file_in_item.storage_key,
+                File.org_id == user.org_id,
+            )
+        ).first()
+        if existing:
+            files.append(existing)
+            continue
+
         if not storage.check_file_exists(file_in_item.storage_key):
             raise HTTPException(
                 400,

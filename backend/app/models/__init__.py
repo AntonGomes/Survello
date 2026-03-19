@@ -1,5 +1,12 @@
 from .artefact_model import Artefact
 from .client_model import Client, ClientContact
+from .dilaps_model import (
+    DilapsItem,
+    DilapsRun,
+    DilapsSection,
+    DilapsSectionFileLink,
+)
+from .embedding_model import ImageEmbedding
 from .file_model import File
 from .instruction_model import (
     Instruction,
@@ -24,7 +31,12 @@ __all__ = [
     "Artefact",
     "Client",
     "ClientContact",
+    "DilapsItem",
+    "DilapsRun",
+    "DilapsSection",
+    "DilapsSectionFileLink",
     "File",
+    "ImageEmbedding",
     "Instruction",
     "InstructionStatus",
     "InstructionType",

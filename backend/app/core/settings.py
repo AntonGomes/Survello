@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     container_prefix: str = Field(default="docgen")
 
+    # Gemini (vision + embeddings)
+    gemini_api_key: str | None = Field(default=None, alias="GEMINI_API_KEY")
+
     # AWS and S3
     aws_default_region: str | None = Field(default=None, alias="AWS_DEFAULT_REGION")
     s3_bucket_name: str | None = Field(default=None, alias="S3_BUCKET_NAME")

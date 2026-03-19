@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
-import { Upload } from "lucide-react";
-import { Dropzone, DropzoneContent } from "@/components/ui/shadcn-io/dropzone";
+import { DropzoneOptions } from "react-dropzone";
+import { Dropzone, DropzoneContent, DropzoneEmptyState } from "@/components/ui/shadcn-io/dropzone";
 
 type Props = {
   title: string;
@@ -10,6 +10,7 @@ type Props = {
   files: File[];
   onDrop: (files: File[]) => void;
   maxFiles?: number;
+  accept?: DropzoneOptions["accept"];
 };
 
 export function UploadCard({
@@ -20,6 +21,7 @@ export function UploadCard({
   files,
   onDrop,
   maxFiles = 1,
+  accept,
 }: Props) {
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
@@ -34,23 +36,11 @@ export function UploadCard({
         maxFiles={maxFiles}
         onDrop={onDrop}
         src={files}
+        accept={accept}
         className="border-2 border-dashed border-accent/40 bg-primary/10 hover:border-accent hover:bg-accent/10 transition-all rounded-xl"
       >
-        {files.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-4">
-            <div className="flex size-10 items-center justify-center rounded-full bg-primary/20 text-primary mb-3">
-              <Upload size={20} />
-            </div>
-            <p className="font-medium text-sm text-foreground mb-1">
-              Browse Files
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Click to browse or drag files here
-            </p>
-          </div>
-        ) : (
-          <DropzoneContent />
-        )}
+        <DropzoneEmptyState />
+        <DropzoneContent />
       </Dropzone>
       {files.length > 0 && (
         <p className="text-sm text-muted-foreground mt-3">
