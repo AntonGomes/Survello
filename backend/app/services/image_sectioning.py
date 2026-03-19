@@ -32,6 +32,10 @@ def _get_files_needing_embedding(
         if not existing:
             ids_to_embed.append(f.id)
             files_to_embed.append(f)
+
+    cached = len(files) - len(files_to_embed)
+    if cached:
+        logger.info(f"Embedding cache hit: {cached}/{len(files)} files")
     return ids_to_embed, files_to_embed
 
 
@@ -41,12 +45,20 @@ def _store_embeddings(
     db: Session,
 ) -> None:
     for file_id, vector in zip(file_ids, vectors, strict=True):
-        emb = ImageEmbedding(
-            file_id=file_id,
-            embedding=vector,
-            model_name="gemini-embedding",
-        )
-        db.add(emb)
+        existing = db.exec(
+            select(ImageEmbedding).where(
+                ImageEmbedding.file_id == file_id
+            )
+        ).first()
+        if existing:
+            existing.embedding = vector
+        else:
+            emb = ImageEmbedding(
+                file_id=file_id,
+                embedding=vector,
+                model_name="gemini-embedding",
+            )
+            db.add(emb)
     db.commit()
 
 
