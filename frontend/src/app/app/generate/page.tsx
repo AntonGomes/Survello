@@ -95,7 +95,7 @@ export default function GeneratePage() {
             />
           </div>
 
-          <DilapsUploadGrid files={files} onUpdate={setFiles} />
+          <DilapsUploadGrid files={files} onUpdate={setFiles} disabled={generation.isActive} />
         </div>
       )}
 

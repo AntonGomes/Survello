@@ -1,20 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import {
-  FileText,
-  Image as ImageIcon,
-  StickyNote,
-  FolderOpen,
-  Files,
-} from "lucide-react";
+import { FolderOpen } from "lucide-react";
 
-import { UploadCard } from "@/components/upload-card";
+import { LeaseUpload } from "@/app/app/generate/lease-upload";
+import { SurveyUpload } from "@/app/app/generate/survey-upload";
+import { SupportingDocs, buildDocSlots } from "@/app/app/generate/supporting-docs";
 import { Card, CardContent } from "@/components/ui/card";
 import { readJobOptions } from "@/client/@tanstack/react-query.gen";
-
-const MAX_SURVEY_IMAGES = 500;
-const MAX_CONTEXT_FILES = 100;
 
 type UploadFiles = {
   leaseFile: File | null;
@@ -27,6 +20,7 @@ type UploadFiles = {
 type DilapsUploadGridProps = {
   files: UploadFiles;
   onUpdate: (files: UploadFiles) => void;
+  disabled?: boolean;
 };
 
 function deduplicateFiles(existing: File[], incoming: File[]) {
@@ -36,78 +30,28 @@ function deduplicateFiles(existing: File[], incoming: File[]) {
   return [...existing, ...newFiles];
 }
 
-export function DilapsUploadGrid({ files, onUpdate }: DilapsUploadGridProps) {
+export function DilapsUploadGrid({ files, onUpdate, disabled }: DilapsUploadGridProps) {
+  const docSlots = buildDocSlots(
+    { leaseDocFiles: files.leaseDocFiles, siteNoteFiles: files.siteNoteFiles, miscFiles: files.miscFiles },
+    (patch) => onUpdate({ ...files, ...patch }),
+  );
+
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <UploadCard
-        title="Lease PDF"
-        icon={<FileText className="w-5 h-5 text-accent" />}
-        hint="Required"
-        required
-        files={files.leaseFile ? [files.leaseFile] : []}
-        onDrop={(dropped) =>
-          onUpdate({ ...files, leaseFile: dropped[0] || null })
-        }
-        maxFiles={1}
-        accept={{ "application/pdf": [".pdf"] }}
+    <div className="space-y-4">
+      <LeaseUpload
+        file={files.leaseFile}
+        onDrop={(dropped) => onUpdate({ ...files, leaseFile: dropped[0] || null })}
+        disabled={disabled}
       />
-      <UploadCard
-        title="Lease Documentation"
-        icon={<Files className="w-5 h-5 text-accent" />}
-        hint="Optional"
-        files={files.leaseDocFiles}
-        onDrop={(dropped) =>
-          onUpdate({
-            ...files,
-            leaseDocFiles: deduplicateFiles(files.leaseDocFiles, dropped),
-          })
-        }
-        maxFiles={MAX_CONTEXT_FILES}
-      />
-      <UploadCard
-        title="Site Notes"
-        icon={<StickyNote className="w-5 h-5 text-accent" />}
-        hint="Optional"
-        files={files.siteNoteFiles}
-        onDrop={(dropped) =>
-          onUpdate({
-            ...files,
-            siteNoteFiles: deduplicateFiles(files.siteNoteFiles, dropped),
-          })
-        }
-        maxFiles={MAX_CONTEXT_FILES}
-      />
-      <UploadCard
-        title="Survey Images"
-        icon={<ImageIcon className="w-5 h-5 text-accent" />}
-        hint="Required"
-        required
+      <SurveyUpload
         files={files.surveyImageFiles}
-        onDrop={(dropped) =>
-          onUpdate({
-            ...files,
-            surveyImageFiles: deduplicateFiles(
-              files.surveyImageFiles,
-              dropped,
-            ),
-          })
-        }
-        maxFiles={MAX_SURVEY_IMAGES}
-        accept={{ "image/*": [".png", ".jpg", ".jpeg", ".webp", ".heic"] }}
+        onDrop={(dropped) => onUpdate({
+          ...files,
+          surveyImageFiles: deduplicateFiles(files.surveyImageFiles, dropped),
+        })}
+        disabled={disabled}
       />
-      <UploadCard
-        title="Misc"
-        icon={<FolderOpen className="w-5 h-5 text-accent" />}
-        hint="Optional"
-        files={files.miscFiles}
-        onDrop={(dropped) =>
-          onUpdate({
-            ...files,
-            miscFiles: deduplicateFiles(files.miscFiles, dropped),
-          })
-        }
-        maxFiles={MAX_CONTEXT_FILES}
-      />
+      <SupportingDocs slots={docSlots} disabled={disabled} />
     </div>
   );
 }
