@@ -1,6 +1,7 @@
 "use client"
 
 import { Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { useDilapsReview } from "@/hooks/use-dilaps-review"
 import { SectionNav } from "./section-nav"
 import { SectionEditor } from "./section-editor"
@@ -15,6 +16,8 @@ function EmptyState() {
 }
 
 function ReviewContent() {
+  const searchParams = useSearchParams()
+  const dilapsId = Number(searchParams.get("dilapsId"))
   const {
     sections, activeSectionId, activeSection,
     mergeSelection, canMerge, totalItems, totalCost,
@@ -40,7 +43,7 @@ function ReviewContent() {
           )}
         </div>
       </div>
-      <ExportPanel totalItems={totalItems} totalCost={totalCost} />
+      <ExportPanel dilapsId={dilapsId} totalItems={totalItems} totalCost={totalCost} />
     </div>
   )
 }
