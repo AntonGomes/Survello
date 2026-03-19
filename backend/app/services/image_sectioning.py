@@ -17,6 +17,7 @@ ADJACENT_MERGE_THRESHOLD = 0.80
 IMAGE_MIME_PREFIXES = ("image/jpeg", "image/png", "image/webp")
 MAX_NAMING_BATCH = 10
 NAMING_RETRIES = 2
+MIN_MERGE_GROUP_SIZE = 2
 
 
 def is_image_file(f: File) -> bool:
@@ -316,7 +317,7 @@ def _apply_llm_merges(
     absorbed: set[int] = set()
     for group in merge_groups:
         valid = [i for i in group if 0 <= i < len(sections) and i not in absorbed]
-        if len(valid) < 2:
+        if len(valid) < MIN_MERGE_GROUP_SIZE:
             continue
         target = valid[0]
         for src in valid[1:]:
@@ -352,18 +353,11 @@ def _llm_merge_pass(
         ]
         window_names = names[start:end]
 
-        merge_groups = vision_provider.suggest_merges(
-            window_images, window_names
-        )
+        merge_groups = vision_provider.suggest_merges(window_images, window_names)
         if merge_groups:
-            absolute_groups = [
-                [idx + start for idx in group]
-                for group in merge_groups
-            ]
+            absolute_groups = [[idx + start for idx in group] for group in merge_groups]
             pre = len(sections)
-            sections, names = _apply_llm_merges(
-                absolute_groups, sections, names
-            )
+            sections, names = _apply_llm_merges(absolute_groups, sections, names)
             merged_in_window = pre - len(sections)
             total_merged += merged_in_window
             start = max(0, end - merged_in_window - LLM_MERGE_OVERLAP)

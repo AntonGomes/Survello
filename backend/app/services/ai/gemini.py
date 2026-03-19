@@ -7,7 +7,6 @@ from google import genai
 from google.genai import types
 
 from app.core.logging import logger
-
 from app.prompts.dilaps_analysis import DILAPS_SECTION_MERGE_PROMPT
 
 from .provider import (
@@ -21,6 +20,7 @@ VISION_MODEL = "gemini-2.5-flash"
 EMBEDDING_MODEL = "gemini-embedding-2-preview"
 EMBEDDING_DIMENSIONS = 768
 MAX_IMAGES_PER_EMBED = 6
+MIN_MERGE_GROUP_SIZE = 2
 SECTION_NAMING_PROMPT = (
     "You are a building surveyor. For each image, provide a short "
     "name for the area shown (e.g. 'Kitchen', 'Front Elevation', "
@@ -146,8 +146,10 @@ class GeminiVisionProvider(VisionProvider):
         raw = json.loads(response.text)
         groups = raw.get("merge_groups", [])
         valid = [
-            g for g in groups
-            if isinstance(g, list) and len(g) >= 2
+            g
+            for g in groups
+            if isinstance(g, list)
+            and len(g) >= MIN_MERGE_GROUP_SIZE
             and all(isinstance(i, int) for i in g)
         ]
         if valid:
