@@ -46,9 +46,7 @@ def _store_embeddings(
 ) -> None:
     for file_id, vector in zip(file_ids, vectors, strict=True):
         existing = db.exec(
-            select(ImageEmbedding).where(
-                ImageEmbedding.file_id == file_id
-            )
+            select(ImageEmbedding).where(ImageEmbedding.file_id == file_id)
         ).first()
         if existing:
             existing.embedding = vector
@@ -79,9 +77,7 @@ def compute_embeddings(
     all_file_ids = [f.id for f in files]
     return list(
         db.exec(
-            select(ImageEmbedding).where(
-                ImageEmbedding.file_id.in_(all_file_ids)
-            )
+            select(ImageEmbedding).where(ImageEmbedding.file_id.in_(all_file_ids))
         ).all()
     )
 
@@ -126,9 +122,7 @@ def section_images(
         return []
 
     ordered = _order_by_timestamp(files, storage)
-    emb_map: dict[int, list[float]] = {
-        e.file_id: e.embedding for e in embeddings
-    }
+    emb_map: dict[int, list[float]] = {e.file_id: e.embedding for e in embeddings}
 
     sections: list[list[File]] = [[ordered[0]]]
 
@@ -140,9 +134,7 @@ def section_images(
             sections.append([])
         sections[-1].append(ordered[i])
 
-    logger.info(
-        f"Sectioned {len(ordered)} images into {len(sections)} groups"
-    )
+    logger.info(f"Sectioned {len(ordered)} images into {len(sections)} groups")
     return sections
 
 

@@ -135,14 +135,10 @@ CurrentUserDep: TypeAlias = Annotated[User, Depends(get_current_user)]
 LLMDep: TypeAlias = Annotated[BaseLLMService, Depends(get_llm_service)]
 StorageDep: TypeAlias = Annotated[StorageService, Depends(get_storage_service)]
 VisionDep: TypeAlias = Annotated[VisionProvider, Depends(get_vision_provider)]
-EmbeddingDep: TypeAlias = Annotated[
-    EmbeddingProvider, Depends(get_embedding_provider)
-]
+EmbeddingDep: TypeAlias = Annotated[EmbeddingProvider, Depends(get_embedding_provider)]
 DBDep: TypeAlias = Annotated[Session, Depends(get_db)]
 SessionDep: TypeAlias = Annotated[Session, Depends(get_db)]
 GenServicesDep: TypeAlias = Annotated[
     GenerationServices, Depends(get_generation_services)
 ]
-DilapsServicesDep: TypeAlias = Annotated[
-    DilapsServices, Depends(get_dilaps_services)
-]
+DilapsServicesDep: TypeAlias = Annotated[DilapsServices, Depends(get_dilaps_services)]

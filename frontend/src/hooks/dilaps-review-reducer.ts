@@ -127,7 +127,7 @@ function handleSplitSection(state: ReviewState, sectionId: number, atImageIndex:
 
 function handleDeleteSection(state: ReviewState, sectionId: number): ReviewState {
   const sections = state.sections.filter((s) => s.id !== sectionId)
-  const newActive = sections.length > 0 ? sections[0].id : null
+  const newActive = sections[0]?.id ?? null
   return {
     ...state,
     sections: recomputeItemNumbers(sections),

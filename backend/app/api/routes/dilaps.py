@@ -126,13 +126,17 @@ def read_dilaps_sections(
     if dilaps_run.org_id != current_user.org_id:
         raise HTTPException(403, "Not authorized")
 
-    sections = db.exec(
-        select(DilapsSection)
-        .where(DilapsSection.dilaps_run_id == dilaps_id)
-        .options(joinedload(DilapsSection.items))
-        .options(joinedload(DilapsSection.files))
-        .order_by(DilapsSection.sort_order)
-    ).unique().all()
+    sections = (
+        db.exec(
+            select(DilapsSection)
+            .where(DilapsSection.dilaps_run_id == dilaps_id)
+            .options(joinedload(DilapsSection.items))
+            .options(joinedload(DilapsSection.files))
+            .order_by(DilapsSection.sort_order)
+        )
+        .unique()
+        .all()
+    )
 
     return [
         SectionWithItems(
@@ -357,9 +361,7 @@ def split_section(
     return [section, new_section]
 
 
-XLSX_MIME = (
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 @router.post(
@@ -383,7 +385,5 @@ def export_dilaps_xlsx(
     return Response(
         content=xlsx_bytes,
         media_type=XLSX_MIME,
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        },
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

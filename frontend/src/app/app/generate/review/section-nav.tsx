@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core"
+import { DndContext, closestCenter, type DragEndEvent, type DraggableAttributes } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { GripVertical, MoreHorizontal, Scissors, Trash2, Merge, ImageIcon, FileText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -56,7 +56,7 @@ function SortableSectionCard(props: SectionCardProps) {
 function SectionCardContent({
   section, isActive, isMergeSelected, showMergeCheckbox, dispatch, onSelect,
   dragListeners, dragAttributes,
-}: SectionCardProps & { dragListeners?: Record<string, unknown>; dragAttributes?: Record<string, unknown> }) {
+}: SectionCardProps & { dragListeners?: Record<string, unknown>; dragAttributes?: DraggableAttributes }) {
   return (
     <div
       className={cn(
@@ -129,7 +129,8 @@ export function SectionNav({ sections, activeSectionId, mergeSelection, canMerge
     const oldIdx = sections.findIndex((s) => s.id === active.id)
     const newIdx = sections.findIndex((s) => s.id === over.id)
     const reordered = [...sections]
-    const [moved] = reordered.splice(oldIdx, 1)
+    const moved = reordered.splice(oldIdx, 1)[0]
+    if (!moved) return
     reordered.splice(newIdx, 0, moved)
     dispatch({ type: "REORDER_SECTIONS", sectionIds: reordered.map((s) => s.id) })
   }
@@ -175,7 +176,13 @@ function MergeToolbar({ canMerge, mergeSelection, dispatch }: { canMerge: boolea
         <Button
           size="sm"
           disabled={!canMerge}
-          onClick={() => dispatch({ type: "MERGE_SECTIONS", sourceId: mergeSelection[1], targetId: mergeSelection[0] })}
+          onClick={() => {
+            const targetId = mergeSelection[0]
+            const sourceId = mergeSelection[1]
+            if (targetId !== undefined && sourceId !== undefined) {
+              dispatch({ type: "MERGE_SECTIONS", sourceId, targetId })
+            }
+          }}
         >
           <Merge className="h-4 w-4 mr-1" /> Merge
         </Button>

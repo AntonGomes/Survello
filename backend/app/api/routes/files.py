@@ -149,15 +149,17 @@ def generate_upload_urls(
 
     for f in files:
         existing = _find_existing_file(
-            db, user.org_id, f.file_name, f.mime_type, f.size_bytes,
+            db,
+            user.org_id,
+            f.file_name,
+            f.mime_type,
+            f.size_bytes,
         )
 
         if existing and storage.check_file_exists(existing.storage_key):
             storage_key = existing.storage_key
         else:
-            storage_key = (
-                f"{user.org_id}/{user.id}/{uuid4()}-{f.file_name}"
-            )
+            storage_key = f"{user.org_id}/{user.id}/{uuid4()}-{f.file_name}"
 
         url = storage.generate_presigned_url(
             "put_object",
@@ -167,9 +169,7 @@ def generate_upload_urls(
         )
 
         extra_data = {"storage_key": storage_key, "put_url": url}
-        response.append(
-            FilePresignResponse.model_validate(f, update=extra_data)
-        )
+        response.append(FilePresignResponse.model_validate(f, update=extra_data))
 
     return response
 

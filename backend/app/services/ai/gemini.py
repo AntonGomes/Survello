@@ -45,12 +45,10 @@ class GeminiFileManager:
         return uploaded
 
     def upload_batch(
-        self, image_data_list: list[bytes],
+        self,
+        image_data_list: list[bytes],
     ) -> list[genai.types.File]:
-        return [
-            self.upload(data, i)
-            for i, data in enumerate(image_data_list)
-        ]
+        return [self.upload(data, i) for i, data in enumerate(image_data_list)]
 
     def cleanup(self) -> None:
         for uploaded in self._uploaded.values():
@@ -72,9 +70,7 @@ class GeminiVisionProvider(VisionProvider):
         system_prompt: str,
         context: str,
     ) -> SectionAnalysis:
-        logger.info(
-            f"Gemini: analyzing {len(image_data_list)} images"
-        )
+        logger.info(f"Gemini: analyzing {len(image_data_list)} images")
 
         files = self.file_manager.upload_batch(image_data_list)
         contents: list = [*files, context]
@@ -90,9 +86,7 @@ class GeminiVisionProvider(VisionProvider):
         )
 
         raw = json.loads(response.text)
-        items = [
-            AnalysisItem(**item) for item in raw.get("items", [])
-        ]
+        items = [AnalysisItem(**item) for item in raw.get("items", [])]
         memory = raw.get("memory_update", "")
         return SectionAnalysis(items=items, memory_update=memory)
 
@@ -100,9 +94,7 @@ class GeminiVisionProvider(VisionProvider):
         self,
         representative_images: list[bytes],
     ) -> list[str]:
-        logger.info(
-            f"Gemini: naming {len(representative_images)} sections"
-        )
+        logger.info(f"Gemini: naming {len(representative_images)} sections")
 
         files = self.file_manager.upload_batch(representative_images)
 
@@ -124,21 +116,13 @@ def _embed_batch(
     batch: list[bytes],
 ) -> list[list[float]]:
     contents = [
-        types.Content(
-            parts=[
-                types.Part.from_bytes(
-                    data=img, mime_type="image/jpeg"
-                )
-            ]
-        )
+        types.Content(parts=[types.Part.from_bytes(data=img, mime_type="image/jpeg")])
         for img in batch
     ]
     result = client.models.embed_content(
         model=EMBEDDING_MODEL,
         contents=contents,
-        config=types.EmbedContentConfig(
-            output_dimensionality=EMBEDDING_DIMENSIONS
-        ),
+        config=types.EmbedContentConfig(output_dimensionality=EMBEDDING_DIMENSIONS),
     )
     return [e.values for e in result.embeddings]
 
@@ -151,9 +135,7 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         self,
         image_data_list: list[bytes],
     ) -> list[list[float]]:
-        logger.info(
-            f"Gemini: embedding {len(image_data_list)} images"
-        )
+        logger.info(f"Gemini: embedding {len(image_data_list)} images")
 
         embeddings: list[list[float]] = []
         for i in range(0, len(image_data_list), MAX_IMAGES_PER_EMBED):

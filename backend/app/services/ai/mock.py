@@ -85,6 +85,5 @@ class MockEmbeddingProvider(EmbeddingProvider):
     ) -> list[list[float]]:
         logger.info(f"MOCK: embedding {len(image_data_list)} images")
         return [
-            [random.gauss(0, 1) for _ in range(EMBEDDING_DIM)]
-            for _ in image_data_list
+            [random.gauss(0, 1) for _ in range(EMBEDDING_DIM)] for _ in image_data_list
         ]

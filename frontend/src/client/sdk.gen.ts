@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, AddInstructionUpdateData, AddInstructionUpdateErrors, AddInstructionUpdateResponses, AddJobUpdateData, AddJobUpdateErrors, AddJobUpdateResponses, AddLeadUpdateData, AddLeadUpdateErrors, AddLeadUpdateResponses, AddQuoteLineData, AddQuoteLineErrors, AddQuoteLineResponses, AddQuoteUpdateData, AddQuoteUpdateErrors, AddQuoteUpdateResponses, ConvertLeadData, ConvertLeadErrors, ConvertLeadResponses, ConvertQuoteData, ConvertQuoteErrors, ConvertQuoteResponses, CreateClientContactData, CreateClientContactErrors, CreateClientContactResponses, CreateClientData, CreateClientErrors, CreateClientResponses, CreateFileData, CreateFileErrors, CreateFileResponses, CreateFilesData, CreateFilesErrors, CreateFilesResponses, CreateInstructionData, CreateInstructionErrors, CreateInstructionResponses, CreateInstructionTypeData, CreateInstructionTypeErrors, CreateInstructionTypeResponses, CreateInvitationData, CreateInvitationErrors, CreateInvitationResponses, CreateJobData, CreateJobErrors, CreateJobResponses, CreateLeadData, CreateLeadErrors, CreateLeadResponses, CreateQuoteData, CreateQuoteErrors, CreateQuoteResponses, CreateRunData, CreateRunErrors, CreateRunResponses, CreateSurveyData, CreateSurveyErrors, CreateSurveyResponses, DeleteClientContactData, DeleteClientContactErrors, DeleteClientContactResponses, DeleteClientData, DeleteClientErrors, DeleteClientResponses, DeleteInstructionData, DeleteInstructionErrors, DeleteInstructionResponses, DeleteInstructionUpdateData, DeleteInstructionUpdateErrors, DeleteInstructionUpdateResponses, DeleteInvitationData, DeleteInvitationErrors, DeleteInvitationResponses, DeleteJobData, DeleteJobErrors, DeleteJobResponses, DeleteLeadData, DeleteLeadErrors, DeleteLeadResponses, DeleteQuoteData, DeleteQuoteErrors, DeleteQuoteResponses, DeleteSurveyData, DeleteSurveyErrors, DeleteSurveyResponses, GenerateFileDownloadUrlData, GenerateFileDownloadUrlErrors, GenerateFileDownloadUrlResponses, GenerateFileUploadUrlsData, GenerateFileUploadUrlsErrors, GenerateFileUploadUrlsResponses, GetCurrentTimerData, GetCurrentTimerResponses, GetInstructionTimeEntriesData, GetInstructionTimeEntriesErrors, GetInstructionTimeEntriesResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, JoinWaitlistData, JoinWaitlistErrors, JoinWaitlistResponses, LoginUserData, LoginUserErrors, LoginUserResponses, LogoutUserData, LogoutUserErrors, LogoutUserResponses, LogTimeManuallyData, LogTimeManuallyErrors, LogTimeManuallyResponses, ReadClientData, ReadClientErrors, ReadClientResponses, ReadClientsData, ReadClientsErrors, ReadClientsResponses, ReadFileData, ReadFileErrors, ReadFileResponses, ReadFilesData, ReadFilesErrors, ReadFilesResponses, ReadInstructionData, ReadInstructionErrors, ReadInstructionFilesData, ReadInstructionFilesErrors, ReadInstructionFilesResponses, ReadInstructionResponses, ReadInstructionsData, ReadInstructionsErrors, ReadInstructionsResponses, ReadInstructionTypesData, ReadInstructionTypesResponses, ReadInvitationsData, ReadInvitationsResponses, ReadJobData, ReadJobErrors, ReadJobResponses, ReadJobsData, ReadJobsErrors, ReadJobsResponses, ReadLeadData, ReadLeadErrors, ReadLeadResponses, ReadLeadsData, ReadLeadsErrors, ReadLeadsResponses, ReadOrgData, ReadOrgResponses, ReadQuoteData, ReadQuoteErrors, ReadQuoteResponses, ReadQuotesData, ReadQuotesErrors, ReadQuotesResponses, ReadRunArtefactsData, ReadRunArtefactsErrors, ReadRunArtefactsResponses, ReadRunData, ReadRunErrors, ReadRunResponses, ReadRunsData, ReadRunsErrors, ReadRunsResponses, ReadSurveyData, ReadSurveyErrors, ReadSurveyFilesData, ReadSurveyFilesErrors, ReadSurveyFilesResponses, ReadSurveyResponses, ReadSurveysData, ReadSurveysErrors, ReadSurveysResponses, ReadUserMeData, ReadUserMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, RemoveOrgUserData, RemoveOrgUserErrors, RemoveOrgUserResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, SetKeyContactData, SetKeyContactErrors, SetKeyContactResponses, StartTimerData, StartTimerErrors, StartTimerResponses, StopTimerData, StopTimerErrors, StopTimerResponses, UpdateClientData, UpdateClientErrors, UpdateClientResponses, UpdateFileData, UpdateFileErrors, UpdateFileResponses, UpdateInstructionData, UpdateInstructionErrors, UpdateInstructionResponses, UpdateInstructionTypeData, UpdateInstructionTypeErrors, UpdateInstructionTypeResponses, UpdateJobData, UpdateJobErrors, UpdateJobResponses, UpdateLeadData, UpdateLeadErrors, UpdateLeadResponses, UpdateOrgUserData, UpdateOrgUserErrors, UpdateOrgUserResponses, UpdateQuoteData, UpdateQuoteErrors, UpdateQuoteResponses, UpdateSurveyData, UpdateSurveyErrors, UpdateSurveyResponses, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, VerifyInvitationData, VerifyInvitationErrors, VerifyInvitationResponses } from './types.gen';
+import type { AcceptInvitationData, AcceptInvitationErrors, AcceptInvitationResponses, AddInstructionUpdateData, AddInstructionUpdateErrors, AddInstructionUpdateResponses, AddJobUpdateData, AddJobUpdateErrors, AddJobUpdateResponses, AddLeadUpdateData, AddLeadUpdateErrors, AddLeadUpdateResponses, AddQuoteLineData, AddQuoteLineErrors, AddQuoteLineResponses, AddQuoteUpdateData, AddQuoteUpdateErrors, AddQuoteUpdateResponses, ConvertLeadData, ConvertLeadErrors, ConvertLeadResponses, ConvertQuoteData, ConvertQuoteErrors, ConvertQuoteResponses, CreateClientContactData, CreateClientContactErrors, CreateClientContactResponses, CreateClientData, CreateClientErrors, CreateClientResponses, CreateDilapsItemData, CreateDilapsItemErrors, CreateDilapsItemResponses, CreateDilapsRunData, CreateDilapsRunErrors, CreateDilapsRunResponses, CreateFileData, CreateFileErrors, CreateFileResponses, CreateFilesData, CreateFilesErrors, CreateFilesResponses, CreateInstructionData, CreateInstructionErrors, CreateInstructionResponses, CreateInstructionTypeData, CreateInstructionTypeErrors, CreateInstructionTypeResponses, CreateInvitationData, CreateInvitationErrors, CreateInvitationResponses, CreateJobData, CreateJobErrors, CreateJobResponses, CreateLeadData, CreateLeadErrors, CreateLeadResponses, CreateQuoteData, CreateQuoteErrors, CreateQuoteResponses, CreateRunData, CreateRunErrors, CreateRunResponses, CreateSurveyData, CreateSurveyErrors, CreateSurveyResponses, DeleteClientContactData, DeleteClientContactErrors, DeleteClientContactResponses, DeleteClientData, DeleteClientErrors, DeleteClientResponses, DeleteDilapsItemData, DeleteDilapsItemErrors, DeleteDilapsItemResponses, DeleteInstructionData, DeleteInstructionErrors, DeleteInstructionResponses, DeleteInstructionUpdateData, DeleteInstructionUpdateErrors, DeleteInstructionUpdateResponses, DeleteInvitationData, DeleteInvitationErrors, DeleteInvitationResponses, DeleteJobData, DeleteJobErrors, DeleteJobResponses, DeleteLeadData, DeleteLeadErrors, DeleteLeadResponses, DeleteQuoteData, DeleteQuoteErrors, DeleteQuoteResponses, DeleteSurveyData, DeleteSurveyErrors, DeleteSurveyResponses, ExportDilapsData, ExportDilapsErrors, ExportDilapsResponses, GenerateFileDownloadUrlData, GenerateFileDownloadUrlErrors, GenerateFileDownloadUrlResponses, GenerateFileUploadUrlsData, GenerateFileUploadUrlsErrors, GenerateFileUploadUrlsResponses, GetCurrentTimerData, GetCurrentTimerResponses, GetInstructionTimeEntriesData, GetInstructionTimeEntriesErrors, GetInstructionTimeEntriesResponses, HealthCheckHealthGetData, HealthCheckHealthGetResponses, JoinWaitlistData, JoinWaitlistErrors, JoinWaitlistResponses, LoginUserData, LoginUserErrors, LoginUserResponses, LogoutUserData, LogoutUserErrors, LogoutUserResponses, LogTimeManuallyData, LogTimeManuallyErrors, LogTimeManuallyResponses, MergeDilapsSectionsData, MergeDilapsSectionsErrors, MergeDilapsSectionsResponses, ReadClientData, ReadClientErrors, ReadClientResponses, ReadClientsData, ReadClientsErrors, ReadClientsResponses, ReadDilapsRunData, ReadDilapsRunErrors, ReadDilapsRunResponses, ReadDilapsSectionsData, ReadDilapsSectionsErrors, ReadDilapsSectionsResponses, ReadFileData, ReadFileErrors, ReadFileResponses, ReadFilesData, ReadFilesErrors, ReadFilesResponses, ReadInstructionData, ReadInstructionErrors, ReadInstructionFilesData, ReadInstructionFilesErrors, ReadInstructionFilesResponses, ReadInstructionResponses, ReadInstructionsData, ReadInstructionsErrors, ReadInstructionsResponses, ReadInstructionTypesData, ReadInstructionTypesResponses, ReadInvitationsData, ReadInvitationsResponses, ReadJobData, ReadJobErrors, ReadJobResponses, ReadJobsData, ReadJobsErrors, ReadJobsResponses, ReadLeadData, ReadLeadErrors, ReadLeadResponses, ReadLeadsData, ReadLeadsErrors, ReadLeadsResponses, ReadOrgData, ReadOrgResponses, ReadQuoteData, ReadQuoteErrors, ReadQuoteResponses, ReadQuotesData, ReadQuotesErrors, ReadQuotesResponses, ReadRunArtefactsData, ReadRunArtefactsErrors, ReadRunArtefactsResponses, ReadRunData, ReadRunErrors, ReadRunResponses, ReadRunsData, ReadRunsErrors, ReadRunsResponses, ReadSurveyData, ReadSurveyErrors, ReadSurveyFilesData, ReadSurveyFilesErrors, ReadSurveyFilesResponses, ReadSurveyResponses, ReadSurveysData, ReadSurveysErrors, ReadSurveysResponses, ReadUserMeData, ReadUserMeResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, RemoveOrgUserData, RemoveOrgUserErrors, RemoveOrgUserResponses, ResendInvitationData, ResendInvitationErrors, ResendInvitationResponses, SetKeyContactData, SetKeyContactErrors, SetKeyContactResponses, SplitDilapsSectionData, SplitDilapsSectionErrors, SplitDilapsSectionResponses, StartTimerData, StartTimerErrors, StartTimerResponses, StopTimerData, StopTimerErrors, StopTimerResponses, UpdateClientData, UpdateClientErrors, UpdateClientResponses, UpdateDilapsItemData, UpdateDilapsItemErrors, UpdateDilapsItemResponses, UpdateDilapsSectionData, UpdateDilapsSectionErrors, UpdateDilapsSectionResponses, UpdateFileData, UpdateFileErrors, UpdateFileResponses, UpdateInstructionData, UpdateInstructionErrors, UpdateInstructionResponses, UpdateInstructionTypeData, UpdateInstructionTypeErrors, UpdateInstructionTypeResponses, UpdateJobData, UpdateJobErrors, UpdateJobResponses, UpdateLeadData, UpdateLeadErrors, UpdateLeadResponses, UpdateOrgUserData, UpdateOrgUserErrors, UpdateOrgUserResponses, UpdateQuoteData, UpdateQuoteErrors, UpdateQuoteResponses, UpdateSurveyData, UpdateSurveyErrors, UpdateSurveyResponses, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, VerifyInvitationData, VerifyInvitationErrors, VerifyInvitationResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -95,6 +95,7 @@ export const readRunArtefacts = <ThrowOnError extends boolean = false>(options: 
  * Generate Upload Urls
  *
  * Generate presigned PUT URLs. Does NOT create DB records yet.
+ * Reuses existing storage keys for files that match by name, type, and size.
  */
 export const generateFileUploadUrls = <ThrowOnError extends boolean = false>(options: Options<GenerateFileUploadUrlsData, ThrowOnError>) => (options.client ?? client).post<GenerateFileUploadUrlsResponses, GenerateFileUploadUrlsErrors, ThrowOnError>({
     url: '/store/presign',
@@ -777,3 +778,95 @@ export const joinWaitlist = <ThrowOnError extends boolean = false>(options: Opti
         ...options.headers
     }
 });
+
+/**
+ * Create Dilaps Run
+ */
+export const createDilapsRun = <ThrowOnError extends boolean = false>(options: Options<CreateDilapsRunData, ThrowOnError>) => (options.client ?? client).post<CreateDilapsRunResponses, CreateDilapsRunErrors, ThrowOnError>({
+    url: '/dilaps/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Read Dilaps Run
+ */
+export const readDilapsRun = <ThrowOnError extends boolean = false>(options: Options<ReadDilapsRunData, ThrowOnError>) => (options.client ?? client).get<ReadDilapsRunResponses, ReadDilapsRunErrors, ThrowOnError>({ url: '/dilaps/{dilaps_id}', ...options });
+
+/**
+ * Read Dilaps Sections
+ */
+export const readDilapsSections = <ThrowOnError extends boolean = false>(options: Options<ReadDilapsSectionsData, ThrowOnError>) => (options.client ?? client).get<ReadDilapsSectionsResponses, ReadDilapsSectionsErrors, ThrowOnError>({ url: '/dilaps/{dilaps_id}/sections', ...options });
+
+/**
+ * Update Dilaps Section
+ */
+export const updateDilapsSection = <ThrowOnError extends boolean = false>(options: Options<UpdateDilapsSectionData, ThrowOnError>) => (options.client ?? client).patch<UpdateDilapsSectionResponses, UpdateDilapsSectionErrors, ThrowOnError>({
+    url: '/dilaps/sections/{section_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Dilaps Item
+ */
+export const deleteDilapsItem = <ThrowOnError extends boolean = false>(options: Options<DeleteDilapsItemData, ThrowOnError>) => (options.client ?? client).delete<DeleteDilapsItemResponses, DeleteDilapsItemErrors, ThrowOnError>({ url: '/dilaps/items/{item_id}', ...options });
+
+/**
+ * Update Dilaps Item
+ */
+export const updateDilapsItem = <ThrowOnError extends boolean = false>(options: Options<UpdateDilapsItemData, ThrowOnError>) => (options.client ?? client).patch<UpdateDilapsItemResponses, UpdateDilapsItemErrors, ThrowOnError>({
+    url: '/dilaps/items/{item_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Create Dilaps Item
+ */
+export const createDilapsItem = <ThrowOnError extends boolean = false>(options: Options<CreateDilapsItemData, ThrowOnError>) => (options.client ?? client).post<CreateDilapsItemResponses, CreateDilapsItemErrors, ThrowOnError>({
+    url: '/dilaps/sections/{section_id}/items',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Merge Sections
+ */
+export const mergeDilapsSections = <ThrowOnError extends boolean = false>(options: Options<MergeDilapsSectionsData, ThrowOnError>) => (options.client ?? client).post<MergeDilapsSectionsResponses, MergeDilapsSectionsErrors, ThrowOnError>({
+    url: '/dilaps/{dilaps_id}/merge-sections',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Split Section
+ */
+export const splitDilapsSection = <ThrowOnError extends boolean = false>(options: Options<SplitDilapsSectionData, ThrowOnError>) => (options.client ?? client).post<SplitDilapsSectionResponses, SplitDilapsSectionErrors, ThrowOnError>({
+    url: '/dilaps/sections/{section_id}/split',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Export Dilaps Xlsx
+ */
+export const exportDilaps = <ThrowOnError extends boolean = false>(options: Options<ExportDilapsData, ThrowOnError>) => (options.client ?? client).post<ExportDilapsResponses, ExportDilapsErrors, ThrowOnError>({ url: '/dilaps/{dilaps_id}/export', ...options });

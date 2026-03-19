@@ -25,12 +25,24 @@ THIN_BORDER = Border(
     bottom=Side(style="thin"),
 )
 COLUMN_WIDTHS = {
-    "A": 10, "B": 14, "C": 40, "D": 40,
-    "E": 6, "F": 8, "G": 8, "H": 12,
+    "A": 10,
+    "B": 14,
+    "C": 40,
+    "D": 40,
+    "E": 6,
+    "F": 8,
+    "G": 8,
+    "H": 12,
 }
 HEADERS = [
-    "Item No", "Lease clause", "Want of repair",
-    "Remedy", "U", "Q", "R", "£",
+    "Item No",
+    "Lease clause",
+    "Want of repair",
+    "Remedy",
+    "U",
+    "Q",
+    "R",
+    "£",
 ]
 PRELIMINARIES_RATE = 0.2
 CONTRACT_ADMIN_RATE = 0.1

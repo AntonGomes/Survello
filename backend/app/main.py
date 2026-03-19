@@ -9,8 +9,8 @@ from fastapi.responses import JSONResponse
 from sqlmodel import text
 
 from app.api.routes.auth import router as auth_router
-from app.api.routes.dilaps import router as dilaps_router
 from app.api.routes.clients import router as clients_router
+from app.api.routes.dilaps import router as dilaps_router
 from app.api.routes.files import router as files_router
 from app.api.routes.instructions import router as instructions_router
 from app.api.routes.invitations import router as invitations_router

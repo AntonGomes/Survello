@@ -110,10 +110,7 @@ def _analyze_single_section(
     ctx: SectionAnalysisContext,
     db: Session,
 ) -> str:
-    image_data = [
-        ctx.storage.get_file_data(f.storage_key)
-        for f in section_files
-    ]
+    image_data = [ctx.storage.get_file_data(f.storage_key) for f in section_files]
 
     prompt = DILAPS_SECTION_ANALYSIS_PROMPT.format(
         lease_context=ctx.lease_context,
@@ -184,14 +181,10 @@ def execute(
         _update_status(dilaps_run, db, DilapsStatus.SECTIONING, 40)
         image_groups = section_images(images, embeddings, storage)
         section_names = name_sections(image_groups, vision, storage)
-        sections = _create_section_records(
-            dilaps_run, image_groups, section_names, db
-        )
+        sections = _create_section_records(dilaps_run, image_groups, section_names, db)
         _update_status(dilaps_run, db, DilapsStatus.SECTIONING, 50)
 
-        lease_context = _build_lease_context(
-            documents, storage, dilaps_run
-        )
+        lease_context = _build_lease_context(documents, storage, dilaps_run)
         ctx = SectionAnalysisContext(
             lease_context=lease_context,
             running_memory="",
@@ -205,12 +198,13 @@ def execute(
             zip(sections, image_groups, strict=True)
         ):
             progress = 50 + int(45 * (idx / max(total_sections, 1)))
-            _update_status(
-                dilaps_run, db, DilapsStatus.ANALYZING, progress
-            )
+            _update_status(dilaps_run, db, DilapsStatus.ANALYZING, progress)
 
             memory_update = _analyze_single_section(
-                section, group, ctx, db,
+                section,
+                group,
+                ctx,
+                db,
             )
             ctx.running_memory += f"\n{section.name}: {memory_update}"
 
@@ -218,9 +212,7 @@ def execute(
         _update_status(dilaps_run, db, DilapsStatus.COMPLETED, 100)
 
         elapsed = time.time() - start
-        logger.info(
-            f"[dilaps={dilaps_run.id}] Complete in {elapsed:.1f}s"
-        )
+        logger.info(f"[dilaps={dilaps_run.id}] Complete in {elapsed:.1f}s")
 
     except Exception as e:
         logger.exception(f"[dilaps={dilaps_run.id}] Failed: {e}")

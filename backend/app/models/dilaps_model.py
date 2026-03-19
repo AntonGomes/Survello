@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from decimal import Decimal
 from enum import Enum
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from sqlmodel import AutoString, Field, Relationship, SQLModel
 
@@ -45,9 +45,7 @@ class DilapsSectionFileLink(SQLModel, table=True):
 class DilapsRunBase(SQLModel):
     property_address: str = Field(max_length=1024)
     lease_summary: str | None = None
-    status: DilapsStatus = Field(
-        default=DilapsStatus.IDLE, sa_type=AutoString
-    )
+    status: DilapsStatus = Field(default=DilapsStatus.IDLE, sa_type=AutoString)
     progress_pct: int = Field(default=0)
     error_message: str | None = None
 
@@ -63,12 +61,8 @@ class DilapsRun(DilapsRunBase, table=True):
 
     run_id: int = Field(foreign_key="runs.id", ondelete="CASCADE")
     org_id: int = Field(foreign_key="orgs.id", ondelete="CASCADE")
-    created_by_user_id: int = Field(
-        foreign_key="users.id", ondelete="RESTRICT"
-    )
-    job_id: int | None = Field(
-        default=None, foreign_key="jobs.id", ondelete="SET NULL"
-    )
+    created_by_user_id: int = Field(foreign_key="users.id", ondelete="RESTRICT")
+    job_id: int | None = Field(default=None, foreign_key="jobs.id", ondelete="SET NULL")
 
     run: "Run" = Relationship()
     sections: list["DilapsSection"] = Relationship(
@@ -105,9 +99,7 @@ class DilapsSection(DilapsSectionBase, table=True):
     __tablename__: ClassVar[str] = "dilaps_sections"
     id: int | None = Field(default=None, primary_key=True)
 
-    dilaps_run_id: int = Field(
-        foreign_key="dilaps_runs.id", ondelete="CASCADE"
-    )
+    dilaps_run_id: int = Field(foreign_key="dilaps_runs.id", ondelete="CASCADE")
 
     dilaps_run: "DilapsRun" = Relationship(back_populates="sections")
     items: list["DilapsItem"] = Relationship(
@@ -144,9 +136,7 @@ class DilapsItem(DilapsItemBase, table=True):
     __tablename__: ClassVar[str] = "dilaps_items"
     id: int | None = Field(default=None, primary_key=True)
 
-    section_id: int = Field(
-        foreign_key="dilaps_sections.id", ondelete="CASCADE"
-    )
+    section_id: int = Field(foreign_key="dilaps_sections.id", ondelete="CASCADE")
 
     section: "DilapsSection" = Relationship(back_populates="items")
 
