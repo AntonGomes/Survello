@@ -8,10 +8,14 @@ from app.models.file_model import File
 from app.services.ai.provider import EmbeddingProvider, VisionProvider
 from app.services.storage import StorageService
 from app.utils.exif import extract_timestamp
-from app.utils.similarity import cosine_similarity
+from app.utils.similarity import centroid, cosine_similarity
 
 SIMILARITY_THRESHOLD = 0.75
+SINGLETON_MERGE_START = 0.55
+SINGLETON_MERGE_STEP = 0.05
 IMAGE_MIME_PREFIXES = ("image/jpeg", "image/png", "image/webp")
+MAX_NAMING_BATCH = 10
+NAMING_RETRIES = 2
 
 
 def is_image_file(f: File) -> bool:
@@ -113,6 +117,85 @@ def _should_break_section(
     return cosine_similarity(prev_emb, curr_emb) < SIMILARITY_THRESHOLD
 
 
+def _section_centroid(
+    section: list[File],
+    emb_map: dict[int, list[float]],
+) -> list[float]:
+    vecs = [emb_map[f.id] for f in section if f.id in emb_map]
+    if not vecs:
+        return []
+    return centroid(vecs)
+
+
+def _best_neighbor(
+    idx: int,
+    sections: list[list[File]],
+    file_emb: list[float],
+    emb_map: dict[int, list[float]],
+    skip: set[int],
+) -> tuple[int, float]:
+    best_sim = -1.0
+    best_idx = -1
+    for j in (idx - 1, idx + 1):
+        if j < 0 or j >= len(sections) or j in skip:
+            continue
+        neighbor_centroid = _section_centroid(sections[j], emb_map)
+        if not neighbor_centroid:
+            continue
+        sim = cosine_similarity(file_emb, neighbor_centroid)
+        if sim > best_sim:
+            best_sim = sim
+            best_idx = j
+    return best_idx, best_sim
+
+
+def _run_merge_pass(
+    sections: list[list[File]],
+    emb_map: dict[int, list[float]],
+    threshold: float,
+) -> list[list[File]]:
+    merged_indices: set[int] = set()
+    for i, section in enumerate(sections):
+        if len(section) != 1 or i in merged_indices:
+            continue
+        file_emb = emb_map.get(section[0].id or 0, [])
+        if not file_emb:
+            continue
+        best_idx, best_sim = _best_neighbor(
+            i, sections, file_emb, emb_map, merged_indices
+        )
+        if best_idx >= 0 and best_sim >= threshold:
+            sections[best_idx].extend(section)
+            merged_indices.add(i)
+
+    if merged_indices:
+        sections = [s for i, s in enumerate(sections) if i not in merged_indices]
+        logger.info(
+            f"Merged {len(merged_indices)} singletons at threshold {threshold:.2f}"
+        )
+    return sections
+
+
+def _merge_singletons(
+    sections: list[list[File]],
+    emb_map: dict[int, list[float]],
+) -> list[list[File]]:
+    if len(sections) <= 1:
+        return sections
+
+    threshold = SINGLETON_MERGE_START
+    while threshold <= SIMILARITY_THRESHOLD:
+        if not any(len(s) == 1 for s in sections):
+            break
+        sections = _run_merge_pass(sections, emb_map, threshold)
+        threshold += SINGLETON_MERGE_STEP
+
+    remaining = sum(1 for s in sections if len(s) == 1)
+    if remaining:
+        logger.info(f"{remaining} singletons remain after merge passes")
+    return sections
+
+
 def section_images(
     files: list[File],
     embeddings: list[ImageEmbedding],
@@ -134,8 +217,31 @@ def section_images(
             sections.append([])
         sections[-1].append(ordered[i])
 
-    logger.info(f"Sectioned {len(ordered)} images into {len(sections)} groups")
+    pre_merge = len(sections)
+    sections = _merge_singletons(sections, emb_map)
+
+    logger.info(
+        f"Sectioned {len(ordered)} images into {len(sections)} groups "
+        f"(pre-merge: {pre_merge})"
+    )
     return sections
+
+
+def _name_batch(
+    batch_images: list[bytes],
+    vision_provider: VisionProvider,
+) -> list[str]:
+    for attempt in range(NAMING_RETRIES + 1):
+        names = vision_provider.name_sections(batch_images)
+        valid_names = [n for n in names if isinstance(n, str) and n.strip()]
+        if len(valid_names) >= len(batch_images):
+            return valid_names[: len(batch_images)]
+        if attempt < NAMING_RETRIES:
+            logger.warning(
+                f"Naming returned {len(valid_names)}/{len(batch_images)} names, "
+                f"retrying (attempt {attempt + 1})"
+            )
+    return names
 
 
 def name_sections(
@@ -149,15 +255,19 @@ def name_sections(
         f = section[mid]
         representative_images.append(storage.get_file_data(f.storage_key))
 
-    names = vision_provider.name_sections(representative_images)
-    expected = len(sections)
+    all_names: list[str] = []
+    for i in range(0, len(representative_images), MAX_NAMING_BATCH):
+        batch = representative_images[i : i + MAX_NAMING_BATCH]
+        batch_names = _name_batch(batch, vision_provider)
+        all_names.extend(batch_names)
 
-    if len(names) < expected:
+    expected = len(sections)
+    if len(all_names) < expected:
         logger.warning(
-            f"LLM returned {len(names)} names for {expected} sections, "
+            f"LLM returned {len(all_names)} names for {expected} sections, "
             "padding with defaults"
         )
-        for i in range(len(names), expected):
-            names.append(f"Section {i + 1}")
+        for i in range(len(all_names), expected):
+            all_names.append(f"Section {i + 1}")
 
-    return names[:expected]
+    return all_names[:expected]
