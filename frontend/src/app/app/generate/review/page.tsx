@@ -17,12 +17,14 @@ function EmptyState() {
 
 function ReviewContent() {
   const searchParams = useSearchParams()
-  const dilapsId = searchParams.get("dilapsId")
+  const dilapsIdParam = searchParams.get("dilapsId")
+  const dilapsId = dilapsIdParam ? Number(dilapsIdParam) : null
+
   const {
     sections, activeSectionId, activeSection,
     mergeSelection, canMerge, totalItems, totalCost,
     dispatch, setActiveSection,
-  } = useDilapsReview()
+  } = useDilapsReview(dilapsId)
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">

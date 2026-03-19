@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 from google import genai
 from google.genai import types
@@ -142,9 +143,16 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
     ) -> list[list[float]]:
         logger.info(f"Gemini: embedding {len(image_data_list)} images")
 
-        embeddings: list[list[float]] = []
-        for i in range(0, len(image_data_list), MAX_IMAGES_PER_EMBED):
-            batch = image_data_list[i : i + MAX_IMAGES_PER_EMBED]
-            embeddings.extend(_embed_batch(self.client, batch))
+        batches = [
+            image_data_list[i : i + MAX_IMAGES_PER_EMBED]
+            for i in range(0, len(image_data_list), MAX_IMAGES_PER_EMBED)
+        ]
 
-        return embeddings
+        if len(batches) <= 1:
+            return _embed_batch(self.client, batches[0]) if batches else []
+
+        with ThreadPoolExecutor(max_workers=len(batches)) as pool:
+            futures = [pool.submit(_embed_batch, self.client, b) for b in batches]
+            results = [f.result() for f in futures]
+
+        return [vec for batch_result in results for vec in batch_result]
