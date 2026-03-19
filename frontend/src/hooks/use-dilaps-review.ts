@@ -1,4 +1,4 @@
-import { useReducer, useCallback, useEffect } from "react"
+import { useReducer, useCallback, useEffect, useState } from "react"
 import { reviewReducer } from "./dilaps-review-reducer"
 import { readDilapsSections } from "@/client/sdk.gen"
 import type { ReviewState, DilapsSection, DilapsItem, UnitType } from "./dilaps-review-types"
@@ -47,16 +47,25 @@ function mapSection(section: SectionWithItems): DilapsSection {
 
 export function useDilapsReview(dilapsId: number | null) {
   const [state, dispatch] = useReducer(reviewReducer, INITIAL_STATE)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (dilapsId === null) return
+    if (!dilapsId) return
+    setLoading(true)
+    setError(null)
     readDilapsSections({
       path: { dilaps_id: dilapsId },
       throwOnError: true,
-    }).then((response) => {
-      const sections = response.data.map(mapSection)
-      dispatch({ type: "SET_SECTIONS", sections })
     })
+      .then((response) => {
+        const sections = response.data.map(mapSection)
+        dispatch({ type: "SET_SECTIONS", sections })
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to load sections")
+      })
+      .finally(() => setLoading(false))
   }, [dilapsId])
 
   const activeSection = state.sections.find(
@@ -86,6 +95,8 @@ export function useDilapsReview(dilapsId: number | null) {
     canMerge,
     totalItems,
     totalCost,
+    loading,
+    error,
     dispatch,
     setActiveSection,
   }
