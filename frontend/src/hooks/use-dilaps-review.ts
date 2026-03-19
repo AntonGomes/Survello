@@ -1,18 +1,63 @@
-import { useReducer, useCallback } from "react"
-import { reviewReducer, recomputeItemNumbers } from "./dilaps-review-reducer"
-import { MOCK_SECTIONS } from "./dilaps-review-mock"
-import type { ReviewState } from "./dilaps-review-types"
+import { useReducer, useCallback, useEffect } from "react"
+import { reviewReducer } from "./dilaps-review-reducer"
+import { readDilapsSections } from "@/client/sdk.gen"
+import type { ReviewState, DilapsSection, DilapsItem, UnitType } from "./dilaps-review-types"
+import type { SectionWithItems, DilapsItemRead } from "@/client/types.gen"
 
 export type { DilapsItem, DilapsSection, UnitType, ReviewAction } from "./dilaps-review-types"
 
 const INITIAL_STATE: ReviewState = {
-  sections: recomputeItemNumbers(MOCK_SECTIONS),
-  activeSectionId: MOCK_SECTIONS[0]?.id ?? null,
+  sections: [],
+  activeSectionId: null,
   mergeSelection: [],
 }
 
-export function useDilapsReview() {
+function parseNumeric(value: string | null | undefined): number | null {
+  if (value === null || value === undefined) return null
+  const parsed = Number(value)
+  return Number.isNaN(parsed) ? null : parsed
+}
+
+function mapItem(item: DilapsItemRead): DilapsItem {
+  const quantity = parseNumeric(item.quantity)
+  const rate = parseNumeric(item.rate)
+  return {
+    id: item.id,
+    itemNumber: item.item_number,
+    leaseClause: item.lease_clause,
+    wantOfRepair: item.want_of_repair,
+    remedy: item.remedy,
+    unit: item.unit as UnitType,
+    quantity,
+    rate,
+    cost: quantity !== null && rate !== null ? quantity * rate : parseNumeric(item.cost),
+    sortOrder: item.sort_order ?? 0,
+  }
+}
+
+function mapSection(section: SectionWithItems): DilapsSection {
+  return {
+    id: section.id,
+    name: section.name,
+    sortOrder: section.sort_order ?? 0,
+    imageFileIds: (section.image_files ?? []).map((f) => f.id),
+    items: (section.items ?? []).map(mapItem),
+  }
+}
+
+export function useDilapsReview(dilapsId: number | null) {
   const [state, dispatch] = useReducer(reviewReducer, INITIAL_STATE)
+
+  useEffect(() => {
+    if (dilapsId === null) return
+    readDilapsSections({
+      path: { dilaps_id: dilapsId },
+      throwOnError: true,
+    }).then((response) => {
+      const sections = response.data.map(mapSection)
+      dispatch({ type: "SET_SECTIONS", sections })
+    })
+  }, [dilapsId])
 
   const activeSection = state.sections.find(
     (s) => s.id === state.activeSectionId

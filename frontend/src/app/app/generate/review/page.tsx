@@ -1,6 +1,7 @@
 "use client"
 
 import { Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { useDilapsReview } from "@/hooks/use-dilaps-review"
 import { SectionNav } from "./section-nav"
 import { SectionEditor } from "./section-editor"
@@ -15,11 +16,15 @@ function EmptyState() {
 }
 
 function ReviewContent() {
+  const searchParams = useSearchParams()
+  const dilapsIdParam = searchParams.get("dilapsId")
+  const dilapsId = dilapsIdParam ? Number(dilapsIdParam) : null
+
   const {
     sections, activeSectionId, activeSection,
     mergeSelection, canMerge, totalItems, totalCost,
     dispatch, setActiveSection,
-  } = useDilapsReview()
+  } = useDilapsReview(dilapsId)
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
