@@ -512,6 +512,12 @@ export type DilapsRunRead = {
      * Lease Summary
      */
     lease_summary?: string | null;
+    /**
+     * Lease Clauses
+     */
+    lease_clauses?: {
+        [key: string]: string;
+    } | null;
     status?: DilapsStatus;
     /**
      * Progress Pct

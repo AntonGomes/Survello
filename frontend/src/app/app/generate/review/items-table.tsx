@@ -11,6 +11,7 @@ import {
   Table, TableBody, TableCell, TableFooter,
   TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import type { DilapsItem, DilapsSection, ReviewAction, UnitType } from "@/hooks/use-dilaps-review"
 
 const UNIT_OPTIONS: UnitType[] = ["Sum", "m", "m\u00B2", "No"]
@@ -18,6 +19,7 @@ const UNIT_OPTIONS: UnitType[] = ["Sum", "m", "m\u00B2", "No"]
 type ItemsTableProps = {
   section: DilapsSection
   dispatch: React.Dispatch<ReviewAction>
+  leaseClauses: Record<string, string>
 }
 
 function formatCurrency(value: number | null): string {
@@ -25,7 +27,51 @@ function formatCurrency(value: number | null): string {
   return `\u00A3${value.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`
 }
 
-function ItemRow({ item, section, dispatch }: { item: DilapsItem; section: DilapsSection; dispatch: React.Dispatch<ReviewAction> }) {
+function resolveClauseText(
+  clauseRef: string,
+  leaseClauses: Record<string, string>,
+): string | null {
+  const refs = clauseRef.split(",").map((r) => r.trim())
+  const texts = refs
+    .map((ref) => leaseClauses[ref])
+    .filter(Boolean)
+  if (texts.length === 0) return null
+  return texts.join("\n\n")
+}
+
+function ClauseInput({ item, leaseClauses, onChange }: {
+  item: DilapsItem
+  leaseClauses: Record<string, string>
+  onChange: (value: string) => void
+}) {
+  const clauseText = resolveClauseText(item.leaseClause, leaseClauses)
+  const input = (
+    <Input
+      className="h-8 text-xs"
+      value={item.leaseClause}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  )
+
+  if (!clauseText) return input
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{input}</TooltipTrigger>
+      <TooltipContent side="bottom" className="max-w-xs whitespace-pre-line text-left">
+        <p className="font-medium mb-1">Clause {item.leaseClause}</p>
+        {clauseText}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+function ItemRow({ item, section, dispatch, leaseClauses }: {
+  item: DilapsItem
+  section: DilapsSection
+  dispatch: React.Dispatch<ReviewAction>
+  leaseClauses: Record<string, string>
+}) {
   const updateField = (field: keyof DilapsItem, value: string | number | null) => {
     dispatch({ type: "UPDATE_ITEM", payload: { sectionId: section.id, itemId: item.id, field, value } })
   }
@@ -34,7 +80,7 @@ function ItemRow({ item, section, dispatch }: { item: DilapsItem; section: Dilap
     <TableRow className="group">
       <TableCell className="font-mono text-muted-foreground w-16">{item.itemNumber}</TableCell>
       <TableCell className="w-24">
-        <Input className="h-8 text-xs" value={item.leaseClause} onChange={(e) => updateField("leaseClause", e.target.value)} />
+        <ClauseInput item={item} leaseClauses={leaseClauses} onChange={(v) => updateField("leaseClause", v)} />
       </TableCell>
       <TableCell className="min-w-48">
         <Textarea className="min-h-8 text-xs resize-none" value={item.wantOfRepair} onChange={(e) => updateField("wantOfRepair", e.target.value)} />
@@ -64,7 +110,7 @@ function ItemRow({ item, section, dispatch }: { item: DilapsItem; section: Dilap
   )
 }
 
-export function ItemsTable({ section, dispatch }: ItemsTableProps) {
+export function ItemsTable({ section, dispatch, leaseClauses }: ItemsTableProps) {
   const sectionTotal = section.items.reduce((sum, item) => sum + (item.cost ?? 0), 0)
 
   return (
@@ -85,7 +131,7 @@ export function ItemsTable({ section, dispatch }: ItemsTableProps) {
         </TableHeader>
         <TableBody>
           {section.items.map((item) => (
-            <ItemRow key={item.id} item={item} section={section} dispatch={dispatch} />
+            <ItemRow key={item.id} item={item} section={section} dispatch={dispatch} leaseClauses={leaseClauses} />
           ))}
         </TableBody>
         <TableFooter>

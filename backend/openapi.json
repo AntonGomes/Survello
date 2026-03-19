@@ -5066,6 +5066,20 @@
             ],
             "title": "Lease Summary"
           },
+          "lease_clauses": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Clauses"
+          },
           "status": {
             "$ref": "#/components/schemas/DilapsStatus",
             "default": "idle"

@@ -9,6 +9,7 @@ from google.genai import types
 
 from app.core.logging import logger
 from app.prompts.dilaps_analysis import DILAPS_SECTION_MERGE_PROMPT
+from app.prompts.dilaps_clause_extraction import LEASE_CLAUSE_EXTRACTION_PROMPT
 
 from .provider import (
     AnalysisItem,
@@ -156,6 +157,33 @@ class GeminiVisionProvider(VisionProvider):
         if valid:
             logger.info(f"LLM suggested {len(valid)} merge groups: {valid}")
         return valid
+
+
+    def extract_lease_clauses(
+        self,
+        document_parts: list[tuple[bytes, str]],
+    ) -> dict[str, str]:
+        logger.info(
+            f"Gemini: extracting lease clauses from "
+            f"{len(document_parts)} documents"
+        )
+
+        parts = [
+            types.Part.from_bytes(data=data, mime_type=mime_type)
+            for data, mime_type in document_parts
+        ]
+
+        response = self.client.models.generate_content(
+            model=VISION_MODEL,
+            contents=[types.Content(parts=parts)],
+            config=types.GenerateContentConfig(
+                system_instruction=LEASE_CLAUSE_EXTRACTION_PROMPT,
+                response_mime_type="application/json",
+                temperature=0.1,
+            ),
+        )
+
+        return json.loads(response.text)
 
 
 def _embed_batch(

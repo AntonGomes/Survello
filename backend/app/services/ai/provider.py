@@ -46,6 +46,13 @@ class VisionProvider(ABC):
     ) -> list[list[int]]:
         raise NotImplementedError
 
+    @abstractmethod
+    def extract_lease_clauses(
+        self,
+        document_parts: list[tuple[bytes, str]],
+    ) -> dict[str, str]:
+        raise NotImplementedError
+
 
 class EmbeddingProvider(ABC):
     @abstractmethod
