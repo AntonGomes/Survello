@@ -8,7 +8,7 @@ import {
   readRunArtefactsOptions,
   generateFileDownloadUrlOptions
 } from "@/client/@tanstack/react-query.gen";
-import { uploadFilesToS3 } from "@/lib/upload";
+import { uploadFilesToS3, type UploadProgress } from "@/lib/upload";
 
 export type Status = "idle" | "presigning" | "uploading" | "generating" | "finalising" | "completed" | "error";
 
@@ -71,7 +71,7 @@ async function executeGeneration({ args, uploads, setLocalStatus, setUploadProgr
   const fileDataMap = new Map(allFiles.map(f => [f.clientId, f.file]));
   const uploadEntries = presignData.map(p => ({ file: fileDataMap.get(p.client_id!)!, ...p }));
   setLocalStatus("uploading");
-  await uploadFilesToS3({ files: uploadEntries.map(u => u.file), presignedPuts: uploadEntries.map(u => ({ put_url: u.put_url, mime_type: u.mime_type })), onProgress: setUploadProgress });
+  await uploadFilesToS3({ files: uploadEntries.map(u => u.file), presignedPuts: uploadEntries.map(u => ({ put_url: u.put_url, mime_type: u.mime_type })), onProgress: (p) => setUploadProgress(p.percent) });
   const registeredFiles = await uploads.registerFilesMutation.mutateAsync({
     body: uploadEntries.map(u => ({ file_name: u.file.name, mime_type: u.file.type || "application/octet-stream", size_bytes: u.file.size, storage_key: u.storage_key, org_id: orgId })),
   });

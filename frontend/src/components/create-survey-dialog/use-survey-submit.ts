@@ -109,7 +109,7 @@ async function uploadAllFiles({ deps, user, surveyId, generateUploadUrls, create
   await uploadFilesToS3({
     files: rawFiles,
     presignedPuts: presignedUrls as never,
-    onProgress: (progress) => { setUploadProgress(PROGRESS_AFTER_PRESIGN + progress * UPLOAD_PROGRESS_WEIGHT) },
+    onProgress: (p) => { setUploadProgress(PROGRESS_AFTER_PRESIGN + p.percent * UPLOAD_PROGRESS_WEIGHT) },
   })
   setUploadProgress(PROGRESS_AFTER_UPLOAD)
 

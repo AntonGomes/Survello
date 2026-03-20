@@ -116,7 +116,7 @@ function ProgressContent() {
       <DilapsLoadingScreen
         status={mapped.status}
         subStatus={mapped.subStatus}
-        uploadProgress={100}
+        uploadProgress={{ percent: 100, completedFiles: 0, totalFiles: 0 }}
         progressPct={dilapsRun?.progress_pct ?? 0}
         totalSections={dilapsRun?.total_sections ?? 0}
         currentSection={dilapsRun?.current_section ?? 0}

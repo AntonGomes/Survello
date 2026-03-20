@@ -4,7 +4,7 @@ import {
   generateFileUploadUrlsMutation,
   createFilesMutation,
 } from "@/client/@tanstack/react-query.gen";
-import { uploadFilesToS3 } from "@/lib/upload";
+import { uploadFilesToS3, type UploadProgress } from "@/lib/upload";
 import {
   type DilapsFileSet,
   type DilapsSubStatus,
@@ -45,7 +45,11 @@ function useUploadPipeline() {
 
 export function useDilapsGeneration() {
   const [dilapsId, setDilapsId] = useState<number | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({
+    percent: 0,
+    completedFiles: 0,
+    totalFiles: 0,
+  });
   const [localStatus, setLocalStatus] = useState<DilapsStatus>("idle");
   const [subStatus, setSubStatus] = useState<DilapsSubStatus>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -57,7 +61,7 @@ export function useDilapsGeneration() {
     if (!allFiles.length) throw new Error("No files to upload");
 
     setLocalStatus("presigning");
-    setUploadProgress(0);
+    setUploadProgress({ percent: 0, completedFiles: 0, totalFiles: allFiles.length });
 
     const presignData = await presignMutation.mutateAsync({
       body: allFiles.map(({ file, clientId }) => ({
@@ -165,7 +169,7 @@ export function useDilapsGeneration() {
     setDilapsId(null);
     setLocalStatus("idle");
     setSubStatus(null);
-    setUploadProgress(0);
+    setUploadProgress({ percent: 0, completedFiles: 0, totalFiles: 0 });
     setErrorMessage(null);
     mutation.reset();
   }, [mutation]);

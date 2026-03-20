@@ -16,7 +16,6 @@ from app.models.dilaps_model import (
 )
 from app.models.file_model import File
 from app.prompts.dilaps_analysis import DILAPS_SECTION_ANALYSIS_PROMPT
-from app.utils.conversion import LLM_SUPPORTED_TYPES, to_pdf
 from app.services.ai.gemini import GeminiVisionProvider
 from app.services.ai.provider import EmbeddingProvider, VisionProvider
 from app.services.image_sectioning import (
@@ -27,7 +26,13 @@ from app.services.image_sectioning import (
     section_images,
 )
 from app.services.storage import StorageService
+from app.utils.conversion import LLM_SUPPORTED_TYPES, to_pdf
 from app.utils.few_shot_loader import load_examples
+
+EMBED_START_PCT = 10
+EMBED_END_PCT = 30
+ANALYZE_START_PCT = 50
+ANALYZE_RANGE_PCT = 45
 
 UNIT_MAP = {
     "Sum": DilapsUnit.SUM,
@@ -187,6 +192,42 @@ def _renumber_items(
     db.commit()
 
 
+def _analyze_all_sections(
+    dilaps_run: DilapsRun,
+    sections: list[DilapsSection],
+    image_groups: list[list[File]],
+    ctx: SectionAnalysisContext,
+    db: Session,
+) -> None:
+    total_sections = len(sections)
+    for idx, (section, group) in enumerate(zip(sections, image_groups, strict=True)):
+        progress = ANALYZE_START_PCT + int(
+            ANALYZE_RANGE_PCT * idx / max(total_sections, 1)
+        )
+        dilaps_run.current_section = idx + 1
+        img_count = len(group)
+        step_label = (
+            f"Inspecting {section.name} — "
+            f"{img_count} images "
+            f"({idx + 1} of {total_sections})..."
+        )
+        _update_status(
+            dilaps_run,
+            db,
+            DilapsStatus.ANALYZING,
+            progress,
+            message=step_label,
+        )
+
+        memory_update = _analyze_single_section(
+            section,
+            group,
+            ctx,
+            db,
+        )
+        ctx.running_memory += f"\n{section.name}: {memory_update}"
+
+
 def execute(
     dilaps_run: DilapsRun,
     db: Session,
@@ -211,15 +252,34 @@ def execute(
             dilaps_run,
             db,
             DilapsStatus.EMBEDDING,
-            10,
-            message="Reading and understanding your survey images...",
+            EMBED_START_PCT,
+            message=f"Processing {len(images)} survey images...",
         )
-        embeddings = compute_embeddings(images, storage, embedding, db)
+
+        embed_range = EMBED_END_PCT - EMBED_START_PCT
+
+        def on_embed_progress(done: int, total: int) -> None:
+            pct = EMBED_START_PCT + int(embed_range * done / max(total, 1))
+            _update_status(
+                dilaps_run,
+                db,
+                DilapsStatus.EMBEDDING,
+                pct,
+                message=f"Processing image {done} of {total}...",
+            )
+
+        embeddings = compute_embeddings(
+            images,
+            storage,
+            embedding,
+            db,
+            on_progress=on_embed_progress,
+        )
         _update_status(
             dilaps_run,
             db,
             DilapsStatus.EMBEDDING,
-            30,
+            EMBED_END_PCT,
             message="Finished processing your images",
         )
 
@@ -231,6 +291,13 @@ def execute(
             message="Grouping photos by area of the property...",
         )
         image_groups = section_images(images, embeddings, storage)
+        _update_status(
+            dilaps_run,
+            db,
+            DilapsStatus.SECTIONING,
+            44,
+            message=f"Naming {len(image_groups)} areas...",
+        )
         section_names = name_sections(image_groups, vision, storage)
         image_groups, section_names = merge_sections_by_llm(
             image_groups, section_names, vision, storage
@@ -267,30 +334,9 @@ def execute(
             storage=storage,
         )
 
-        total_sections = len(sections)
-        for idx, (section, group) in enumerate(
-            zip(sections, image_groups, strict=True)
-        ):
-            progress = 50 + int(45 * (idx / max(total_sections, 1)))
-            dilaps_run.current_section = idx + 1
-            _update_status(
-                dilaps_run,
-                db,
-                DilapsStatus.ANALYZING,
-                progress,
-                message=f"Inspecting {section.name} ({idx + 1} of {total_sections})...",
-            )
-
-            memory_update = _analyze_single_section(
-                section,
-                group,
-                ctx,
-                db,
-            )
-            ctx.running_memory += f"\n{section.name}: {memory_update}"
-
+        _analyze_all_sections(dilaps_run, sections, image_groups, ctx, db)
         _renumber_items(dilaps_run, db)
-        dilaps_run.current_section = total_sections
+        dilaps_run.current_section = len(sections)
         _update_status(
             dilaps_run,
             db,

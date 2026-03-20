@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { DilapsStatus, DilapsSubStatus } from "@/hooks/use-dilaps-generation";
+import type { UploadProgress } from "@/lib/upload";
 import {
   STEPS,
   getStepState,
   formatTimeRemaining,
-  estimateSecondsRemaining,
+  estimateFromHistory,
+  type ProgressSample,
   type StepConfig,
   type StepState,
 } from "./loading-steps";
@@ -16,7 +18,7 @@ import {
 type Props = {
   status: DilapsStatus;
   subStatus: DilapsSubStatus;
-  uploadProgress: number;
+  uploadProgress: UploadProgress;
   progressPct: number;
   totalSections: number;
   currentSection: number;
@@ -24,20 +26,36 @@ type Props = {
 };
 
 const UPLOAD_WEIGHT = 0.1;
+const SAMPLE_INTERVAL_MS = 2000;
+const MAX_SAMPLES = 30;
 
-function useElapsedSeconds() {
-  const startRef = useRef(Date.now());
-  const [elapsed, setElapsed] = useState(0);
+function useProgressHistory(progressPct: number) {
+  const historyRef = useRef<ProgressSample[]>([]);
+  const progressRef = useRef(progressPct);
+  const [estimate, setEstimate] = useState<number | null>(null);
+
+  progressRef.current = progressPct;
 
   useEffect(() => {
-    startRef.current = Date.now();
-    const interval = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
-    }, 1000);
-    return () => clearInterval(interval);
+    const record = () => {
+      const now = Date.now();
+      const pct = progressRef.current;
+
+      historyRef.current.push({ time: now, pct });
+
+      if (historyRef.current.length > MAX_SAMPLES) {
+        historyRef.current = historyRef.current.slice(-MAX_SAMPLES);
+      }
+
+      setEstimate(estimateFromHistory(historyRef.current));
+    };
+
+    record();
+    const id = setInterval(record, SAMPLE_INTERVAL_MS);
+    return () => clearInterval(id);
   }, []);
 
-  return elapsed;
+  return estimate;
 }
 
 function StepItem({ step, state }: { step: StepConfig; state: StepState }) {
@@ -108,29 +126,47 @@ export function DilapsLoadingScreen({
   currentSection,
   statusMessage,
 }: Props) {
-  const elapsedSeconds = useElapsedSeconds();
-
   const effectiveProgress =
     status === "presigning" || status === "uploading"
-      ? Math.round(uploadProgress * UPLOAD_WEIGHT)
+      ? Math.round(uploadProgress.percent * UPLOAD_WEIGHT)
       : progressPct;
 
-  const secondsRemaining = estimateSecondsRemaining(effectiveProgress, elapsedSeconds);
+  const secondsRemaining = useProgressHistory(effectiveProgress);
+
+  const currentFileNum = Math.min(
+    uploadProgress.completedFiles + 1,
+    uploadProgress.totalFiles,
+  );
+  const uploadStatusMessage =
+    status === "presigning"
+      ? "Preparing upload..."
+      : status === "uploading"
+        ? `Uploading file ${currentFileNum} of ${uploadProgress.totalFiles}...`
+        : null;
+
+  const displayMessage = uploadStatusMessage ?? statusMessage;
 
   return (
     <div className="flex flex-1 items-center justify-center px-8 py-12">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
           <h2 className="text-xl font-semibold text-foreground">Building your dilaps report</h2>
-          {statusMessage && (
-            <p className="text-sm text-muted-foreground animate-in fade-in duration-500">{statusMessage}</p>
+          {displayMessage && (
+            <p className="text-sm text-muted-foreground animate-in fade-in duration-500">{displayMessage}</p>
           )}
         </div>
 
         <div className="space-y-3">
           <Progress value={effectiveProgress} className="h-2.5 bg-primary/10" />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{effectiveProgress}% complete</span>
+            <span>
+              {effectiveProgress}% complete
+              {subStatus === "analyzing" && totalSections > 0 && (
+                <span className="ml-1.5 text-muted-foreground/70">
+                  (area {currentSection} of {totalSections})
+                </span>
+              )}
+            </span>
             {secondsRemaining !== null && (
               <span className="animate-in fade-in duration-300">{formatTimeRemaining(secondsRemaining)}</span>
             )}
