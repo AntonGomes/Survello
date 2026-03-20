@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { ArrowRight, UserPlus, X } from "lucide-react"
+import { extractErrorMessage } from "@/lib/utils"
 
 import { RegisterSidebar } from "./register-sidebar"
 
@@ -27,7 +28,7 @@ function useRegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setError(""); setLoading(true)
     try { await register({ name, email, password, org_name: orgName, inviteEmails: wantsToInvite ? inviteEmails.filter(em => em.trim()) : [] }) }
-    catch (err: unknown) { setError(err instanceof Error ? err.message : "Failed to register") }
+    catch (err: unknown) { setError(extractErrorMessage(err, "Failed to register")) }
     finally { setLoading(false) }
   }
 
