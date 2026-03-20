@@ -22,6 +22,7 @@ import {
   DilapsUploadGrid,
   LinkedJobBanner,
 } from "@/app/app/generate/upload-section";
+import { DilapsLoadingScreen } from "@/app/app/generate/loading-screen";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -286,6 +287,20 @@ function NewReportTab() {
       router.push(`/app/generate/progress?dilapsId=${generation.dilapsId}`);
     }
   }, [generation.dilapsId, generation.isActive, router]);
+
+  if (generation.isActive && !generation.dilapsId) {
+    return (
+      <DilapsLoadingScreen
+        status={generation.status}
+        subStatus={generation.subStatus}
+        uploadProgress={generation.uploadProgress}
+        progressPct={0}
+        totalSections={0}
+        currentSection={0}
+        statusMessage={null}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

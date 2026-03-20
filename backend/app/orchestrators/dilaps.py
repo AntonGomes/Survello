@@ -77,7 +77,7 @@ def _extract_lease_clauses(
         data = storage.get_file_data(f.storage_key)
         mime = f.mime_type or "application/pdf"
         if mime not in LLM_SUPPORTED_TYPES:
-            logger.info(f"Converting {f.name} ({mime}) to PDF for LLM")
+            logger.info(f"Converting {f.file_name} ({mime}) to PDF for LLM")
             data = to_pdf(data)
             mime = "application/pdf"
         document_parts.append((data, mime))
