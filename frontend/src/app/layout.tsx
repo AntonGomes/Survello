@@ -22,8 +22,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Configure local Tiempos Text font
-// You must place the font files in src/app/fonts/
+
+
 const tiempos = localFont({
   src: [
     {

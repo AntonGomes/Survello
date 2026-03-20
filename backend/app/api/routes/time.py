@@ -1,8 +1,11 @@
+from datetime import UTC, datetime
 from typing import cast
-from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException
-from sqlmodel import select, desc
-from app.api.deps import DBDep, CurrentUserDep
+from sqlmodel import desc, select
+
+from app.api.deps import CurrentUserDep, DBDep
+from app.models.instruction_model import Instruction, InstructionType
 from app.models.time_entry_model import (
     TimeEntry,
     TimeEntryCreate,
@@ -10,9 +13,17 @@ from app.models.time_entry_model import (
     TimeEntryOut,
     TimeEntryRead,
 )
-from app.models.instruction_model import Instruction
 
 router = APIRouter()
+
+
+def get_instruction_display_name(instruction: Instruction, db: DBDep) -> str:
+    """Get display name from instruction type."""
+    if instruction.instruction_type_id:
+        instruction_type = db.get(InstructionType, instruction.instruction_type_id)
+        if instruction_type:
+            return instruction_type.name
+    return "Unknown"
 
 
 @router.post("/start", response_model=TimeEntryOut, operation_id="startTimer")
@@ -45,7 +56,7 @@ def start_timer(
     entry = TimeEntry(
         instruction_id=entry_in.instruction_id,
         user_id=current_user.id,
-        start_time=datetime.now(timezone.utc),
+        start_time=datetime.now(UTC),
         description=entry_in.description,
     )
     db.add(entry)
@@ -54,7 +65,7 @@ def start_timer(
 
     return TimeEntryOut(
         **entry.model_dump(),
-        instruction_name=instruction.name,
+        instruction_name=get_instruction_display_name(instruction, db),
         user_name=current_user.name,
     )
 
@@ -65,7 +76,7 @@ def stop_timer(
     db: DBDep,
     description: str | None = None,
 ):
-    """Stop the currently active timer and update instruction actual hours."""
+    """Stop the currently active timer."""
     active_entry = db.exec(
         select(TimeEntry)
         .where(TimeEntry.user_id == current_user.id)
@@ -76,32 +87,32 @@ def stop_timer(
         raise HTTPException(status_code=404, detail="No active timer found")
 
     # Update end time
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     active_entry.end_time = now
 
     # Calculate duration and store it
-    duration = now - active_entry.start_time.replace(tzinfo=timezone.utc)
+    duration = now - active_entry.start_time.replace(tzinfo=UTC)
     minutes = max(1, int(duration.total_seconds() / 60))  # Minimum 1 minute
     active_entry.duration_minutes = minutes
-    hours_to_add = minutes / 60.0
 
     # Update description if provided
     if description:
         active_entry.description = description
 
-    # Update Instruction actual_hours
+    # Get instruction for display name
     instruction = db.get(Instruction, active_entry.instruction_id)
-    if instruction:
-        instruction.actual_hours = (instruction.actual_hours or 0) + hours_to_add
-        db.add(instruction)
 
     db.add(active_entry)
     db.commit()
     db.refresh(active_entry)
 
+    instruction_name = "Unknown"
+    if instruction:
+        instruction_name = get_instruction_display_name(instruction, db)
+
     return TimeEntryOut(
         **active_entry.model_dump(),
-        instruction_name=instruction.name if instruction else "Unknown",
+        instruction_name=instruction_name,
         user_name=current_user.name,
     )
 
@@ -121,7 +132,7 @@ def log_time_manually(
         raise HTTPException(status_code=403, detail="Not authorized")
 
     # Create entry with start and end time based on duration
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     entry = TimeEntry(
         instruction_id=entry_in.instruction_id,
         user_id=current_user.id,
@@ -131,18 +142,12 @@ def log_time_manually(
         duration_minutes=entry_in.duration_minutes,
     )
     db.add(entry)
-
-    # Update Instruction actual_hours
-    hours_to_add = entry_in.duration_minutes / 60.0
-    instruction.actual_hours = (instruction.actual_hours or 0) + hours_to_add
-    db.add(instruction)
-
     db.commit()
     db.refresh(entry)
 
     return TimeEntryOut(
         **entry.model_dump(),
-        instruction_name=instruction.name,
+        instruction_name=get_instruction_display_name(instruction, db),
         user_name=current_user.name,
     )
 
@@ -167,13 +172,17 @@ def get_current_timer(
     instruction = db.get(Instruction, active_entry.instruction_id)
 
     # Calc current duration on the fly for display
-    now = datetime.now(timezone.utc)
-    duration = now - active_entry.start_time.replace(tzinfo=timezone.utc)
+    now = datetime.now(UTC)
+    duration = now - active_entry.start_time.replace(tzinfo=UTC)
     minutes = int(duration.total_seconds() / 60)
+
+    instruction_name = "Unknown"
+    if instruction:
+        instruction_name = get_instruction_display_name(instruction, db)
 
     return TimeEntryOut(
         **active_entry.model_dump(exclude={"duration_minutes"}),
-        instruction_name=instruction.name if instruction else "Unknown",
+        instruction_name=instruction_name,
         user_name=current_user.name,
         duration_minutes=minutes,
     )

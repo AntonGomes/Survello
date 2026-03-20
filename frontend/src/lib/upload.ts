@@ -1,69 +1,91 @@
+const PERCENT_MULTIPLIER = 100;
+const HTTP_OK_MIN = 200;
+const HTTP_OK_MAX = 300;
 
-export interface UploadProgressEvent {
-  loaded: number;
-  total: number;
-  fileIndex: number;
+export interface UploadProgress {
+  percent: number;
+  completedFiles: number;
+  totalFiles: number;
 }
 
-export async function uploadFilesToS3(
-  files: File[], 
-  presignedPuts: { put_url: string; mime_type: string }[],
-  onProgress?: (progress: number) => void
-): Promise<void> {
+interface PresignedPut {
+  put_url: string;
+  mime_type: string;
+  already_exists?: boolean;
+}
+
+interface UploadFilesToS3Options {
+  files: File[];
+  presignedPuts: PresignedPut[];
+  onProgress?: (progress: UploadProgress) => void;
+}
+
+export async function uploadFilesToS3({
+  files,
+  presignedPuts,
+  onProgress,
+}: UploadFilesToS3Options): Promise<void> {
   const totalFiles = files.length;
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  const loadedPerFile = new Array<number>(totalFiles).fill(0);
   let completedFiles = 0;
 
-  // Simple progress tracker: (completed / total) * 100
-  // For more granular progress, we'd need to track bytes per file
   const updateProgress = () => {
-    if (onProgress) {
-      const percent = Math.round((completedFiles / totalFiles) * 100);
-      onProgress(percent);
-    }
+    if (!onProgress) return;
+    const loadedBytes = loadedPerFile.reduce((sum, b) => sum + b, 0);
+    const percent = totalBytes > 0
+      ? Math.round((loadedBytes / totalBytes) * PERCENT_MULTIPLIER)
+      : Math.round((completedFiles / totalFiles) * PERCENT_MULTIPLIER);
+    onProgress({ percent, completedFiles, totalFiles });
   };
 
-  const uploadSingle = (file: File, putUrl: string, mimeType: string) => {
+  const uploadSingle = ({ file, putUrl, mimeType, index }: {
+    file: File;
+    putUrl: string;
+    mimeType: string;
+    index: number;
+  }) => {
     return new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          loadedPerFile[index] = e.loaded;
+          updateProgress();
+        }
+      };
+
       xhr.onload = () => {
-        console.log(`Upload response for ${file.name}:`, {
-          status: xhr.status,
-          statusText: xhr.statusText,
-          etag: xhr.getResponseHeader('ETag'),
-          allHeaders: xhr.getAllResponseHeaders(),
-          response: xhr.responseText
-        });
-        
-        if (xhr.status >= 200 && xhr.status < 300) {
+        if (xhr.status >= HTTP_OK_MIN && xhr.status < HTTP_OK_MAX) {
+          loadedPerFile[index] = file.size;
           completedFiles++;
           updateProgress();
           resolve();
-          console.log(`Successfully uploaded ${file.name}, url: ${putUrl.split('?')[0]}.`);
         } else {
           reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
         }
       };
 
       xhr.onerror = () => {
-        console.error(`Network error uploading ${file.name}`);
-        reject(new Error("Network error during upload"));
+        reject(new Error(`Network error uploading ${file.name}`));
       };
-      
+
       xhr.open("PUT", putUrl);
-      // Use the exact mime_type that was used to generate the presigned URL
-      // The Content-Type header is signed, so it MUST match exactly
       xhr.setRequestHeader("Content-Type", mimeType);
-      console.log(`Uploading ${file.name} with Content-Type: ${mimeType} to ${putUrl.split('?')[0]}`);
       xhr.send(file);
     });
   };
 
-  // Upload files in parallel, matching each file to its presigned URL by index
   const uploads = files.map((file, index) => {
     const put = presignedPuts[index];
     if (!put) throw new Error(`No presigned URL found for file ${file.name}`);
-    return uploadSingle(file, put.put_url, put.mime_type);
+    if (put.already_exists) {
+      loadedPerFile[index] = file.size;
+      completedFiles++;
+      updateProgress();
+      return Promise.resolve();
+    }
+    return uploadSingle({ file, putUrl: put.put_url, mimeType: put.mime_type, index });
   });
 
   await Promise.all(uploads);

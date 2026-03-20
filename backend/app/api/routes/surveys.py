@@ -1,25 +1,32 @@
-from typing import cast
+from typing import Annotated, cast
 
-from fastapi import APIRouter, HTTPException, status
-from sqlmodel import select, func
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.orm import joinedload
+from sqlmodel import func, select
 
-from app.api.deps import DBDep, CurrentUserDep
+from app.api.deps import CurrentUserDep, DBDep
+from app.models.file_model import File, FileRead
+from app.models.job_model import Job
 from app.models.survey_model import (
     Survey,
     SurveyCreate,
-    SurveyRead,
-    SurveyUpdate,
-    SurveySurveyorLink,
     SurveyorRead,
+    SurveyRead,
+    SurveySurveyorLink,
+    SurveyUpdate,
 )
-from app.models.file_model import File, FileRead
-from app.models.job_model import Job
-from app.models.user_model import User
 from app.models.update_model import create_survey_created_update
-
+from app.models.user_model import User
 
 router = APIRouter()
+
+
+class SurveyListFilters(BaseModel):
+    job_id: int | None = None
+    instruction_id: int | None = None
+    offset: int = 0
+    limit: int = 100
 
 
 def _build_survey_read(survey: Survey, db) -> SurveyRead:
@@ -113,7 +120,7 @@ def create_survey(
         )
         if job.updates is None:
             job.updates = []
-        job.updates = [update_item.model_dump(mode="json")] + job.updates
+        job.updates = [update_item.model_dump(mode="json"), *job.updates]
         db.add(job)
         db.commit()
 
@@ -135,28 +142,25 @@ def create_survey(
 def read_surveys(
     current_user: CurrentUserDep,
     db: DBDep,
-    job_id: int | None = None,
-    instruction_id: int | None = None,
-    offset: int = 0,
-    limit: int = 100,
+    filters: Annotated[SurveyListFilters, Depends()],
 ) -> list[SurveyRead]:
     """Retrieve surveys, optionally filtered by job or instruction."""
     query = (
         select(Survey)
         .where(Survey.org_id == current_user.org_id)
         .options(
-            joinedload(Survey.surveyor),  # ty: ignore[arg-type]
-            joinedload(Survey.conducted_by_user),  # ty: ignore[arg-type]
-            joinedload(Survey.instruction),  # ty: ignore[arg-type]
+            joinedload(Survey.surveyor),
+            joinedload(Survey.conducted_by_user),
+            joinedload(Survey.instruction),
         )
     )
 
-    if job_id:
-        query = query.where(Survey.job_id == job_id)
-    if instruction_id:
-        query = query.where(Survey.instruction_id == instruction_id)
+    if filters.job_id:
+        query = query.where(Survey.job_id == filters.job_id)
+    if filters.instruction_id:
+        query = query.where(Survey.instruction_id == filters.instruction_id)
 
-    surveys = db.exec(query.offset(offset).limit(limit)).unique().all()
+    surveys = db.exec(query.offset(filters.offset).limit(filters.limit)).unique().all()
 
     return [_build_survey_read(survey, db) for survey in surveys]
 

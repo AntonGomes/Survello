@@ -5,8 +5,9 @@ from __future__ import annotations
 import io
 import tokenize
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any, Iterator
+from typing import Any
 
 from openai import OpenAI
 
@@ -61,9 +62,12 @@ class MockLLMService(BaseLLMService):
         self, container: LLMContainer, files: list[LLMFile], system: str, user: str
     ) -> Iterator[str]:
         logger.info("MOCK: Generating responses...")
-        actions = ["Analyzing document...", "Extracting tables...", "Finalizing PDF..."]
-        for action in actions:
-            yield action
+        actions = [
+            "Analyzing document...",
+            "Extracting tables...",
+            "Finalizing PDF...",
+        ]
+        yield from actions
 
     def download(self, container: LLMContainer) -> bytes:
         logger.info("MOCK: Downloading content")
@@ -128,10 +132,7 @@ class OpenAIService(BaseLLMService):
                 yield str(getattr(chunk_any, "text", ""))
 
             elif event == "response.code_interpreter_call_code.done":
-                for comment in self._extract_comments(
-                    str(getattr(chunk_any, "code", ""))
-                ):
-                    yield comment
+                yield from self._extract_comments(str(getattr(chunk_any, "code", "")))
 
             elif event == "error":
                 raise RuntimeError(str(getattr(chunk_any, "error", "LLM error")))

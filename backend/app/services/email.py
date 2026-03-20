@@ -1,8 +1,12 @@
 import logging
+
 import resend
+
 from app.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
+
+EMAIL_FONT_FAMILY = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
 
 
 def send_invitation_email(
@@ -22,18 +26,36 @@ def send_invitation_email(
 
     subject = f"You've been invited to join {org_name} on Survello"
 
+    font = EMAIL_FONT_FAMILY
+    expire_days = settings.invitation_expire_days
     html_body = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }}
-            .container {{ max-width: 600px; margin: 0 auto; padding: 40px 20px; }}
+            body {{
+                font-family: {font};
+                line-height: 1.6; color: #333;
+            }}
+            .container {{
+                max-width: 600px; margin: 0 auto;
+                padding: 40px 20px;
+            }}
             .header {{ text-align: center; margin-bottom: 40px; }}
-            .logo {{ font-size: 28px; font-style: italic; font-weight: 500; color: #0f172a; }}
-            .content {{ background: #f8fafc; border-radius: 12px; padding: 32px; margin-bottom: 24px; }}
-            .button {{ display: inline-block; background: #0f172a; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; }}
+            .logo {{
+                font-size: 28px; font-style: italic;
+                font-weight: 500; color: #0f172a;
+            }}
+            .content {{
+                background: #f8fafc; border-radius: 12px;
+                padding: 32px; margin-bottom: 24px;
+            }}
+            .button {{
+                display: inline-block; background: #0f172a; color: white;
+                padding: 14px 28px; text-decoration: none;
+                border-radius: 8px; font-weight: 600;
+            }}
             .footer {{ text-align: center; color: #64748b; font-size: 14px; }}
         </style>
     </head>
@@ -44,18 +66,23 @@ def send_invitation_email(
             </div>
             <div class="content">
                 <h2 style="margin-top: 0;">You've been invited!</h2>
-                <p><strong>{invited_by_name}</strong> has invited you to join <strong>{org_name}</strong> on Survello.</p>
-                <p>Click the button below to accept your invitation and create your account:</p>
+                <p>
+                    <strong>{invited_by_name}</strong> has invited you to
+                    join <strong>{org_name}</strong> on Survello.
+                </p>
+                <p>Click the button below to accept your invitation:</p>
                 <p style="text-align: center; margin: 32px 0;">
-                    <a href="{invite_url}" class="button">Accept Invitation</a>
+                    <a href="{invite_url}" class="button">
+                        Accept Invitation
+                    </a>
                 </p>
                 <p style="color: #64748b; font-size: 14px;">
-                    This invitation expires in {settings.invitation_expire_days} days.
+                    This invitation expires in {expire_days} days.
                 </p>
             </div>
             <div class="footer">
-                <p>If you didn't expect this email, you can safely ignore it.</p>
-                <p>© Survello</p>
+                <p>If you didn't expect this, you can safely ignore it.</p>
+                <p>&copy; Survello</p>
             </div>
         </div>
     </body>

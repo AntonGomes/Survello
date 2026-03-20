@@ -1,5 +1,6 @@
-from app.models.job_model import JobBase
 from datetime import datetime
+
+from app.models.job_model import JobBase
 
 
 class JobReadMinimal(JobBase):

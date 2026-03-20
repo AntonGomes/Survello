@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { DropzoneOptions } from "react-dropzone";
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from "@/components/ui/shadcn-io/dropzone";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
   files: File[];
   onDrop: (files: File[]) => void;
   maxFiles?: number;
+  accept?: DropzoneOptions["accept"];
 };
 
 export function UploadCard({
@@ -19,6 +21,7 @@ export function UploadCard({
   files,
   onDrop,
   maxFiles = 1,
+  accept,
 }: Props) {
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
@@ -33,6 +36,7 @@ export function UploadCard({
         maxFiles={maxFiles}
         onDrop={onDrop}
         src={files}
+        accept={accept}
         className="border-2 border-dashed border-accent/40 bg-primary/10 hover:border-accent hover:bg-accent/10 transition-all rounded-xl"
       >
         <DropzoneEmptyState />

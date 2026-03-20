@@ -1,8 +1,11 @@
+from http import HTTPStatus
+
 from fastapi.testclient import TestClient
 from sqlmodel import Session
-from app.models.instruction_model import InstructionType, FeeType
-from app.models.job_model import Job, JobStatus
+
 from app.models.client_model import Client
+from app.models.instruction_model import InstructionType
+from app.models.job_model import Job, JobStatus
 
 
 def test_instructions_workflow(client: TestClient, session: Session, setup_data: dict):
@@ -36,36 +39,34 @@ def test_instructions_workflow(client: TestClient, session: Session, setup_data:
     client.cookies = {"session_token": setup_data["token"]}
 
     project_payload = {
-        "name": "Test Instruction",
         "description": "A description",
         "job_id": job.id,
         "instruction_type_id": pt.id,
-        "fee_type": FeeType.HOURLY,
         "status": "planned",
     }
 
     response = client.post("/instructions/", json=project_payload)
-    assert response.status_code == 201, response.text
+    assert response.status_code == HTTPStatus.CREATED, response.text
     project_data = response.json()
-    assert project_data["name"] == "Test Instruction"
+    assert project_data["description"] == "A description"
 
     # 4. List Projects
     response = client.get("/instructions/")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     list_data = response.json()
     assert len(list_data) >= 1
     assert any(p["id"] == project_data["id"] for p in list_data)
 
     # 5. List Project Types
     response = client.get("/instructions/types")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     types_data = response.json()
     assert len(types_data) >= 1
     assert types_data[0]["name"] == "Test Type"
 
     # 6. Read Instruction Detail
     response = client.get(f"/instructions/{project_data['id']}")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     detail = response.json()
     assert detail["id"] == project_data["id"]
     assert detail["instruction_type"]["id"] == pt.id

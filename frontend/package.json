@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "env-cmd -f .env.local next dev --turbopack",
+    "dev": "next dev --turbopack",
     "dev:cloud": "env-cmd -f .env.cloud next dev",
     "build": "next build --turbopack",
     "start": "next start",

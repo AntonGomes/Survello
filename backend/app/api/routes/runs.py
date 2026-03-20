@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from sqlmodel import select
 
-from app.api.deps import StorageDep, CurrentUserDep, DBDep, LLMDep
-from app.orchestrators.generation import execute
+from app.api.deps import CurrentUserDep, DBDep, GenServicesDep
+from app.models.artefact_model import Artefact
+from app.models.file_model import File
 from app.models.run_model import (
     Run,
     RunCreate,
     RunRead,
 )
-from app.models.artefact_model import Artefact
-from app.models.file_model import File
-
+from app.orchestrators.generation import execute
 
 router = APIRouter()
 
@@ -23,36 +22,37 @@ def create_run(
     background_tasks: BackgroundTasks,
     current_user: CurrentUserDep,
     db: DBDep,
-    storage: StorageDep,
-    llm: LLMDep,
+    services: GenServicesDep,
 ) -> Run:
-    """
-    Create a new document generation run and start the orchestrator in the background.
-    """
-    # Fetch context files first
-    context_files: list[File] = []
-    for file_id in run_in.context_file_ids:
-        file = db.get(File, file_id)
-        if not file:
-            raise HTTPException(status_code=404, detail=f"File {file_id} not found")
-        context_files.append(file)
+    """Start a document generation run in the background."""
+    context_files = _fetch_context_files(db, run_in.context_file_ids)
 
-    # Create the Run record
-    extra_data = {"org_id": current_user.org_id, "created_by_user_id": current_user.id}
+    extra_data = {
+        "org_id": current_user.org_id,
+        "created_by_user_id": current_user.id,
+    }
     db_run = Run.model_validate(run_in, update=extra_data)
-
-    # Assign context files directly - SQLModel handles the link table
     db_run.context_files = context_files
 
     db.add(db_run)
     db.commit()
     db.refresh(db_run)
 
-    # Start the orchestrator in the background
     if db_run.id:
-        background_tasks.add_task(execute, db_run, db, storage, llm)
+        background_tasks.add_task(execute, db_run, db, services.storage, services.llm)
 
     return db_run
+
+
+def _fetch_context_files(db: DBDep, file_ids: list[int]) -> list[File]:
+    """Load context files by ID, raising 404 if any are missing."""
+    files: list[File] = []
+    for file_id in file_ids:
+        file = db.get(File, file_id)
+        if not file:
+            raise HTTPException(status_code=404, detail=f"File {file_id} not found")
+        files.append(file)
+    return files
 
 
 @router.get("/{run_id}", response_model=RunRead, operation_id="readRun")

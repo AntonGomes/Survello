@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 
-from app.api.deps import DBDep, CurrentUserDep
+from app.api.deps import CurrentUserDep, DBDep
+from app.core.security import hash_password
 from app.models.user_model import (
-    User,
-    UserRole,
     OrgReadWithUsers,
     OrgUserRead,
-    UserUpdate,
+    User,
     UserRead,
+    UserRole,
+    UserUpdate,
 )
-from app.core.security import hash_password
 
 router = APIRouter()
 

@@ -29,148 +29,106 @@ interface QuoteColumnsProps {
   onConvert: (quote: QuoteRead) => void;
 }
 
-export const createQuoteColumns = ({
-  onConvert,
-}: QuoteColumnsProps): ColumnDef<QuoteRead>[] => [
-  {
-    accessorKey: "name",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Quote Name" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="font-medium flex items-center gap-2">
-          <FileText className="h-4 w-4 text-muted-foreground" />
-          {row.getValue("name")}
-        </div>
-      );
-    },
-  },
-  {
-    id: "client_or_lead",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Client / Lead" />
-    ),
-    cell: ({ row }) => {
-      const quote = row.original;
-      if (quote.client) {
-        return (
-          <div className="flex items-center gap-1">
-            <Badge variant="outline" className="text-xs">Client</Badge>
-            <span>{quote.client.name}</span>
-          </div>
-        );
-      }
-      if (quote.lead) {
-        return (
-          <div className="flex items-center gap-1">
-            <Badge variant="outline" className="text-xs bg-amber-50">Lead</Badge>
-            <span>{quote.lead.name}</span>
-          </div>
-        );
-      }
-      return <span className="text-muted-foreground">—</span>;
-    },
-  },
-  {
-    accessorKey: "estimated_fee",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Est. Fee" />
-    ),
-    cell: ({ row }) => {
-      const fee = row.getValue("estimated_fee") as number | null;
-      if (!fee) return <span className="text-muted-foreground">—</span>;
-      return (
-        <div className="font-medium">
-          £{fee.toLocaleString()}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
-    ),
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
-      return (
-        <Badge variant="outline" className={cn("capitalize", statusColors[status])}>
-          {status}
-        </Badge>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
-    id: "lines_count",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Projects" />
-    ),
-    cell: ({ row }) => {
-      const linesCount = row.original.lines?.length || 0;
-      return (
-        <span className="text-muted-foreground">
-          {linesCount} project{linesCount !== 1 ? "s" : ""}
-        </span>
-      );
-    },
-  },
-  {
-    accessorKey: "updated_at",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Last Updated" />
-    ),
-    cell: ({ row }) => {
-      const updatedAt = row.getValue("updated_at") as string;
-      return (
-        <div className="text-muted-foreground text-sm">
-          {getStalenessText(updatedAt)}
-        </div>
-      );
-    },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const quote = row.original;
-      const isAccepted = quote.status === "accepted";
-      const isConverted = !!quote.converted_job_id;
+function QuoteClientLeadCell({ quote }: { quote: QuoteRead }) {
+  if (quote.client) {
+    return (
+      <div className="flex items-center gap-1">
+        <Badge variant="outline" className="text-xs">Client</Badge>
+        <span>{quote.client.name}</span>
+      </div>
+    );
+  }
+  if (quote.lead) {
+    return (
+      <div className="flex items-center gap-1">
+        <Badge variant="outline" className="text-xs bg-amber-50">Lead</Badge>
+        <span>{quote.lead.name}</span>
+      </div>
+    );
+  }
+  return <span className="text-muted-foreground">—</span>;
+}
 
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {!isConverted && isAccepted && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onConvert(quote);
-                }}
-              >
-                <ArrowRight className="mr-2 h-4 w-4" />
-                Convert to Job
-              </DropdownMenuItem>
-            )}
-            {isConverted && quote.converted_job_id && (
-              <DropdownMenuItem asChild>
-                <a href={`/app/jobs/${quote.converted_job_id}`}>
-                  View Job
-                </a>
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+function QuoteActionsCell({ quote, onConvert }: { quote: QuoteRead; onConvert: (q: QuoteRead) => void }) {
+  const isAccepted = quote.status === "accepted";
+  const isConverted = !!quote.converted_job_id;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {!isConverted && isAccepted && (
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onConvert(quote); }}>
+            <ArrowRight className="mr-2 h-4 w-4" />Convert to Job
+          </DropdownMenuItem>
+        )}
+        {isConverted && quote.converted_job_id && (
+          <DropdownMenuItem asChild>
+            <a href={`/app/jobs/${quote.converted_job_id}`}>View Job</a>
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function buildQuoteDataColumns(): ColumnDef<QuoteRead>[] {
+  return [
+    {
+      accessorKey: "name",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Quote Name" />,
+      cell: ({ row }) => (
+        <div className="font-medium flex items-center gap-2">
+          <FileText className="h-4 w-4 text-muted-foreground" />{row.getValue("name")}
+        </div>
+      ),
     },
-  },
+    {
+      id: "client_or_lead",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Client / Lead" />,
+      cell: ({ row }) => <QuoteClientLeadCell quote={row.original} />,
+    },
+    {
+      accessorKey: "estimated_fee",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Est. Fee" />,
+      cell: ({ row }) => {
+        const fee = row.getValue("estimated_fee") as number | null;
+        if (!fee) return <span className="text-muted-foreground">—</span>;
+        return <div className="font-medium">£{fee.toLocaleString()}</div>;
+      },
+    },
+    {
+      accessorKey: "status",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        return <Badge variant="outline" className={cn("capitalize", statusColors[status])}>{status}</Badge>;
+      },
+      filterFn: (...[row, id, value]) => value.includes(row.getValue(id)),
+    },
+    {
+      id: "lines_count",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Projects" />,
+      cell: ({ row }) => {
+        const linesCount = row.original.lines?.length || 0;
+        return <span className="text-muted-foreground">{linesCount} project{linesCount !== 1 ? "s" : ""}</span>;
+      },
+    },
+    {
+      accessorKey: "updated_at",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Last Updated" />,
+      cell: ({ row }) => <div className="text-muted-foreground text-sm">{getStalenessText(row.getValue("updated_at") as string)}</div>,
+    },
+  ];
+}
+
+export const createQuoteColumns = ({ onConvert }: QuoteColumnsProps): ColumnDef<QuoteRead>[] => [
+  ...buildQuoteDataColumns(),
+  { id: "actions", cell: ({ row }) => <QuoteActionsCell quote={row.original} onConvert={onConvert} /> },
 ];

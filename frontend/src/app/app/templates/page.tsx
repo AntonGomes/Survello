@@ -14,11 +14,11 @@ export default function TemplatesPage() {
 
   return (
     <div className="space-y-6 h-full flex flex-col">
-      <FeatureHeader title="Templates" badge={null} />
+      <FeatureHeader title="Document Templates" badge={null} />
 
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground">
-          Manage instruction types and their default templates.
+          Configure instruction types and their default document templates. These templates are used when generating reports and documents for each instruction type.
         </p>
         <CreateInstructionTypeDialog />
       </div>

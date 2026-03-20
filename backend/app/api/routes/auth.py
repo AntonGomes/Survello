@@ -1,21 +1,28 @@
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
-from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, Response, HTTPException, Cookie
-from app.api.deps import SessionDep
-from app.core.security import verify_password, hash_password, create_token
-from app.core.settings import get_settings
-from app.models.user_model import (
-    UserLogin,
-    UserRegister,
-    UserRead,
-    User,
-    Org,
-    UserRole,
-    Session as DbSession,
-)
+
+from fastapi import APIRouter, Cookie, HTTPException, Response
 from sqlmodel import select
 
+from app.api.deps import SessionDep
+from app.core.security import create_token, hash_password, verify_password
+from app.core.settings import get_settings
+from app.models.user_model import (
+    Org,
+    User,
+    UserLogin,
+    UserRead,
+    UserRegister,
+    UserRole,
+)
+from app.models.user_model import (
+    Session as DbSession,
+)
+
 router = APIRouter()
+
+SAMESITE_SECURE = "none"
+SAMESITE_INSECURE = "lax"
 
 
 @router.post("/register", response_model=UserRead, operation_id="registerUser")
@@ -26,13 +33,16 @@ def register(user_in: UserRegister, response: Response, db: SessionDep):
     settings = get_settings()
     is_whitelisted = user_in.email in settings.test_email_whitelist
 
-    # Check registration whitelist (if configured)
-    if settings.registration_whitelist:
-        if user_in.email not in settings.registration_whitelist:
-            raise HTTPException(
-                status_code=403,
-                detail="Registration is currently by invitation only. Please join the waitlist.",
-            )
+    whitelist = settings.registration_whitelist
+    not_on_whitelist = whitelist and user_in.email not in whitelist
+    if not_on_whitelist:
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Registration is currently by invitation only."
+                " Please join the waitlist."
+            ),
+        )
 
     # 1. Check for existing user
     existing_user = db.exec(select(User).where(User.email == user_in.email)).first()
@@ -64,7 +74,7 @@ def register(user_in: UserRegister, response: Response, db: SessionDep):
 
     # 4. Create Session Token
     token = create_token()
-    expires = datetime.now(timezone.utc) + timedelta(hours=2)
+    expires = datetime.now(UTC) + timedelta(hours=2)
 
     # 5. Save Session to DB
     new_session = DbSession(session_token=token, user_id=user.id, expires_at=expires)
@@ -72,12 +82,13 @@ def register(user_in: UserRegister, response: Response, db: SessionDep):
     db.commit()
 
     # 6. Set Cookie
+    samesite = SAMESITE_SECURE if settings.secure_cookies else SAMESITE_INSECURE
     response.set_cookie(
         key="session_token",
         value=token,
         httponly=True,
-        secure=True,
-        samesite="none",  # Required for cross-origin cookies
+        secure=settings.secure_cookies,
+        samesite=samesite,
         expires=expires,
     )
 
@@ -97,7 +108,7 @@ def login(login_data: UserLogin, response: Response, db: SessionDep):
 
     # 2. Create Session Token
     token = create_token()  # UUID or Hex string
-    expires = datetime.now(timezone.utc) + timedelta(hours=2)
+    expires = datetime.now(UTC) + timedelta(hours=2)
 
     # 3. Save Session to DB
     new_session = DbSession(session_token=token, user_id=user.id, expires_at=expires)
@@ -106,12 +117,14 @@ def login(login_data: UserLogin, response: Response, db: SessionDep):
     db.commit()
 
     # 4. Set Cookie
+    settings = get_settings()
+    samesite = SAMESITE_SECURE if settings.secure_cookies else SAMESITE_INSECURE
     response.set_cookie(
         key="session_token",
         value=token,
         httponly=True,
-        secure=True,
-        samesite="none",  # Required for cross-origin cookies
+        secure=settings.secure_cookies,
+        samesite=samesite,
         expires=expires,
     )
 

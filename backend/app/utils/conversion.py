@@ -78,8 +78,8 @@ def to_summary(data: bytes, mime: str) -> str:
 
 def _libreoffice_convert(input_path: Path, output_dir: Path) -> bytes:
     """Run LibreOffice headless conversion to PDF."""
-    import shutil
     import platform
+    import shutil
     import uuid
 
     # Find soffice

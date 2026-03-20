@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         arbitrary_types_allowed=True,
-        env_file=".env",
+        env_file=(".env", ".env.local"),
         extra="ignore",
         env_parse_none_str="null",
     )
@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # OpenAI / App
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     container_prefix: str = Field(default="docgen")
+
+    # Gemini (vision + embeddings)
+    gemini_api_key: str | None = Field(default=None, alias="GEMINI_API_KEY")
 
     # AWS and S3
     aws_default_region: str | None = Field(default=None, alias="AWS_DEFAULT_REGION")
@@ -43,6 +46,8 @@ class Settings(BaseSettings):
     # Feature Flags / Mocks
     use_mock_llm: bool = Field(default=False, alias="USE_MOCK_LLM")
     use_mock_storage: bool = Field(default=False, alias="USE_MOCK_STORAGE")
+    mock_dilaps_vision: bool = Field(default=False, alias="MOCK_DILAPS_VISION")
+    mock_dilaps_embedding: bool = Field(default=False, alias="MOCK_DILAPS_EMBEDDING")
 
     # Email / Resend Settings
     resend_api_key: str | None = Field(default=None, alias="RESEND_API_KEY")
@@ -51,6 +56,9 @@ class Settings(BaseSettings):
 
     # Frontend URL (for email links)
     frontend_url: str = Field(default="http://localhost:3000", alias="FRONTEND_URL")
+
+    # Cookie security: set to True in production (HTTPS), False for local HTTP dev
+    secure_cookies: bool = Field(default=False, alias="SECURE_COOKIES")
 
     # Invitation settings
     invitation_expire_days: int = Field(default=7, alias="INVITATION_EXPIRE_DAYS")
@@ -87,7 +95,7 @@ class Settings(BaseSettings):
         return f"postgresql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     # BaseSettings automatically reads from .env and os.environ
     return Settings()  # ty: ignore[call-arg]

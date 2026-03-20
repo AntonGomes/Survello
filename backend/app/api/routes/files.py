@@ -1,10 +1,11 @@
+import logging
 from typing import cast
 from uuid import uuid4
-import logging
+
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
-from app.api.deps import StorageDep, CurrentUserDep, DBDep
+from app.api.deps import CurrentUserDep, DBDep, StorageDep
 from app.models.file_model import (
     File,
     FileCreate,
@@ -16,7 +17,7 @@ from app.models.file_model import (
 )
 from app.models.job_model import Job
 from app.models.update_model import create_file_upload_update
-from app.utils.conversion import to_pdf, ConversionError, DOCX_MIME, XLSX_MIME
+from app.utils.conversion import DOCX_MIME, XLSX_MIME, ConversionError, to_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ def _add_file_upload_update_to_job(
 
     if job.updates is None:
         job.updates = []
-    job.updates = [update_item.model_dump(mode="json")] + job.updates
+    job.updates = [update_item.model_dump(mode="json"), *job.updates]
     db.add(job)
     db.commit()
 
@@ -111,6 +112,23 @@ def _maybe_generate_preview(
         logger.error(f"Unexpected error generating preview for file {db_file.id}: {e}")
 
 
+def _find_existing_file(
+    db: DBDep,
+    org_id: int,
+    file_name: str,
+    mime_type: str,
+    size_bytes: int | None,
+) -> File | None:
+    stmt = select(File).where(
+        File.org_id == org_id,
+        File.file_name == file_name,
+        File.mime_type == mime_type,
+    )
+    if size_bytes is not None:
+        stmt = stmt.where(File.size_bytes == size_bytes)
+    return db.exec(stmt).first()
+
+
 @router.post(
     "/presign",
     response_model=list[FilePresignResponse],
@@ -121,23 +139,46 @@ def generate_upload_urls(
     files: list[FilePresignRequest],
     storage: StorageDep,
     user: CurrentUserDep,
+    db: DBDep,
 ) -> list[FilePresignResponse]:
     """
     Generate presigned PUT URLs. Does NOT create DB records yet.
+    Reuses existing storage keys for files that match by name, type, and size.
     """
     response: list[FilePresignResponse] = []
 
     for f in files:
-        storage_key = f"{user.org_id}/{user.id}/{uuid4()}-{f.file_name}"
-
-        url = storage.generate_presigned_url(
-            "put_object",
-            storage_key=storage_key,
-            mime_type=f.mime_type,
-            file_name=f.file_name,
+        existing = _find_existing_file(
+            db,
+            user.org_id,
+            f.file_name,
+            f.mime_type,
+            f.size_bytes,
         )
 
-        extra_data = {"storage_key": storage_key, "put_url": url}
+        already_exists = False
+        if existing and storage.check_file_exists(existing.storage_key):
+            storage_key = existing.storage_key
+            already_exists = True
+        else:
+            storage_key = f"{user.org_id}/{user.id}/{uuid4()}-{f.file_name}"
+
+        url = (
+            ""
+            if already_exists
+            else storage.generate_presigned_url(
+                "put_object",
+                storage_key=storage_key,
+                mime_type=f.mime_type,
+                file_name=f.file_name,
+            )
+        )
+
+        extra_data = {
+            "storage_key": storage_key,
+            "put_url": url,
+            "already_exists": already_exists,
+        }
         response.append(FilePresignResponse.model_validate(f, update=extra_data))
 
     return response
@@ -199,10 +240,21 @@ def create_files(
     files: list[File] = []
     extra_data = {"uploaded_by_user_id": user.id, "org_id": user.org_id}
     for file_in_item in files_in:
+        existing = db.exec(
+            select(File).where(
+                File.storage_key == file_in_item.storage_key,
+                File.org_id == user.org_id,
+            )
+        ).first()
+        if existing:
+            files.append(existing)
+            continue
+
         if not storage.check_file_exists(file_in_item.storage_key):
             raise HTTPException(
                 400,
-                f"File verification failed. Upload not found. storage_key:{file_in_item.storage_key}",
+                "File verification failed. Upload not found."
+                f" storage_key:{file_in_item.storage_key}",
             )
         db_file = File.model_validate(file_in_item, update=extra_data)
         db.add(db_file)

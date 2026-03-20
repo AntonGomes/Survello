@@ -1,51 +1,62 @@
-from .user_model import User, Org, Session
-from .client_model import Client, ClientContact
-from .file_model import File
 from .artefact_model import Artefact
-from .job_model import Job
+from .client_model import Client, ClientContact
+from .dilaps_model import (
+    DilapsItem,
+    DilapsRun,
+    DilapsSection,
+    DilapsSectionFileLink,
+)
+from .embedding_model import ImageEmbedding
+from .file_model import File
 from .instruction_model import (
     Instruction,
-    InstructionType,
     InstructionStatus,
+    InstructionType,
     # Backwards compatibility aliases
     Project,
-    ProjectType,
     ProjectStatus,
+    ProjectType,
 )
-from .run_model import Run, RunFileLink
+from .job_model import Job
 from .lead_model import Lead
 from .quote_model import Quote, QuoteLine
-from .survey_model import Survey, WeatherCondition, SurveySurveyorLink
+from .run_model import Run, RunFileLink
+from .survey_model import Survey, SurveySurveyorLink, WeatherCondition
 from .time_entry_model import TimeEntry
 from .update_model import UpdateItem, UpdateType
+from .user_model import Org, Session, User
 from .waitlist_model import Waitlist
 
 __all__ = [
-    "User",
-    "Org",
-    "Session",
+    "Artefact",
     "Client",
     "ClientContact",
+    "DilapsItem",
+    "DilapsRun",
+    "DilapsSection",
+    "DilapsSectionFileLink",
     "File",
-    "Artefact",
-    "Job",
+    "ImageEmbedding",
     "Instruction",
-    "InstructionType",
     "InstructionStatus",
-    # Backwards compatibility aliases
-    "Project",
-    "ProjectType",
-    "ProjectStatus",
-    "Run",
-    "RunFileLink",
+    "InstructionType",
+    "Job",
     "Lead",
+    "Org",
+    "Project",
+    "ProjectStatus",
+    "ProjectType",
     "Quote",
     "QuoteLine",
+    "Run",
+    "RunFileLink",
+    "Session",
     "Survey",
     "SurveySurveyorLink",
-    "WeatherCondition",
     "TimeEntry",
     "UpdateItem",
     "UpdateType",
+    "User",
     "Waitlist",
+    "WeatherCondition",
 ]

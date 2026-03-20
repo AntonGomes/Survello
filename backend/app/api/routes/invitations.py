@@ -1,21 +1,22 @@
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
+
 from fastapi import APIRouter, HTTPException
 from sqlmodel import select
 
-from app.api.deps import DBDep, CurrentUserDep
+from app.api.deps import CurrentUserDep, DBDep
+from app.core.security import create_token, hash_password
+from app.core.settings import get_settings
 from app.models.user_model import (
+    Invitation,
+    InvitationAccept,
+    InvitationCreate,
+    InvitationPublic,
+    InvitationRead,
+    InvitationStatus,
     User,
     UserRead,
     UserRole,
-    Invitation,
-    InvitationCreate,
-    InvitationRead,
-    InvitationPublic,
-    InvitationAccept,
-    InvitationStatus,
 )
-from app.core.security import hash_password, create_token
-from app.core.settings import get_settings
 from app.services.email import send_invitation_email
 
 router = APIRouter()
@@ -64,8 +65,7 @@ def create_invitation(
         org_id=current_user.org_id,
         invited_by_user_id=current_user.id,
         role=invite_in.role,
-        expires_at=datetime.now(timezone.utc)
-        + timedelta(days=settings.invitation_expire_days),
+        expires_at=datetime.now(UTC) + timedelta(days=settings.invitation_expire_days),
     )
     db.add(invitation)
     db.commit()
@@ -116,7 +116,7 @@ def verify_invitation(token: str, db: DBDep):
             status_code=400, detail="This invitation has already been used"
         )
 
-    if invitation.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+    if invitation.expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
         invitation.status = InvitationStatus.EXPIRED
         db.add(invitation)
         db.commit()
@@ -150,7 +150,7 @@ def accept_invitation(accept_in: InvitationAccept, db: DBDep):
             status_code=400, detail="This invitation has already been used"
         )
 
-    if invitation.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+    if invitation.expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
         invitation.status = InvitationStatus.EXPIRED
         db.add(invitation)
         db.commit()
@@ -227,7 +227,7 @@ def resend_invitation(
 
     # Extend expiration and resend
     settings = get_settings()
-    invitation.expires_at = datetime.now(timezone.utc) + timedelta(
+    invitation.expires_at = datetime.now(UTC) + timedelta(
         days=settings.invitation_expire_days
     )
     db.add(invitation)

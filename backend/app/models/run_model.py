@@ -1,12 +1,13 @@
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, ClassVar
+from datetime import UTC, datetime
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, AutoString
+from typing import TYPE_CHECKING, ClassVar
+
 from sqlalchemy import JSON, Column
+from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from .file_model import File
     from .artefact_model import Artefact
+    from .file_model import File
 
 
 class RunStatus(str, Enum):
@@ -44,16 +45,19 @@ class RunBase(SQLModel):
 class Run(RunBase, table=True):
     __tablename__: ClassVar[str] = "runs"
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+        default_factory=lambda: datetime.now(UTC),
+        sa_column_kwargs={"onupdate": lambda: datetime.now(UTC)},
     )
 
     org_id: int = Field(default=None, foreign_key="orgs.id", ondelete="CASCADE")
     created_by_user_id: int = Field(foreign_key="users.id", ondelete="RESTRICT")
     job_id: int | None = Field(default=None, foreign_key="jobs.id", ondelete="SET NULL")
     template_file_id: int = Field(foreign_key="files.id", ondelete="RESTRICT")
+    instruction_type_id: int | None = Field(
+        default=None, foreign_key="project_types.id", ondelete="SET NULL"
+    )
 
     template_file: "File" = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Run.template_file_id]"}
@@ -69,6 +73,7 @@ class RunCreate(SQLModel):
     job_id: int | None = None
     template_file_id: int
     context_file_ids: list[int]
+    instruction_type_id: int | None = None
 
 
 class RunRead(RunBase):
@@ -77,5 +82,6 @@ class RunRead(RunBase):
     org_id: int
     template_file_id: int
     job_id: int | None = None
+    instruction_type_id: int | None = None
     created_at: datetime
     updated_at: datetime

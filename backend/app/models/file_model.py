@@ -1,15 +1,17 @@
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional, ClassVar
+from datetime import UTC, datetime
 from enum import Enum
-from sqlmodel import SQLModel, Field, Relationship, AutoString
+from typing import TYPE_CHECKING, ClassVar, Optional
+
+from sqlmodel import AutoString, Field, Relationship, SQLModel
+
 from .run_model import RunFileLink
 
 if TYPE_CHECKING:
-    from .user_model import User
-    from .run_model import Run, RunFileLink
-    from .job_model import Job
     from .instruction_model import Instruction
+    from .job_model import Job
+    from .run_model import Run, RunFileLink
     from .survey_model import Survey
+    from .user_model import User
 
 
 class FileRole(str, Enum):
@@ -29,7 +31,7 @@ class File(FileBase, table=True):
     __tablename__: ClassVar[str] = "files"
     id: int | None = Field(default=None, primary_key=True)
     storage_key: str = Field(max_length=1024, unique=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     role: FileRole = Field(default=FileRole.INPUT, sa_type=AutoString)
 
     org_id: int = Field(default=None, foreign_key="orgs.id", ondelete="CASCADE")
@@ -84,6 +86,7 @@ class FilePresignResponse(FileBase):
     client_id: str
     put_url: str
     storage_key: str
+    already_exists: bool = False
 
 
 class FileUpdate(SQLModel):

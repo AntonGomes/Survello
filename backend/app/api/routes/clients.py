@@ -1,9 +1,10 @@
 from typing import cast
-from fastapi import APIRouter, HTTPException, status
-from sqlmodel import select
-from sqlalchemy.orm import joinedload
 
-from app.api.deps import DBDep, CurrentUserDep
+from fastapi import APIRouter, HTTPException, status
+from sqlalchemy.orm import joinedload
+from sqlmodel import select
+
+from app.api.deps import CurrentUserDep, DBDep
 from app.models.client_model import (
     Client,
     ClientContact,
@@ -155,7 +156,6 @@ def delete_client(
         raise HTTPException(status_code=403, detail="Not authorized")
     db.delete(client)
     db.commit()
-    return
 
 
 @router.post(
@@ -257,4 +257,3 @@ def delete_client_contact(
 
     db.delete(contact)
     db.commit()
-    return

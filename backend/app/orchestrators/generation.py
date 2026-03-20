@@ -15,9 +15,44 @@ from app.prompts.doc_gen_prompt import (
     DOC_GEN_SYSTEM_PROMPT_DOCX,
     DOC_GEN_SYSTEM_PROMPT_XLSX,
 )
-from app.services.llm import BaseLLMService, LLMFile, LLMContainer
+from app.services.llm import BaseLLMService, LLMContainer, LLMFile
 from app.services.storage import StorageService
-from app.utils.conversion import to_pdf, to_summary, LLM_SUPPORTED_TYPES, XLSX_MIME
+from app.utils.conversion import LLM_SUPPORTED_TYPES, XLSX_MIME, to_pdf, to_summary
+
+
+def _prepare_context_files(
+    run: Run, context_files: list[File], storage: StorageService, db: Session
+) -> list[LLMFile]:
+    """Prepare context files for LLM, using PDF previews for unsupported types."""
+    llm_files: list[LLMFile] = []
+    total = len(context_files)
+    for f in context_files:
+        if f.mime_type not in LLM_SUPPORTED_TYPES and f.preview_file:
+            preview = f.preview_file
+            url = storage.generate_presigned_url(
+                "get_object",
+                preview.storage_key,
+                preview.mime_type,
+                preview.file_name,
+                inline=True,
+            )
+            llm_files.append(LLMFile(url=url, name=preview.file_name))
+        else:
+            url = storage.generate_presigned_url(
+                "get_object",
+                f.storage_key,
+                f.mime_type,
+                f.file_name,
+                inline=True,
+            )
+            llm_files.append(LLMFile(url=url, name=f.file_name))
+
+        if run.upload_progress is None:
+            run.upload_progress = 0
+        run.upload_progress += int(60 / total + 1)
+        db.commit()
+
+    return llm_files
 
 
 def execute(
@@ -28,11 +63,9 @@ def execute(
 
     Flow: Load → Prepare files → Generate → Save artefact
     """
-    # Verify run.id is present (should be for existing runs)
     if run.id is None:
         raise ValueError("Run ID is missing")
 
-    # Ensure we have the latest status
     if run.status != RunStatus.IDLE:
         logger.warning(f"Run {run.id} already in status {run.status}")
 
@@ -40,57 +73,28 @@ def execute(
     container: LLMContainer | None = None
 
     try:
-        # Load
         template = run.template_file
         context_files = list(run.context_files)
         version = len(run.artefacts) + 1
 
+        ctx_count = len(context_files)
         logger.info(
-            f"[run={run.id}] Starting: template={template.file_name}, context={len(context_files)}"
+            f"[run={run.id}] Starting:"
+            f" template={template.file_name},"
+            f" context={ctx_count}"
         )
 
-        # Prepare files
         logger.info(f"[run={run.id}] Preparing files for upload")
         run.status = RunStatus.UPLOADING
         db.commit()
 
         template_bytes = storage.get_file_data(template.storage_key)
         summary = to_summary(template_bytes, template.mime_type)
+        llm_files = _prepare_context_files(run, context_files, storage, db)
 
-        # Prepare context files for LLM (use existing PDF previews for unsupported types)
-        llm_files: list[LLMFile] = []
-        for f in context_files:
-            # Use preview file if available and original is not LLM-supported
-            if f.mime_type not in LLM_SUPPORTED_TYPES and f.preview_file:
-                preview = f.preview_file
-                url = storage.generate_presigned_url(
-                    "get_object",
-                    preview.storage_key,
-                    preview.mime_type,
-                    preview.file_name,
-                    inline=True,
-                )
-                llm_files.append(LLMFile(url=url, name=preview.file_name))
-            else:
-                url = storage.generate_presigned_url(
-                    "get_object", f.storage_key, f.mime_type, f.file_name, inline=True
-                )
-                llm_files.append(LLMFile(url=url, name=f.file_name))
-
-            # Initialize if None
-            if run.upload_progress is None:
-                run.upload_progress = 0
-
-            run.upload_progress += int(
-                60 / len(context_files) + 1
-            )  # incremental progress up to 90%
-            db.commit()
-
-        # Upload template to LLM
         container = llm.upload_template(template_bytes, template.file_name, str(run.id))
         run.upload_progress = 100
 
-        # Generate
         logger.info(f"[run={run.id}] Generating document")
         run.status = RunStatus.GENERATING
         db.commit()
@@ -101,14 +105,14 @@ def execute(
             else DOC_GEN_SYSTEM_PROMPT_DOCX
         )
         system = prompt.format(template_string=summary)
-        user = f"Template file: {container.container_file_id}. Process with provided context."
+        file_id = container.container_file_id
+        user = f"Template file: {file_id}. Process with provided context."
 
         gen = llm.generate(container, llm_files, system, user)
         for msg in gen:
             run.model_responses = [*run.model_responses, msg]
             db.commit()
 
-        # Finalize
         logger.info(f"[run={run.id}] Finalising artefact")
         run.status = RunStatus.FINALISING
         db.commit()
@@ -119,8 +123,9 @@ def execute(
         run.status = RunStatus.COMPLETED
         db.commit()
 
+        elapsed = time.time() - start
         logger.info(
-            f"[run={run.id}] Complete in {time.time() - start:.1f}s, artefact={artefact.id}"
+            f"[run={run.id}] Complete in {elapsed:.1f}s, artefact={artefact.id}"
         )
 
     except Exception as e:
@@ -136,7 +141,11 @@ def execute(
 
 
 def _create_artefact(
-    db: Session, storage: StorageService, run: Run, data: bytes, version: int
+    db: Session,
+    storage: StorageService,
+    run: Run,
+    data: bytes,
+    version: int,
 ) -> Artefact:
     """Create artefact + preview files and artefact record."""
     assert run.id is not None

@@ -222,3 +222,6 @@ node_modules/
 *.env*
 
 deploy_backend.sh
+
+# TypeScript build info
+*.tsbuildinfo

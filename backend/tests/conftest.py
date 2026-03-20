@@ -1,22 +1,30 @@
 import sys
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
+
 import pytest
-from datetime import datetime, timedelta, timezone
+
+_magic_mock = MagicMock()
+_magic_mock.from_buffer.return_value = "application/octet-stream"
+sys.modules["magic"] = _magic_mock
+
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
-# Mock python-magic which requires a system library not present in this env
-sys.modules["magic"] = MagicMock()
-# Ensure callers get a real MIME string (not a MagicMock) so ORM inserts work.
-sys.modules["magic"].from_buffer.return_value = "application/octet-stream"
-
-from app.main import app  # noqa: E402
-from app.api.deps import get_db, get_storage_service, get_llm_service  # noqa: E402
-from app.models.user_model import User, Org, Session as UserSession, UserRole  # noqa: E402
-from app.models.file_model import File, FileRole  # noqa: E402
-from app.services.storage import StorageService  # noqa: E402
-from app.services.llm import BaseLLMService, OpenAIService, LLMContainer  # noqa: E402
+from app.api.deps import (
+    GenerationServices,
+    get_db,
+    get_generation_services,
+    get_llm_service,
+    get_storage_service,
+)
+from app.main import app
+from app.models.file_model import File, FileRole
+from app.models.user_model import Org, User, UserRole
+from app.models.user_model import Session as UserSession
+from app.services.llm import BaseLLMService, LLMContainer, OpenAIService
+from app.services.storage import StorageService
 
 
 def pytest_addoption(parser):
@@ -81,9 +89,13 @@ def client_fixture(
     def get_llm_override():
         return mock_llm
 
+    def get_gen_services_override():
+        return GenerationServices(mock_storage, mock_llm)
+
     app.dependency_overrides[get_db] = get_session_override
     app.dependency_overrides[get_storage_service] = get_storage_override
     app.dependency_overrides[get_llm_service] = get_llm_override
+    app.dependency_overrides[get_generation_services] = get_gen_services_override
 
     yield TestClient(app)
 
@@ -112,7 +124,7 @@ def setup_data_fixture(session: Session):
     token = "test-token"
     user_session = UserSession(
         session_token=token,
-        expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+        expires_at=datetime.now(UTC) + timedelta(days=1),
         user_id=user.id,
     )
     session.add(user_session)

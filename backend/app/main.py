@@ -8,24 +8,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlmodel import text
 
-from app.api.routes.runs import router as runs_router
-from app.api.routes.files import router as files_router
 from app.api.routes.auth import router as auth_router
-from app.api.routes.jobs import router as jobs_router
-from app.api.routes.instructions import router as instructions_router
-from app.api.routes.users import router as users_router
 from app.api.routes.clients import router as clients_router
-from app.api.routes.time import router as time_router
-from app.api.routes.leads import router as leads_router
-from app.api.routes.quotes import router as quotes_router
-from app.api.routes.surveys import router as surveys_router
+from app.api.routes.dilaps import router as dilaps_router
+from app.api.routes.files import router as files_router
+from app.api.routes.instructions import router as instructions_router
 from app.api.routes.invitations import router as invitations_router
+from app.api.routes.jobs import router as jobs_router
+from app.api.routes.leads import router as leads_router
 from app.api.routes.org import router as org_router
+from app.api.routes.quotes import router as quotes_router
+from app.api.routes.runs import router as runs_router
+from app.api.routes.surveys import router as surveys_router
+from app.api.routes.time import router as time_router
+from app.api.routes.users import router as users_router
 from app.api.routes.waitlist import router as waitlist_router
+from app.core.db import engine, init_db
+from app.core.settings import get_settings
 
-from app.core.db import init_db, engine
-
-# Configure logging to output to stdout (App Runner captures stdout)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -46,14 +46,30 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down application...")
 
 
-origins = [
-    "http://localhost:3000",  # For local development
-    "http://localhost:3001",  # For local development
-    "https://survelloapp.com",  # Production domain
-    "https://www.survelloapp.com",  # Production domain with www
-    "https://survello.vercel.app",  # Vercel deployment
-    "https://survello-git-main.vercel.app",  # Vercel preview URLs
+PRODUCTION_ORIGINS = [
+    "https://survelloapp.com",
+    "https://www.survelloapp.com",
+    "https://survello.vercel.app",
+    "https://survello-git-main.vercel.app",
 ]
+
+
+def _is_local_dev() -> bool:
+    settings = get_settings()
+    return "localhost" in settings.frontend_url
+
+
+def _build_allowed_origins() -> list[str]:
+    settings = get_settings()
+    origins = list(PRODUCTION_ORIGINS)
+    frontend = settings.frontend_url.rstrip("/")
+    if frontend not in origins:
+        origins.append(frontend)
+    return origins
+
+
+LOCAL_DEV_ORIGIN_REGEX = r"^http://localhost:\d+$"
+origins = _build_allowed_origins()
 
 app = FastAPI(
     title="Document Generation Service",
@@ -66,6 +82,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=LOCAL_DEV_ORIGIN_REGEX if _is_local_dev() else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -121,3 +138,4 @@ app.include_router(surveys_router, prefix="/surveys", tags=["Surveys"])
 app.include_router(invitations_router, prefix="/invitations", tags=["Invitations"])
 app.include_router(org_router, prefix="/org", tags=["Organization"])
 app.include_router(waitlist_router, prefix="/waitlist", tags=["Waitlist"])
+app.include_router(dilaps_router, prefix="/dilaps", tags=["Dilaps"])

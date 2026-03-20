@@ -1,26 +1,36 @@
 from typing import cast
-from fastapi import APIRouter, HTTPException, status, Query
-from sqlmodel import select
+
+from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy.orm import joinedload
-from app.api.deps import DBDep, CurrentUserDep
+from sqlmodel import func, select
+
+from app.api.deps import CurrentUserDep, DBDep
+from app.models.file_model import File, FileRead
 from app.models.instruction_model import (
     Instruction,
+    InstructionAddUpdate,
     InstructionCreate,
     InstructionRead,
-    InstructionUpdate,
     InstructionType,
     InstructionTypeCreate,
     InstructionTypeRead,
     InstructionTypeUpdate,
-    InstructionAddUpdate,
-)
-from app.models.update_model import (
-    create_text_update,
-    create_instruction_created_update,
+    InstructionUpdate,
 )
 from app.models.job_model import Job
 from app.models.job_read_minimal import JobReadMinimal
-from app.models.file_model import File, FileRead
+from app.models.update_model import (
+    create_instruction_created_update,
+    create_text_update,
+)
+
+
+def generate_instruction_number(db, org_id: int) -> str:
+    """Generate a semantic instruction number (e.g., INS-00042) for an org."""
+    count = db.exec(
+        select(func.count(Instruction.id)).where(Instruction.org_id == org_id)
+    ).one()
+    return f"INS-{(count + 1):05d}"
 
 
 class InstructionReadDetail(InstructionRead):
@@ -105,7 +115,18 @@ def create_instruction(
     current_user: CurrentUserDep,
     db: DBDep,
 ) -> InstructionRead:
-    extra_data = {"org_id": current_user.org_id, "created_by_user_id": current_user.id}
+    # Fetch instruction type to get the name for display
+    instruction_type = db.get(InstructionType, instruction_in.instruction_type_id)
+    if not instruction_type:
+        raise HTTPException(status_code=400, detail="Invalid instruction type")
+
+    # Generate semantic instruction number
+    instruction_number = generate_instruction_number(db, current_user.org_id)
+    extra_data = {
+        "org_id": current_user.org_id,
+        "created_by_user_id": current_user.id,
+        "instruction_number": instruction_number,
+    }
     instruction = Instruction.model_validate(instruction_in, update=extra_data)
     db.add(instruction)
     db.commit()
@@ -120,8 +141,9 @@ def create_instruction(
             "".join(word[0].upper() for word in (current_user.name or "").split()[:2])
             or "??"
         )
+        # Use instruction type name since instruction no longer has a name field
         update_item = create_instruction_created_update(
-            instruction_name=instruction.name,
+            instruction_name=instruction_type.name,
             instruction_id=instruction.id,
             author_id=current_user.id,
             author_name=current_user.name,
@@ -129,7 +151,7 @@ def create_instruction(
         )
         if job.updates is None:
             job.updates = []
-        job.updates = [update_item.model_dump(mode="json")] + job.updates
+        job.updates = [update_item.model_dump(mode="json"), *job.updates]
         db.add(job)
         db.commit()
 
@@ -237,7 +259,6 @@ def delete_instruction(
         raise HTTPException(status_code=403, detail="Not authorized")
     db.delete(instruction)
     db.commit()
-    return
 
 
 # -----------------------------------------------------------------------------
