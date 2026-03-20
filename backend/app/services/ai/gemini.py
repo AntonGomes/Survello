@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import io
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 from google import genai
 from google.genai import types
 
 from app.core.logging import logger
+from app.prompts.dilaps_analysis import DILAPS_SECTION_MERGE_PROMPT
+from app.prompts.dilaps_clause_extraction import LEASE_CLAUSE_EXTRACTION_PROMPT
 
 from .provider import (
     AnalysisItem,
@@ -19,6 +22,7 @@ VISION_MODEL = "gemini-2.5-flash"
 EMBEDDING_MODEL = "gemini-embedding-2-preview"
 EMBEDDING_DIMENSIONS = 768
 MAX_IMAGES_PER_EMBED = 6
+MIN_MERGE_GROUP_SIZE = 2
 SECTION_NAMING_PROMPT = (
     "You are a building surveyor. For each image, provide a short "
     "name for the area shown (e.g. 'Kitchen', 'Front Elevation', "
@@ -115,6 +119,70 @@ class GeminiVisionProvider(VisionProvider):
 
         return json.loads(response.text)
 
+    def suggest_merges(
+        self,
+        representative_images: list[bytes],
+        section_names: list[str],
+    ) -> list[list[int]]:
+        logger.info(
+            f"Gemini: suggesting merges for {len(representative_images)} sections"
+        )
+
+        parts: list[types.Part] = []
+        for idx, (img, name) in enumerate(
+            zip(representative_images, section_names, strict=True)
+        ):
+            parts.append(types.Part.from_text(text=f"[Section {idx}: {name}]"))
+            parts.append(types.Part.from_bytes(data=img, mime_type="image/jpeg"))
+
+        response = self.client.models.generate_content(
+            model=VISION_MODEL,
+            contents=[types.Content(parts=parts)],
+            config=types.GenerateContentConfig(
+                system_instruction=DILAPS_SECTION_MERGE_PROMPT,
+                response_mime_type="application/json",
+                temperature=0.1,
+            ),
+        )
+
+        raw = json.loads(response.text)
+        groups = raw.get("merge_groups", [])
+        valid = [
+            g
+            for g in groups
+            if isinstance(g, list)
+            and len(g) >= MIN_MERGE_GROUP_SIZE
+            and all(isinstance(i, int) for i in g)
+        ]
+        if valid:
+            logger.info(f"LLM suggested {len(valid)} merge groups: {valid}")
+        return valid
+
+    def extract_lease_clauses(
+        self,
+        document_parts: list[tuple[bytes, str]],
+    ) -> dict[str, str]:
+        logger.info(
+            f"Gemini: extracting lease clauses from {len(document_parts)} documents"
+        )
+
+        parts = [
+            types.Part.from_bytes(data=data, mime_type=mime_type)
+            for data, mime_type in document_parts
+        ]
+
+        response = self.client.models.generate_content(
+            model=VISION_MODEL,
+            contents=[types.Content(parts=parts)],
+            config=types.GenerateContentConfig(
+                system_instruction=LEASE_CLAUSE_EXTRACTION_PROMPT,
+                response_mime_type="application/json",
+                temperature=0.1,
+            ),
+        )
+
+        return json.loads(response.text)
+
 
 def _embed_batch(
     client: genai.Client,
@@ -142,9 +210,16 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
     ) -> list[list[float]]:
         logger.info(f"Gemini: embedding {len(image_data_list)} images")
 
-        embeddings: list[list[float]] = []
-        for i in range(0, len(image_data_list), MAX_IMAGES_PER_EMBED):
-            batch = image_data_list[i : i + MAX_IMAGES_PER_EMBED]
-            embeddings.extend(_embed_batch(self.client, batch))
+        batches = [
+            image_data_list[i : i + MAX_IMAGES_PER_EMBED]
+            for i in range(0, len(image_data_list), MAX_IMAGES_PER_EMBED)
+        ]
 
-        return embeddings
+        if len(batches) <= 1:
+            return _embed_batch(self.client, batches[0]) if batches else []
+
+        with ThreadPoolExecutor(max_workers=len(batches)) as pool:
+            futures = [pool.submit(_embed_batch, self.client, b) for b in batches]
+            results = [f.result() for f in futures]
+
+        return [vec for batch_result in results for vec in batch_result]

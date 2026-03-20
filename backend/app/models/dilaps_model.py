@@ -3,6 +3,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import TYPE_CHECKING, ClassVar
 
+from sqlalchemy import JSON
 from sqlmodel import AutoString, Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -45,6 +46,7 @@ class DilapsSectionFileLink(SQLModel, table=True):
 class DilapsRunBase(SQLModel):
     property_address: str = Field(max_length=1024)
     lease_summary: str | None = None
+    lease_clauses: dict[str, str] | None = Field(default=None, sa_type=JSON)
     status: DilapsStatus = Field(default=DilapsStatus.IDLE, sa_type=AutoString)
     progress_pct: int = Field(default=0)
     total_sections: int = Field(default=0)

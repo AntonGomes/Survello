@@ -87,6 +87,36 @@ function StepItem({ step, state }: { step: StepConfig; state: StepState }) {
   );
 }
 
+function SectionProgress({
+  currentSection,
+  totalSections,
+}: {
+  currentSection: number;
+  totalSections: number;
+}) {
+  if (totalSections <= 0) return null;
+
+  return (
+    <div className="mt-1 flex items-center gap-2">
+      <div className="flex gap-1">
+        {Array.from({ length: totalSections }).map((_, i) => {
+          const done = i < currentSection;
+          const active = i === currentSection;
+          const cls = done
+            ? "w-4 bg-accent"
+            : active
+              ? "w-4 bg-primary animate-pulse"
+              : "w-2.5 bg-muted-foreground/20";
+          return <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${cls}`} />;
+        })}
+      </div>
+      <span className="text-xs text-muted-foreground">
+        {currentSection} / {totalSections}
+      </span>
+    </div>
+  );
+}
+
 export function DilapsLoadingScreen({
   status,
   subStatus,
@@ -147,13 +177,22 @@ export function DilapsLoadingScreen({
           <div className="divide-y divide-border/50">
             {STEPS.map((step) => {
               const state = getStepState(step, status, subStatus);
-              return <StepItem key={step.key} step={step} state={state} />;
+              return (
+                <div key={step.key}>
+                  <StepItem step={step} state={state} />
+                  {step.key === "analyzing" && state === "active" && (
+                    <div className="pb-3 pl-13">
+                      <SectionProgress currentSection={currentSection} totalSections={totalSections} />
+                    </div>
+                  )}
+                </div>
+              );
             })}
           </div>
         </div>
 
         <p className="text-center text-xs text-muted-foreground/60">
-          You can leave this page open — we&apos;ll redirect you when it&apos;s ready
+          You can navigate away — check back anytime from the Reports tab
         </p>
       </div>
     </div>

@@ -3552,6 +3552,61 @@
       }
     },
     "/dilaps/": {
+      "get": {
+        "tags": [
+          "Dilaps"
+        ],
+        "summary": "List Dilaps Runs",
+        "operationId": "listDilapsRuns",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DilapsRunRead"
+                  },
+                  "title": "Response Listdilapsruns"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Dilaps"
@@ -3559,14 +3614,14 @@
         "summary": "Create Dilaps Run",
         "operationId": "createDilapsRun",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DilapsRunCreate"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -5066,6 +5121,20 @@
             ],
             "title": "Lease Summary"
           },
+          "lease_clauses": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Clauses"
+          },
           "status": {
             "$ref": "#/components/schemas/DilapsStatus",
             "default": "idle"
@@ -5429,6 +5498,11 @@
           "storage_key": {
             "type": "string",
             "title": "Storage Key"
+          },
+          "already_exists": {
+            "type": "boolean",
+            "title": "Already Exists",
+            "default": false
           }
         },
         "type": "object",

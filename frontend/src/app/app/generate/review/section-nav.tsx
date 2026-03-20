@@ -136,7 +136,7 @@ export function SectionNav({ sections, activeSectionId, mergeSelection, canMerge
   }
 
   return (
-    <div className="flex flex-col h-full border-r" style={{ width: SIDEBAR_WIDTH }}>
+    <div className="flex flex-col h-full overflow-hidden border-r" style={{ width: SIDEBAR_WIDTH }}>
       <div className="p-4 border-b">
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Sections</h3>
       </div>

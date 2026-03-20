@@ -19,12 +19,7 @@ DILAPS_SECTION_ANALYSIS_PROMPT = (
     "3. Prescribe the remedy in professional language\n"
     "4. Estimate the unit (Sum, m, m², No), "
     "quantity, rate, and cost\n\n"
-    "Common lease clauses:\n"
-    "- Three: Repair obligations (structural, fabric)\n"
-    "- Four: Decoration obligations (painting)\n"
-    "- Five: Cleaning obligations (windows, glazing)\n"
-    "- Seven: Reinstatement (tenant alterations)\n"
-    "- Eight: Statutory compliance (asbestos, electrical)\n\n"
+    "{lease_clauses}\n\n"
     "Cost estimation guidelines:\n"
     '- Use "Sum" for lump-sum items\n'
     "- Use rates appropriate for UK construction\n"
@@ -46,6 +41,29 @@ DILAPS_SECTION_ANALYSIS_PROMPT = (
     "  ],\n"
     '  "memory_update": "Brief summary of this section"\n'
     "}}"
+)
+
+DILAPS_SECTION_MERGE_PROMPT = (
+    "You are a building surveyor reviewing a dilapidations photo survey "
+    "that has been split into sections. Each numbered image represents "
+    "one section, shown with its current name.\n\n"
+    "Some sections actually show the SAME room or area and should be "
+    "merged. This happens when a surveyor takes photos of the same "
+    "space from different angles, or when similar parts of a room "
+    "(e.g. floor vs walls) were split into separate sections.\n\n"
+    "## Instructions\n"
+    "Look at the images and names carefully. Identify groups of "
+    "sections that show the SAME physical space and should be merged.\n\n"
+    "Only merge sections that clearly depict the same room or area. "
+    "Do NOT merge sections just because they have similar finishes "
+    "or features — they must be the same physical location.\n\n"
+    "## Output Format\n"
+    "Return a JSON object:\n"
+    '{{ "merge_groups": [[0, 3], [1, 4, 5]] }}\n\n'
+    "Each inner array lists section indices (0-based) that should be "
+    "merged together. Omit sections that should stay separate. "
+    "Return an empty array if no merges are needed:\n"
+    '{{ "merge_groups": [] }}'
 )
 
 DILAPS_SECTION_NAMING_PROMPT = (

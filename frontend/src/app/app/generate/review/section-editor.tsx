@@ -14,9 +14,10 @@ import type { DilapsSection, ReviewAction } from "@/hooks/use-dilaps-review"
 type SectionEditorProps = {
   section: DilapsSection
   dispatch: React.Dispatch<ReviewAction>
+  leaseClauses: Record<string, string>
 }
 
-function SectionNameEditor({ section, dispatch }: SectionEditorProps) {
+function SectionNameEditor({ section, dispatch }: Pick<SectionEditorProps, "section" | "dispatch">) {
   const [isEditing, setIsEditing] = useState(false)
 
   if (!isEditing) {
@@ -168,7 +169,7 @@ function ImageGrid({ section }: { section: DilapsSection }) {
   )
 }
 
-export function SectionEditor({ section, dispatch }: SectionEditorProps) {
+export function SectionEditor({ section, dispatch, leaseClauses }: SectionEditorProps) {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -176,7 +177,7 @@ export function SectionEditor({ section, dispatch }: SectionEditorProps) {
         <Badge variant="secondary">{section.items.length} items</Badge>
       </div>
       <ImageGrid section={section} />
-      <ItemsTable section={section} dispatch={dispatch} />
+      <ItemsTable section={section} dispatch={dispatch} leaseClauses={leaseClauses} />
     </div>
   )
 }

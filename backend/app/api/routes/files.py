@@ -156,19 +156,29 @@ def generate_upload_urls(
             f.size_bytes,
         )
 
+        already_exists = False
         if existing and storage.check_file_exists(existing.storage_key):
             storage_key = existing.storage_key
+            already_exists = True
         else:
             storage_key = f"{user.org_id}/{user.id}/{uuid4()}-{f.file_name}"
 
-        url = storage.generate_presigned_url(
-            "put_object",
-            storage_key=storage_key,
-            mime_type=f.mime_type,
-            file_name=f.file_name,
+        url = (
+            ""
+            if already_exists
+            else storage.generate_presigned_url(
+                "put_object",
+                storage_key=storage_key,
+                mime_type=f.mime_type,
+                file_name=f.file_name,
+            )
         )
 
-        extra_data = {"storage_key": storage_key, "put_url": url}
+        extra_data = {
+            "storage_key": storage_key,
+            "put_url": url,
+            "already_exists": already_exists,
+        }
         response.append(FilePresignResponse.model_validate(f, update=extra_data))
 
     return response

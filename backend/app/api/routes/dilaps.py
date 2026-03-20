@@ -27,6 +27,22 @@ from app.services.xlsx_export import export_dilaps
 router = APIRouter()
 
 
+@router.get("/", response_model=list[DilapsRunRead], operation_id="listDilapsRuns")
+def list_dilaps_runs(
+    db: DBDep,
+    current_user: CurrentUserDep,
+    offset: int = 0,
+    limit: int = 50,
+) -> list[DilapsRun]:
+    return db.exec(
+        select(DilapsRun)
+        .where(DilapsRun.org_id == current_user.org_id)
+        .order_by(DilapsRun.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+    ).all()
+
+
 @router.post("/", response_model=DilapsRunRead, operation_id="createDilapsRun")
 def create_dilaps_run(
     body: DilapsRunCreate,

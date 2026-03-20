@@ -83,8 +83,12 @@ export function useDilapsGeneration() {
     setLocalStatus("uploading");
     await uploadFilesToS3({
       files: uploads.map((u) => u.file),
-      presignedPuts: uploads.map((u) => ({ put_url: u.put_url, mime_type: u.mime_type })),
-      onProgress: (progress) => setUploadProgress(progress),
+      presignedPuts: uploads.map((u) => ({
+        put_url: u.put_url,
+        mime_type: u.mime_type,
+        already_exists: u.already_exists ?? false,
+      })),
+      onProgress: setUploadProgress,
     });
 
     return { uploads, orgId: args.orgId };

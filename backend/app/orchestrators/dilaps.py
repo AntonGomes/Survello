@@ -16,11 +16,13 @@ from app.models.dilaps_model import (
 )
 from app.models.file_model import File
 from app.prompts.dilaps_analysis import DILAPS_SECTION_ANALYSIS_PROMPT
+from app.utils.conversion import LLM_SUPPORTED_TYPES, to_pdf
 from app.services.ai.gemini import GeminiVisionProvider
 from app.services.ai.provider import EmbeddingProvider, VisionProvider
 from app.services.image_sectioning import (
     compute_embeddings,
     is_image_file,
+    merge_sections_by_llm,
     name_sections,
     section_images,
 )
@@ -63,14 +65,40 @@ def _separate_files(
     return images, documents
 
 
-def _build_lease_context(
+def _extract_lease_clauses(
     documents: list[File],
     storage: StorageService,
+    vision: VisionProvider,
+) -> dict[str, str]:
+    if not documents:
+        return {}
+    document_parts: list[tuple[bytes, str]] = []
+    for f in documents:
+        data = storage.get_file_data(f.storage_key)
+        mime = f.mime_type or "application/pdf"
+        if mime not in LLM_SUPPORTED_TYPES:
+            logger.info(f"Converting {f.name} ({mime}) to PDF for LLM")
+            data = to_pdf(data)
+            mime = "application/pdf"
+        document_parts.append((data, mime))
+    return vision.extract_lease_clauses(document_parts)
+
+
+def _format_lease_clauses(clauses: dict[str, str]) -> str:
+    if not clauses:
+        return "No lease clauses available."
+    lines = [f"- {ref}: {text}" for ref, text in clauses.items()]
+    return "Lease clauses:\n" + "\n".join(lines)
+
+
+def _build_lease_context(
     dilaps_run: DilapsRun,
 ) -> str:
     parts = [f"Property: {dilaps_run.property_address}"]
     if dilaps_run.lease_summary:
         parts.append(f"Lease summary: {dilaps_run.lease_summary}")
+    if dilaps_run.lease_clauses:
+        parts.append(_format_lease_clauses(dilaps_run.lease_clauses))
     return "\n".join(parts)
 
 
@@ -106,6 +134,7 @@ def _create_section_records(
 @dataclass
 class SectionAnalysisContext:
     lease_context: str
+    lease_clauses_text: str
     running_memory: str
     few_shot: str
     vision: VisionProvider
@@ -122,6 +151,7 @@ def _analyze_single_section(
 
     prompt = DILAPS_SECTION_ANALYSIS_PROMPT.format(
         lease_context=ctx.lease_context,
+        lease_clauses=ctx.lease_clauses_text,
         running_memory=ctx.running_memory or "None yet.",
         few_shot_examples=ctx.few_shot,
     )
@@ -217,6 +247,7 @@ def execute(
             message="Finished processing your images",
         )
 
+
         _update_status(
             dilaps_run,
             db,
@@ -233,6 +264,9 @@ def execute(
             message=f"Naming {len(image_groups)} areas...",
         )
         section_names = name_sections(image_groups, vision, storage)
+        image_groups, section_names = merge_sections_by_llm(
+            image_groups, section_names, vision, storage
+        )
         sections = _create_section_records(dilaps_run, image_groups, section_names, db)
         _update_status(
             dilaps_run,
@@ -244,9 +278,21 @@ def execute(
         dilaps_run.total_sections = len(sections)
         db.commit()
 
-        lease_context = _build_lease_context(documents, storage, dilaps_run)
+        _update_status(
+            dilaps_run,
+            db,
+            DilapsStatus.SECTIONING,
+            55,
+            message="Reading lease clauses...",
+        )
+        dilaps_run.lease_clauses = _extract_lease_clauses(documents, storage, vision)
+        db.commit()
+
+        lease_context = _build_lease_context(dilaps_run)
+        clauses_text = _format_lease_clauses(dilaps_run.lease_clauses or {})
         ctx = SectionAnalysisContext(
             lease_context=lease_context,
+            lease_clauses_text=clauses_text,
             running_memory="",
             few_shot=load_examples(),
             vision=vision,

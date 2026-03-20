@@ -1,7 +1,9 @@
 "use client"
 
 import { Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { useDilapsReview } from "@/hooks/use-dilaps-review"
+import { Spinner } from "@/components/ui/spinner"
 import { SectionNav } from "./section-nav"
 import { SectionEditor } from "./section-editor"
 import { ExportPanel } from "./export-panel"
@@ -15,11 +17,35 @@ function EmptyState() {
 }
 
 function ReviewContent() {
+  const searchParams = useSearchParams()
+  const dilapsIdParam = searchParams.get("dilapsId")
+  const dilapsId = dilapsIdParam ? Number(dilapsIdParam) : null
+
   const {
     sections, activeSectionId, activeSection,
     mergeSelection, canMerge, totalItems, totalCost,
-    dispatch, setActiveSection,
-  } = useDilapsReview()
+    leaseClauses, loading, error, dispatch, setActiveSection,
+  } = useDilapsReview(dilapsId)
+
+  if (!dilapsId) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-muted-foreground">
+        <p>No dilaps ID provided.</p>
+      </div>
+    )
+  }
+
+  if (loading && sections.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    )
+  }
+
+  if (error) {
+    throw new Error(`Failed to load dilaps sections: ${error}`)
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
@@ -34,13 +60,13 @@ function ReviewContent() {
         />
         <div className="flex-1 overflow-auto">
           {activeSection ? (
-            <SectionEditor section={activeSection} dispatch={dispatch} />
+            <SectionEditor section={activeSection} dispatch={dispatch} leaseClauses={leaseClauses} />
           ) : (
             <EmptyState />
           )}
         </div>
       </div>
-      <ExportPanel totalItems={totalItems} totalCost={totalCost} />
+      <ExportPanel totalItems={totalItems} totalCost={totalCost} dilapsId={dilapsId} />
     </div>
   )
 }

@@ -8,9 +8,15 @@ export interface UploadProgress {
   totalFiles: number;
 }
 
+interface PresignedPut {
+  put_url: string;
+  mime_type: string;
+  already_exists?: boolean;
+}
+
 interface UploadFilesToS3Options {
   files: File[];
-  presignedPuts: { put_url: string; mime_type: string }[];
+  presignedPuts: PresignedPut[];
   onProgress?: (progress: UploadProgress) => void;
 }
 
@@ -73,6 +79,12 @@ export async function uploadFilesToS3({
   const uploads = files.map((file, index) => {
     const put = presignedPuts[index];
     if (!put) throw new Error(`No presigned URL found for file ${file.name}`);
+    if (put.already_exists) {
+      loadedPerFile[index] = file.size;
+      completedFiles++;
+      updateProgress();
+      return Promise.resolve();
+    }
     return uploadSingle({ file, putUrl: put.put_url, mimeType: put.mime_type, index });
   });
 
