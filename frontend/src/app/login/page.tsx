@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowRight } from "lucide-react";
+import { extractErrorMessage } from "@/lib/utils";
 import { LoginSidebar } from "./login-sidebar";
 
 function LoginForm() {
@@ -23,7 +24,7 @@ function LoginForm() {
     try {
       await login({ email, password });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to login");
+      setError(extractErrorMessage(err, "Failed to login"));
     } finally {
       setLoading(false);
     }
