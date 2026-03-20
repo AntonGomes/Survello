@@ -2,16 +2,16 @@ const PERCENT_MULTIPLIER = 100;
 const HTTP_OK_MIN = 200;
 const HTTP_OK_MAX = 300;
 
-export interface UploadProgressEvent {
-  loaded: number;
-  total: number;
-  fileIndex: number;
+export interface UploadProgress {
+  percent: number;
+  completedFiles: number;
+  totalFiles: number;
 }
 
 interface UploadFilesToS3Options {
   files: File[];
   presignedPuts: { put_url: string; mime_type: string }[];
-  onProgress?: (progress: number) => void;
+  onProgress?: (progress: UploadProgress) => void;
 }
 
 export async function uploadFilesToS3({
@@ -20,59 +20,60 @@ export async function uploadFilesToS3({
   onProgress,
 }: UploadFilesToS3Options): Promise<void> {
   const totalFiles = files.length;
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  const loadedPerFile = new Array<number>(totalFiles).fill(0);
   let completedFiles = 0;
 
-  
-  
   const updateProgress = () => {
-    if (onProgress) {
-      const percent = Math.round((completedFiles / totalFiles) * PERCENT_MULTIPLIER);
-      onProgress(percent);
-    }
+    if (!onProgress) return;
+    const loadedBytes = loadedPerFile.reduce((sum, b) => sum + b, 0);
+    const percent = totalBytes > 0
+      ? Math.round((loadedBytes / totalBytes) * PERCENT_MULTIPLIER)
+      : Math.round((completedFiles / totalFiles) * PERCENT_MULTIPLIER);
+    onProgress({ percent, completedFiles, totalFiles });
   };
 
-  const uploadSingle = ({ file, putUrl, mimeType }: { file: File; putUrl: string; mimeType: string }) => {
+  const uploadSingle = ({ file, putUrl, mimeType, index }: {
+    file: File;
+    putUrl: string;
+    mimeType: string;
+    index: number;
+  }) => {
     return new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
 
-      xhr.onload = () => {
-        console.log(`Upload response for ${file.name}:`, {
-          status: xhr.status,
-          statusText: xhr.statusText,
-          etag: xhr.getResponseHeader('ETag'),
-          allHeaders: xhr.getAllResponseHeaders(),
-          response: xhr.responseText
-        });
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          loadedPerFile[index] = e.loaded;
+          updateProgress();
+        }
+      };
 
+      xhr.onload = () => {
         if (xhr.status >= HTTP_OK_MIN && xhr.status < HTTP_OK_MAX) {
+          loadedPerFile[index] = file.size;
           completedFiles++;
           updateProgress();
           resolve();
-          console.log(`Successfully uploaded ${file.name}, url: ${putUrl.split('?')[0]}.`);
         } else {
           reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
         }
       };
 
       xhr.onerror = () => {
-        console.error(`Network error uploading ${file.name}`);
-        reject(new Error("Network error during upload"));
+        reject(new Error(`Network error uploading ${file.name}`));
       };
 
       xhr.open("PUT", putUrl);
-
-
       xhr.setRequestHeader("Content-Type", mimeType);
-      console.log(`Uploading ${file.name} with Content-Type: ${mimeType} to ${putUrl.split('?')[0]}`);
       xhr.send(file);
     });
   };
 
-
   const uploads = files.map((file, index) => {
     const put = presignedPuts[index];
     if (!put) throw new Error(`No presigned URL found for file ${file.name}`);
-    return uploadSingle({ file, putUrl: put.put_url, mimeType: put.mime_type });
+    return uploadSingle({ file, putUrl: put.put_url, mimeType: put.mime_type, index });
   });
 
   await Promise.all(uploads);

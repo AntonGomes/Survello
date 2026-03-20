@@ -71,8 +71,6 @@ export function getStepState(
 }
 
 const SECONDS_PER_MINUTE = 60;
-const MIN_PROGRESS_FOR_ESTIMATE = 8;
-const MIN_ELAPSED_SECONDS = 3;
 
 export function formatTimeRemaining(seconds: number) {
   if (seconds < SECONDS_PER_MINUTE) return "Less than a minute remaining";
@@ -81,14 +79,36 @@ export function formatTimeRemaining(seconds: number) {
   return `About ${minutes} minutes remaining`;
 }
 
-export function estimateSecondsRemaining(
-  progressPct: number,
-  elapsedSeconds: number,
-) {
-  if (progressPct < MIN_PROGRESS_FOR_ESTIMATE || elapsedSeconds < MIN_ELAPSED_SECONDS) {
+export type ProgressSample = { time: number; pct: number };
+
+const WINDOW_SECONDS = 30;
+const MIN_WINDOW_SECONDS = 3;
+const MIN_PCT_DELTA = 0.5;
+
+export function estimateFromHistory(
+  history: ProgressSample[],
+): number | null {
+  if (history.length < 2) return null;
+
+  const latest = history[history.length - 1]!;
+  const windowStart = latest.time - WINDOW_SECONDS * 1000;
+
+  let anchor = history[0]!;
+  for (const sample of history) {
+    if (sample.time >= windowStart) {
+      anchor = sample;
+      break;
+    }
+  }
+
+  const elapsedMs = latest.time - anchor.time;
+  const pctDelta = latest.pct - anchor.pct;
+
+  if (elapsedMs < MIN_WINDOW_SECONDS * 1000 || pctDelta < MIN_PCT_DELTA) {
     return null;
   }
-  const rate = progressPct / elapsedSeconds;
-  const remaining = (100 - progressPct) / rate;
-  return Math.max(0, Math.round(remaining));
+
+  const ratePerMs = pctDelta / elapsedMs;
+  const remainingMs = (100 - latest.pct) / ratePerMs;
+  return Math.max(0, Math.round(remainingMs / 1000));
 }

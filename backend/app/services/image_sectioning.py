@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from sqlmodel import Session, select
 
 from app.core.logging import logger
@@ -64,19 +66,38 @@ def _store_embeddings(
     db.commit()
 
 
+ProgressCallback = Callable[[int, int], None]
+
+EMBED_BATCH_SIZE = 6
+
+
 def compute_embeddings(
     files: list[File],
     storage: StorageService,
     embedding_provider: EmbeddingProvider,
     db: Session,
+    on_progress: ProgressCallback | None = None,
 ) -> list[ImageEmbedding]:
     ids_to_embed, files_to_embed = _get_files_needing_embedding(files, db)
+    total = len(files)
+    cached = total - len(files_to_embed)
+
+    if on_progress and cached > 0:
+        on_progress(cached, total)
 
     if files_to_embed:
         logger.info(f"Computing embeddings for {len(files_to_embed)} images")
         data_list = [storage.get_file_data(f.storage_key) for f in files_to_embed]
-        vectors = embedding_provider.embed_images(data_list)
-        _store_embeddings(ids_to_embed, vectors, db)
+
+        all_vectors: list[list[float]] = []
+        for i in range(0, len(data_list), EMBED_BATCH_SIZE):
+            batch = data_list[i : i + EMBED_BATCH_SIZE]
+            batch_vectors = embedding_provider.embed_images(batch)
+            all_vectors.extend(batch_vectors)
+            if on_progress:
+                on_progress(cached + i + len(batch), total)
+
+        _store_embeddings(ids_to_embed, all_vectors, db)
 
     all_file_ids = [f.id for f in files]
     return list(
