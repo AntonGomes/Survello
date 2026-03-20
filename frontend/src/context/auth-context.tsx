@@ -15,7 +15,7 @@ interface AuthContextType {
   user: UserRead | undefined;
   isLoading: boolean;
   isAdmin: boolean;
-  login: (data: UserLogin) => void;
+  login: (data: UserLogin) => Promise<void>;
   register: (data: RegisterWithInvites) => Promise<void>;
   logout: () => void;
 }
@@ -36,11 +36,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading } = useQuery({ ...readUserMeOptions(), retry: false });
   const isAdmin = user?.role === UserRole.ADMIN;
 
-  const { mutate: loginMutate } = useMutation({
-    ...loginUserMutation(),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: readUserMeOptions().queryKey }); router.push("/app"); },
-  });
-  const login = (data: UserLogin) => { loginMutate({ body: data }); };
+  const { mutateAsync: loginMutate } = useMutation({ ...loginUserMutation() });
+  const login = async (data: UserLogin): Promise<void> => {
+    await loginMutate({ body: data });
+    await queryClient.invalidateQueries({ queryKey: readUserMeOptions().queryKey });
+    router.push("/app");
+  };
 
   const { mutateAsync: registerMutate } = useMutation({ ...registerUserMutation() });
   const { mutateAsync: createInvite } = useMutation({ ...createInvitationMutation() });
