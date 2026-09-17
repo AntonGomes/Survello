@@ -111,6 +111,13 @@ because silent sync failure is the one thing that would destroy trust in it.
   container**: it would roughly triple the image size and needs more RAM than the cheap
   instance has, and the only formats it would add are legacy binary Office files and
   CAD. Those are handled by asking for a PDF export, which is one click at source.
+- **Document prerequisites are checked before the job is queued**, not inside the
+  worker. A schedule type's config carries `required_doc_roles` and
+  `recommended_doc_roles`; the generation handler resolves the job's tagged documents
+  against them and rejects the request with the specific missing roles before a single
+  token is spent. Readability is checked at the same point — a file tagged `lease` that
+  yields no extractable text or pages counts as missing, so a corrupt upload fails
+  loudly at the start rather than producing a confident, baseless draft.
 - **Citations are a first-class API feature, not something we build.** Setting
   `citations: {enabled: true}` on each document block makes the model return
   `cited_text` plus a 1-indexed `page_location` for every claim, which is exactly what

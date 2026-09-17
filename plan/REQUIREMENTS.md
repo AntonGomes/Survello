@@ -120,6 +120,14 @@ The core product. One engine, three outputs.
 - [ ] **Scanned documents work** — a photographed or scanned PDF is read visually, so an old paper report or a marked-up plan is as usable as a clean digital one.
 - [ ] **Say what each document is** — tag a file as lease, plan, previous report, specification and so on, so the draft knows what it's reading rather than guessing.
 - [ ] **Choose what feeds a run** — tick which documents are context for this generation; the rest stay stored but out of the way.
+- [ ] **Each type declares what it needs** — a schedule type lists the documents it requires and the ones it merely recommends, as part of its settings.
+- [ ] **Required documents are enforced** — generation won't start without them. Dilapidations without a lease is blocked, because the claim is founded on the covenants and there's nothing to write against.
+- [ ] **Blocked means helpful, not stuck** — the message names exactly what's missing and offers the upload there and then, rather than a greyed-out button with no explanation.
+- [ ] **Recommended documents warn** — missing ones are listed with what they'd improve, and you can carry on regardless.
+- [ ] **Override is deliberate and recorded** — a required document can be waived with a reason; the schedule carries that note so it's obvious later why it was drafted without one.
+- [ ] **Checked before anything is spent** — the check runs before the job is queued, so a missing lease costs nothing rather than producing a useless draft.
+- [ ] **Unreadable files caught** — a file tagged as a lease that turns out to be blank, corrupt or the wrong document is flagged at the same point, not silently treated as present.
+- [ ] **Sensible defaults, yours to change** — ships with a starting set per type; if your mum wants licences for alterations required rather than recommended, that's a settings change.
 - [ ] **Plans pre-fill the location list** — upload a floor plan and the rooms and elevations become the tagging list used on site, so capture is picking from a list rather than typing.
 - [ ] **Upload once, reuse** — a document is uploaded once and referenced by every later run, rather than re-sent each time.
 - [ ] **Lease-aware (dilaps)** — upload the lease, the relevant covenants are extracted, and each item cites the clause it breaches.
@@ -170,3 +178,29 @@ The core product. One engine, three outputs.
 - [ ] **Never silently deletes** — deletes are soft; there's a bin you can restore from.
 - [ ] **Cheap to run** — target under $25/month excluding AI usage, with a hard cap on AI spend.
 - [ ] **Style is yours to set** — the current look is kept as a starting point; once it's working you tell me what to change and I change it.
+
+---
+
+## Appendix — starting document rules per schedule type
+
+What each type requires before it will generate, and what it merely asks for. These are
+the shipped defaults and all of them are editable in settings — **please correct them**,
+you and your mum know this better than I do.
+
+Site capture (photos and notes) is required for every type; it's the input the schedule
+is actually built from.
+
+| Schedule type | Required | Recommended |
+|---|---|---|
+| **Dilapidations — terminal** | Lease | Licences for alterations, schedule of condition at lease start, floor plan, previous correspondence |
+| **Dilapidations — interim** | Lease | Licences for alterations, floor plan, previous schedules served |
+| **Schedule of Condition** | — | Floor plan, lease (where it's to be annexed to one) |
+| **Schedule of Works** | — | Client brief or specification, floor plan, cost information |
+| **Schedule of Defects** | — | Contract specification, previous snagging list, floor plan |
+| **Snagging list** | — | Floor plan, specification |
+| **Planned maintenance** | — | Asset list, previous maintenance schedule, floor plan |
+
+The only one I'm confident should be hard-blocking is the lease on a dilapidations
+schedule: the claim is founded on the covenants, so without it there's nothing to write
+breaches against. Everything else is a warning, on the grounds that a surveyor who wants
+to press on usually has a reason.

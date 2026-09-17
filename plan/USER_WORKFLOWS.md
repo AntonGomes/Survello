@@ -152,7 +152,9 @@ at from memory that evening.
    gets tagged for what it is.
 4. Tick which of them feed this run. The M&E report goes in; an unrelated rent review
    letter sitting in the job files stays out.
-5. **Generate schedule → Terminal dilapidations.**
+5. **Generate schedule → Terminal dilapidations.** It stops: *"A terminal dilapidations
+   schedule needs the lease. Upload it, or waive with a reason."* The lease is already
+   there, so it carries on. Had it not been, nothing would have been spent finding out.
 6. A few minutes later: a draft of around 35 items, grouped by location in survey order.
    Each has element, breach, remedy, clause reference and a cost from the rate library.
    Several items now read against the schedule of condition — the front shutter was
