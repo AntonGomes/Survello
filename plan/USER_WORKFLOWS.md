@@ -119,20 +119,22 @@ schedule of dilapidations on Unit 4, 118 High Street — lease expires 31 March.
 
 Unit 4 is a shut-up retail unit. No wifi, patchy 4G at the back.
 
-1. The night before, open the job on the iPad. The lease and previous correspondence
-   cache locally.
-2. On site, tap **Start capture**. The site timer starts with it. Set location to
-   *Ground floor — Front of shop*.
-3. Photograph the shopfront. Hold the mic button: *"Powder-coated aluminium shopfront,
+1. The night before, upload the floor plan the agent sent over. The rooms and
+   elevations on it become the location list for this job.
+2. Open the job on the iPad. The lease, the plan and previous correspondence cache
+   locally.
+3. On site, tap **Start capture**. The site timer starts with it. Pick location
+   *Ground floor — Front of shop* from the list — no typing.
+4. Photograph the shopfront. Hold the mic button: *"Powder-coated aluminium shopfront,
    paint finish failed on the lower section, corrosion to the threshold. Tenant covenant
    to keep in repair and redecorate in the final year."*
-4. Next photo, same location, another note. Repeat — forty photos in an hour.
-5. Change location to *Rear storeroom*. Everything after that is tagged there
+5. Next photo, same location, another note. Repeat — forty photos in an hour.
+6. Change location to *Rear storeroom*. Everything after that is tagged there
    automatically.
-6. Ceiling tiles water-stained. Photo, note: *"Water staining to suspended ceiling
+7. Ceiling tiles water-stained. Photo, note: *"Water staining to suspended ceiling
    tiles, approximately twelve tiles, source appears to be a historic roof leak — check
    landlord's repairing obligation."*
-7. Walk out, stop the timer — 1h 40m, tagged **site**. The header says **"63 items
+8. Walk out, stop the timer — 1h 40m, tagged **site**. The header says **"63 items
    waiting to upload."** Get in the car, hit 4G on the main road, it drains to zero.
 
 Nothing was typed all morning, and the site time is already logged rather than guessed
@@ -142,26 +144,34 @@ at from memory that evening.
 *Desk. The core of the product, and where the afternoon used to go.*
 
 1. Open the job. 63 photos, 41 voice notes, grouped by location, transcribed.
-2. Upload the lease PDF. Covenants extracted — repair, decoration, yield-up, statutory
-   compliance.
-3. **Generate schedule → Terminal dilapidations.**
-4. A few minutes later: a draft of around 35 items, grouped by location in survey order.
+2. Upload the lease PDF, tagged **lease**. Covenants extracted — repair, decoration,
+   yield-up, statutory compliance.
+3. Upload the rest of what's relevant: the floor plan (already there from the site
+   visit), the schedule of condition from when the tenant took occupation, a scanned
+   asbestos register the agent sent as a photographed PDF, and the M&E report. Each
+   gets tagged for what it is.
+4. Tick which of them feed this run. The M&E report goes in; an unrelated rent review
+   letter sitting in the job files stays out.
+5. **Generate schedule → Terminal dilapidations.**
+6. A few minutes later: a draft of around 35 items, grouped by location in survey order.
    Each has element, breach, remedy, clause reference and a cost from the rate library.
-5. Review. Item 12's cost is nonsense — the rate matched "redecoration" generically. Fix
+   Several items now read against the schedule of condition — the front shutter was
+   already damaged at the start of the lease, so it's flagged rather than claimed.
+7. Review. Item 12's cost is nonsense — the rate matched "redecoration" generically. Fix
    it inline; the cost library learns it.
-6. Items 18–24 are all the storeroom ceiling. Select them, then type: *"combine these
+8. Items 18–24 are all the storeroom ceiling. Select them, then type: *"combine these
    into a single item covering the whole suspended ceiling, and add an allowance for
    access equipment."* A diff appears. Accept.
-7. Item 27 cites the wrong clause. Click the item, see the source photo, hear the
-   original note, correct it.
-8. Select the whole schedule: *"make the wording more formal and consistent with a
+9. Item 27 cites the wrong clause. Click the item, see the source photo, hear the
+   original note, and read the lease clause at the page it was taken from. Correct it.
+10. Select the whole schedule: *"make the wording more formal and consistent with a
    landlord's terminal schedule."* Diff. Accept most, reject two where it has lost the
    specifics.
-9. Three items still show **unreviewed**. Read them. Two are fine; one is wrong — delete
+11. Three items still show **unreviewed**. Read them. Two are fine; one is wrong — delete
    it.
-10. **Export → PDF** with the photo appendix, plates numbered and cross-referenced.
-11. Mark **issued**. Frozen snapshot taken.
-12. Draft covering email, PDF attached, sent through Outlook.
+12. **Export → PDF** with the photo appendix, plates numbered and cross-referenced.
+13. Mark **issued**. Frozen snapshot taken.
+14. Draft covering email, PDF attached, sent through Outlook.
 
 Any later edit creates version 2. The issued version stays readable forever — which is
 the part that matters if the tenant's surveyor disputes it in June.

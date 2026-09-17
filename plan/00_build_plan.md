@@ -103,6 +103,25 @@ because silent sync failure is the one thing that would destroy trust in it.
 - Existing prompts in `backend/app/prompts/` are ported over — they're the genuinely
   valuable part of the current codebase, along with the process documented in
   `DILAPS_PROCESS.md`.
+- **Document context.** Everything uploaded to a job can be fed to a generation run.
+  Files are uploaded once through the Files API and referenced by `file_id` on every
+  later run, so a 200-page lease is not re-sent each time. PDFs and images go to the
+  model as-is — including scanned ones, which are read visually, so no OCR service is
+  needed. DOCX and XLSX are text-extracted in pure Go. **No LibreOffice in the
+  container**: it would roughly triple the image size and needs more RAM than the cheap
+  instance has, and the only formats it would add are legacy binary Office files and
+  CAD. Those are handled by asking for a PDF export, which is one click at source.
+- **Citations are a first-class API feature, not something we build.** Setting
+  `citations: {enabled: true}` on each document block makes the model return
+  `cited_text` plus a 1-indexed `page_location` for every claim, which is exactly what
+  "evidence on every line" needs. Caveat to resolve at build time: citations are
+  incompatible with `output_config.format`, so the structured schedule rows come back
+  through a `strict: true` tool call rather than a response format. If that combination
+  turns out to be blocked too, generation splits into two passes — cited extraction,
+  then structuring — which costs a little more but keeps the page references.
+- **Limits worth designing around:** 32MB per request and 600 pages per PDF. Files API
+  references keep the request small, but a very large bundle still gets split across
+  passes and merged, rather than silently truncated.
 - **The rate research agent** is a queued background job with its own budget, separate
   from the schedule budget so one can't starve the other. For each rate it re-fetches
   the cited source URL, searches for a current figure where the source has moved or

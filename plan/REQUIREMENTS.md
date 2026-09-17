@@ -115,11 +115,18 @@ The core product. One engine, three outputs.
 - [ ] **Schedule types are configurable** — a type defines its columns, its wording style and its template; new types are added in settings, not in code.
 - [ ] **Ships with the common ones** — Dilapidations (interim and terminal), Schedule of Condition, Schedule of Works, Schedule of Defects, Snagging list, Planned maintenance.
 - [ ] **Generate from a site visit** — the photos, voice notes and locations from Phase 4 become a draft schedule.
+- [ ] **Feed it any relevant document** — building plans, previous reports, specifications, asbestos registers, EPCs, structural or M&E reports, contractor quotes, the client's brief, correspondence. All of it is context for the draft.
+- [ ] **Formats it accepts** — PDF, Word, Excel, images and plain text go in directly. CAD drawings go in as a PDF export, which is one click in the drawing package.
+- [ ] **Scanned documents work** — a photographed or scanned PDF is read visually, so an old paper report or a marked-up plan is as usable as a clean digital one.
+- [ ] **Say what each document is** — tag a file as lease, plan, previous report, specification and so on, so the draft knows what it's reading rather than guessing.
+- [ ] **Choose what feeds a run** — tick which documents are context for this generation; the rest stay stored but out of the way.
+- [ ] **Plans pre-fill the location list** — upload a floor plan and the rooms and elevations become the tagging list used on site, so capture is picking from a list rather than typing.
+- [ ] **Upload once, reuse** — a document is uploaded once and referenced by every later run, rather than re-sent each time.
 - [ ] **Lease-aware (dilaps)** — upload the lease, the relevant covenants are extracted, and each item cites the clause it breaches.
 - [ ] **Priced automatically** — each item is matched to the cost library and costed, with the source shown.
 - [ ] **Organised by location** — items grouped by building / elevation / room, in a sensible survey order.
 - [ ] **Review table** — every field editable in place; reorder, merge, split and delete items; nothing is locked.
-- [ ] **Evidence on every line** — click an item to see the photos and the voice note it came from.
+- [ ] **Evidence on every line** — click an item to see the photos, the voice note, and the document and page number it came from.
 - [ ] **AI lines are flagged until checked** — each item shows whether a human has reviewed it, and a schedule warns you if you export with unreviewed lines.
 - [ ] **Natural-language editing** — select some rows, type "make these more formal and add a scaffolding allowance", see the proposed changes as a diff, accept or reject.
 - [ ] **Undo** — every edit, AI or manual, is reversible.
