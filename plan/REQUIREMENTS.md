@@ -60,8 +60,11 @@ Replacing the spreadsheet. This is the part that gets used every day.
 - [ ] **Time tracking (manual)** — log a duration after the fact with a description and date.
 - [ ] **Site, office or travel** — every entry is tagged with where the time went, so a job shows the split and future fee proposals can be based on real numbers.
 - [ ] **Billable flag** — each entry is billable or not, defaulting to billable.
-- [ ] **Rate per person** — each user has a default hourly charge-out rate, set once in settings.
-- [ ] **Rate override per job** — a job can carry its own rate for one or both people, overriding the default.
+- [ ] **Rate levels, not one rate per person** — the firm works in three charge-out levels: roughly £85–105 across the three for a principal, £65–85 for a graduate.
+- [ ] **A rate card** — one screen showing every level against every person, editable in place. That's the whole rate structure in one view rather than buried per user.
+- [ ] **A job picks its level** — choose the level when the job is set up and every entry on it resolves at that level, whoever logs the time. No retyping rates job by job.
+- [ ] **One-off override still possible** — a job or a single entry can carry a rate outside the card for the awkward case, without disturbing the card.
+- [ ] **Levels are named by the firm** — whatever the three are actually called, set in settings.
 - [ ] **Rates never rewrite history** — the rate in force is stamped onto the entry when it's logged, so changing a rate later can't silently re-price old unbilled time.
 - [ ] **Timesheet view** — a week grid per person, editable in place, with the site/office/travel split visible.
 

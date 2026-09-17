@@ -288,7 +288,12 @@ them is editing a text file — no code changes.
 
 ### Email
 
-**Microsoft Graph API**, OAuth sign-in once. Not IMAP. This matters for one specific
+**Microsoft Graph API**, OAuth sign-in once. Not IMAP.
+
+A useful consequence: mail sends through the firm's real mailbox, so it goes out from
+`@melvillegomes.co.uk` and there is no SPF, DKIM or DMARC to configure on that domain.
+`survelloapp.com` is only ever the address of the app itself and never sends mail as the
+firm. This matters for one specific
 reason: sending through Graph puts the message in the real Sent Items and keeps the
 thread ID, so when the client replies it lands in Outlook in the right conversation.
 Anything else splits every thread in half and the firm would stop using it in a week.

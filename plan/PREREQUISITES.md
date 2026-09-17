@@ -60,7 +60,7 @@ Not blockers to start, but they can't be automated away, so budget for them:
 
 | # | Question | Answer |
 |---|---|---|
-| 1 | Domain | **survelloapp.com**, registered through Vercel. An A record points at the Lightsail IP; nothing is hosted on Vercel |
+| 1 | Domain | **survelloapp.com**, registered through Vercel. An A record points at the Lightsail IP; nothing is hosted on Vercel. The firm's own domain is melvillegomes.co.uk and stays where it is |
 | 2 | Email provider | **Microsoft 365** — Graph API, as planned |
 | 3 | Site device | **Android tablet, roughly 8 inches.** Capture UI designed narrow and one-handed |
 | 4 | Survey method | **Location by location** — finish a room, move on. Capture tags everything to the current location until it's changed |
@@ -91,14 +91,15 @@ Everything below is copy-and-send. It's in plain language deliberately.
 > ever use.
 >
 > **Business bits**
-> - Firm's registered name and address as they appear on invoices
-> - VAT number, if you're VAT registered
+> - Firm's registered name and address exactly as they appear on invoices
+> - VAT number
 > - Bank details as they appear on an invoice
 > - What your invoice numbers look like, and what number you're up to — so the app
 >   carries on your sequence instead of starting again
 > - Your payment terms (30 days? 14? on receipt?)
-> - Your hourly rate, and the other person's
 > - What you charge per mile for travel
+> - **The three rate levels** — what each one is called, what it is for each person, and
+>   what decides which level a job gets charged at
 >
 > **Examples of your documents** — the most useful thing on this list
 > - An invoice you've actually sent (two if you bill some jobs hourly and some at a
