@@ -103,6 +103,12 @@ because silent sync failure is the one thing that would destroy trust in it.
 - Existing prompts in `backend/app/prompts/` are ported over — they're the genuinely
   valuable part of the current codebase, along with the process documented in
   `DILAPS_PROCESS.md`.
+- **The rate research agent** is a queued background job with its own budget, separate
+  from the schedule budget so one can't starve the other. For each rate it re-fetches
+  the cited source URL, searches for a current figure where the source has moved or
+  died, and returns a proposed change with its evidence. It writes to a
+  `rate_change_proposal` table and never touches the live rate — applying a proposal is
+  a human action that creates a new rate version.
 - Every run records its token spend against a monthly budget in settings. Hitting the
   cap stops new work and says so, rather than quietly running up a bill.
 

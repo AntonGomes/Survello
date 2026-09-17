@@ -121,7 +121,8 @@ Unit 4 is a shut-up retail unit. No wifi, patchy 4G at the back.
 
 1. The night before, open the job on the iPad. The lease and previous correspondence
    cache locally.
-2. On site, tap **Start capture**. Set location to *Ground floor — Front of shop*.
+2. On site, tap **Start capture**. The site timer starts with it. Set location to
+   *Ground floor — Front of shop*.
 3. Photograph the shopfront. Hold the mic button: *"Powder-coated aluminium shopfront,
    paint finish failed on the lower section, corrosion to the threshold. Tenant covenant
    to keep in repair and redecorate in the final year."*
@@ -131,10 +132,11 @@ Unit 4 is a shut-up retail unit. No wifi, patchy 4G at the back.
 6. Ceiling tiles water-stained. Photo, note: *"Water staining to suspended ceiling
    tiles, approximately twelve tiles, source appears to be a historic roof leak — check
    landlord's repairing obligation."*
-7. Walk out. The header says **"63 items waiting to upload."** Get in the car, hit 4G on
-   the main road, it drains to zero.
+7. Walk out, stop the timer — 1h 40m, tagged **site**. The header says **"63 items
+   waiting to upload."** Get in the car, hit 4G on the main road, it drains to zero.
 
-Nothing was typed all morning.
+Nothing was typed all morning, and the site time is already logged rather than guessed
+at from memory that evening.
 
 ### Workflow 3 — Draft to issued schedule
 *Desk. The core of the product, and where the afternoon used to go.*
@@ -168,12 +170,16 @@ the part that matters if the tenant's surveyor disputes it in June.
 *Desk. Five minutes, monthly.*
 
 1. Dashboard: **WIP £4,280**. Click it.
-2. Unit 4 shows 11.5 hours logged against a £1,450 fixed fee — an effective rate of
-   £126/hr. Fine.
-3. **Invoice job → fixed fee, 100%.** Invoice drafted, numbered, VAT applied.
-4. PDF attached to a draft email. Sent.
-5. **Six weeks later.** Dashboard: *"Aged debtors — £1,740 over 60 days."*
-6. Click through, **Draft chaser**, send. Payment arrives; mark paid, balance clears.
+2. Unit 4 shows 11.5 hours — 1.7 on site, 8.4 in the office, 1.4 travel — against a
+   £1,450 fixed fee. An effective rate of £126/hr. Fine.
+3. The next job down, a small condition survey, shows 9 hours at £115 = £1,035, but the
+   agreed figure was £750. Bill £750, reason *"fixed fee agreed"*; the £285 write-off is
+   recorded rather than vanishing.
+4. Back to Unit 4. **Invoice job → fixed fee, 100%.** Invoice drafted, numbered, VAT
+   applied.
+5. PDF attached to a draft email. Sent.
+6. **Six weeks later.** Dashboard: *"Aged debtors — £1,740 over 60 days."*
+7. Click through, **Draft chaser**, send. Payment arrives; mark paid, balance clears.
 
 ### Workflow 5 — Monday morning
 *Two minutes, before the kettle boils.*
@@ -188,6 +194,27 @@ The 7am email:
 > WIP £4,280 · Debtors £3,120 · 4 jobs live
 
 Open the app, three clicks, three chasers drafted.
+
+### Workflow 6 — Keeping the cost library honest
+*Desk. Twice a year, twenty minutes.*
+
+The rates behind every schedule drift. Left alone for two years they quietly make every
+schedule wrong.
+
+1. Open **Cost library**. Fourteen rates are badged **stale** — not checked in over
+   twelve months.
+2. Hit **Update rates**. A research agent is queued; close the tab.
+3. An hour later, a notification: *"41 rates checked, 12 changes proposed."*
+4. Open the results. Each row shows the old figure, the proposed new one, the source it
+   came from and a link to it.
+5. Row by row: accept the nine that look right. Reject two where the source has clearly
+   matched the wrong spec. Edit one by hand — the agent found a national average, but
+   she knows what her own contractors charge.
+6. Accepted rates get a new version and a fresh checked date. Schedules issued before
+   today keep the figures they were written with.
+
+Nothing changed without her saying so, and every number on the screen can be traced back
+to something.
 
 ---
 

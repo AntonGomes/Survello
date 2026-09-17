@@ -48,8 +48,12 @@ Replacing the spreadsheet. This is the part that gets used every day.
 - [ ] **File store per job** — drag-and-drop uploads, previewed inline; PDFs, images, Word, Excel.
 - [ ] **Time tracking (timer)** — start/stop button on a job; running timer visible everywhere; survives closing the tab.
 - [ ] **Time tracking (manual)** — log a duration after the fact with a description and date.
-- [ ] **Billable flag and rates** — each entry is billable or not; each user has an hourly charge-out rate, overridable per job.
-- [ ] **Timesheet view** — a week grid per person, editable in place.
+- [ ] **Site, office or travel** — every entry is tagged with where the time went, so a job shows the split and future fee proposals can be based on real numbers.
+- [ ] **Billable flag** — each entry is billable or not, defaulting to billable.
+- [ ] **Rate per person** — each user has a default hourly charge-out rate, set once in settings.
+- [ ] **Rate override per job** — a job can carry its own rate for one or both people, overriding the default.
+- [ ] **Rates never rewrite history** — the rate in force is stamped onto the entry when it's logged, so changing a rate later can't silently re-price old unbilled time.
+- [ ] **Timesheet view** — a week grid per person, editable in place, with the site/office/travel split visible.
 
 ## Phase 3 — Money
 
@@ -57,6 +61,8 @@ Replacing the spreadsheet. This is the part that gets used every day.
 - [ ] **Sequential numbering** — a counter in settings with a configurable prefix; never reuses or skips a number.
 - [ ] **Invoice from time** — select unbilled time entries on a job, click once, they become invoice lines at each person's rate.
 - [ ] **Invoice from fixed fee** — for agreed-fee jobs, bill the fee (or a percentage of it) without touching time.
+- [ ] **Adjust the final value** — the total from time is only a starting point; set the amount actually billed, with a reason, and the difference is recorded against the job.
+- [ ] **Write-offs are visible** — time logged but not billed, per job and per month, so it's a number you can see rather than one that quietly disappears.
 - [ ] **Staged billing** — invoice a percentage now and the rest later; the job tracks how much of the fee is still unbilled.
 - [ ] **Invoice PDF** — rendered from a template to match the firm's existing invoice; a dummy template ships now, swapped for the real one when you send me an example.
 - [ ] **Email the invoice** — attaches the PDF to a draft email addressed to the client, ready to review and send.
@@ -82,15 +88,21 @@ Built as an offline-first web app so it works in basements and plant rooms.
 - [ ] **Voice notes** — hold a button and talk; the recording attaches to the photo or the location.
 - [ ] **Voice notes become text** — transcribed automatically on sync, and the text is what feeds the schedule.
 - [ ] **Quick typed note** — for when talking isn't practical.
+- [ ] **Time logged on site** — the timer runs offline on the iPad and syncs with everything else, so site hours aren't reconstructed from memory that evening.
 - [ ] **Photo markup** — draw arrows and circles on a photo before it goes in a report.
 - [ ] **Photo library per job** — browse by location or by time, with the notes attached.
 - [ ] **Storage stays cheap** — images are resized and compressed on upload; originals kept in S3's cheapest tier.
 
 ## Phase 5 — Cost library
 
-- [ ] **Rate list** — description, unit (m², item, hour), rate, and which trade it belongs to.
+- [ ] **Rates overview** — one browsable, searchable screen of every material and labour rate: description, unit (m², item, hour), rate, trade, source, and when it was last checked.
 - [ ] **Sources cited** — each rate carries a source name, URL and the date it was checked; shown wherever the rate is used.
 - [ ] **Fully editable** — add, edit, archive rates in-app; no waiting on me to change a number.
+- [ ] **Update button** — one click sends a research agent off to re-check every rate against its cited source and the wider web.
+- [ ] **Proposed changes, never applied changes** — the agent returns a list of old → new with its evidence and a link; you accept or reject each row, and nothing moves until you do.
+- [ ] **Stale rates flagged** — anything not checked for longer than a threshold you set is badged in the overview, so you know what needs attention.
+- [ ] **Update runs in the background** — a queued job with its own spend cap; close the tab and come back to the results.
+- [ ] **See where a rate is used** — open a rate and see which schedules reference it, so a correction can be traced through.
 - [ ] **Starter rate card** — ships with a plausible dummy set so the schedules work from day one; your mum corrects it from experience.
 - [ ] **History preserved** — editing a rate creates a new version; an old schedule still shows the figure it was written with.
 - [ ] **Uplift factors** — settings for overheads & profit, preliminaries, contingency and fees, applied on top of the raw rates.
@@ -100,7 +112,8 @@ Built as an offline-first web app so it works in basements and plant rooms.
 
 The core product. One engine, three outputs.
 
-- [ ] **Three schedule types** — Dilapidations, Schedule of Condition, Schedule of Works. Same underlying data, different columns and wording.
+- [ ] **Schedule types are configurable** — a type defines its columns, its wording style and its template; new types are added in settings, not in code.
+- [ ] **Ships with the common ones** — Dilapidations (interim and terminal), Schedule of Condition, Schedule of Works, Schedule of Defects, Snagging list, Planned maintenance.
 - [ ] **Generate from a site visit** — the photos, voice notes and locations from Phase 4 become a draft schedule.
 - [ ] **Lease-aware (dilaps)** — upload the lease, the relevant covenants are extracted, and each item cites the clause it breaches.
 - [ ] **Priced automatically** — each item is matched to the cost library and costed, with the source shown.
@@ -115,6 +128,7 @@ The core product. One engine, three outputs.
 - [ ] **Export to PDF** — the client-facing version, from a template matched to the firm's existing schedules (dummy now, real one when you send an example).
 - [ ] **Scott Schedule export** — the dilapidations dispute format with claimant/response columns, for when a job goes contested.
 - [ ] **Photo appendix** — numbered plates, cross-referenced from the schedule lines.
+- [ ] **Every export works for every type** — Excel, Word, PDF, Scott Schedule and photo appendix are available on any schedule, not tied to one type.
 - [ ] **Issued versions are frozen** — marking a schedule "issued" snapshots it; later edits create a new version and the old one stays readable.
 
 ## Phase 7 — Email
