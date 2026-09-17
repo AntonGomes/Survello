@@ -138,6 +138,49 @@ because silent sync failure is the one thing that would destroy trust in it.
 - Every run records its token spend against a monthly budget in settings. Hitting the
   cap stops new work and says so, rather than quietly running up a bill.
 
+### Why not self-host a model
+
+Asked and answered here so it doesn't get re-litigated.
+
+**On the app's own server: impossible.** The instance has 1–2GB of RAM and a shared
+vCPU. It runs a Go binary in about 30MB. There is no model worth using that fits.
+
+**On a GPU instance: about 25× more expensive than the thing it replaces.** The cheapest
+practical GPU instance on AWS runs into the hundreds of dollars a month, against an
+expected API bill in the low tens. It also reintroduces exactly the operational burden
+the hosting decision was made to avoid.
+
+**On a machine in the office: technically possible, fails the requirements.** It would
+have to be always on, reachable, patched and backed up — and the class of model that
+runs on a desktop is not the class you want reading a lease. A misread covenant produces
+a schedule claiming for something the tenant was entitled to do. That is the one output
+where being wrong is worse than being slow or expensive, and it would be traded away to
+save perhaps £15 a month.
+
+**The one honest exception is transcription.** Whisper-class models genuinely do run on
+CPU. But voice notes cost roughly 8p per job through the API, and the RAM it would take
+on the small instance is worth more than the saving. Revisit only if transcription
+volume grows by an order of magnitude.
+
+**Where the savings actually are** — all in how the API is called, not who hosts it:
+
+- **Model mix.** Haiku for classification (email→job matching), Sonnet for the bulk of
+  schedule drafting and photo analysis, Opus reserved for lease covenant extraction
+  where being wrong is expensive.
+- **Prompt caching** on the lease and cost library. A second run against the same job
+  re-reads the cached prefix at a fraction of the price, and re-runs are common.
+- **Image discipline.** Photos are a large share of the input tokens on a generation
+  run. They are resized before they are sent, and sent per location rather than all at
+  once, so a re-run of one room doesn't re-send the whole survey.
+- **The Batch API** (half price) for the rate research agent, which runs twice a year
+  and has no reason to be fast. Not for schedule generation, where the user is waiting.
+
+**Expected order of magnitude:** a full generation on a job with a 100-page lease and
+~60 photos costs roughly £0.50–£1.50 depending on model choice. At ten schedules a
+month that is £5–£15, with everything else rounding to noise. Measure properly with the
+token counting endpoint during Phase 6 rather than trusting this estimate — but it is
+the right scale, and it is why self-hosting does not pay.
+
 ### Documents out
 
 - **PDF:** [Typst](https://typst.app) — a single static binary in the container. Data
