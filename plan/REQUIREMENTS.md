@@ -25,12 +25,14 @@ The boring plumbing, done first so that shipping is never scary.
 - [ ] **Nightly whole-machine snapshot** — Lightsail automatic snapshots, kept 7 days, as the belt-and-braces layer.
 - [ ] **Login** — email + password, argon2id hashing, session cookie. Two accounts, no sign-up page.
 - [ ] **Everything scoped to the firm** — an `org` row owns all data; every query is filtered by it, so a future second firm is a config change not a rewrite.
-- [ ] **Two roles** — **Principal** sees everything; **Surveyor** sees all the work and none of the money. Jaye is a Surveyor.
-- [ ] **What a Surveyor cannot see** — charge-out rates (their own or anyone's), invoices, credit notes, payments, debtors, WIP, write-offs, job fees, quotes, and every money tile on the dashboard.
-- [ ] **What a Surveyor can do** — everything else: jobs, clients, site capture, schedules, documents, the cost library, and logging their own time.
-- [ ] **Material and labour rates are not charge-out rates** — the cost library is needed to do the job, so a Surveyor sees and edits it normally. It's billing rates and invoices that are restricted.
+- [ ] **Two roles** — **Principal** sees everything; **Surveyor** sees the money the client sees, but not the money that measures people. Jaye is a Surveyor.
+- [ ] **A Surveyor sees the commercial picture** — job fees, quotes, invoices and whether they're paid. Knowing what a job is worth is part of learning the trade.
+- [ ] **A Surveyor never sees charge-out rates** — not their own, not anyone's. This is the line.
+- [ ] **No metric that prices a person** — no effective hourly rate, no fee-versus-actual, no write-offs, no utilisation or billable percentage, no WIP broken down by who earned it. These are the numbers that tell someone what they're worth, and a graduate doesn't need them.
+- [ ] **Own timesheet only, in hours** — a Surveyor sees their own time as time. Not converted to money, and not next to anyone else's.
+- [ ] **Material and labour rates are not charge-out rates** — the cost library is needed to write a schedule, so everyone sees and edits it normally.
 - [ ] **Hidden, not greyed out** — restricted things are absent from the interface rather than visibly locked, so it doesn't feel like working in someone else's account.
-- [ ] **Enforced on the server** — permission is checked in the API, not by hiding buttons, so it holds regardless of what the browser is asked to do.
+- [ ] **Rates enforced on the server** — rate fields are stripped in the API rather than hidden in the browser, so the number never reaches the device.
 - [ ] **Files live in S3** — photos and documents upload straight from the browser to S3 via presigned URLs, so the little server never handles big files.
 - [ ] **Errors reach you** — Sentry free tier catches crashes; a weekly email says "everything is fine" or what broke.
 - [ ] **Spend is visible, not policed** — a monthly AI budget in settings, with spend to date shown as a dashboard tile. Going over warns; it doesn't block.

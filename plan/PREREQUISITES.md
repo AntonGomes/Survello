@@ -60,11 +60,11 @@ Not blockers to start, but they can't be automated away, so budget for them:
 
 | # | Question | Answer |
 |---|---|---|
-| 1 | Domain | Domain already owned, registered through Vercel. Point an A record at the Lightsail IP; nothing is hosted on Vercel |
+| 1 | Domain | **survelloapp.com**, registered through Vercel. An A record points at the Lightsail IP; nothing is hosted on Vercel |
 | 2 | Email provider | **Microsoft 365** — Graph API, as planned |
 | 3 | Site device | **Android tablet, roughly 8 inches.** Capture UI designed narrow and one-handed |
 | 4 | Survey method | **Location by location** — finish a room, move on. Capture tags everything to the current location until it's changed |
-| 5 | Access levels | **Two roles.** Jaye (graduate) sees all the work and none of the money: no charge-out rates, invoices, fees, quotes or money tiles. Material and labour rates stay visible — they're needed to do the job |
+| 5 | Access levels | **Two roles.** Jaye sees the money the client sees — job fees, quotes, invoices, payments — but never a charge-out rate or any figure that prices his own output. Material and labour rates stay visible; they're needed to do the job |
 | 6 | Name and look | Keep both for now |
 | 7 | VAT registered | **Yes** — VAT on invoices throughout |
 | 8 | AI spend | **Warn, don't block.** Spend to date visible on the dashboard only, never priced at the point of use. Plus a runaway ceiling far above the budget that does stop, to catch bugs rather than ration work |
@@ -73,9 +73,9 @@ Not blockers to start, but they can't be automated away, so budget for them:
 
 ### Still outstanding from this section
 
-- [ ] **The domain name itself** — I need to know what it is
 - [ ] **Point DNS at the server** — once the Lightsail instance exists, add an A record
-      in Vercel's DNS settings for that domain. I'll give you the IP and the exact record
+      for `survelloapp.com` (and `www`) in Vercel's DNS settings. I'll give you the IP
+      and the exact records to paste
 
 # Part 3 — What to ask your mum
 
@@ -141,11 +141,7 @@ Everything below is copy-and-send. It's in plain language deliberately.
 > a plan someone had scribbled on — that's genuinely useful too. The messy ones are what
 > break it.
 >
-> **One question**
-> - Does Jaye need to see anything money-related at all? The plan is that he can do
->   everything on the work side — jobs, site visits, schedules, documents, his own
->   timesheet — but sees no charge-out rates, invoices or fees, including his own rate.
->   Say if that's too strict or not strict enough.
+> That's everything — no questions outstanding.
 
 ---
 

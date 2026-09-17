@@ -62,14 +62,21 @@ on both quality and cost. The existing `embedding_model.py` gets dropped.
 
 ### Permissions
 
-Two roles on the user row: `principal` and `surveyor`. The split is money, not function.
+Two roles on the user row: `principal` and `surveyor`. The rule is *client-facing money
+is visible; person-measuring money is not*. A surveyor sees job fees, quotes, invoices and
+payment status. A surveyor never sees a charge-out rate, an effective hourly rate, a
+fee-versus-actual figure, a write-off, a utilisation percentage, or WIP attributed to a
+person.
 
-Enforcement is in the API layer, not the UI. Restricted fields are stripped in the
-handler and restricted routes rejected outright, so hiding a button is a presentation
-detail rather than the security boundary. Money-bearing fields (charge-out rate, job fee,
-invoice totals, WIP, write-off) are omitted from the response shape entirely for a
-surveyor rather than sent and hidden — a value that never reaches the browser can't leak
-from it.
+Enforcement is in the API layer. Rate and per-person-performance fields are omitted from
+the response shape for a surveyor rather than sent and hidden, so the number never
+reaches the device, and the derived endpoints (fee-vs-actual, write-off report,
+utilisation) reject outright.
+
+Worth being clear about what this is: a **dignity boundary, not a security one**. Someone
+with their own timesheet and an invoice total can do division. Engineering against that
+would be wasted effort and would make the app worse. The goal is simply never to put a
+number in front of a graduate that tells him what he's worth per hour.
 
 Restricted areas are absent from the navigation rather than greyed out. Working all day
 in an interface that keeps showing you locked doors is unpleasant, and there's nothing to

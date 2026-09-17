@@ -21,18 +21,22 @@ signal.
 | Session length | Half an hour | 10 seconds at a time |
 | What's wanted | Overview, precision, editing | Capture speed and nothing else |
 
-There are two roles, and the split is about money rather than job function:
+There are two roles, and the line is not confidentiality. It's this:
 
-- **Principal** — sees everything, including fees, invoices and what everyone's time is
-  worth.
-- **Surveyor** — Jaye, the graduate. Does all the same work: jobs, site visits,
-  schedules, documents, logging time. Sees none of the charge-out rates, invoices or
-  money figures, including their own rate.
+> **A Surveyor sees the money the client sees. Not the money that measures people.**
 
-Beyond that the roles blur and the app shouldn't ask which hat someone is wearing. Note
-the distinction that matters: the **cost library** of material and labour rates is needed
-to write a schedule, so everyone sees it. It's **charge-out rates and invoices** that are
-restricted.
+- **Principal** — everything.
+- **Surveyor** — Jaye, the graduate. Same work: jobs, site visits, schedules, documents,
+  timesheet. Sees job fees, quotes, invoices and what's been paid, because understanding
+  what work is worth is part of learning the job. Never sees a charge-out rate, his own
+  included, and never sees a number that prices his output: no effective hourly rate, no
+  fee-versus-actual, no write-offs, no utilisation percentage.
+
+Beyond that the roles blur and the app shouldn't ask which hat someone is wearing. Two
+things worth noting: the **cost library** of material and labour rates is needed to write
+a schedule, so everyone sees it; and this boundary is about tone, not security — a
+determined person with their own timesheet could do arithmetic. It isn't worth
+engineering against that. It's worth never putting the number in front of him.
 
 ---
 
