@@ -1,131 +1,151 @@
-# Survello — What's Needed to Build It Straight Through
+# Survello — What's Needed Before the Build
 
-Everything required to build all eight phases without stopping to ask questions.
+Three parts:
 
-Work through it top to bottom. Section A is the hard blocker — nothing deploys without
-it. Section D matters more than it looks: every unanswered question there is a point
-where I'd otherwise have to stop and ask.
+1. **Jobs for you** — accounts and keys. About an hour.
+2. **Decisions** — a numbered list you can answer in one message.
+3. **What to ask your mum** — written so you can forward it as-is.
 
-**Never paste keys or secrets into chat.** Everything marked 🔑 goes into GitHub Actions
-secrets (repo → Settings → Secrets and variables → Actions) or the server's environment
-file. I'll write the code to read them from there; I never need to see the values.
+Sections 1 and 2 unblock everything through Phase 6. Section 3 is what makes the output
+usable on a real job rather than a convincing demo.
 
 ---
 
-## A. Accounts and access — blocks deployment
+# Part 1 — Jobs for you
 
-- [ ] **AWS account**, billing set up, root MFA enabled
-- [ ] 🔑 **IAM user with programmatic access** — permissions for Lightsail, S3, and
-      Route 53 (only if using a domain). Access key ID + secret into GitHub secrets.
-- [ ] **Domain name** purchased — or tell me to run on the raw Lightsail IP for now
-      (perfectly fine to start; swapping to a domain later is a config change)
-- [ ] 🔑 **Anthropic API key**, billing enabled, with a monthly spend limit set on the
-      account as a backstop behind the app's own cap
-- [ ] 🔑 **OpenAI API key**, billing enabled, spend limit set — used only for voice
-      transcription
-- [ ] **GitHub Actions enabled** on the repo
-- [ ] 🔑 **Sentry account + DSN** — free tier, about two minutes, optional but worth it
+**Never paste keys or secrets into chat.** Everything marked 🔑 goes into the repo's
+GitHub Actions secrets (Settings → Secrets and variables → Actions). I write the code to
+read them from there and never need to see the values.
+
+### Accounts (~45 minutes)
+
+- [ ] **AWS account** — sign up, add a card, turn on MFA for the root account
+- [ ] 🔑 **AWS access key** — create an IAM user with permissions for Lightsail, S3 and
+      Route 53. Put the access key ID and secret into GitHub secrets
+- [ ] 🔑 **Anthropic API key** — console.anthropic.com, add billing, **set a monthly
+      spend limit** as a backstop behind the app's own cap
+- [ ] 🔑 **OpenAI API key** — billing and spend limit as above. Used only for
+      transcribing voice notes
+- [ ] **GitHub Actions enabled** on this repo
+- [ ] 🔑 **Sentry DSN** — free tier, about two minutes, catches crashes. Optional
+
+### Later, only for Phase 7 (email)
+
 - [ ] 🔑 **Microsoft Entra app registration** — client ID, tenant ID, client secret, with
-      admin consent granted for the mail scopes. Needs whoever administers the Microsoft
-      365 tenant. *Only blocks Phase 7; everything before it builds fine without.*
+      admin consent for the mail scopes. Needs whoever administers the firm's Microsoft
+      365. Nothing before Phase 7 depends on this, so it can wait
+- [ ] **The first mailbox sign-in** — an OAuth flow your mum clicks through in a browser,
+      as the mailbox owner
 
-## B. The firm's details and content — makes it correct rather than generic
+### Things only a human can do, whatever I build
 
-- [ ] **Registered firm name, trading address, VAT number**
-- [ ] **Bank details** as they appear on invoices
-- [ ] **VAT registered?** If not, VAT disappears from the invoice entirely
-- [ ] **Invoice number format** and the next number to issue (so it continues her
-      existing sequence rather than restarting)
-- [ ] **Payment terms** — 30 days, 14, on receipt
-- [ ] **Logo, letterhead, fonts, brand colours** — whatever exists
-- [ ] **A real invoice**, redacted. Two if the firm bills both hourly and fixed-fee
-- [ ] **A real example of each schedule type** she produces — the **Word or Excel
-      originals**, not PDFs, so the structure and styling can be matched rather than
-      guessed at
-- [ ] **Hourly charge-out rate for each of the two people**
-- [ ] **Mileage rate** in pence per mile
-- [ ] **How she quotes** — the basis for pricing a job, even if it's rules of thumb
-- [ ] **Which sources she trusts** for materials and labour rates, with URLs if any.
-      This seeds the cost library and the research agent
-- [ ] **Her job stages**, named as she actually uses them
-- [ ] **The spreadsheet she currently tracks jobs in**, plus the client list — for the
-      day-one importer
-- [ ] **Five to ten sent emails** covering each step: quote, chaser, instruction
-      acknowledgement, schedule issued, invoice chase. These teach the drafts to sound
-      like her rather than like a chatbot
+Not blockers to start, but they can't be automated away, so budget for them:
 
-## C. Test fixtures — the difference between "built" and "works"
-
-This is the section that decides whether the schedule engine is any good.
-
-- [ ] **One complete real job, anonymised** — the lease PDF, every site photo, the floor
-      plan, any voice notes, **and the finished schedule she produced from them**
-- [ ] **A second complete job** of a different schedule type
-- [ ] **One awkward document** — a scanned or photographed lease, a bad fax, a marked-up
-      plan. The messy path is the one that breaks
-
-Without these I can build the pipeline but cannot tell whether its output is worth
-reading. "Produces a plausible schedule a surveyor would have to rewrite from scratch"
-is the failure mode that makes the entire project pointless, and it is invisible without
-a real before-and-after to measure against.
-
-## D. Decisions — every unanswered one is a stop
-
-- [ ] **Does she survey location-by-location or element-by-element?** (all of a room,
-      then the next room — or all the windows, then all the doors). This shapes the
-      capture UI, which everything downstream depends on
-- [ ] **Microsoft 365 or Google Workspace?**
-- [ ] **Which tablet** — iPad or Android, and roughly what size
-- [ ] **Does the second person need different access, or identical?** (identical is my
-      assumption, and simpler)
-- [ ] **Keep the name and the current look**, or restyle?
-- [ ] **GBP only?** (assumed)
-- [ ] **Is there any live data** in the current system to preserve, or is this truly a
-      clean start? (assumed clean)
-- [ ] **What should happen when the AI spend cap is hit** — hard stop, or warn and
-      continue? (hard stop assumed)
-
-## E. Steps that need a human, whatever I do
-
-Not things I can prepare away. Budget about an hour total, ideally before I start:
-
-1. **Creating the AWS account** — card details, MFA, identity verification
-2. **Buying the domain and pointing DNS** at the server
-3. **The Entra app registration and admin consent** — a consent screen someone has to
-      click, on an account with tenant admin rights
-4. **The first Microsoft sign-in** that connects the mailbox — an OAuth flow in a real
-      browser, as the mailbox owner
-5. **Installing the app on the actual iPad** and trying it somewhere with no signal
-
-I'll write step-by-step instructions for each. None is difficult; none can be automated
-away from this side.
+1. Creating the AWS account (card, MFA, identity verification)
+2. Buying a domain and pointing its DNS, if you want one
+3. The Entra registration and admin consent
+4. The first Microsoft sign-in
+5. Installing the app on the actual iPad and trying it somewhere with no signal
 
 ---
 
-## What I can and can't verify myself
+# Part 2 — Decisions
 
-Worth being straight about, so there are no surprises at the end.
+Each has my recommendation. **The fastest reply is "all your defaults except 3 and 7"**
+plus your answers to those. Ones marked 👩 need your mum.
 
-**I can test:** everything server-side, the whole UI in a browser, offline behaviour
-with the network disabled in Chromium, document generation end to end, all exports.
-
-**I can't test:** the app on a real iPad, in a real building, with real intermittent
-signal, held in one hand. Phase 4 needs a real site visit to be trusted, and that visit
-is the one thing standing between "offline capture works in a simulated environment" and
-"offline capture works."
-
-**I can't judge without Section C:** whether the generated schedules are good.
+| # | Question | My recommendation |
+|---|---|---|
+| 1 | Domain now, or run on the raw server IP to start? | **Start on the IP.** It works fine for testing and swapping to a domain later is a config change |
+| 2 | 👩 Microsoft 365 or Google Workspace? | No default — I need the real answer. It decides how email is built |
+| 3 | 👩 Which tablet does she use on site, and roughly what size? | No default. It sets the capture layout |
+| 4 | 👩 Does she survey **location-by-location** (finish a room, move on) or **element-by-element** (all windows, then all doors)? | No default. **This is the one that matters most** — it shapes the capture screen, which everything downstream feeds from |
+| 5 | Do the two of them need different access levels? | **Identical.** Simpler, and with two people permissions are just friction |
+| 6 | Keep the name Survello and the current look? | **Keep for now.** Restyle once it works and you can see it with real data in it |
+| 7 | 👩 Is the firm VAT registered? | No default. If not, VAT disappears from invoices entirely |
+| 8 | When the monthly AI spend cap is hit — hard stop, or warn and carry on? | **Hard stop**, with a clear message. A cap that doesn't stop anything isn't a cap |
+| 9 | Clean start, or migrate data from the current system? | **Clean start**, with a one-off importer for her spreadsheet |
+| 10 | Any currency other than GBP? | **GBP only** |
 
 ---
 
-## Priority, if you can't gather all of it at once
+# Part 3 — What to ask your mum
 
-| Give me | And I can build |
+Everything below is copy-and-send. It's in plain language deliberately.
+
+> ### Things I need to build the surveying app
+>
+> No rush on any of it — send what's easy first.
+>
+> **On confidentiality:** for anything with a client's details on it, feel free to black
+> out or change names, addresses and figures. I only need the *shape* of the documents,
+> not the real details. Nothing gets shared outside the app, which only you and I will
+> ever use.
+>
+> **Business bits**
+> - Firm's registered name and address as they appear on invoices
+> - VAT number, if you're VAT registered
+> - Bank details as they appear on an invoice
+> - What your invoice numbers look like, and what number you're up to — so the app
+>   carries on your sequence instead of starting again
+> - Your payment terms (30 days? 14? on receipt?)
+> - Your hourly rate, and the other person's
+> - What you charge per mile for travel
+>
+> **Examples of your documents** — the most useful thing on this list
+> - An invoice you've actually sent (two if you bill some jobs hourly and some at a
+>   fixed fee)
+> - An example of **each type of schedule** you produce — dilapidations, condition,
+>   works, whatever else
+> - **Please send the Word or Excel originals, not PDFs.** I need to see how they're
+>   built, not just how they look
+> - Your logo and letterhead, if you have files for them
+>
+> **How you actually work**
+> - The stages a job goes through, in your words — whatever you'd write at the top of a
+>   spreadsheet column
+> - How you decide what to quote for a job, even if it's rules of thumb
+> - Where you look up prices for materials and labour — books, websites, or just
+>   experience. Links if there are any
+> - The spreadsheet or list you currently track jobs in — as-is, however messy
+>
+> **A few emails**
+> - Five to ten emails you've sent covering: quoting for a job, chasing a quote that's
+>   gone quiet, acknowledging an instruction, sending a finished schedule, chasing an
+>   unpaid invoice
+> - This is so the app drafts emails that sound like you, rather than like a robot
+>
+> **One complete job — the important one**
+>
+> Everything from a single job you've finished:
+> - The lease
+> - Every photo you took on site
+> - The floor plan
+> - Any voice notes or site notes
+> - **And the finished schedule you wrote from them**
+>
+> This is the one that decides whether the app is any good. With a real before-and-after
+> I can check whether what it produces is close to what you'd have written yourself.
+> Without it I'm guessing, and we'd only find out at the end. A second job of a different
+> type would be even better.
+>
+> If you have one where the paperwork was a nightmare — a scanned lease, a bad photocopy,
+> a plan someone had scribbled on — that's genuinely useful too. The messy ones are what
+> break it.
+>
+> **Two questions**
+> 1. When you're surveying a building, do you work through it room by room and finish
+>    each room before moving on — or do you go round looking at all the windows, then all
+>    the doors, and so on?
+> 2. What do you use on site — an iPad, an Android tablet, your phone?
+
+---
+
+## Priority, if it can't all happen at once
+
+| Have | Can build |
 |---|---|
-| **A** (minus Entra) **+ D** | Everything through Phase 6, deployed and working |
-| **+ B** | The same, but correct for the firm rather than generic |
-| **+ C** | The same, with the schedule output actually validated |
-| **+ Entra** | Phase 7, email |
-
-Sections A and D alone unblock the great majority of the build. B and C determine
-whether what comes out is usable on a real job or a convincing demo.
+| Part 1 accounts + Part 2 answers | Everything through Phase 6, deployed and working |
+| + the business bits and document examples | The same, correct for the firm rather than generic |
+| + the complete real job | The same, with the schedule quality actually verified |
+| + Entra registration | Phase 7, email |
