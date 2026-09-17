@@ -1,3 +1,6 @@
+> **Superseded.** See `plan/00_build_plan.md` and `plan/REQUIREMENTS.md` for the current plan.
+> Kept for reference.
+
 # Roadmap: Evolution to AI-Powered CRM
 
 ## 1. The Vision

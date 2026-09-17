@@ -1,3 +1,6 @@
+> **Superseded.** See `plan/00_build_plan.md` and `plan/REQUIREMENTS.md` for the current plan.
+> Kept for reference.
+
 # Security Implementation Report
 
 ## 1. Overview
