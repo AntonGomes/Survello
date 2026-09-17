@@ -16,15 +16,23 @@ signal.
 
 | | **Desk mode** | **Site mode** |
 |---|---|---|
-| Device | Laptop, two screens | iPad or phone, one hand, gloves on |
+| Device | Laptop, two screens | 8-inch Android tablet, one hand, gloves on |
 | Connection | Fine | Often none |
 | Session length | Half an hour | 10 seconds at a time |
 | What's wanted | Overview, precision, editing | Capture speed and nothing else |
 
-With two staff, roles blur completely. There is no point splitting permissions, and the
-app should never ask "are you the surveyor or the admin?" — assume both people do
-everything. This is why roles and permissions are deliberately absent from the
-requirements.
+There are two roles, and the split is about money rather than job function:
+
+- **Principal** — sees everything, including fees, invoices and what everyone's time is
+  worth.
+- **Surveyor** — Jaye, the graduate. Does all the same work: jobs, site visits,
+  schedules, documents, logging time. Sees none of the charge-out rates, invoices or
+  money figures, including their own rate.
+
+Beyond that the roles blur and the app shouldn't ask which hat someone is wearing. Note
+the distinction that matters: the **cost library** of material and labour rates is needed
+to write a schedule, so everyone sees it. It's **charge-out rates and invoices** that are
+restricted.
 
 ---
 
@@ -121,7 +129,7 @@ Unit 4 is a shut-up retail unit. No wifi, patchy 4G at the back.
 
 1. The night before, upload the floor plan the agent sent over. The rooms and
    elevations on it become the location list for this job.
-2. Open the job on the iPad. The lease, the plan and previous correspondence cache
+2. Open the job on the tablet. The lease, the plan and previous correspondence cache
    locally.
 3. On site, tap **Start capture**. The site timer starts with it. Pick location
    *Ground floor — Front of shop* from the list — no typing.

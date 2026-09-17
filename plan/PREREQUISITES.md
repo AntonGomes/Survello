@@ -50,29 +50,32 @@ Not blockers to start, but they can't be automated away, so budget for them:
 2. Buying a domain and pointing its DNS, if you want one
 3. The Entra registration and admin consent
 4. The first Microsoft sign-in
-5. Installing the app on the actual iPad and trying it somewhere with no signal
+5. Installing the app on the actual Android tablet and trying it somewhere with no signal
 
 ---
 
 # Part 2 — Decisions
 
-Each has my recommendation. **The fastest reply is "all your defaults except 3 and 7"**
-plus your answers to those. Ones marked 👩 need your mum.
+**All answered.** Recorded here so the reasoning is on file.
 
-| # | Question | My recommendation |
+| # | Question | Answer |
 |---|---|---|
-| 1 | Domain now, or run on the raw server IP to start? | **Start on the IP.** It works fine for testing and swapping to a domain later is a config change |
-| 2 | 👩 Microsoft 365 or Google Workspace? | No default — I need the real answer. It decides how email is built |
-| 3 | 👩 Which tablet does she use on site, and roughly what size? | No default. It sets the capture layout |
-| 4 | 👩 Does she survey **location-by-location** (finish a room, move on) or **element-by-element** (all windows, then all doors)? | No default. **This is the one that matters most** — it shapes the capture screen, which everything downstream feeds from |
-| 5 | Do the two of them need different access levels? | **Identical.** Simpler, and with two people permissions are just friction |
-| 6 | Keep the name Survello and the current look? | **Keep for now.** Restyle once it works and you can see it with real data in it |
-| 7 | 👩 Is the firm VAT registered? | No default. If not, VAT disappears from invoices entirely |
-| 8 | When the monthly AI spend cap is hit — hard stop, or warn and carry on? | **Hard stop**, with a clear message. A cap that doesn't stop anything isn't a cap |
-| 9 | Clean start, or migrate data from the current system? | **Clean start**, with a one-off importer for her spreadsheet |
-| 10 | Any currency other than GBP? | **GBP only** |
+| 1 | Domain | Domain already owned, registered through Vercel. Point an A record at the Lightsail IP; nothing is hosted on Vercel |
+| 2 | Email provider | **Microsoft 365** — Graph API, as planned |
+| 3 | Site device | **Android tablet, roughly 8 inches.** Capture UI designed narrow and one-handed |
+| 4 | Survey method | **Location by location** — finish a room, move on. Capture tags everything to the current location until it's changed |
+| 5 | Access levels | **Two roles.** Jaye (graduate) sees all the work and none of the money: no charge-out rates, invoices, fees, quotes or money tiles. Material and labour rates stay visible — they're needed to do the job |
+| 6 | Name and look | Keep both for now |
+| 7 | VAT registered | **Yes** — VAT on invoices throughout |
+| 8 | AI spend | **Warn, don't block.** Spend to date visible on the dashboard only, never priced at the point of use. Plus a runaway ceiling far above the budget that does stop, to catch bugs rather than ration work |
+| 9 | Existing data | Clean start |
+| 10 | Currency | GBP only |
 
----
+### Still outstanding from this section
+
+- [ ] **The domain name itself** — I need to know what it is
+- [ ] **Point DNS at the server** — once the Lightsail instance exists, add an A record
+      in Vercel's DNS settings for that domain. I'll give you the IP and the exact record
 
 # Part 3 — What to ask your mum
 
@@ -138,11 +141,11 @@ Everything below is copy-and-send. It's in plain language deliberately.
 > a plan someone had scribbled on — that's genuinely useful too. The messy ones are what
 > break it.
 >
-> **Two questions**
-> 1. When you're surveying a building, do you work through it room by room and finish
->    each room before moving on — or do you go round looking at all the windows, then all
->    the doors, and so on?
-> 2. What do you use on site — an iPad, an Android tablet, your phone?
+> **One question**
+> - Does Jaye need to see anything money-related at all? The plan is that he can do
+>   everything on the work side — jobs, site visits, schedules, documents, his own
+>   timesheet — but sees no charge-out rates, invoices or fees, including his own rate.
+>   Say if that's too strict or not strict enough.
 
 ---
 

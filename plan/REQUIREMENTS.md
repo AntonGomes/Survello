@@ -25,9 +25,17 @@ The boring plumbing, done first so that shipping is never scary.
 - [ ] **Nightly whole-machine snapshot** — Lightsail automatic snapshots, kept 7 days, as the belt-and-braces layer.
 - [ ] **Login** — email + password, argon2id hashing, session cookie. Two accounts, no sign-up page.
 - [ ] **Everything scoped to the firm** — an `org` row owns all data; every query is filtered by it, so a future second firm is a config change not a rewrite.
+- [ ] **Two roles** — **Principal** sees everything; **Surveyor** sees all the work and none of the money. Jaye is a Surveyor.
+- [ ] **What a Surveyor cannot see** — charge-out rates (their own or anyone's), invoices, credit notes, payments, debtors, WIP, write-offs, job fees, quotes, and every money tile on the dashboard.
+- [ ] **What a Surveyor can do** — everything else: jobs, clients, site capture, schedules, documents, the cost library, and logging their own time.
+- [ ] **Material and labour rates are not charge-out rates** — the cost library is needed to do the job, so a Surveyor sees and edits it normally. It's billing rates and invoices that are restricted.
+- [ ] **Hidden, not greyed out** — restricted things are absent from the interface rather than visibly locked, so it doesn't feel like working in someone else's account.
+- [ ] **Enforced on the server** — permission is checked in the API, not by hiding buttons, so it holds regardless of what the browser is asked to do.
 - [ ] **Files live in S3** — photos and documents upload straight from the browser to S3 via presigned URLs, so the little server never handles big files.
 - [ ] **Errors reach you** — Sentry free tier catches crashes; a weekly email says "everything is fine" or what broke.
-- [ ] **Spend caps** — a monthly AI budget stored in settings; the app refuses to start expensive work once it's hit, and tells you why.
+- [ ] **Spend is visible, not policed** — a monthly AI budget in settings, with spend to date shown as a dashboard tile. Going over warns; it doesn't block.
+- [ ] **Never priced at the point of use** — no cost shown on a generation run or anywhere in the working flow. Seeing a price before every action would stop them using the thing they're paying for.
+- [ ] **A runaway ceiling, well above the budget** — a much higher hard stop that exists to catch a bug or a loop, not to ration normal work. If it ever fires, something is wrong and you want to know.
 
 ## Phase 2 — Work management
 
@@ -80,7 +88,7 @@ Replacing the spreadsheet. This is the part that gets used every day.
 
 Built as an offline-first web app so it works in basements and plant rooms.
 
-- [ ] **Works with no signal** — the app installs to the iPad home screen and runs fully offline; everything syncs when signal returns.
+- [ ] **Works with no signal** — the app installs to the Android tablet's home screen and runs fully offline; everything syncs when signal returns.
 - [ ] **Offline queue you can see** — a visible "12 items waiting to upload" indicator so nothing is ever silently lost.
 - [ ] **Photo capture** — take photos in-app against a job, many in a row, without waiting for uploads.
 - [ ] **Photo metadata kept** — timestamp and GPS preserved from capture, so a photo can prove when and where it was taken.
@@ -88,7 +96,7 @@ Built as an offline-first web app so it works in basements and plant rooms.
 - [ ] **Voice notes** — hold a button and talk; the recording attaches to the photo or the location.
 - [ ] **Voice notes become text** — transcribed automatically on sync, and the text is what feeds the schedule.
 - [ ] **Quick typed note** — for when talking isn't practical.
-- [ ] **Time logged on site** — the timer runs offline on the iPad and syncs with everything else, so site hours aren't reconstructed from memory that evening.
+- [ ] **Time logged on site** — the timer runs offline on the tablet and syncs with everything else, so site hours aren't reconstructed from memory that evening.
 - [ ] **Photo markup** — draw arrows and circles on a photo before it goes in a report.
 - [ ] **Photo library per job** — browse by location or by time, with the notes attached.
 - [ ] **Storage stays cheap** — images are resized and compressed on upload; originals kept in S3's cheapest tier.
@@ -171,7 +179,8 @@ The core product. One engine, three outputs.
 
 ## Non-functional (true throughout)
 
-- [ ] **Works properly on an iPad** — that's the site device; the layout is designed for it, not squeezed into it.
+- [ ] **Built for an 8-inch Android tablet** — that's the site device. The capture screen is designed for a narrow screen held in one hand, not a desktop layout shrunk down.
+- [ ] **The review table stays a desk job** — editing a 35-row schedule needs a real screen, and pretending otherwise would make both worse.
 - [ ] **Fast on a bad connection** — small payloads, optimistic updates, nothing blocks on the network.
 - [ ] **No data lock-in** — a single "export everything" button produces a zip of CSVs plus all files.
 - [ ] **Import from the spreadsheet** — a one-off importer to bring existing clients and live jobs in on day one.

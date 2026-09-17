@@ -60,6 +60,36 @@ and schedule items. No search service, no vector database — at this document v
 FTS5 plus sending whole documents to the model with prompt caching beats embeddings
 on both quality and cost. The existing `embedding_model.py` gets dropped.
 
+### Permissions
+
+Two roles on the user row: `principal` and `surveyor`. The split is money, not function.
+
+Enforcement is in the API layer, not the UI. Restricted fields are stripped in the
+handler and restricted routes rejected outright, so hiding a button is a presentation
+detail rather than the security boundary. Money-bearing fields (charge-out rate, job fee,
+invoice totals, WIP, write-off) are omitted from the response shape entirely for a
+surveyor rather than sent and hidden — a value that never reaches the browser can't leak
+from it.
+
+Restricted areas are absent from the navigation rather than greyed out. Working all day
+in an interface that keeps showing you locked doors is unpleasant, and there's nothing to
+gain from it.
+
+The cost library is explicitly **not** restricted: material and labour rates are needed to
+write a schedule. Only billing rates and invoices are.
+
+### Spend visibility
+
+The monthly AI budget warns rather than blocks, and month-to-date spend appears as a
+dashboard tile. Nothing in the working flow is ever priced — no per-run cost, no estimate
+before generating. Showing someone a price before every action is a reliable way to stop
+them using a tool you're paying for anyway, and the whole point is that they use it.
+
+Separately there is a runaway ceiling set far above the budget, which does hard-stop. It
+exists to catch a bug, a retry loop or a runaway agent — not to ration normal work. If it
+ever fires, that is a fault worth being woken up about, and it alerts rather than
+silently degrading.
+
 ### Background work: a table and a goroutine
 
 No Celery, no Redis, no SQS. A `jobs` table in SQLite is the queue; a few worker
@@ -88,7 +118,11 @@ React Hook Form and Zod all stay.
 
 ### Offline site capture
 
-The PWA installs to the iPad home screen. Photos, voice recordings, locations and
+The PWA installs to the Android tablet's home screen — which is the easier target:
+Chrome on Android gives proper installation, background sync and generous storage quotas,
+where iOS Safari has historically been the constrained one. The screen is about 8 inches,
+so the capture UI is designed narrow and one-handed from the start rather than adapted
+down from the desktop layout. Photos, voice recordings, locations and
 notes are written to **IndexedDB** immediately and queued; a service worker drains
 the queue to S3 when there's signal. The UI always shows how many items are waiting,
 because silent sync failure is the one thing that would destroy trust in it.
