@@ -95,11 +95,63 @@ because silent sync failure is the one thing that would destroy trust in it.
 
 ### AI
 
-- **Claude** for the language work. Haiku for cheap classification (matching emails to
-  jobs), Sonnet for the main schedule drafting and photo analysis, Opus only for lease
-  clause extraction where accuracy is worth the money. Prompt caching on the lease and
-  cost library, which is where the savings are.
-- **Whisper API** for voice transcription. About half a penny a minute.
+**The model provider is deliberately not fixed.** Everything goes through a small
+`LLMProvider` interface — the same pattern as `MailProvider` — with implementations for
+Anthropic and Google. Swapping is a config change, and the two can run side by side for
+comparison. The reason is in the next section.
+
+- **Transcription uses the model provider's own audio support**, not a separate speech
+  service. Google's models take audio natively, and their transcription cleans
+  disfluencies and filler words, which suits dictated site notes well. This removes the
+  OpenAI dependency from the project entirely — one vendor, one key, one bill.
+- **Tiering by task, whichever provider wins.** A cheap small model for classification
+  (matching emails to jobs), a mid model for photo analysis and schedule drafting, a
+  frontier model only for lease covenant extraction where being wrong is expensive.
+- Prompt caching on the lease and cost library, which is where the savings are.
+
+### Choosing between Anthropic and Google
+
+Raised by the client, and the honest answer is that it should be measured rather than
+argued about. Recorded here so the reasoning survives.
+
+**On price, at the flagship tier it is a wash.** Google's Pro tier and Claude Sonnet land
+within a few pence of each other on a generation run of this shape. Claude Opus is
+roughly 2–3× that.
+
+**The real cost difference is below the flagship tier.** Google's Flash and Flash-Lite
+models are far cheaper than anything comparable, which matters enormously for the
+high-volume, low-judgement work: email classification, transcription, first-pass photo
+sorting. For those, Google is the obvious choice on cost and the quality bar is low
+enough that it is unlikely to matter.
+
+**Two Google pricing traps to design around:** prompts over 200K tokens move to a higher
+meter, and a generation run with a lease plus photos lands right around that line;
+and thinking tokens bill at output rates, which can quietly inflate a run. Neither is
+disqualifying, both need measuring rather than assuming.
+
+**Other differences that matter here:** Google reads PDFs up to 1000 pages against
+Claude's 600, which matters for fat lease bundles; Google has a free tier that a
+two-person firm might genuinely stay inside for the cheap tasks. Against that, Claude's
+citation support attaches directly to documents sent with the request, whereas Google's
+page-level citations come through its File Search tool, which is a managed retrieval
+store — a different shape. For a lease you want the model to read *everything*, not
+retrieve the top few chunks, so whether direct-attachment citations carry page numbers on
+Google's side is an open question to settle in Phase 6, not now.
+
+**What decides it:** the real job in Section C of `PREREQUISITES.md`. Run the same
+lease, the same photos and the same voice notes through both, and compare each against
+the schedule the surveyor actually wrote. That is a day's work and it answers on evidence
+what no amount of reasoning from the outside will.
+
+Until then: Google for the cheap high-volume tasks, where it clearly wins, and the
+generation model left as a config flag.
+
+**A note on who is saying this.** These recommendations come from Claude, made by
+Anthropic, about whether to use a competitor's models. That is a conflict of interest and
+it is why the recommendation is "measure it against your own real job" rather than a
+confident verdict either way. The pricing figures above are from secondary sources —
+Google's own pricing page is blocked from this environment — so confirm them before
+relying on the numbers.
 - Existing prompts in `backend/app/prompts/` are ported over — they're the genuinely
   valuable part of the current codebase, along with the process documented in
   `DILAPS_PROCESS.md`.

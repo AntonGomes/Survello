@@ -22,10 +22,15 @@ read them from there and never need to see the values.
 - [ ] **AWS account** — sign up, add a card, turn on MFA for the root account
 - [ ] 🔑 **AWS access key** — create an IAM user with permissions for Lightsail, S3 and
       Route 53. Put the access key ID and secret into GitHub secrets
-- [ ] 🔑 **Anthropic API key** — console.anthropic.com, add billing, **set a monthly
-      spend limit** as a backstop behind the app's own cap
-- [ ] 🔑 **OpenAI API key** — billing and spend limit as above. Used only for
-      transcribing voice notes
+- [ ] 🔑 **An AI provider key** — get **both** if it's easy, since which one is used for
+      schedule generation gets decided by measurement in Phase 6:
+      - **Google AI Studio** — has a free tier a two-person firm may well stay inside
+        for the cheaper tasks
+      - **Anthropic** — console.anthropic.com
+      Add billing and **set a monthly spend limit** on each, as a backstop behind the
+      app's own cap
+- [ ] ~~OpenAI API key~~ — **no longer needed.** Voice notes are transcribed by the same
+      model that does everything else, so the project has one AI vendor rather than two
 - [ ] **GitHub Actions enabled** on this repo
 - [ ] 🔑 **Sentry DSN** — free tier, about two minutes, catches crashes. Optional
 
